@@ -1,0 +1,32 @@
+{
+  "runs": [
+    {
+      "date": "2026-10-30T18:32:45.198607+00:00",
+      "input_tokens": 263918,
+      "output_tokens": 0,
+      "files": 10
+    },
+    {
+      "date": "2026-10-31T08:05:02.324074+00:00",
+      "input_tokens": 1442985,
+      "output_tokens": 0,
+      "files": 39,
+      "note": "full rebuild after moving Anger Galaxy to anger-galaxy/ plus orgasm-galaxy sources; tokens are subagent totals"
+    },
+    {
+      "date": "2026-10-31T09:40:38.167992+00:00",
+      "input_tokens": 331777,
+      "output_tokens": 127247,
+      "files": 33
+    },
+    {
+      "date": "2026-10-31T13:07:32.691215+00:00",
+      "input_tokens": 148000,
+      "output_tokens": 60000,
+      "files": 130,
+      "note": "incremental --update: semantic extraction of 119 brain-system/raw body-system captures (20 chunks) plus AST of 11 changed brain-system/src files; token counts are only those recorded in the chunk files (6 of 20 chunks carried estimates, the rest placeholder zeros), so this run is undercounted"
+    }
+  ],
+  "total_input_tokens": 2186680,
+  "total_output_tokens": 187247
+}
