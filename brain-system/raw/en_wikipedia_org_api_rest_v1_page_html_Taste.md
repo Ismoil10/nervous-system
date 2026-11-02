@@ -1,0 +1,61 @@
+---
+source_url: "https://en.wikipedia.org/api/rest_v1/page/html/Taste"
+type: webpage
+title: "Taste"
+captured_at: 2026-10-31T12:27:25.349380+00:00
+contributor: "Claude"
+---
+
+# Taste
+
+Source: https://en.wikipedia.org/api/rest_v1/page/html/Taste
+
+---
+
+Taste
+
+Sense of chemicals on the tongue
+
+
+
+This article is about the sense. For the social and aesthetic aspects of "taste", see [Taste (sociology)](./Taste_(sociology) "Taste (sociology)"). For other uses, see [Taste (disambiguation)](./Taste_(disambiguation) "Taste (disambiguation)").
+
+[Taste bud](./Taste_bud "Taste bud")
+
+The **gustatory system** or **sense of taste** is the [sensory system](./Sensory_system "Sensory system") that is partially responsible for the [perception](./Perception "Perception") of taste.[[1]](./Taste#cite_note-Trivedi-1) Taste is the perception stimulated when a substance in the [mouth](./Mouth "Mouth") [reacts chemically](./Biochemistry "Biochemistry") with [taste receptor](./Taste_receptor "Taste receptor") cells located on [taste buds](./Taste_bud "Taste bud") in the [oral cavity](./Oral_cavity "Oral cavity"), mostly on the [tongue](./Tongue "Tongue"). Taste, along with [the sense of smell](./Olfaction "Olfaction") and [trigeminal nerve](./Trigeminal_nerve "Trigeminal nerve") stimulation (registering texture, pain, and temperature), determines flavors of [food](./Food "Food") and other substances. [Humans](./Human "Human") have taste receptors on taste buds and other areas, including the upper surface of the tongue and the [epiglottis](./Epiglottis "Epiglottis").[[2]](./Taste#cite_note-Witt-2)[[3]](./Taste#cite_note-3) The [gustatory cortex](./Gustatory_cortex "Gustatory cortex") is responsible for the perception of taste.
+
+The tongue is covered with thousands of small bumps called [papillae](./Lingual_papillae "Lingual papillae"), which are visible to the [naked eye](./Naked_eye "Naked eye").[[2]](./Taste#cite_note-Witt-2) Within each papilla are hundreds of taste buds.[[1]](./Taste#cite_note-Trivedi-1)[[4]](./Taste#cite_note-Schacter169-4) The exceptions to this are the [filiform papillae](./Filiform_papillae "Filiform papillae"), which do not contain taste buds. There are between 2000 and 5000[[5]](./Taste#cite_note-Boron,_W.F._2003-5) taste buds that are located on the back and front of the tongue. Others are located on the roof, sides and back of the mouth, and in the [throat](./Throat "Throat"). Each taste bud contains 50 to 100 taste receptor cells.[[6]](./Taste#cite_note-Roper-6)
+
+Taste receptors in the mouth sense the five basic tastes: [sweetness](./Sweetness "Sweetness"), [sourness](./Sourness "Sourness"), [saltiness](./Saltiness "Saltiness"), [bitterness](./Bitterness "Bitterness"), and [savoriness](./Savoriness "Savoriness") (also known as *savory* or *umami*).[[1]](./Taste#cite_note-Trivedi-1)[[2]](./Taste#cite_note-Witt-2)[[7]](./Taste#cite_note-Kean-7)[[8]](./Taste#cite_note-8) Scientific experiments have demonstrated that these five tastes exist and are distinct from one another. Taste buds are able to tell different tastes apart when they interact with different molecules or ions. Sweetness, savoriness, and bitter tastes are triggered by the binding of molecules to [G protein-coupled receptors](./G_protein-coupled_receptors "G protein-coupled receptors") on the [cell membranes](./Cell_membrane "Cell membrane") of taste buds. Saltiness and sourness are perceived when [alkali metals](./Alkali_metal "Alkali metal") or [hydrogen](./Hydrogen "Hydrogen") [ions](./Ions "Ions") meet taste buds, respectively.[[9]](./Taste#cite_note-9)[[10]](./Taste#cite_note-10)
+
+The basic tastes contribute only partially to the sensation and flavor of food in the mouth—other factors include [smell](./Odor "Odor"),[[1]](./Taste#cite_note-Trivedi-1) detected by the [olfactory epithelium](./Olfactory_epithelium "Olfactory epithelium") of the nose;[[11]](./Taste#cite_note-11) [texture](./Texture_(food) "Texture (food)"),[[12]](./Taste#cite_note-12) detected through a variety of [mechanoreceptors](./Mechanoreceptor "Mechanoreceptor"), muscle nerves, etc.;[[13]](./Taste#cite_note-13) temperature, detected by [temperature receptors](./Thermoreceptor "Thermoreceptor"); and "coolness" (such as of [menthol](./Menthol "Menthol")) and "hotness" ([pungency](./Pungency "Pungency")), by [chemesthesis](./Chemesthesis "Chemesthesis").
+
+As the gustatory system senses both harmful and beneficial things, all basic tastes bring either caution or craving depending upon the effect the things they sense have on the body.[[14]](./Taste#cite_note-aa-14) Sweetness helps to identify energy-rich foods, while bitterness warns people of poisons.[[15]](./Taste#cite_note-15)
+
+Among humans, as taste perception begins to fade during [ageing](./Ageing "Ageing"), tongue papillae are lost, and [saliva](./Saliva "Saliva") production slowly decreases.[[16]](./Taste#cite_note-SeidelBall2010-16) Humans can also have distortion of tastes ([dysgeusia](./Dysgeusia "Dysgeusia")). Not all [mammals](./Mammal "Mammal") share the same tastes: some [rodents](./Rodent "Rodent") can taste [starch](./Starch "Starch") (which humans cannot), [cats](./Cat "Cat") cannot taste sweetness, and several other [carnivores](./Carnivores "Carnivores"), including [hyenas](./Hyena "Hyena"), [dolphins](./Dolphin "Dolphin"), and [sea lions](./Sea_lion "Sea lion"), have lost the ability to sense up to four of their ancestral five basic tastes.[[17]](./Taste#cite_note-17)
+
+## Basic tastes
+
+The gustatory system allows animals to distinguish between safe and harmful food and to gauge different foods' nutritional value.[[18]](./Taste#cite_note-18) [Digestive enzymes](./Digestive_enzyme "Digestive enzyme") in saliva begin to dissolve food into base chemicals that are washed over the papillae and detected as tastes by the taste buds. The tongue is covered with thousands of small bumps called [papillae](./Lingual_papillae "Lingual papillae"), which are visible to the naked eye. Within each papilla are hundreds of taste buds.[[4]](./Taste#cite_note-Schacter169-4) The exception to this are the [filiform papillae](./Filiform_papillae "Filiform papillae"), which do not contain taste buds. There are between 2,000 and 5,000[[5]](./Taste#cite_note-Boron,_W.F._2003-5) taste buds that are located on the back and front of the tongue. Others are located on the roof, sides and back of the mouth, and in the throat. Each taste bud contains 50 to 100 taste-receptor cells.[[6]](./Taste#cite_note-Roper-6)
+
+The five specific tastes received by [taste receptors](./Taste_receptor "Taste receptor") are saltiness, sweetness, bitterness, sourness, and savoriness (often known by its Japanese name *umami*, which translates to 'deliciousness').[[19]](./Taste#cite_note-19)
+
+As of the early 20th century, Western physiologists and psychologists thought that there were four basic tastes: sweetness, sourness, saltiness, and bitterness. The concept of a "savory" taste was not present in Western science at that time, but was postulated in Japanese research.[[20]](./Taste#cite_note-Ikeda1909-20)
+
+One study found that salt and sour taste mechanisms both detect, in different ways, the presence of [sodium chloride](./Sodium_chloride "Sodium chloride") (salt) in the mouth. Acids are also detected and perceived as sour.[[21]](./Taste#cite_note-auto-21) The detection of salt is important to many organisms, but especially mammals, as it serves a critical role in ion and water [homeostasis](./Homeostasis "Homeostasis") in the body. It is specifically needed in the [mammalian kidney](./Mammalian_kidney "Mammalian kidney") as an osmotically active compound that facilitates passive re-uptake of water into the blood.[[22]](./Taste#cite_note-22) Because of this, salt elicits a pleasant taste in most humans, in certain concentrations.[[23]](./Taste#cite_note-23)
+
+Sour and salt tastes can be pleasant in small quantities, but in larger quantities become more and more unpleasant to taste. For sour taste, this presumably is because the sour taste can signal something is rotten or spoiled, which can be dangerous to the body because of bacteria that grow in such media. Additionally, sour taste signals [acids](./Acids "Acids"),[[24]](./Taste#cite_note-24) which can cause serious tissue damage.
+
+Sweet taste signals the presence of [carbohydrates](./Carbohydrates "Carbohydrates") in solution.[[25]](./Taste#cite_note-25) Since carbohydrates have a very high [calorie](./Calorie "Calorie") count (saccharides have many bonds, therefore much energy),[[26]](./Taste#cite_note-26) they are essential to the human body, which evolved to seek out the high-calorie foods.[[27]](./Taste#cite_note-27) They are used as direct energy ([sugars](./Sugars "Sugars")) and storage of energy ([glycogen](./Glycogen "Glycogen")). Many non-carbohydrate molecules trigger a sweet response, leading to the development of many artificial sweeteners, including [saccharin](./Saccharin "Saccharin"), [sucralose](./Sucralose "Sucralose"), and [aspartame](./Aspartame "Aspartame").[[28]](./Taste#cite_note-28)
+
+The savory taste (known in Japanese as *umami*), identified by Japanese chemist [Kikunae Ikeda](./Kikunae_Ikeda "Kikunae Ikeda"), signals the presence of the [amino acid](./Amino_acid "Amino acid") [L-glutamate](./L-glutamate "L-glutamate").[[29]](./Taste#cite_note-29) The amino acids in proteins are used in the body to build muscles and organs, and to transport molecules ([hemoglobin](./Hemoglobin "Hemoglobin")), [antibodies](./Antibodies "Antibodies"), and the organic catalysts known as [enzymes](./Enzymes "Enzymes"). These are all critical molecules, and it is important to have a steady supply of amino acids; consequently, savory tastes trigger a pleasurable response, encouraging the intake of [peptides](./Peptides "Peptides") and [proteins](./Proteins "Proteins").
+
+[Pungency](./Pungency "Pungency") (piquancy or hotness) had traditionally been considered a sixth basic taste.[[30]](./Taste#cite_note-books.google.com-30) In 2015, researchers suggested a new basic taste of [fatty acids](./Fatty_acid "Fatty acid") called "fat taste",[[31]](./Taste#cite_note-31) although "oleogustus" and "pinguis" have both been proposed as alternate terms.[[32]](./Taste#cite_note-32)[[33]](./Taste#cite_note-Reed_353S–360S-33)
+
+### Sweetness
+
+Main article: [Sweetness](./Sweetness "Sweetness")
+
+The diagram above depicts the signal transduction pathway of the sweet taste. Object A is a taste bud, object B is one taste cell of the taste bud, and object C is the neuron attached to the taste cell. I. Part I shows the reception of a molecule. 1. Sugar, the first messenger, binds to a protein receptor on the cell membrane. II. Part II shows the transduction of the relay molecules. 2. G Protein-coupled receptors, second messengers, are activated. 3. G Proteins activate adenylate cyclase, an enzyme, which increases the cAMP concentration. Depolarization occurs. 4. The energy, from step 3, is given to activate the K+, potassium, protein channels.III. Part III shows the response of the taste cell. 5. Ca+, calcium, protein channels is activated.6. The increased Ca+ concentration activates neurotransmitter vesicles. 7. The neuron connected to the taste bud is stimulated by the neurotransmitters.
+
+Sweetness, usually regarded as a pleasurable sensation, is produced by the presence of [sugars](./Sugar "Sugar") and substances that mimic sugar. Sweetness may be connected to [aldehydes](./Aldehyde "Aldehyde") and [ketones](./Ketone "Ketone"), which contain a [carbonyl group](./Carbonyl_group "Carbonyl group"). Sweetness is detected by a variety of [G protein coupled receptors](./G_protein_coupled_receptor "G protein coupled receptor") (GPCR) coupled to the [G protein](./G_protein "G protein") [gustducin](./Gustducin "Gustducin") found on the [taste buds](./Taste_bud "Taste bud"). At least two different variants of the "sweetness receptors" must be activated for the brain to register sweetness. Compounds the brain senses as sweet are compounds that can bind with varying bond strength to two different sweetness receptors. These receptors are T1R2+3 (heterodimer) and T1R3 (homodimer), which account for all sweet sensing in humans and animals.[[34]](./

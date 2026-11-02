@@ -1,0 +1,61 @@
+---
+source_url: "https://en.wikipedia.org/api/rest_v1/page/html/Lateral_inhibition"
+type: webpage
+title: "Lateral inhibition"
+captured_at: 2026-10-31T12:25:02.912913+00:00
+contributor: "Claude"
+---
+
+# Lateral inhibition
+
+Source: https://en.wikipedia.org/api/rest_v1/page/html/Lateral_inhibition
+
+---
+
+Lateral inhibition
+
+Capacity of an excited neuron to reduce activity of its neighbors
+
+
+
+Along the boundary between adjacent shades of grey in the [Mach bands](./Mach_bands "Mach bands") illusion, lateral inhibition makes the darker area falsely appear even darker and the lighter area falsely appear even lighter.
+
+In [neurobiology](./Neurobiology "Neurobiology"), **lateral inhibition** is the capacity of an excited [neuron](./Neuron "Neuron") to reduce the activity of its neighbors. Lateral inhibition disables the spreading of [action potentials](./Action_potentials "Action potentials") from excited neurons to neighboring neurons in the lateral direction. This creates a contrast in stimulation that allows increased sensory perception. It is also referred to as lateral antagonism and occurs primarily in visual processes, but also in [tactile](./Touch "Touch"), [auditory](./Auditory_system "Auditory system"), and even [olfactory](./Olfactory "Olfactory") processing.[[1]](./Lateral_inhibition#cite_note-1) Cells that utilize lateral inhibition appear primarily in the [cerebral cortex](./Cerebral_cortex "Cerebral cortex") and [thalamus](./Thalamus "Thalamus") and make up lateral inhibitory networks (LINs).[[2]](./Lateral_inhibition#cite_note-2) Artificial lateral inhibition has been incorporated into artificial sensory systems, such as [vision chips](./Vision_chip "Vision chip"),[[3]](./Lateral_inhibition#cite_note-3)[[4]](./Lateral_inhibition#cite_note-4) hearing systems,[[5]](./Lateral_inhibition#cite_note-5) and optical mice.[[6]](./Lateral_inhibition#cite_note-6)[[7]](./Lateral_inhibition#cite_note-7) An often under-appreciated point is that although lateral inhibition is visualised in a spatial sense, it is also thought to exist in what is known as "lateral inhibition across abstract dimensions." This refers to lateral inhibition between neurons that are not adjacent in a spatial sense, but in terms of modality of stimulus. This phenomenon is thought to aid in colour discrimination.[[8]](./Lateral_inhibition#cite_note-8)
+
+## History
+
+Optical illusion caused by lateral inhibition: the Hermann [grid illusion](./Grid_illusion "Grid illusion")
+
+The concept of neural inhibition (in motor systems) was well known to [Descartes](./Descartes "Descartes") and his contemporaries.[[9]](./Lateral_inhibition#cite_note-9)
+Sensory inhibition in vision was inferred by [Ernst Mach](./Ernst_Mach "Ernst Mach") in 1865 as depicted in his [mach band](./Mach_band "Mach band").[[10]](./Lateral_inhibition#cite_note-10)[[11]](./Lateral_inhibition#cite_note-11)
+Inhibition in single sensory neurons was discovered and investigated starting in 1949 by [Haldan K. Hartline](./Haldan_K._Hartline "Haldan K. Hartline") when he used algorithms to express the effect of Ganglion receptive fields. His algorithms also help explain the experiment conducted by [David H. Hubel](./David_H._Hubel "David H. Hubel") and [Torsten Wiesel](./Torsten_Wiesel "Torsten Wiesel") that expressed a variation of sensory processing, including lateral inhibition, within different species.[[12]](./Lateral_inhibition#cite_note-12)
+
+In 1956, Hartline revisited this concept of lateral inhibition in [horseshoe crab](./Atlantic_horseshoe_crab "Atlantic horseshoe crab") (*Limulus polyphemus*) eyes, during an experiment conducted with the aid of Henry G Wagner and Floyd Ratliff. Hartline explored the anatomy of [ommatidia](./Ommatidia "Ommatidia") in the horseshoe crab because of their similar function and physiological anatomy to photoreceptors in the human eye. Also, they are much larger than photoreceptors in humans, which would make them much easier to observe and record. Hartline contrasted the response signal of the ommatidium when a single concentrated beam of light was directed at one receptor unit as opposed to three surrounding units.[[13]](./Lateral_inhibition#cite_note-13) He further supported his theory of lateral inhibition as the response signal of one unit was stronger when the surrounding units were not exposed to light.[[14]](./Lateral_inhibition#cite_note-14)
+
+## Sensory inhibition
+
+A stimulus affecting all three neurons, but which affects B strongest or first, can be sharpened if B sends lateral signals to neighbors A and C not to fire, thereby *inhibiting* them. Lateral inhibition is used in vision to sharpen signals to the brain (pink arrow).
+
+[Georg von Békésy](./Georg_von_Békésy "Georg von Békésy"), in his book *Sensory Inhibition*,[[15]](./Lateral_inhibition#cite_note-15) explores a wide range of inhibitory phenomena in [sensory systems](./Sensory_systems "Sensory systems"), and interprets them in terms of sharpening.
+
+### Visual inhibition
+
+See also: [Surround suppression](./Surround_suppression "Surround suppression")
+
+Lateral inhibition increases the [contrast](./Contrast_(vision) "Contrast (vision)") and sharpness in visual response. This phenomenon already occurs in the mammalian [retina](./Retina "Retina"). In the dark, a small light stimulus will enhance the different [photoreceptors](./Photoreceptor_cell "Photoreceptor cell") ([rod cells](./Rod_cells "Rod cells")). The rods in the center of the stimulus will [transduce](./Signal_transduction "Signal transduction") the "light" signal to the brain, whereas different rods on the outside of the stimulus will send a "dark" signal to the brain due to lateral inhibition from [horizontal cells](./Retina_horizontal_cells "Retina horizontal cells"). This contrast between the light and dark creates a sharper image. (Compare [unsharp masking](./Unsharp_masking "Unsharp masking") in digital processing). This mechanism also creates the [Mach band](./Mach_band "Mach band") visual effect.
+
+Visual lateral inhibition is the process in which [photoreceptor cells](./Photoreceptor_cells "Photoreceptor cells") aid the brain in perceiving contrast within an image. Electromagnetic light enters the eye by passing through the [cornea](./Cornea "Cornea"), [pupil](./Pupil "Pupil"), and the [lens (optics)](./Lens_(optics) "Lens (optics)").[[16]](./Lateral_inhibition#cite_note-16) It then bypasses the [ganglion cells](./Retinal_ganglion_cell "Retinal ganglion cell"), [amacrine cells](./Amacrine_cells "Amacrine cells"), [bipolar cells](./Bipolar_cells "Bipolar cells"), and [horizontal cells](./Horizontal_cells "Horizontal cells") in order to reach the photoreceptors [rod cells](./Rod_cells "Rod cells") which absorb light. The rods become stimulated by the energy from the light and release an excitatory neural signal to the horizontal cells.
+
+This excitatory signal, however, will only be transmitted by the [rod cells](./Rod_cells "Rod cells") in the center of the ganglion cell receptive field to [ganglion cells](./Retinal_ganglion_cell "Retinal ganglion cell") because horizontal cells respond by sending an inhibitory signal to the neighboring rods to create a balance that allows mammals to perceive more vivid images.[[17]](./Lateral_inhibition#cite_note-17) The central rod will send the light signals directly to [bipolar cells](./Retina_bipolar_cell "Retina bipolar cell") which in turn will relay the signal to the ganglion cells.[[18]](./Lateral_inhibition#cite_note-18) [Amacrine cells](./Retina_amacrine_cell "Retina amacrine cell") also produce lateral inhibition to [bipolar cells](./Retina_bipolar_cell "Retina bipolar cell")[[19]](./Lateral_inhibition#cite_note-pmid23690563-19) and [ganglion cells](./Retina_ganglion_cell "Retina ganglion cell") to perform various visual computations including image sharpening.[[20]](./Lateral_inhibition#cite_note-pmid10684895-20) The final visual signals will be sent to the thalamus and [cerebral cortex](./Cerebral_cortex "Cerebral cortex"), where additional lateral inhibition occurs.
+
+### Tactile inhibition
+
+Sensory information collected by the peripheral nervous system is transmitted to specific areas of the primary [somatosensory](./Somatosensory "Somatosensory") area in the [parietal cortex](./Parietal_cortex "Parietal cortex") according to its origin on any given part of the body. For each neuron in the primary somatosensory area, there is a corresponding region of the skin that is stimulated or inhibited by that neuron.[[21]](./Lateral_inhibition#cite_note-Heller_2013_20-21) The regions that correspond to a location on the somatosensory cortex are mapped by a [homunculus](./Cortical_homunculus "Cortical homunculus"). This corresponding region of the skin is referred to as the neuron's [receptive field](./Receptive_field "Receptive field"). The most sensitive regions of the body have the greatest representation in any given cortical area, but they also have the smallest receptive fields. The lips, tongue, and fingers are examples of this phenomenon.[[21]](./Lateral_inhibition#cite_note-Heller_2013_20-21) Each receptive field is composed of two regions: a central excitatory region and a peripheral inhibitory region. One entire receptive field can overlap with other receptive fields, making it difficult to differentiate between stimulation locations, but lateral inhibition helps to reduce that overlap.[[22]](./Lateral_inhibition#cite_note-22) When an area of the skin is touched, the central excitatory region activates and the peripheral region is inhibited, creating a contrast in sensation and allowing sensory precision. The person can then pinpoint exactly which part of the skin is being touched. In the face of inhibition, only the neurons that are most stimulated and least inhibited will fire, so the firing pattern tends to concentrate at stimulus peaks. This ability becomes less precise as stimulation moves from areas with small receptive fields to larger receptive fields, e.g. moving from the fingertips to the forearm to the upper arm.[[21]](./Lateral_inhibition#cite_note-Heller_2013_20-21)
+
+### Auditory inhibition
+
+Similarities between sensory processes of the skin and the auditory system suggest lateral inhibition could play a role in auditory processing. The [basilar membrane](./Basilar_membrane "Basilar membrane") in the [cochlea](./Cochlea "Cochlea") has receptive fields similar to the receptive fields of the skin and eyes. Also, neighboring cells in the auditory cortex have similar specific frequencies that cause them to fire, creating a map of sound frequencies similar to that of the somatosensory cortex.[[23]](./Lateral_inhibition#cite_note-23) Lateral inhibition in [tonotopic](./Tonotopic "Tonotopic") channels can be found in the [inferior colliculus](./Inferior_colliculus "Inferior colliculus") and at higher levels of auditory processing in the brain. However, the role that lateral inhibition plays in auditory sensation is unclear. Some scientists found that lateral inhibition could play a role in sharpening spatial input patterns and temporal changes in sensation,[[24]](./Lateral_inhibition#cite_note-24) others propose it plays an important role in processing low or high tones.
+
+Lateral inhibition is also thought to play a role in suppressing [tinnitus](./Tinnitus "Tinnitus"). Tinnitus can occur when damage to the [cochlea](./Cochlea "Cochlea") creates a greater reduction of inhibition than excitation, allowing neurons to become aware of sound without sound actually reaching the ear.[[25]](./Lateral_inhibition#cite_note-Moller_2011_96-25) If certain sound frequencies that contribute to inhibition more than excitation are produced, tinnitus can be suppressed.[[25]](./Lateral_inhibition#cite_note-Moller_2011_96-25) Evidence supports findings that high-frequency sounds are best for inhibition and therefore best for reducing some types of tinnitus.
+
+In [mustached bats](./Mustached_bat "Mustached bat"), evidence supports the hypothesis that lateral inhibitory processes of the auditory system contribute to improved auditory information processing. Lateral inhibition would occur in the medial and dorsal divisions of the [medial geniculate nucleus](./Medial_geniculate_nucleus "Medial geniculate nucleus") of mustached bats, along with [positi
