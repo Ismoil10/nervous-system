@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Brain System</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="scene" aria-label="Human brain drawn as neuron points, with released dopamine shown as amber glow"></canvas>
+
+  <div id="loading" class="loading" role="status">
+    <div class="spinner" aria-hidden="true"></div>
+    <span id="loading-text">Loading…</span>
+  </div>
+
+  <div id="hud" class="hud" style="--arousal: 0">
+    <header id="status" class="panel status">
+      <h1>Brain System</h1>
+      <div id="phase-name" class="phase-name" aria-live="polite">Rest</div>
+      <div id="arousal-meter" class="meter" hidden>
+        <div class="meter-head"><span>Arousal</span><span id="arousal-val" class="meter-val">0%</span></div>
+        <div class="bar"><div id="arousal-bar" class="bar-fill"></div></div>
+      </div>
+      <p id="clock" class="clock">—</p>
+      <div id="refractory" class="refractory" hidden>
+        <div class="meter-head"><span>Refractory</span><span id="refractory-val" class="meter-val">—</span></div>
+        <div class="bar thin" aria-hidden="true"><div id="refractory-bar" class="bar-fill"></div></div>
+      </div>
+    </header>
+
+    <!-- Left column: data, every section collapsible. -->
+    <div class="drops">
+      <section id="drop-vitals" class="panel drop" data-store="vitals">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="vitals-panel">
+            <span class="drop-title">Vitals</span>
+            <span id="vitals-chip" class="pill" hidden>Intervention</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="vitals-panel" class="drop-body" hidden>
+          <dl class="stats">
+            <div id="row-hr"><dt>Heart rate</dt><dd><span id="tag-hr" class="tag" hidden></span><span id="hr">—</span></dd></div>
+            <div id="row-bp"><dt>Blood pressure</dt><dd><span id="tag-bp" class="tag" hidden></span><span id="bp">—</span></dd></div>
+            <div id="row-rr"><dt>Respiration</dt><dd><span id="tag-rr" class="tag" hidden></span><span id="rr">—</span></dd></div>
+            <div id="row-pupil" hidden><dt>Pupil L/R</dt><dd><span id="tag-pupil" class="tag" hidden></span><span id="pupil">—</span></dd></div>
+            <div id="row-scl" hidden><dt>Skin conductance</dt><dd><span id="tag-scl" class="tag" hidden></span><span id="scl">—</span></dd></div>
+            <div id="row-tcore" hidden><dt>Core temperature</dt><dd><span id="tag-tcore" class="tag" hidden></span><span id="tcore">—</span></dd></div>
+            <div id="row-tskin" hidden><dt>Skin temperature</dt><dd><span id="tag-tskin" class="tag" hidden></span><span id="tskin">—</span></dd></div>
+            <div id="row-motility" hidden><dt>Gut motility</dt><dd><span id="tag-motility" class="tag" hidden></span><span id="motility">—</span></dd></div>
+            <div id="row-cortisol" hidden><dt>Cortisol</dt><dd><span id="tag-cortisol" class="tag" hidden></span><span id="cortisol">—</span></dd></div>
+            <div id="row-adrenaline" hidden><dt>Adrenaline</dt><dd><span id="tag-adrenaline" class="tag" hidden></span><span id="adrenaline">—</span></dd></div>
+            <div id="row-il6" hidden><dt>IL-6</dt><dd><span id="tag-il6" class="tag" hidden></span><span id="il6">—</span></dd></div>
+            <div id="row-sickness" hidden><dt>Sickness</dt><dd><span id="tag-sickness" class="tag" hidden></span><span id="sickness">—</span></dd></div>
+            <div id="row-pulses" hidden><dt>Contractions</dt><dd id="pulses">—</dd></div>
+          </dl>
+          <div id="vitals-trace" class="trace" hidden>
+            <div class="field-head">
+              <label for="vitals-var">Trace</label>
+              <span id="vitals-span" class="field-val">—</span>
+            </div>
+            <select id="vitals-var">
+              <option value="hr" selected>Heart rate</option>
+              <option value="map">Mean arterial pressure</option>
+              <option value="rr">Respiration</option>
+              <option value="pupil">Pupil diameter</option>
+              <option value="scl">Skin conductance</option>
+              <option value="tCore">Core temperature</option>
+              <option value="cortisol">Cortisol</option>
+              <option value="il6">IL-6</option>
+            </select>
+            <canvas id="vitals-spark" class="spark" role="img" aria-label="Trace of the selected vital sign over the last 60 screen seconds"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section id="drop-live" class="panel drop" data-store="live">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="live-panel">
+            <span class="drop-title">Live</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="live-panel" class="drop-body" hidden>
+          <p id="phase-desc" class="phase-desc"></p>
+          <dl id="live-path-row" class="stats" hidden>
+            <div><dt>Last stimulus path</dt><dd id="live-path">—</dd></div>
+          </dl>
+          <ol id="event-log" class="event-log" aria-label="Event log, newest first" hidden></ol>
+          <p id="live-note" class="note" hidden>Packets are population volleys at true conduction speed at the shown clock rate, not single spikes.</p>
+          <div id="event-announce" class="sr-only" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="drop-dopamine" class="panel drop" data-store="dopamine">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="dopamine-panel">
+            <span class="drop-title">Dopamine</span>
+            <span class="pill">rat-calibrated</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="dopamine-panel" class="drop-body" hidden>
+          <canvas id="spark" class="spark" role="img" aria-label="Nucleus accumbens core dopamine over time, 0 to 80 nM, tonic level 15 nM"></canvas>
+          <dl class="stats">
+            <div><dt>NAcc core</dt><dd id="da-nacc-core">—</dd></div>
+            <div><dt>NAcc shell</dt><dd id="da-nacc-shell">—</dd></div>
+            <div><dt>Dorsal striatum</dt><dd id="da-dstr">—</dd></div>
+            <div><dt>Prefrontal cortex</dt><dd id="da-mpfc">—</dd></div>
+            <div><dt>Amygdala</dt><dd id="da-amy">—</dd></div>
+            <div><dt>Medial preoptic area</dt><dd id="da-mpoa">—</dd></div>
+            <div><dt>Paraventricular nucleus</dt><dd id="da-pvn">—</dd></div>
+            <div><dt>Median eminence (TIDA)</dt><dd id="da-me">—</dd></div>
+            <div><dt>Spinal cord (A11)</dt><dd id="da-spinal">—</dd></div>
+          </dl>
+          <dl class="stats">
+            <div><dt>VTA firing</dt><dd><span id="vta-burst" class="pill burst" hidden>burst</span><span id="fire-vta">—</span></dd></div>
+            <div><dt>SNc firing</dt><dd id="fire-snc">—</dd></div>
+            <div><dt>TIDA firing</dt><dd id="fire-tida">—</dd></div>
+          </dl>
+          <dl class="stats">
+            <div><dt>D1 occupancy</dt><dd id="occ-d1">—</dd></div>
+            <div><dt>D2 occupancy</dt><dd id="occ-d2">—</dd></div>
+            <div><dt>Prediction error δ</dt><dd id="rpe">—</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section id="drop-modulators" class="panel drop" data-store="modulators">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="modulators-panel">
+            <span class="drop-title">Modulators</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="modulators-panel" class="drop-body" hidden>
+          <!-- Each dot doubles as the legend of the tint drawn on that modulator's source nucleus;
+               a dot shows only while its tint is drawn (at most four at once). -->
+          <ul class="nc" role="list">
+            <li class="m-prl"><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the pituitary"></span>Prolactin</span><span id="mod-prolactin" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-ser"><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the raphe nuclei"></span>Serotonin</span><span id="mod-serotonin" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-gaba"><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the RMTg and VTA"></span>GABA brake</span><span id="mod-gaba" class="nc-val">—</span><span class="nc-bar base" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-opi"><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the periaqueductal grey and arcuate nucleus"></span>μ-opioid tone</span><span id="mod-opioid" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-oxt"><span class="nc-name">Oxytocin</span><span id="mod-oxytocin" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-ne" hidden><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the locus coeruleus" hidden></span>Noradrenaline</span><span id="mod-noradrenaline" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-ach" hidden><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the basal forebrain, PPN and LDT" hidden></span>Acetylcholine</span><span id="mod-acetylcholine" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-ha" hidden><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the tuberomammillary nucleus" hidden></span>Histamine</span><span id="mod-histamine" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li class="m-ox" hidden><span class="nc-name"><span class="dot" aria-hidden="true" title="Tint on the lateral hypothalamus" hidden></span>Orexin</span><span id="mod-orexin" class="nc-val">—</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+          </ul>
+          <dl class="stats">
+            <div><dt>Net gain on dopamine</dt><dd id="mod-gain">—</dd></div>
+          </dl>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right column: controls. On small screens every section becomes a popover. -->
+    <div class="right">
+      <section id="drop-body" class="panel drop ctl" data-store="body">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="body-panel">
+            <span class="drop-title">Body</span>
+            <span id="body-chip" class="pill" hidden></span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="body-panel" class="drop-body" hidden>
+          <div id="body-mode" class="seg" role="group" aria-label="Body mode (B key)">
+            <button type="button" id="body-mode-brain" aria-pressed="false">Brain only</button>
+            <button type="button" id="body-mode-body" aria-pressed="false">Whole body</button>
+          </div>
+          <ul class="switches" role="list" aria-label="Networks">
+            <li><button type="button" id="net-somatic" class="switch net-somatic" role="switch" aria-checked="true">
+              <span class="glyph" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M1.5 9.5c2.2-4 4.3-4 6.5 0s4.3 4 6.5 0"/></svg></span>
+              <span class="sw-label">Somatic</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="net-autonomic" class="switch net-autonomic" role="switch" aria-checked="true">
+              <span class="glyph" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 8h12"/><circle class="f" cx="3.5" cy="8" r="1.9"/><circle class="f" cx="8" cy="8" r="1.9"/><circle class="f" cx="12.5" cy="8" r="1.9"/></svg></span>
+              <span class="sw-label">Autonomic</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="net-enteric" class="switch net-enteric" role="switch" aria-checked="true">
+              <span class="glyph" aria-hidden="true"><svg viewBox="0 0 16 16"><path d="M2 5.5h12M2 10.5h12M5.5 2v12M10.5 2v12"/></svg></span>
+              <span class="sw-label">Enteric</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="net-neuroendocrine" class="switch net-neuroendocrine" role="switch" aria-checked="true">
+              <span class="glyph" aria-hidden="true"><svg viewBox="0 0 16 16"><circle class="f" cx="8" cy="8" r="6.2" opacity="0.25"/><circle class="f" cx="8" cy="8" r="3.8" opacity="0.5"/><circle class="f" cx="8" cy="8" r="1.6"/></svg></span>
+              <span class="sw-label">Neuroendocrine</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="net-neuroimmune" class="switch net-neuroimmune" role="switch" aria-checked="true">
+              <span class="glyph" aria-hidden="true"><svg viewBox="0 0 16 16"><circle class="f" cx="3.5" cy="4" r="1.2"/><circle class="f" cx="9" cy="3" r="1.2"/><circle class="f" cx="13" cy="6.5" r="1.2"/><circle class="f" cx="6" cy="8.5" r="1.2"/><circle class="f" cx="11" cy="11" r="1.2"/><circle class="f" cx="4" cy="13" r="1.2"/></svg></span>
+              <span class="sw-label">Neuroimmune</span><span class="sw-track" aria-hidden="true"></span></button></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="drop-interventions" class="panel drop ctl" data-store="interventions">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="interventions-panel">
+            <span class="drop-title">Interventions</span>
+            <span id="intervention-chip" class="pill" hidden></span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="interventions-panel" class="drop-body" hidden>
+          <div class="field">
+            <label for="intervention" class="field-head">Preset</label>
+            <select id="intervention">
+              <option value="none" selected>None</option>
+              <option value="sci">Spinal cord injury</option>
+              <option value="nerveSection">Nerve section</option>
+              <option value="dorsalRhizotomy">Dorsal rhizotomy</option>
+              <option value="heartTransplant">Heart transplant</option>
+              <option value="atropine">Atropine</option>
+              <option value="truncalVagotomy">Truncal vagotomy</option>
+              <option value="sympathectomy">Sympathectomy T2–T3</option>
+              <option value="pureAutonomicFailure">Pure autonomic failure</option>
+              <option value="adrenalectomy">Adrenalectomy</option>
+              <option value="hypophysectomy">Hypophysectomy</option>
+              <option value="splenicDenervation">Splenic denervation</option>
+              <option value="vns">Vagus nerve stimulation</option>
+            </select>
+          </div>
+          <div class="field" data-param="sci-level" hidden>
+            <label for="sci-level" class="field-head">Level</label>
+            <select id="sci-level">
+              <option value="C2">C2</option><option value="C4">C4</option><option value="C6" selected>C6</option>
+              <option value="T1">T1</option><option value="T6">T6</option><option value="T10">T10</option>
+              <option value="L2">L2</option><option value="S2">S2</option>
+            </select>
+          </div>
+          <div class="field" data-param="sci-type" hidden>
+            <label for="sci-type" class="field-head">Type</label>
+            <select id="sci-type">
+              <option value="complete" selected>Complete</option>
+              <option value="brownSequard">Brown-Séquard</option>
+              <option value="central">Central cord</option>
+              <option value="anterior">Anterior cord</option>
+            </select>
+          </div>
+          <div class="field" data-param="sci-phase" hidden>
+            <label for="sci-phase" class="field-head">Phase</label>
+            <select id="sci-phase">
+              <option value="1">Phase 1 · 0–1 d</option>
+              <option value="2">Phase 2 · 1–3 d</option>
+              <option value="3" selected>Phase 3 · 1–4 wk</option>
+              <option value="4">Phase 4 · 1–12 mo</option>
+            </select>
+          </div>
+          <div class="field" data-param="nerve" hidden>
+            <label for="nerve" class="field-head">Nerve</label>
+            <select id="nerve">
+              <option value="radial">Radial</option><option value="median" selected>Median</option>
+              <option value="ulnar">Ulnar</option><option value="axillary">Axillary</option>
+              <option value="musculocutaneous">Musculocutaneous</option><option value="femoral">Femoral</option>
+              <option value="obturator">Obturator</option><option value="sciatic">Sciatic</option>
+              <option value="tibial">Tibial</option><option value="commonFibular">Common fibular</option>
+              <option value="phrenic">Phrenic</option><option value="cn7.motor">Facial (motor)</option>
+            </select>
+          </div>
+          <div class="field" data-param="nerve-day" hidden>
+            <div class="field-head">
+              <label for="nerve-day">Days since section</label>
+              <span id="nerve-day-val" class="field-val">0 d</span>
+            </div>
+            <input id="nerve-day" type="range" min="0" max="365" step="1" value="0">
+          </div>
+          <div class="field" data-param="symp-stellate" hidden>
+            <label class="check"><input id="symp-stellate" type="checkbox"> Include the stellate ganglion</label>
+          </div>
+          <div class="field" data-param="vns" hidden>
+            <div class="field-head">
+              <label for="vns">Stimulation</label>
+              <span id="vns-val" class="field-val">50%</span>
+            </div>
+            <input id="vns" type="range" min="0" max="100" step="1" value="50">
+          </div>
+        </div>
+      </section>
+
+      <section id="drop-stimulus" class="panel drop ctl" data-store="stimulus">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="stimulus-panel">
+            <span class="drop-title">Stimulus</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="stimulus-panel" class="drop-body" hidden>
+          <div class="pair">
+            <div class="field">
+              <label for="sens-sense" class="field-head">Sense</label>
+              <select id="sens-sense">
+                <option value="vision">Vision</option>
+                <option value="hearing">Hearing</option>
+                <option value="touch">Touch</option>
+                <option value="pain">Pain</option>
+                <option value="temperature">Temperature</option>
+                <option value="smell">Smell</option>
+                <option value="taste">Taste</option>
+                <option value="balance">Balance</option>
+                <option value="proprioception">Proprioception</option>
+                <option value="interoception">Interoception</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="sens-mode" class="field-head">Mode</label>
+              <select id="sens-mode"></select>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label id="sens-intensity-label" for="sens-intensity">Intensity</label>
+              <span id="sens-intensity-val" class="field-val">—</span>
+            </div>
+            <input id="sens-intensity" type="range" min="0" max="1000" step="1" value="500" list="sens-marks">
+            <datalist id="sens-marks"></datalist>
+          </div>
+          <div id="sens-params" class="sub-fields"></div>
+          <div class="field">
+            <div class="field-head">
+              <label for="sens-duration">Duration</label>
+              <span id="sens-duration-val" class="field-val">—</span>
+            </div>
+            <input id="sens-duration" type="range" min="0" max="1000" step="1" value="500">
+          </div>
+          <div id="sens-site-field" class="field">
+            <label for="sens-site" class="field-head">Site</label>
+            <div class="site-row">
+              <select id="sens-site"><option value="">Choose a site</option></select>
+              <button type="button" id="sens-pick" class="toggle" aria-pressed="false" title="Click a site on the figure (Esc cancels)">Pick on body</button>
+            </div>
+          </div>
+          <div id="sens-side-field" class="field" hidden>
+            <label for="sens-side" class="field-head">Side</label>
+            <select id="sens-side"></select>
+          </div>
+          <dl id="sens-site-info" class="stats readout" hidden>
+            <div hidden><dt>Site</dt><dd id="sens-info-site">—</dd></div>
+            <div hidden><dt>Dermatome</dt><dd id="sens-info-dermatome">—</dd></div>
+            <div hidden><dt>Nerve</dt><dd id="sens-info-nerve">—</dd></div>
+            <div hidden><dt>Segment</dt><dd id="sens-info-segment">—</dd></div>
+            <div hidden><dt>Path</dt><dd id="sens-info-path">—</dd></div>
+            <div hidden><dt>Predicted</dt><dd id="sens-info-predicted">—</dd></div>
+          </dl>
+          <dl class="stats readout">
+            <div id="sens-psi-row" hidden><dt>Perceived (ψ)</dt><dd id="sens-psi">—</dd></div>
+          </dl>
+          <div class="pair">
+            <div class="field">
+              <label for="sens-repeat" class="field-head">Repeat</label>
+              <select id="sens-repeat"></select>
+            </div>
+            <div class="field">
+              <label for="sens-interval" class="field-head">Interval</label>
+              <select id="sens-interval"></select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" id="sens-deliver" class="primary" title="Enter key">Fire</button>
+            <button type="button" id="sens-clear">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="drop-scenarios" class="panel drop ctl" data-store="scenarios">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="scenarios-panel">
+            <span class="drop-title">Scenarios</span>
+            <span id="scn-chip" class="pill" hidden></span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="scenarios-panel" class="drop-body" hidden>
+          <div id="scenario" class="radio-list" role="radiogroup" aria-label="Scenario">
+            <label class="radio"><input type="radio" name="scenario" id="scenario-hotObject" value="hotObject"><span>Touching a hot object</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-loudSound" value="loudSound"><span>Sudden loud sound</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-brightLight" value="brightLight"><span>Bright light</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-kneeJerk" value="kneeJerk"><span>Knee jerk</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-standUp" value="standUp"><span>Standing up</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-meal" value="meal"><span>Eating a meal</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-stressor" value="stressor"><span>Acute stressor</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-infection" value="infection"><span>Infection and fever</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-orgasm" value="orgasm"><span>Orgasm – dopamine</span></label>
+            <div class="radio-sep" role="presentation"></div>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-valsalva" value="valsalva"><span>Valsalva manoeuvre</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-coldFace" value="coldFace"><span>Cold face immersion</span></label>
+            <label class="radio"><input type="radio" name="scenario" id="scenario-sleepSound" value="sleepSound"><span>Sound during sleep</span></label>
+          </div>
+          <div class="btn-row quad">
+            <button type="button" id="scn-play" aria-pressed="false">Play</button>
+            <button type="button" id="scn-stop">Stop</button>
+            <button type="button" id="scn-restart">Restart</button>
+            <button type="button" id="scn-repeat" hidden>Repeat</button>
+          </div>
+          <div id="scn-scrub" class="scrub-wrap" hidden>
+            <div id="scn-progress" class="scrub" role="slider" tabindex="0" aria-label="Scenario time, logarithmic axis" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="0" aria-disabled="true">
+              <div class="scrub-track"><div id="scn-fill" class="scrub-fill"></div><div id="scn-ticks" class="scrub-ticks"></div></div>
+            </div>
+            <div class="scrub-meta"><span id="scn-stage">—</span><span id="scn-time"></span></div>
+          </div>
+          <p id="scn-seed" class="note" hidden></p>
+          <div id="scn-orgasm" class="orgasm-block" hidden>
+            <div class="seg" role="group" aria-label="Mode">
+              <button type="button" id="mode-demo" class="active" aria-pressed="true">Demo</button>
+              <button type="button" id="mode-manual" aria-pressed="false">Manual</button>
+            </div>
+            <div class="field">
+              <div class="field-head">
+                <label for="stim-level">Stimulation level</label>
+                <span id="stim-val" class="field-val">0%</span>
+              </div>
+              <input id="stim-level" type="range" min="0" max="100" step="1" value="0" disabled>
+            </div>
+            <div class="field">
+              <label for="profile" class="field-head">Response profile</label>
+              <select id="profile">
+                <option value="single" selected>Single peak with refractory period</option>
+                <option value="multiple">Multiple peaks possible</option>
+                <option value="rapid">Rapid rise</option>
+                <option value="noclimax">Plateau without climax</option>
+                <option value="extended">Extended</option>
+                <option value="older">Older adult</option>
+              </select>
+            </div>
+            <div class="field">
+              <div class="field-head">
+                <label for="tref">Refractory duration</label>
+                <span id="tref-val" class="field-val">15 min</span>
+              </div>
+              <input id="tref" type="range" min="0" max="1000" step="1" value="496" aria-valuetext="15 min">
+            </div>
+            <div class="field">
+              <label for="hypothesis" class="field-head">Post-orgasm dopamine hypothesis</label>
+              <select id="hypothesis">
+                <option value="satiety" selected>Serotonergic satiety (dip)</option>
+                <option value="sustained">Sustained (rat PEI)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="drop-time" class="panel drop ctl" data-store="time">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="time-panel">
+            <span class="drop-title">Time</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="time-panel" class="drop-body" hidden>
+          <dl class="stats">
+            <div><dt>Clock</dt><dd id="time-readout">—</dd></div>
+            <div><dt>Human time</dt><dd id="time-human">—</dd></div>
+          </dl>
+          <div id="time-preset" class="chips" role="group" aria-label="Clock presets">
+            <button type="button" id="time-preset-reflex" data-preset="reflex" aria-pressed="false">Reflex</button>
+            <button type="button" id="time-preset-pain" data-preset="pain" aria-pressed="false">Pain</button>
+            <button type="button" id="time-preset-autonomic" data-preset="autonomic" aria-pressed="false">Autonomic</button>
+            <button type="button" id="time-preset-gut" data-preset="gut" aria-pressed="false">Gut</button>
+            <button type="button" id="time-preset-endocrine" data-preset="endocrine" aria-pressed="false">Endocrine</button>
+            <button type="button" id="time-preset-immune" data-preset="immune" aria-pressed="false">Immune</button>
+            <button type="button" id="time-preset-circadian" data-preset="circadian" aria-pressed="false">Circadian</button>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="time-rate">Rate</label>
+              <span id="time-rate-val" class="field-val">×1</span>
+            </div>
+            <input id="time-rate" type="range" min="0" max="1000" step="1" value="393">
+          </div>
+          <div class="time-row">
+            <div id="time-auto" class="seg" role="group" aria-label="Clock source (L key)">
+              <button type="button" id="time-auto-auto" class="active" aria-pressed="true">Auto</button>
+              <button type="button" id="time-auto-lock" aria-pressed="false">Lock</button>
+            </div>
+            <button type="button" id="time-pause" aria-pressed="false" title="P key">Pause</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="drop-brainsys" class="panel drop ctl" data-store="brainsys">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="brainsys-panel">
+            <span class="drop-title">Brain systems</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="brainsys-panel" class="drop-body" hidden>
+          <div class="field">
+            <label for="arousal-state" class="field-head">State</label>
+            <select id="arousal-state">
+              <option value="wakeAlert">Awake, alert</option>
+              <option value="wakeRelaxed" selected>Awake, relaxed</option>
+              <option value="n1">N1 sleep</option>
+              <option value="n2">N2 sleep</option>
+              <option value="n3">N3 sleep</option>
+              <option value="rem">REM sleep</option>
+            </select>
+          </div>
+          <ul class="switches" role="list" aria-label="Overlays">
+            <li><button type="button" id="ov-thalamocortical" class="switch" role="switch" aria-checked="false"><span class="sw-label">Thalamocortical</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="ov-basalGanglia" class="switch" role="switch" aria-checked="false"><span class="sw-label">Basal ganglia loops</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="ov-cerebellar" class="switch" role="switch" aria-checked="false"><span class="sw-label">Cerebellar loops</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="ov-limbic" class="switch" role="switch" aria-checked="false"><span class="sw-label">Limbic</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="ov-hypothalamus" class="switch" role="switch" aria-checked="false"><span class="sw-label">Hypothalamus</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="ov-brainstem" class="switch" role="switch" aria-checked="false"><span class="sw-label">Brainstem centres</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="ov-networks" class="switch" role="switch" aria-checked="false"><span class="sw-label">Networks <span class="sw-note">functional connectivity (fMRI correlation)</span></span><span class="sw-track" aria-hidden="true"></span></button></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="drop-views" class="panel drop ctl" data-store="views">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="views-panel">
+            <span class="drop-title">Views</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="views-panel" class="drop-body" hidden>
+          <div class="field">
+            <label for="view" class="field-head">View</label>
+            <select id="view">
+              <optgroup label="Brain" id="view-brain">
+                <option value="whole" selected>Whole brain</option>
+                <option value="cutaway">Cutaway</option>
+                <option value="dopamine">Dopamine system</option>
+              </optgroup>
+              <optgroup label="Body" id="view-body">
+                <option value="wholeBody">Whole body</option>
+                <option value="upperBody">Upper body</option>
+                <option value="headNeck">Head &amp; neck</option>
+                <option value="thorax">Thorax</option>
+                <option value="abdomen">Abdomen</option>
+                <option value="torso">Torso</option>
+                <option value="spine">Spine</option>
+                <option value="rightArm">Right arm</option>
+                <option value="rightLeg">Right leg</option>
+              </optgroup>
+            </select>
+          </div>
+          <ul class="switches" role="list" aria-label="Display">
+            <li><button type="button" id="view-skeleton" class="switch" role="switch" aria-checked="false"><span class="sw-label">Skeleton</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="view-receptors" class="switch" role="switch" aria-checked="false"><span class="sw-label">Touch receptors</span><span class="sw-track" aria-hidden="true"></span></button></li>
+            <li><button type="button" id="view-labels" class="switch" role="switch" aria-checked="false"><span class="sw-label">Labels</span><span class="sw-track" aria-hidden="true"></span></button></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="drop-perf" class="panel drop perf" data-store="perf">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="perf-panel" title="Performance">
+            <span class="drop-title">Performance</span>
+            <span id="fps-badge" class="badge">— FPS</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="perf-panel" class="drop-body" hidden>
+          <dl class="stats">
+            <div><dt>FPS</dt><dd id="fps">—</dd></div>
+            <div><dt>Quality tier</dt><dd id="tier">—</dd></div>
+            <div><dt>Points drawn</dt><dd id="points">—</dd></div>
+            <div id="body-points-row" hidden><dt>Body points</dt><dd id="body-points">—</dd></div>
+            <div id="extra-points-row" hidden><dt>Added brain points</dt><dd id="extra-points">—</dd></div>
+            <div id="packets-row" hidden><dt>Packets drawn</dt><dd id="packets">—</dd></div>
+            <div id="kernel-ms-row" hidden><dt>Model time per frame</dt><dd id="kernel-ms">—</dd></div>
+            <div id="clock-limited-row" hidden><dt>Clock lowered by budget</dt><dd id="clock-limited">—</dd></div>
+            <div><dt>Render resolution</dt><dd id="res">—</dd></div>
+            <div><dt>GPU</dt><dd id="gpu">—</dd></div>
+            <div id="gpu-ms-row" hidden><dt>GPU time</dt><dd id="gpu-ms">—</dd></div>
+          </dl>
+          <div class="field perf-quality">
+            <label for="quality" class="field-head">Quality</label>
+            <select id="quality">
+              <option value="auto" selected>Auto</option>
+              <option value="0">Low</option>
+              <option value="1">Medium</option>
+              <option value="2">High</option>
+              <option value="3">Ultra</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section id="drop-settings" class="panel drop ctl settings" data-store="settings">
+        <h2 class="drop-h">
+          <button type="button" class="drop-head" aria-expanded="false" aria-controls="settings-panel">
+            <span class="drop-title">Settings</span>
+            <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+          </button>
+        </h2>
+        <div id="settings-panel" class="drop-body" hidden>
+          <div class="field">
+            <div class="field-head">
+              <label for="age">Age</label>
+              <span id="age-val" class="field-val">30 y</span>
+            </div>
+            <input id="age" type="range" min="18" max="90" step="1" value="30">
+          </div>
+          <div class="field">
+            <span class="field-head" id="reduced-motion-label">Reduced motion</span>
+            <div id="reduced-motion" class="seg" role="group" aria-labelledby="reduced-motion-label">
+              <button type="button" id="reduced-motion-system" class="active" aria-pressed="true">System</button>
+              <button type="button" id="reduced-motion-on" aria-pressed="false">On</button>
+            </div>
+          </div>
+          <ul class="switches" role="list" aria-label="Motion">
+            <li><button type="button" id="limb-motion" class="switch" role="switch" aria-checked="true"><span class="sw-label">Limb motion</span><span class="sw-track" aria-hidden="true"></span></button></li>
+          </ul>
+          <div class="btn-row">
+            <button type="button" id="reset">Reset</button>
+            <button type="button" id="info-btn" title="I key" aria-haspopup="dialog">About</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <nav id="controls" class="panel controls" aria-label="Controls">
+      <button type="button" id="stimulate" class="stimulate" aria-pressed="false" title="Hold, or hold Space (switches to Manual mode)" hidden>Stimulate</button>
+      <button type="button" id="distract" title="D key" hidden>Distract</button>
+      <button type="button" id="pause" aria-pressed="false" title="P key">Pause</button>
+      <button type="button" id="view-btn" title="Cycle view (V key)">View</button>
+    </nav>
+  </div>
+
+  <div id="info" class="info" hidden>
+    <article id="info-card" class="info-card" role="dialog" aria-modal="true" aria-labelledby="info-title" tabindex="-1">
+      <h2 id="info-title">About Brain System</h2>
+
+      <h3>What you see</h3>
+      <p>
+        A procedural human brain in MNI space and, in whole-body mode, a clinical figure built of
+        stars that carries the brain's networks through the body: somatic, autonomic, enteric,
+        neuroendocrine and neuroimmune. Cool-white stars in the brain, cord and ganglia are neural
+        tissue. Each neural star stands for many neurons; hovering a structure shows
+        "1 star ≈ N neurons" for the current quality tier. On the skin and on non-neural organs,
+        stars mark tissue, not cells.
+      </p>
+      <ul>
+        <li>Body brightness is normalised for visibility.</li>
+        <li>Nerves, ganglia, adrenal glands, cranial-nerve nuclei and small nuclei are enlarged for legibility.</li>
+        <li>Sense organs, brainstem relays and some body coordinates are estimated positions.</li>
+        <li>Pelvic nerves and plexuses are schematic.</li>
+        <li>Hormone and cytokine glows show plasma level, not vessels.</li>
+      </ul>
+      <p>
+        Signals travel as packets: population volleys at true conduction speed at the shown clock
+        rate, not single spikes. Afferent packets, travelling toward the brain, always have the
+        coolest colour; direction of travel, not colour alone, tells afferent from efferent. A
+        disabled network fades to a grey ghost.
+      </p>
+      <p>
+        In the orgasm scenario, warm amber lanterns are released dopamine in each terminal field
+        (rat-calibrated model), and amber threads are the dopamine pathways. Faint tints show
+        modulator tone on its source nucleus:
+      </p>
+      <ul class="legend">
+        <li class="m-ser"><span class="dot" aria-hidden="true"></span>serotonin on the raphe</li>
+        <li class="m-gaba"><span class="dot" aria-hidden="true"></span>GABA on the RMTg</li>
+        <li class="m-prl"><span class="dot" aria-hidden="true"></span>prolactin on the pituitary</li>
+        <li class="m-opi"><span class="dot" aria-hidden="true"></span>opioid tone on the periaqueductal grey</li>
+      </ul>
+
+      <h3>Switches, interventions and stimuli</h3>
+      <p>
+        Body switches between Brain only and Whole body and turns each network on or off. Off means
+        denervation for nerves and basal replacement for hormones; the rest of the model responds by
+        its own dynamics. Interventions remove specific nerves or structures, one at a time. Stimulus
+        delivers one sense at a site picked on the figure or chosen from the site list. Scenarios
+        play scripted timelines; their outputs are a model run with a stated seed, not population
+        means. In brain-only mode the body vitals read "—".
+      </p>
+
+      <h3>Time</h3>
+      <p>
+        Every model quantity runs in human time. The clock shows human time and the rate: ×1/100
+        means one screen second shows 10 ms. The clock slows by itself so that fast signals stay
+        visible; Lock fixes the rate.
+      </p>
+
+      <h3>The model</h3>
+      <p>
+        Seven dopamine cell groups (lateral and medial VTA, SNc, A11–A14) drive extracellular
+        dopamine in nine terminal fields, with Michaelis–Menten uptake, D1/D2 receptor binding,
+        autoreceptors, release plasticity and a reward-prediction-error signal. Prolactin, GABA,
+        endogenous opioids, serotonin and oxytocin act only as modulators of dopamine.
+      </p>
+      <p class="note">Design and sources: <code>research/ANALYSIS.md</code>; dopamine equations: <code>research/DOPAMINE.md</code>.</p>
+
+      <h3>Caveats</h3>
+      <ul>
+        <li>Human dopamine during sex has never been measured.</li>
+        <li>Concentrations are calibrated on rat microdialysis and voltammetry.</li>
+        <li>Human imaging measures blood flow, not dopamine.</li>
+        <li>The effect of prolactin on brain dopamine is a hypothesis.</li>
+        <li>The efferent route of the inflammatory reflex is contested.</li>
+        <li>Model latencies are always shown next to their measured target range.</li>
+      </ul>
+
+      <h3>Controls</h3>
+      <ul class="keys">
+        <li><kbd>B</kbd> brain only or whole body · <kbd>L</kbd> lock the clock · <kbd>[</kbd> <kbd>]</kbd> clock one decade slower or faster</li>
+        <li><kbd>Enter</kbd> fire the stimulus (focus in Stimulus) · <kbd>Esc</kbd> cancel picking or close</li>
+        <li>Orgasm scenario: hold <kbd>Space</kbd> or the Stimulate button to stimulate (switches to Manual mode); <kbd>D</kbd> distract</li>
+        <li><kbd>P</kbd> pause · <kbd>V</kbd> cycle view · <kbd>H</kbd> hide HUD · <kbd>F</kbd> fullscreen · <kbd>I</kbd> About</li>
+        <li>Drag to rotate; scroll or pinch to zoom</li>
+      </ul>
+
+      <h3>Safety</h3>
+      <p>
+        No part of the screen flashes more than 3 times per second, there are no red flashes, and
+        large-area brightness changes are limited and smoothed. Stimuli are never drawn as flames or
+        screen flashes: a light stimulus is a local glow in the eye. No sound is played. Reduced
+        motion is respected: limb motion, breathing and gut movement, heartbeat pulses and
+        auto-rotation stop.
+      </p>
+
+      <button type="button" id="info-close">Close</button>
+    </article>
+  </div>
+
+  <div id="fatal" class="fatal" hidden></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
