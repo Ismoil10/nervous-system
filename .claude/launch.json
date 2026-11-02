@@ -1,0 +1,61 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "anger-galaxy",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8766",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "anger-galaxy"
+      ],
+      "port": 8766
+    },
+    {
+      "name": "orgasm-galaxy",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8767",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "orgasm-galaxy"
+      ],
+      "port": 8767
+    },
+    {
+      "name": "brain-system",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8768",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "brain-system"
+      ],
+      "port": 8768
+    },
+    {
+      "name": "brain-system-backup",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8769",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        ".handoff/backup-brain-system-pre-build"
+      ],
+      "port": 8769
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+# Files excluded from the Graphify graph (tool configuration, launchers, binaries); patterns match in every project
+CLAUDE.md
+.claude/
+start.bat
+screenshots/
+.handoff/
