@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Orgasm Galaxy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="scene" aria-label="Barred spiral galaxy animation"></canvas>
+
+  <div id="loading" class="loading" role="status">
+    <div class="spinner"></div>
+    <p id="loading-text">Generating galaxy…</p>
+  </div>
+
+  <div id="hud" class="hud" style="--arousal: 0">
+    <div class="side">
+      <header id="status" class="panel status">
+        <h1>Orgasm Galaxy</h1>
+        <div id="phase-name" class="phase-name" aria-live="polite">Baseline</div>
+        <div class="meter">
+          <div class="meter-head"><span>Arousal</span><span id="arousal-val">0%</span></div>
+          <div class="bar"><div id="arousal-bar" class="bar-fill"></div></div>
+        </div>
+        <p id="clock" class="clock">–</p>
+        <p id="refractory" class="refractory" hidden></p>
+      </header>
+
+      <details id="drop-vitals" class="panel drop vitals" data-store="vitals">
+        <summary>
+          <span class="drop-title">Vitals</span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+        </summary>
+        <div class="drop-body">
+          <p id="phase-desc" class="phase-desc"></p>
+          <canvas id="spark" class="spark" aria-label="Arousal over the last 60 seconds"></canvas>
+          <dl class="stats">
+            <div><dt>Heart rate</dt><dd id="hr">–</dd></div>
+            <div><dt>Breathing</dt><dd id="rr">–</dd></div>
+            <div><dt>Blood pressure</dt><dd id="bp">–</dd></div>
+            <div><dt>Contractions</dt><dd id="pulses">–</dd></div>
+          </dl>
+        </div>
+      </details>
+
+      <details id="drop-neuro" class="panel drop neuro" data-store="neuro">
+        <summary>
+          <span class="drop-title">Neurochemistry</span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+        </summary>
+        <div class="drop-body">
+          <ul class="nc" role="list">
+            <li><span class="nc-name">Dopamine</span><span id="nc-d" class="nc-val">–</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li><span class="nc-name">Oxytocin</span><span id="nc-o" class="nc-val">–</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li><span class="nc-name">Prolactin</span><span id="nc-r" class="nc-val">–</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li><span class="nc-name">Catecholamines</span><span id="nc-n" class="nc-val">–</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li><span class="nc-name">Opioid tone</span><span id="nc-psi" class="nc-val">–</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li><span class="nc-name">Vasopressin</span><span id="nc-v" class="nc-val">–</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+            <li><span class="nc-name">Refractory inhibition</span><span id="nc-i" class="nc-val">–</span><span class="nc-bar" aria-hidden="true"><span class="nc-fill"></span></span></li>
+          </ul>
+          <p class="footnote">Normalized, illustrative values</p>
+        </div>
+      </details>
+    </div>
+
+    <details id="drop-perf" class="panel drop perf" data-store="perf">
+      <summary title="Performance">
+        <span class="drop-title">Performance</span>
+        <span id="fps-badge" class="badge">– FPS</span>
+        <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+      </summary>
+      <div class="drop-body">
+        <dl>
+          <div><dt>FPS</dt><dd id="fps">–</dd></div>
+          <div><dt>Quality</dt><dd id="tier">–</dd></div>
+          <div><dt>Stars</dt><dd id="stars">–</dd></div>
+          <div><dt>Render</dt><dd id="res">–</dd></div>
+          <div><dt>GPU</dt><dd id="gpu">–</dd></div>
+        </dl>
+      </div>
+    </details>
+
+    <nav class="panel controls" aria-label="Controls">
+      <button id="stimulate" class="stimulate" aria-pressed="false" title="Hold, or hold Space">Stimulate</button>
+      <button id="distract" title="D key">Distract</button>
+      <button id="pause" aria-pressed="false" title="P key">Pause</button>
+      <details id="drop-settings" class="drop drop-up settings" data-store="settings">
+        <summary>
+          <span class="drop-title">Settings</span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+        </summary>
+        <div class="drop-body">
+          <div class="seg" role="group" aria-label="Mode">
+            <button id="mode-demo" class="active" aria-pressed="true">Demo</button>
+            <button id="mode-manual" aria-pressed="false">Manual</button>
+          </div>
+          <div class="field">
+            <div class="field-head">
+              <label for="stim-level">Stimulation level</label>
+              <span id="stim-val" class="field-val">0%</span>
+            </div>
+            <input id="stim-level" type="range" min="0" max="100" step="1" value="0" disabled>
+          </div>
+          <label class="field">
+            <span class="field-head">Profile</span>
+            <select id="profile">
+              <option value="single" selected>Single peak with refractory period</option>
+              <option value="multiple">Multiple peaks possible</option>
+              <option value="rapid">Rapid rise, fast resolution</option>
+              <option value="noclimax">Plateau without climax</option>
+              <option value="extended">Extended / multi-peak</option>
+              <option value="older">Older adult</option>
+            </select>
+          </label>
+          <div class="field">
+            <div class="field-head">
+              <label for="tref">Refractory duration</label>
+              <span id="tref-val" class="field-val">15 min</span>
+            </div>
+            <input id="tref" type="range" min="0" max="1000" step="1" value="496" aria-valuetext="15 min">
+          </div>
+          <label class="field">
+            <span class="field-head">Envelope</span>
+            <select id="envelope">
+              <option value="typical" selected>Typical</option>
+              <option value="lab">Laboratory</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="sr-only">Quality level</span>
+            <select id="quality">
+              <option value="auto" selected>Quality: auto</option>
+              <option value="0">Low</option>
+              <option value="1">Medium</option>
+              <option value="2">High</option>
+              <option value="3">Ultra</option>
+            </select>
+          </label>
+          <div class="btn-row">
+            <button id="reset">Reset</button>
+            <button id="info-btn" title="I key">About</button>
+          </div>
+        </div>
+      </details>
+    </nav>
+  </div>
+
+  <div id="info" class="info" hidden>
+    <article class="info-card" role="dialog" aria-modal="true" aria-labelledby="info-title">
+      <h2 id="info-title">What this animation shows</h2>
+      <p>
+        A barred spiral galaxy, built from real astrophysics, stands in for a model of the
+        physiology and neurology of the human orgasm. Nothing in the image depicts a body: each
+        physiological or neural signal drives one real galactic phenomenon.
+      </p>
+
+      <h3>The response cycle</h3>
+      <p>
+        Arousal builds through <b>excitement</b> into a <b>plateau</b>. A short point of
+        inevitability (about 2–3 s) follows, after which the response can no longer be stopped.
+        <b>Orgasm</b> is a train of rhythmic muscle contractions about 0.8 s apart, growing weaker
+        and further apart. In <b>resolution</b> the body returns to baseline, and during the
+        <b>refractory period</b> further stimulation has little or no effect.
+      </p>
+
+      <table>
+        <thead><tr><th>Body and brain</th><th>In the galaxy</th></tr></thead>
+        <tbody>
+          <tr><td>Vasocongestion (blood inflow)</td><td>Gas flows in along the bar dust lanes into the nuclear ring</td></tr>
+          <tr><td>Felt arousal</td><td>Starburst in the nuclear ring</td></tr>
+          <tr><td>Dopamine (wanting)</td><td>Nuclear feeding spirals and a faint nuclear flicker</td></tr>
+          <tr><td>Myotonia (muscle tension)</td><td>Sharper bar dust lanes</td></tr>
+          <tr><td>Sympathetic discharge</td><td>The active nucleus ignites</td></tr>
+          <tr><td>Contraction train</td><td>Jet knots, one per contraction</td></tr>
+          <tr><td>Oxytocin</td><td>Ionization cones and light echoes</td></tr>
+          <tr><td>Opioid afterglow</td><td>Relic knots cooling</td></tr>
+          <tr><td>Prolactin / satiety</td><td>Post-starburst quenched ring</td></tr>
+          <tr><td>Refractory inhibition</td><td>Depleted gas reservoir refilling</td></tr>
+          <tr><td>Sex flush</td><td>Inner-disk H-alpha (Hα) glow</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Two clocks</h3>
+      <p>
+        Every screen second carries two labels: human time, which the physiology runs on, and
+        astrophysical time, which the galaxy runs on. During the build, one screen second is about
+        10 s of human time and 4.8 million years for the galaxy. At the climax the galaxy clock
+        slows smoothly to about 1,000 years per second while human time runs in real time, so the
+        0.8 s rhythm is shown as it happens and the disk appears frozen. Afterwards both clocks
+        speed up again.
+      </p>
+
+      <h3>Documented compromises</h3>
+      <ul>
+        <li>The jet is drawn about 10× brighter than real optical jets so that it stays visible.</li>
+        <li>The flush analog fades centre-first because galaxies quench inside-out, unlike the
+          human flush, which fades in the reverse order of its spread.</li>
+        <li>The numbers are illustrative typical values from the literature, not measurements of
+          anyone. Bodily signs correlate only weakly with felt intensity, and the cause of the
+          refractory period is still debated.</li>
+        <li>Profiles are response patterns available to any body. Differences between groups are
+          overlapping tendencies, not categories.</li>
+      </ul>
+
+      <p class="keys">
+        Hold <kbd>Space</kbd> or the Stimulate button to stimulate · <kbd>D</kbd> distract ·
+        <kbd>P</kbd> pause · <kbd>H</kbd> hide HUD · <kbd>I</kbd> About · <kbd>F</kbd> fullscreen ·
+        <kbd>Esc</kbd> close
+      </p>
+      <p class="note">Sources and the full derivation: <code>research/ANALYSIS.md</code>.</p>
+      <button id="info-close">Close</button>
+    </article>
+  </div>
+
+  <div id="fatal" class="fatal" hidden></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
