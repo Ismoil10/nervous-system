@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Anger Galaxy</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="scene" aria-label="Spiral galaxy animation"></canvas>
+
+  <div id="loading" class="loading" role="status">
+    <div class="spinner"></div>
+    <p id="loading-text">Generating galaxy…</p>
+  </div>
+
+  <div id="hud" class="hud" style="--anger: 0">
+    <div class="side">
+      <header class="panel status">
+        <h1>Anger Galaxy</h1>
+        <div id="phase-name" class="phase-name" aria-live="polite">Calm</div>
+        <div class="meter">
+          <div class="meter-head"><span>Anger</span><span id="anger-val">4%</span></div>
+          <div class="bar"><div id="anger-bar" class="bar-fill"></div></div>
+        </div>
+      </header>
+
+      <details id="drop-live" class="panel drop live" data-store="live">
+        <summary>
+          <span class="drop-title">Live data</span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+        </summary>
+        <div class="drop-body">
+          <p id="phase-desc" class="phase-desc"></p>
+          <canvas id="spark" class="spark" aria-label="Anger level over the last 60 seconds"></canvas>
+          <dl class="stats">
+            <div><dt>Heart rate</dt><dd id="bpm">–</dd></div>
+            <div><dt>Rotation speed</dt><dd id="speed">–</dd></div>
+            <div><dt>Star formation</dt><dd id="sf">–</dd></div>
+            <div><dt>Arm pitch</dt><dd id="pitch">–</dd></div>
+            <div><dt>Time scale</dt><dd id="timescale">–</dd></div>
+          </dl>
+        </div>
+      </details>
+    </div>
+
+    <details id="drop-perf" class="panel drop perf" data-store="perf">
+      <summary title="Performance">
+        <span class="drop-title">Performance</span>
+        <span id="fps-badge" class="badge">– FPS</span>
+        <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+      </summary>
+      <div class="drop-body">
+        <dl>
+          <div><dt>FPS</dt><dd id="fps">–</dd></div>
+          <div><dt>Quality</dt><dd id="tier">–</dd></div>
+          <div><dt>Stars</dt><dd id="stars">–</dd></div>
+          <div><dt>Render</dt><dd id="res">–</dd></div>
+          <div><dt>GPU</dt><dd id="gpu">–</dd></div>
+        </dl>
+      </div>
+    </details>
+
+    <nav class="panel controls" aria-label="Controls">
+      <button id="provoke" class="provoke" title="G key">Provoke</button>
+      <button id="pause" aria-pressed="false" title="Space">Pause</button>
+      <details id="drop-settings" class="drop drop-up settings" data-store="settings">
+        <summary>
+          <span class="drop-title">Settings</span>
+          <svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5"/></svg>
+        </summary>
+        <div class="drop-body">
+          <div class="seg" role="group" aria-label="Mode">
+            <button id="mode-auto" class="active" aria-pressed="true">Auto cycle</button>
+            <button id="mode-manual" aria-pressed="false">Manual</button>
+          </div>
+          <label class="slider">
+            <span>Anger</span>
+            <input id="anger-slider" type="range" min="0" max="100" value="4" disabled>
+          </label>
+          <label class="switch" title="S key">
+            <span>Camera shake</span>
+            <input id="shake-toggle" type="checkbox" role="switch" checked>
+          </label>
+          <label class="select">
+            <span class="sr-only">Quality level</span>
+            <select id="quality">
+              <option value="auto" selected>Quality: auto</option>
+              <option value="0">Low</option>
+              <option value="1">Medium</option>
+              <option value="2">High</option>
+              <option value="3">Ultra</option>
+            </select>
+          </label>
+          <button id="info-btn" title="I key">About</button>
+        </div>
+      </details>
+    </nav>
+  </div>
+
+  <div id="info" class="info" hidden>
+    <article class="info-card" role="dialog" aria-modal="true" aria-labelledby="info-title">
+      <h2 id="info-title">What this animation shows</h2>
+      <p>
+        The spiral galaxy is modeled on real astrophysics: star colors are computed from temperature
+        via Planck's law, luminosities follow the initial mass function (IMF), and the arms are a
+        density wave that the stars flow through. The anger level is mapped onto real galactic
+        phenomena:
+      </p>
+      <table>
+        <thead><tr><th>Anger</th><th>In the galaxy</th></tr></thead>
+        <tbody>
+          <tr><td>Arousal level</td><td>Differential rotation speeds up</td></tr>
+          <tr><td>Tension, narrowing of attention</td><td>The arms sharpen and wind more tightly</td></tr>
+          <tr><td>Inner "boiling"</td><td>Velocity dispersion rises and the disk thickens</td></tr>
+          <tr><td>Flushed face</td><td>Starburst: red H II regions glowing in H-alpha (Hα) flare up</td></tr>
+          <tr><td>Heartbeat</td><td>The active nucleus pulses in brightness</td></tr>
+          <tr><td>Outburst</td><td>Shock-wave ring, supernovae, red superwind</td></tr>
+          <tr><td>Exhaustion</td><td>Rotation slows and star formation dies down</td></tr>
+        </tbody>
+      </table>
+      <p class="keys">
+        <kbd>Mouse</kbd> rotate · <kbd>Wheel</kbd> zoom · <kbd>G</kbd> provoke ·
+        <kbd>Space</kbd> pause · <kbd>S</kbd> camera shake · <kbd>H</kbd> hide HUD · <kbd>F</kbd> fullscreen
+      </p>
+      <p class="note">Time runs as a time-lapse: one second on screen equals millions of years. Details: <code>research/ANALYSIS.md</code>.</p>
+      <button id="info-close">Close</button>
+    </article>
+  </div>
+
+  <div id="fatal" class="fatal" hidden></div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

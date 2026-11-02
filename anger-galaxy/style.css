@@ -1,0 +1,446 @@
+:root {
+  --bg: #000;
+  --panel: rgba(8, 10, 18, 0.58);
+  --panel-solid: rgba(12, 14, 24, 0.94);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --text: #e8ecf4;
+  --muted: #98a2b6;
+  --amber: #f2c14e;
+  --red: #ff4b3a;
+  --rose: #ff2d55;
+  --radius: 12px;
+  --gap: 16px;
+  --gutter: 16px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+#scene:active { cursor: grabbing; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+/* --- HUD --- */
+.hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr) minmax(0, 260px);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "side . perf"
+    "controls controls controls";
+  gap: var(--gap);
+  padding: var(--gap) var(--gutter);
+  transition: opacity 0.4s ease;
+}
+.hud.hidden { opacity: 0; }
+.hud.hidden * { pointer-events: none !important; }
+
+.panel {
+  pointer-events: auto;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 12px 14px;
+}
+
+/* Left column: always-visible status plus the "Live data" dropdown below it.
+   It is the scroll container on short screens, so it takes pointer events for its scrollbar. */
+.side {
+  pointer-events: auto;
+  grid-area: side;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.side > * { flex: none; }
+
+.status h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+.phase-name {
+  font-size: 20px;
+  font-weight: 650;
+  line-height: 1.25;
+  margin-top: 4px;
+  color: color-mix(in oklab, var(--text), #ff7a68 calc(var(--anger) * 85%));
+}
+.phase-name.flash { animation: flash 0.9s ease-out; }
+@keyframes flash { from { transform: translateY(4px); } to { transform: none; } }
+
+.meter { margin-top: 10px; }
+.meter-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+#anger-val { color: var(--text); font-variant-numeric: tabular-nums; }
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  width: 100%;
+  transform-origin: left;
+  transform: scaleX(0.04);
+  background: linear-gradient(90deg, var(--amber), #ff7a3d 55%, var(--rose));
+  transition: transform 0.12s linear;
+}
+
+/* --- Dropdowns (<details>/<summary>) --- */
+.drop { padding: 0; }
+.drop > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  border-radius: inherit;
+}
+.drop > summary::-webkit-details-marker { display: none; }
+.drop > summary:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: -2px;
+}
+.drop-title { flex: 1; min-width: 0; }
+.chev {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  color: var(--muted);
+  transition: transform 0.2s ease, color 0.15s;
+}
+.drop > summary:hover .chev { color: var(--text); }
+.drop[open] > summary .chev { transform: rotate(180deg); }
+.drop-up > summary .chev { transform: rotate(180deg); }
+.drop-up[open] > summary .chev { transform: none; }
+.drop-body { padding: 0 14px 12px; }
+
+.badge {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Live data */
+.phase-desc {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #c3cad8;
+  min-height: 3.6em;
+}
+.spark {
+  display: block;
+  width: 100%;
+  height: 52px;
+}
+
+dl { margin: 10px 0 0; }
+dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 3px 0;
+  font-size: 12.5px;
+}
+dt { color: var(--muted); }
+dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; }
+
+/* Performance */
+.perf { grid-area: perf; align-self: start; }
+.perf > .drop-body { max-height: calc(100dvh - 140px); overflow-y: auto; }
+.perf dl { margin: 0; }
+.perf dd { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* --- Controls --- */
+.controls {
+  grid-area: controls;
+  justify-self: center;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 10px 12px;
+}
+button, select, .settings > summary {
+  font: inherit;
+  font-size: 13px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+button:hover, select:hover, .settings > summary:hover { background: rgba(255, 255, 255, 0.11); }
+button:focus-visible, select:focus-visible, input:focus-visible, .settings > summary:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+select option { background: #11131c; }
+
+.provoke {
+  background: rgba(255, 75, 58, 0.18);
+  border-color: rgba(255, 75, 58, 0.45);
+  color: #ffd2cb;
+}
+.provoke:hover { background: rgba(255, 75, 58, 0.3); }
+
+/* Settings: a button-like summary whose body opens upward as a popover above the bar */
+.settings > summary {
+  display: inline-flex;
+  gap: 6px;
+  font-weight: 400;
+}
+.settings[open] > summary {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(242, 193, 78, 0.45);
+}
+.settings > .drop-body {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(300px, calc(100vw - 2 * var(--gutter)));
+  max-height: calc(100dvh - 130px);
+  overflow-y: auto;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.settings .drop-body > button { width: 100%; }
+
+.seg { display: flex; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.12); }
+.seg button { flex: 1; border: 0; border-radius: 0; }
+.seg button.active { background: rgba(242, 193, 78, 0.2); color: #ffe3a3; }
+
+.slider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.slider input { flex: 1; min-width: 0; accent-color: var(--red); }
+.slider input:disabled { opacity: 0.45; }
+.select { display: block; }
+.select select { width: 100%; }
+
+.switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.switch input {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 20px;
+  margin: 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.switch input::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--text);
+  transition: transform 0.15s;
+}
+.switch input:checked { background: rgba(255, 75, 58, 0.45); border-color: rgba(255, 75, 58, 0.7); }
+.switch input:checked::before { transform: translateX(14px); }
+
+/* --- About dialog --- */
+.info {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+.info[hidden] { display: none; }
+.info-card {
+  max-width: 620px;
+  max-height: 100%;
+  overflow: auto;
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.info-card h2 { margin: 0 0 8px; font-size: 18px; }
+.info-card table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+.info-card th, .info-card td { text-align: left; padding: 6px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+.info-card th { color: var(--muted); font-weight: 600; }
+.info-card .keys, .info-card .note { color: #c3cad8; font-size: 13px; }
+kbd {
+  font: 12px ui-monospace, Consolas, monospace;
+  padding: 1px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+
+/* --- Loading and error --- */
+.loading {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  background: #000;
+  color: var(--muted);
+  font-size: 14px;
+  z-index: 20;
+}
+.loading[hidden] { display: none; }
+.spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: var(--amber);
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.fatal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  padding: 24px;
+  text-align: center;
+  font-size: 15px;
+  color: #ffd2cb;
+  z-index: 30;
+}
+.fatal[hidden] { display: none; }
+
+/* --- Small screens --- */
+@media (max-width: 760px) {
+  .hud {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "side perf"
+      "controls controls";
+    gap: 12px;
+  }
+  .side { max-width: 340px; }
+  .phase-name { font-size: 18px; }
+
+  /* Performance stays a compact summary; its body drops down as a popover that starts
+     below the always-visible status panel (--status-h is set by src/ui.js), so it never covers it. */
+  .perf { position: relative; }
+  .perf > summary { padding: 10px 12px; }
+  .perf > .drop-body {
+    position: absolute;
+    /* .perf and .status share the same top edge; subtract .perf's 1px top border */
+    top: calc(var(--status-h, 112px) + 8px - 1px);
+    right: 0;
+    width: min(260px, calc(100vw - 2 * var(--gutter)));
+    /* stop above the controls bar */
+    max-height: calc(100dvh - var(--status-h, 112px) - 110px);
+    padding: 10px 14px;
+    background: var(--panel-solid);
+    border: 1px solid var(--panel-border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* Phones in portrait: a visible "Performance" title would squeeze the status panel to ~140px,
+   so the summary shows only the FPS badge. The title stays as the accessible name and as the
+   summary's tooltip (title="Performance" in index.html). */
+@media (max-width: 480px) {
+  .perf .drop-title {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phase-name.flash, .spinner { animation: none; }
+  .chev { transition: none; }
+}
