@@ -1,4 +1,4 @@
-// Human sexual response model (research/DOPAMINE.md §6.7, the corrected orgasm-galaxy/research/ANALYSIS.md
+// Human sexual response model (research/DOPAMINE.md §6.7, the corrected research/RESPONSE.md
 // §7.2–§7.9), the physiological driver of Brain System. It integrates in human time with first-order
 // dynamics: felt arousal A with positive dopaminergic feedback and dual control, genital vasocongestion
 // G, autonomic tone, myotonia, catecholamines, oxytocin, prolactin, opioid tone, vasopressin, refractory
@@ -62,16 +62,16 @@ export const PHASES = {
   },
 };
 
-// Profiles are response patterns available to any body (galaxy §7.2, §7.9; DOPAMINE.md §6.7).
+// Profiles are response patterns available to any body (RESPONSE.md §7.2, §7.9; DOPAMINE.md §6.7).
 const BASE = {
   e: 0.5, s: 0.5, kappa: 0.45, q: 0.5, I0: 1.0, tref: 900, tauH: 120, f: 0.6, age: 0,
   tauAScale: 1, gDecayScale: 1, growth: 1.08,
-  tail: 3,                     // galaxy §7.5: 0–3 minor pulses
+  tail: 3,                     // RESPONSE.md §7.5: 0–3 minor pulses
   tailRef: 2,                  // §6.9 deterministic reference tail
-  delta0: 0.8,                 // galaxy §7.2: initial contraction interval, 0.6–0.9 s
-  pattern: 'mj',               // galaxy §7.5: 'mj' or 'emg'
-  Tpre: 1.5, uPre: false,      // galaxy §7.2: onset window (human s) and emission setting
-  gate: true,                  // galaxy §7.9: orgasm gate active
+  delta0: 0.8,                 // RESPONSE.md §7.2: initial contraction interval, 0.6–0.9 s
+  pattern: 'mj',               // RESPONSE.md §7.5: 'mj' or 'emg'
+  Tpre: 1.5, uPre: false,      // RESPONSE.md §7.2: onset window (human s) and emission setting
+  gate: true,                  // RESPONSE.md §7.9: orgasm gate active
 };
 export const PROFILES = {
   single: { ...BASE },
@@ -83,16 +83,16 @@ export const PROFILES = {
 };
 
 export const C = {
-  tauA: 600, gamma: 5, lambda: 0.03, lambdaS: 0.15, aH: 0.5, tauC: 60,   // §6.7, galaxy §7.4
+  tauA: 600, gamma: 5, lambda: 0.03, lambdaS: 0.15, aH: 0.5, tauC: 60,   // §6.7, RESPONSE.md §7.4
   tauInh: 20, tauOff: 180, tauR: 90, iGate: 0.08,                        // §6.7 decay terms on A
-  etaTau: 20, etaSd: 0.03,                                               // galaxy §7.4 level noise
+  etaTau: 20, etaSd: 0.03,                                               // RESPONSE.md §7.4 level noise
   tauG: 20,
-  theta: 0.85, thetaHold: 0.5, plateauA: 0.75, plateauSag: 0.7,          // §6.7, galaxy §7.6
+  theta: 0.85, thetaHold: 0.5, plateauA: 0.75, plateauSag: 0.7,          // §6.7, RESPONSE.md §7.6
   onsetScreen: 2.5, cancelS: 0.5, tauOmega: 20, tauOmegaCancel: 2,       // §6.7 ONSET row
   tauO: 350, tauPsi: 900, kO: 5e-4, kOOmega: 0.03, kPsi: 0.025,          // §6.7
   tauVFall: 1200,                                                        // §6.7: vasopressin fall 20 min
   tauRRise: 300, tauRFall: 2400, rHold: 1800, rCap: 1.5,                 // §6.7: prolactin closed form
-  tauITiny: 20,                                                          // galaxy §7.4: τ_I for I₀ ≤ 0.08
+  tauITiny: 20,                                                          // RESPONSE.md §7.4: τ_I for I₀ ≤ 0.08
   aRes: 0.35, aResSpan: 0.45,                                            // §6.7: A_res = 0.35 + 0.45·(1 − I₀)
   hMax: 0.5, hFine: 0.05, stimGap: 0.02,                                 // §6.7, §9.3: human step cap
   clockRamp: 1,                                                          // §9.3: screen s of a log ramp
@@ -296,7 +296,7 @@ export class ResponseModel {
 
     const Seff = this.Seff;
     // Central arousal: self-amplifying, dual control, upward genital feedback, withdrawal and
-    // refractory decline. Not integrated during ONSET and ORGASM (galaxy §7.4).
+    // refractory decline. Not integrated during ONSET and ORGASM (RESPONSE.md §7.4).
     if (ph !== 'orgasm' && ph !== 'onset') {
       const dA = (p.e * Seff * (1 + C.gamma * this.D) * (1 - this.A)
         - (C.lambda + C.lambdaS * p.s + C.aH * this.St * this.H) * this.A) / (C.tauA * p.tauAScale)
@@ -361,7 +361,7 @@ export class ResponseModel {
     this._enter('orgasm');
   }
 
-  // The phase machine (galaxy §7.6 table, DOPAMINE.md §6.7 row).
+  // The phase machine (RESPONSE.md §7.6 table, DOPAMINE.md §6.7 row).
   _transitions() {
     const ph = this.phase, p = this.p;
     const Seff = this.Seff, Aobs = this.Aeff;
@@ -519,7 +519,7 @@ export class ResponseModel {
     };
   }
 
-  // Algebraic vitals (galaxy §7.4); kept as the regression reference (ANALYSIS.md B.13).
+  // Algebraic vitals (RESPONSE.md §7.4); kept as the regression reference (ANALYSIS.md B.13).
   vitals() {
     const lab = this.envelope === 'lab';
     const HRpk = lab ? 180 : 125, dSBP = lab ? 100 : 45, dDBP = lab ? 50 : 8, dRR = lab ? 26 : 13;

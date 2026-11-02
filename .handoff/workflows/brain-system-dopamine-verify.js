@@ -11,7 +11,7 @@ export const meta = {
 const ROOT = 'C:\\Users\\User\\projects\\galaxy'
 const APP = ROOT + '\\brain-system'
 const DOC = APP + '\\research\\DOPAMINE.md'
-const GAL = ROOT + '\\orgasm-galaxy\\research\\ANALYSIS.md'
+const GAL = ROOT + '\\brain-system\\research\\RESPONSE.md'
 const SCRATCH = 'C:\\Users\\User\\AppData\\Local\\Temp\\claude\\C--Users-User-projects-galaxy\\641a402d-336b-4b93-bc5d-2e26265edfd2\\scratchpad'
 
 const CONTEXT = `Project: Brain System (${APP}; renamed today from "Orgasm Brain", folder renamed from orgasm-brain/, so older text may still say orgasm-brain — that is expected), a WebGL2 visualization of a procedural human brain (MNI-152 mm) made of cool-white neuron "stars". It is being extended to the brain's networks throughout a star-built human body (separate spec research/ANALYSIS.md, being written now — not your concern). The dopamine-during-orgasm simulation, with dopamine release drawn as warm amber lantern glow, is now ONE SCENARIO of Brain System. Clinical, non-explicit tone.

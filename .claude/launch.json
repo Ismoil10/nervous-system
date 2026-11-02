@@ -16,20 +16,6 @@
       "port": 8766
     },
     {
-      "name": "orgasm-galaxy",
-      "runtimeExecutable": "python",
-      "runtimeArgs": [
-        "-m",
-        "http.server",
-        "8767",
-        "--bind",
-        "127.0.0.1",
-        "--directory",
-        "orgasm-galaxy"
-      ],
-      "port": 8767
-    },
-    {
       "name": "brain-system",
       "runtimeExecutable": "python",
       "runtimeArgs": [

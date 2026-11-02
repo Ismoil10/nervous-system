@@ -1,4 +1,12 @@
-# Orgasm Galaxy — scientific analysis and design rationale
+# Brain System — the whole-body sexual response model: analysis and design rationale
+
+Origin: written as the analysis of the Orgasm Galaxy project, which was removed from the workspace on
+2026-11-02 (it remains in the git history). Brain System keeps this document because its §3–§7 define
+the canonical whole-body response model behind `src/response.js` and the orgasm scenario
+(DOPAMINE.md §6.7); "galaxy §n" in older text means §n of this document. The galaxy-visualization
+parts — §2 (stars in space), §8 (mapping onto the galaxy), the galaxy rows of §9–§10 — and their
+astrophysics captures are historical. Paths such as `raw/` and `../anger-galaxy/` below are as
+originally written; the human-physiology captures now live in `brain-system/raw/`.
 
 This document was written **before** any Orgasm Galaxy code, and it is the basis of the model.
 Sources are the Wikipedia captures in `raw/` and `../anger-galaxy/raw/`. They were located
@@ -1459,7 +1467,7 @@ refill near zero through the second build and the second AGN ignited at b ≈ 1,
 
 ### 11.1. Raw captures used (located with `graphify query` / `explain` / `path`)
 
-`orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_*.md`:
+`brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_*.md`:
 
 | File | Lines used |
 |---|---|

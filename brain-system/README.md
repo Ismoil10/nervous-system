@@ -58,7 +58,8 @@ and `?view=whole|cutaway|dopamine`.
 | `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/main.js` | Adaptive quality, camera, HUD, animation loop |
 
 Rendering assets (HDR pipeline, bloom, star point-spread function, adaptive quality, HUD style)
-come from [Orgasm Galaxy](../orgasm-galaxy/README.md) and [Anger Galaxy](../anger-galaxy/README.md).
+come from the Orgasm Galaxy project (removed on 2026-11-02; its response-model analysis lives on as
+[research/RESPONSE.md](research/RESPONSE.md)) and [Anger Galaxy](../anger-galaxy/README.md).
 
 ## Safety
 Nothing flashes more than three times per second. Firing is drawn as a rate-coded twinkle of

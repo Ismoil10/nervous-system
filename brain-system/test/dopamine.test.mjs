@@ -210,7 +210,7 @@ describe('DOPAMINE.md §6.9 rows on the current code (human time, Δ = 0.05 s)',
     FIELDS.forEach((f, j) => assert.ok(Math.abs(d.C[j] / f.C0 - 1) < 0.15, `${f.id} ${(d.C[j] / f.C0).toFixed(3)}× at baseline re-entry`));
   });
 
-  test('row 20: median time to θ over 20 seeds within ±20 % of the galaxy §7.4 target (7.4 min)', () => {
+  test('row 20: median time to θ over 20 seeds within ±20 % of the RESPONSE.md §7.4 target (7.4 min)', () => {
     const th = [];
     for (let seed = 1; seed <= 20; seed++) {
       const { marks } = humanRun({ seed, T: 1800, S: refStim, stop: (m, mk) => !!mk.inevitability });

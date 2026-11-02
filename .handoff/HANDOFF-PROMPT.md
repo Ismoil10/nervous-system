@@ -48,7 +48,7 @@ UTC+5). Read this whole prompt before acting. The working directory is `C:\Users
 
 | Path | What it is |
 |---|---|
-| `anger-galaxy/`, `orgasm-galaxy/` | Finished sibling projects (WebGL2 star galaxies). Do not change them in this task. |
+| `anger-galaxy/` | Finished sibling project (WebGL2 star galaxy). Do not change it in this task. `orgasm-galaxy/` was removed on 2026-11-02; its response-model analysis is now `brain-system/research/RESPONSE.md` and its human-physiology captures are in `brain-system/raw/`. |
 | `brain-system/` | **This project.** Renamed today from `orgasm-brain/` (folder, page title, HUD, graph ids and paths, launch config, memory all updated). |
 | `brain-system/research/ANALYSIS.md` | The **canonical spec** for the whole-body extension (≈ 7,060 lines): §1 conventions, §2 frames and the reference body, §3 brain systems, §4 signal processing, §5 sensory, §6 somatic, §7 autonomic, §8 enteric, §9 neuroendocrine, §10 neuroimmune, §11 integration (switches, kernel), §12 scenarios and validation, §13 rendering/HUD/performance/safety, §14 sources, **Appendix A** the binding contract (frames, names A.3, clocks A.4, switch semantics A.5, stimuli A.6, decisions A.8, shared values A.9), **Appendix B** the implementation plan (B.3 current code, B.4 modules and interfaces, B.5 per-file changes, B.6 frame loop, B.7 GPU layout, B.8 budgets, B.10–B.12 HUD/switches/scenarios, B.13 orgasm scenario, B.14 tests, B.15 phases). Use Grep on headings and Read with offset/limit; it is too long to read whole. |
 | `brain-system/research/DOPAMINE.md` | Spec of the **orgasm scenario** (dopamine model, 2,276 lines, §1–§11). Fact-checked in 3 rounds. |
@@ -160,7 +160,7 @@ First steps for you:
    changed sections and update `PARAMS`.
 3. **Add the specs and docs to the graph semantically** (they only have heading nodes): `ANALYSIS.md`,
    `DOPAMINE.md`, `brain-system/README.md`, `brain-system/index.html`, the root `README.md`, and
-   `orgasm-galaxy/research/ANALYSIS.md`, README, index.html. Adapt `.handoff/workflows/graphify-project-docs.js`
+   `brain-system/research/RESPONSE.md`. Adapt `.handoff/workflows/graphify-project-docs.js`
    (paths changed from orgasm-brain to brain-system; split `ANALYSIS.md` into several chunks by section line
    ranges because the extraction spec bounds lines per chunk) and merge with the graphify `--update` flow
    (`~/.claude/skills/graphify/SKILL.md` + `references/update.md`), as `.handoff/workflows/graphify-body-sources.js`
@@ -175,9 +175,7 @@ First steps for you:
    errors. Save screenshots to `brain-system/screenshots/` (ignored by the graph) and send them to the user.
 6. **Wrap up:** `graphify update .`; README (features, controls, switch table, test command); update memory;
    report graph-usage numbers; tell the user what is done and what is not verified.
-7. **Follow-ups to offer the user (separate tasks):** update `orgasm-galaxy` code to its revised analysis
-   (θ 0.85, τ_A 600, λ 0.03, onset phase, prolactin no longer suppressing dopamine); re-verify the DOPAMINE.md
-   round-3 edits.
+7. **Follow-up to offer the user (separate task):** re-verify the DOPAMINE.md round-3 edits.
 
 ## 7. Useful details
 

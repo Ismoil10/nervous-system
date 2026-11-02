@@ -143,91 +143,67 @@
     "ast_hash": "fbbce9f64ee00cf04f61d930bcdc13e0",
     "semantic_hash": "fbbce9f64ee00cf04f61d930bcdc13e0"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Active_galactic_nucleus.md": {
-    "mtime": 1793432672.508072,
-    "seen": 1793433902.308195,
-    "ast_hash": "814e9160556bf8cb9a334118954db4f9",
-    "semantic_hash": "814e9160556bf8cb9a334118954db4f9"
-  },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Astrophysical_jet.md": {
-    "mtime": 1793432681.754524,
-    "seen": 1793433902.308195,
-    "ast_hash": "c3e11e31dc8ea6e023b5fa53a73720ab",
-    "semantic_hash": "c3e11e31dc8ea6e023b5fa53a73720ab"
-  },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Barred_spiral_galaxy.md": {
-    "mtime": 1793432691.3625922,
-    "seen": 1793433902.308195,
-    "ast_hash": "298912bc61850e08f28ae14366103161",
-    "semantic_hash": "298912bc61850e08f28ae14366103161"
-  },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Human_sexual_response_cycle.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Human_sexual_response_cycle.md": {
     "mtime": 1793432587.407823,
     "seen": 1793433902.308195,
     "ast_hash": "5c8d2c4b468e8ab8ed58e1db8766ba3b",
     "semantic_hash": "5c8d2c4b468e8ab8ed58e1db8766ba3b"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Mesolimbic_pathway.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Mesolimbic_pathway.md": {
     "mtime": 1793432602.0992444,
     "seen": 1793433902.308195,
     "ast_hash": "d42502c9275faf8c37fff254a43650b8",
     "semantic_hash": "d42502c9275faf8c37fff254a43650b8"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Messier_87.md": {
-    "mtime": 1793432701.5776472,
-    "seen": 1793433902.308195,
-    "ast_hash": "2672077c3d8cdba05690b769223d4367",
-    "semantic_hash": "2672077c3d8cdba05690b769223d4367"
-  },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Nucleus_accumbens.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Nucleus_accumbens.md": {
     "mtime": 1793432652.1139624,
     "seen": 1793433902.308195,
     "ast_hash": "788f286812ed04f889861dc5e2f45c4a",
     "semantic_hash": "788f286812ed04f889861dc5e2f45c4a"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Orgasm.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Orgasm.md": {
     "mtime": 1793432585.6254144,
     "seen": 1793433902.308195,
     "ast_hash": "7906e6b015db77984daa2a3dd355975e",
     "semantic_hash": "7906e6b015db77984daa2a3dd355975e"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Oxytocin.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Oxytocin.md": {
     "mtime": 1793432597.9029655,
     "seen": 1793433902.308195,
     "ast_hash": "f4cbab6dc6e1bba6e8c50f8058d5023b",
     "semantic_hash": "f4cbab6dc6e1bba6e8c50f8058d5023b"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Periaqueductal_gray.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Periaqueductal_gray.md": {
     "mtime": 1793432661.6246338,
     "seen": 1793433902.308195,
     "ast_hash": "79534d74d6e3c2a5d77a7564f51a2573",
     "semantic_hash": "79534d74d6e3c2a5d77a7564f51a2573"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Prolactin.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Prolactin.md": {
     "mtime": 1793432600.446318,
     "seen": 1793433902.308195,
     "ast_hash": "8475583050639c9baffb99cd3a6e41dc",
     "semantic_hash": "8475583050639c9baffb99cd3a6e41dc"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Refractory_period_sex.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Refractory_period_sex.md": {
     "mtime": 1793432588.938644,
     "seen": 1793433902.308195,
     "ast_hash": "a0da8a0050eb09eb6314c5adff246b30",
     "semantic_hash": "a0da8a0050eb09eb6314c5adff246b30"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Sex_flush.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sex_flush.md": {
     "mtime": 1793432593.4629052,
     "seen": 1793433902.308195,
     "ast_hash": "1b38e51f4e9b8caf52a01069e733a1de",
     "semantic_hash": "1b38e51f4e9b8caf52a01069e733a1de"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Sexual_arousal.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sexual_arousal.md": {
     "mtime": 1793432591.1075108,
     "seen": 1793433902.308195,
     "ast_hash": "7218bda765dc9d8bc8907f57799b29c0",
     "semantic_hash": "7218bda765dc9d8bc8907f57799b29c0"
   },
-  "orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Vasocongestion.md": {
+  "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Vasocongestion.md": {
     "mtime": 1793432594.4800408,
     "seen": 1793433902.308195,
     "ast_hash": "1bfc4f8c0d2b20a0387355794f2ef1b4",
@@ -252,81 +228,15 @@
     "semantic_hash": "e0670a587e8fc6af765abcc52a3cb070"
   },
   "brain-system/src/response.js": {
-    "mtime": 1793466537.139382,
-    "seen": 1793643693.0401623,
-    "ast_hash": "b0cf291a57afed2bb57a9bcdc205858d",
+    "mtime": 1793644026.7987678,
+    "seen": 1793644123.5977733,
+    "ast_hash": "c3ec563d27aa9beca72859da0585473c",
     "semantic_hash": ""
   },
-  "orgasm-galaxy/src/astro.js": {
-    "mtime": 1793437370.2774007,
-    "seen": 1793439547.3224084,
-    "ast_hash": "09912c6637c86918608c14d862b3ecf5",
-    "semantic_hash": "09912c6637c86918608c14d862b3ecf5"
-  },
-  "orgasm-galaxy/src/camera.js": {
-    "mtime": 1793432573.9950986,
-    "seen": 1793439547.3224084,
-    "ast_hash": "f13ce6e1ee0053d967a43a8b9b88dd59",
-    "semantic_hash": "f13ce6e1ee0053d967a43a8b9b88dd59"
-  },
-  "orgasm-galaxy/src/galaxy-model.js": {
-    "mtime": 1793436110.697863,
-    "seen": 1793439547.3224084,
-    "ast_hash": "9e06381a484969b0a131dbc8f3612715",
-    "semantic_hash": "9e06381a484969b0a131dbc8f3612715"
-  },
-  "orgasm-galaxy/src/gl-utils.js": {
-    "mtime": 1793432574.0071003,
-    "seen": 1793439547.3224084,
-    "ast_hash": "2d645880a186f7e8efb554503566552b",
-    "semantic_hash": "2d645880a186f7e8efb554503566552b"
-  },
-  "orgasm-galaxy/src/knots.js": {
-    "mtime": 1793437063.2565289,
-    "seen": 1793439547.3224084,
-    "ast_hash": "fd7846075a62be4ce6c871830b271271",
-    "semantic_hash": "fd7846075a62be4ce6c871830b271271"
-  },
-  "orgasm-galaxy/src/main.js": {
-    "mtime": 1793437157.4727829,
-    "seen": 1793439547.3224084,
-    "ast_hash": "1002b40904197d184e81b25c3536da85",
-    "semantic_hash": "1002b40904197d184e81b25c3536da85"
-  },
-  "orgasm-galaxy/src/performance.js": {
-    "mtime": 1793435014.0161877,
-    "seen": 1793439547.3224084,
-    "ast_hash": "21ee8f739f88fed7fccaed9b45a48ea0",
-    "semantic_hash": "21ee8f739f88fed7fccaed9b45a48ea0"
-  },
-  "orgasm-galaxy/src/renderer.js": {
-    "mtime": 1793436958.1484272,
-    "seen": 1793439547.3224084,
-    "ast_hash": "4f201a6978020a44e979d19e5fd2e3d3",
-    "semantic_hash": "4f201a6978020a44e979d19e5fd2e3d3"
-  },
-  "orgasm-galaxy/src/response.js": {
-    "mtime": 1793436531.6613317,
-    "seen": 1793439547.3224084,
-    "ast_hash": "3386c452437a122bd9ec45f957f3033e",
-    "semantic_hash": "3386c452437a122bd9ec45f957f3033e"
-  },
-  "orgasm-galaxy/src/shaders.js": {
-    "mtime": 1793437157.4104905,
-    "seen": 1793439547.3224084,
-    "ast_hash": "401d2879bbced8b5603b327fdf94f7a7",
-    "semantic_hash": "401d2879bbced8b5603b327fdf94f7a7"
-  },
-  "orgasm-galaxy/src/ui.js": {
-    "mtime": 1793436444.4507792,
-    "seen": 1793439547.3224084,
-    "ast_hash": "43f2c5e69742ed16d4806a96141b64c9",
-    "semantic_hash": "43f2c5e69742ed16d4806a96141b64c9"
-  },
   "README.md": {
-    "mtime": 1793449001.5422192,
-    "seen": 1793449021.391548,
-    "ast_hash": "ab3907f4858b44373f894d8b75d6bb63",
+    "mtime": 1793644042.7255719,
+    "seen": 1793644123.5977733,
+    "ast_hash": "d362e8ab15d594a325a0d313d2f13493",
     "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dopamine.md": {
@@ -395,22 +305,10 @@
     "ast_hash": "68b67d82645960577a9c5f8a5be94b99",
     "semantic_hash": "68b67d82645960577a9c5f8a5be94b99"
   },
-  "orgasm-galaxy/README.md": {
-    "mtime": 1793437449.363951,
-    "seen": 1793438788.86759,
-    "ast_hash": "7953c6c07afa3bcccf4cb801c6de9040",
-    "semantic_hash": ""
-  },
-  "orgasm-galaxy/index.html": {
-    "mtime": 1793436213.2230496,
-    "seen": 1793438788.86759,
-    "ast_hash": "160c04d5da1c7961f53e02499b217ac1",
-    "semantic_hash": ""
-  },
-  "orgasm-galaxy/research/ANALYSIS.md": {
-    "mtime": 1793441329.22009,
-    "seen": 1793441457.939993,
-    "ast_hash": "85e14c5b74e0ea09be2ac3384fea9931",
+  "brain-system/research/RESPONSE.md": {
+    "mtime": 1793644051.556044,
+    "seen": 1793644123.5977733,
+    "ast_hash": "02b4690e360bf6b87eb9493fa0270892",
     "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Autoreceptor.md": {
@@ -498,9 +396,9 @@
     "semantic_hash": ""
   },
   "brain-system/README.md": {
-    "mtime": 1793449001.5372584,
-    "seen": 1793449021.391548,
-    "ast_hash": "6a7c0de00ad47baa2b0101fa81d66c69",
+    "mtime": 1793644036.1714418,
+    "seen": 1793644123.5977733,
+    "ast_hash": "4527b4a8d77bd17614bf211a8bd683ee",
     "semantic_hash": ""
   },
   "brain-system/index.html": {
@@ -516,9 +414,9 @@
     "semantic_hash": ""
   },
   "brain-system/research/DOPAMINE.md": {
-    "mtime": 1793462972.7654161,
-    "seen": 1793465121.5182254,
-    "ast_hash": "dd7a2309f64025eb52fc9e1802cf41b8",
+    "mtime": 1793644034.5561037,
+    "seen": 1793644123.5977733,
+    "ast_hash": "f08d959d55510d0ab903eee757f09986",
     "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Action_potential.md": {
@@ -1302,9 +1200,9 @@
     "semantic_hash": ""
   },
   "brain-system/test/dopamine.test.mjs": {
-    "mtime": 1793464020.7020955,
-    "seen": 1793465121.5182254,
-    "ast_hash": "c16578b76e729ef73256dd708d311058",
+    "mtime": 1793644026.9237778,
+    "seen": 1793644123.5977733,
+    "ast_hash": "8e81ea641783a0531b0a36152386e053",
     "semantic_hash": ""
   },
   "brain-system/test/geometry-brain.test.mjs": {
@@ -1344,9 +1242,9 @@
     "semantic_hash": ""
   },
   "brain-system/research/ANALYSIS.md": {
-    "mtime": 1793463577.876878,
-    "seen": 1793465121.5182254,
-    "ast_hash": "9266fb0288194b35b55645f3e16f0ac0",
+    "mtime": 1793644026.5634048,
+    "seen": 1793644123.5977733,
+    "ast_hash": "874f8514d0acf4aabbe2e4552a3bd44f",
     "semantic_hash": ""
   }
 }

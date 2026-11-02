@@ -32,7 +32,7 @@ colour, §9 implementation targets, §10 safety and uncertainty rules, §11 sour
 - Coordinates: MNI-152 millimetres, x → right, y → anterior, z → superior. Bilateral structures
   are given for the right side; mirror x for the left.
 - Companion documents: the whole-body response model is specified and fact-checked in
-  `orgasm-galaxy/research/ANALYSIS.md` §3–§7. Its corrected equations (§7.4–§7.9 there) are the
+  `RESPONSE.md` §3–§7. Its corrected equations (§7.4–§7.9 there) are the
   **one canonical response model** of this project. `brain-system/src/response.js` is a copy of the
   galaxy code that still carries the pre-correction constants; it must be ported (§6.7). The
   dopamine model here **reads** that model; it does not re-derive arousal, vasocongestion, hormones
@@ -159,11 +159,11 @@ Visually, one source star lights a broad territory, never a single partner.
 
 | Pathway | Source → target | Route | Role relevant here | Evidence |
 |---|---|---|---|---|
-| Mesolimbic | VTA → NAcc (shell, core), olfactory tubercle; minor → amygdala, hippocampus, septum | medial forebrain bundle (MFB) through lateral hypothalamus, lateral preoptic area, substantia innominata | wanting, anticipation, prediction error, approach | [G orgasm-galaxy/raw Mesolimbic_pathway.md L31, L39]; [G Dopaminergic_pathways.md L39, L54] |
+| Mesolimbic | VTA → NAcc (shell, core), olfactory tubercle; minor → amygdala, hippocampus, septum | medial forebrain bundle (MFB) through lateral hypothalamus, lateral preoptic area, substantia innominata | wanting, anticipation, prediction error, approach | [G raw Mesolimbic_pathway.md L31, L39]; [G Dopaminergic_pathways.md L39, L54] |
 | Mesocortical (meso- and nigrocortical in primates) | VTA (medial) → vmPFC, OFC, ACC; in primates also dorsal-tier SNc and A8, and the innervation is far more widespread than in rodents: motor and premotor cortex (areas 4 and 6) receive dense dopamine input, comparable to or denser than prefrontal cortex | MFB, then the anterior limb of the internal capsule (human "superolateral MFB") | salience, evaluation | [G Mesocortical_pathway.md L27]; Berger, Gaspar & Verney 1991; Williams & Goldman-Rakic 1998 (Mk); Coenen et al. 2012 |
 | Nigrostriatal | SNc (+ A8) → putamen, caudate | MFB, fanning dorsolaterally through internal capsule and globus pallidus | motor vigour; not sex-specific | [G Nigrostriatal_pathway.md L43] |
 | Incertohypothalamic | A13 (+ A14) → MPOA, PVN, DMH | short intrahypothalamic | autonomic and neuroendocrine integration "during sexual behaviour" | [G Incertohypothalamic_pathway.md L17]; Hull, Muschamp & Sato 2004 (R) |
-| Tuberoinfundibular | A12 → external zone of the median eminence, where the axons end; dopamine then reaches anterior-pituitary lactotrophs through the long hypophyseal portal vessels | 3–5 mm axon, then a blood vessel; only tuberohypophyseal A12/A14 fibres run down the stalk, and they end in the intermediate and neural lobes, not the anterior lobe | tonic inhibition of prolactin via lactotroph D2 | [G Tuberoinfundibular_pathway.md L21, L23, L40]; [G orgasm-galaxy/raw Prolactin.md L40]; Ben-Jonathan & Hnasko 2001 |
+| Tuberoinfundibular | A12 → external zone of the median eminence, where the axons end; dopamine then reaches anterior-pituitary lactotrophs through the long hypophyseal portal vessels | 3–5 mm axon, then a blood vessel; only tuberohypophyseal A12/A14 fibres run down the stalk, and they end in the intermediate and neural lobes, not the anterior lobe | tonic inhibition of prolactin via lactotroph D2 | [G Tuberoinfundibular_pathway.md L21, L23, L40]; [G raw Prolactin.md L40]; Ben-Jonathan & Hnasko 2001 |
 | Diencephalospinal | A11 → dorsal horn, intermediolateral column, lumbosacral cord (spinal ejaculation generator, sacral parasympathetic nucleus) | descending ~45–50 cm in the periventricular grey and the dorsal longitudinal fasciculus beside the PAG, then the dorsolateral funiculus (rat) | spinal sexual reflexes (rodent) | [G Dopaminergic_pathways.md L43]; Skagerberg & Lindvall 1985 (R) |
 
 **Simplifications.** The model draws and computes only the rows above. It omits the olfactory
@@ -515,7 +515,7 @@ electrode values.
 
 **Human dopamine release during sexual arousal or orgasm has never been measured directly.** Every
 statement about human timing is inferred from blood flow, BOLD, pharmacology or rat data
-(`orgasm-galaxy/research/ANALYSIS.md` §5.1, §6 caveats).
+(`RESPONSE.md` §5.1, §6 caveats).
 
 **Key studies by species, sex, method and sampling interval.** Every number used in §4 and in the
 HUD comes from one of these rows and keeps its species tag.
@@ -541,7 +541,7 @@ HUD comes from one of these rows and keeps its species tag.
 ### 4.2. Anticipatory (appetitive) phase
 
 - The anticipation of most rewards increases brain dopamine [G Dopamine.md L64]; mesolimbic firing
-  rises in anticipation [G orgasm-galaxy/raw Mesolimbic_pathway.md L39]. Wanting maps to
+  rises in anticipation [G raw Mesolimbic_pathway.md L39]. Wanting maps to
   appetitive, approach and anticipatory behaviour [G Reward_system.md L21, L37].
 - **Rat, male.** NAcc dopamine rises significantly when a receptive female is presented behind a
   screen, before contact, and rises further during copulation, to roughly 1.4–2× baseline in
@@ -680,7 +680,7 @@ HUD comes from one of these rows and keeps its species tag.
   is still raised at 60 min after orgasm, the end of sampling (men and women, coitus, continuous
   blood sampling; Exton et al. 2001, Psychoneuroendocrinology 26:287; review: "for over an hour",
   Krüger et al. 2002), and rises ~400 % more after
-  intercourse than after masturbation [G orgasm-galaxy/raw Refractory_period_sex.md L25, L29];
+  intercourse than after masturbation [G raw Refractory_period_sex.md L25, L29];
   Brody & Krüger 2006. Its causal role in refractoriness is unresolved: no
   prolactin involvement in the mouse refractory period (Valente, Marques & Lima 2021), no rise in one
   multi-orgasmic man (Haake et al. 2002), and the human cabergoline/protirelin study (Krüger et al.
@@ -708,8 +708,7 @@ Translation is by phase, not by one allometric factor.
 ### 4.7. Sex and profiles
 
 Nearly all dopamine data are from male rats; female data exist mainly for paced mating. The
-response profiles are response patterns available to any body (`orgasm-galaxy/research/
-ANALYSIS.md` §7.9) and the dopamine model has no sex parameter. The MPOA testosterone permissive
+response profiles are response patterns available to any body (`RESPONSE.md` §7.9) and the dopamine model has no sex parameter. The MPOA testosterone permissive
 factor is fixed at 1.
 
 ### 4.8. Schematic time course (model, default profile)
@@ -770,7 +769,7 @@ Notes:
    while prolactin stays raised. In a negative feedback loop this is what a sustained releasing
    drive produces: the surge is maintained by releasing factors overriding the dopamine brake. For
    the same reason a TIDA withdrawal can be at most one contributor to the onset of the surge. The
-   parent analysis uses R only as a marker (`orgasm-galaxy/research/ANALYSIS.md` §6, §7.4).
+   parent analysis uses R only as a marker (`RESPONSE.md` §6, §7.4).
 2. **Opioids.** μ disinhibition raises and κ inhibition lowers dopamine; both systems are tonically
    active and the net direction after orgasm is unknown (human naloxone data conflict). With the
    default "sustained" setting, μ disinhibition holds NAcc at 1.25× rest at +1 min, 1.11× at +5 min,
@@ -796,7 +795,7 @@ Notes:
 1. **Inputs only from the response model.** Arousal, vasocongestion, sympathetic tone, myotonia,
    catecholamines, oxytocin, prolactin, opioid tone, refractory inhibition, the generator Ω, the
    contraction train and the phase machine all come from the response model, which is the corrected
-   galaxy model (`orgasm-galaxy/research/ANALYSIS.md` §7.4–§7.9) ported to `response.js` (§6.7).
+   galaxy model (`RESPONSE.md` §7.4–§7.9) ported to `response.js` (§6.7).
    The dopamine model adds no physiology of its own beyond dopamine and the dopamine-acting parts of
    the modulators.
 2. **One dopamine signal.** The response model's dopaminergic drive D is computed from the
@@ -1170,8 +1169,8 @@ If the closed loop is ever switched off, the response model's D must be renamed 
 this text as an abstract "motivational drive", stated to be uncoupled from the displayed nM values.
 
 **Canonical response model: port the corrected galaxy equations.** `brain-system/src/response.js`
-is a copy of the galaxy code with the constants from before the galaxy §7.4 correction. Every
-result in §6.9 and §9.6 assumes these changes, all from `orgasm-galaxy/research/ANALYSIS.md`
+is a copy of the galaxy code with the constants from before the RESPONSE.md §7.4 correction. Every
+result in §6.9 and §9.6 assumes these changes, all from `RESPONSE.md`
 §7.2–§7.9 except the rows marked "this document":
 
 | Item | Current `response.js` | Corrected (canonical) |
@@ -1193,33 +1192,33 @@ result in §6.9 and §9.6 assumes these changes, all from `orgasm-galaxy/researc
 | Prolactin R | no c_ctx; decline τ 25 min; R = min(1.5, Σ_k R_k) over the last four orgasm ends (`_Rat`) | c_ctx = 0.3 + 0.7·I₀; decline τ 40 min (t½ ≈ 28 min); keep R = min(1.5, Σ_k R_k) (this document: the galaxy sum has no ceiling, see point (e) below), summed over all orgasm ends of the session |
 | Flush | smoothstep(0.6, 0.95, Aeff) | smoothstep(0.7, 1.0, â) |
 | Vitals | RR 14 + 22·h; DBP 75 + 0.45·ΔSBP·h; upper-range HR_pk 175 | ΔRR 13 (upper range 26); ΔDBP 8 (upper range 50); upper-range HR_pk 180 |
-| Phase transitions | EXCITEMENT → PLATEAU and RES_EARLY → PLATEAU test A ≥ 0.75; PLATEAU → EXCITEMENT at A < 0.6; EXCITEMENT → BASELINE after `phaseTh > 20`; no-climax exit at A < 0.1 plus 6 screen s; PLATEAU → NO_CLIMAX counts S < 0.05; no NO_CLIMAX → EXCITEMENT or RECOVERY → EXCITEMENT, so with T_ref > 30 min a stimulated user stays in RECOVERY until R < 0.2 | galaxy §7.6 table verbatim: A_obs ≥ 0.75; A_obs < 0.7 with S̃ > 0.05; A < 0.03 and S̃ < 0.02 held for 20 s; S̃ < 0.05 for ≥ 60 s and A < 0.6; NO_CLIMAX → BASELINE at G < 0.1; NO_CLIMAX → EXCITEMENT on S_eff > 0.05; RECOVERY → EXCITEMENT on S_eff > 0.05 and I < 0.08 |
+| Phase transitions | EXCITEMENT → PLATEAU and RES_EARLY → PLATEAU test A ≥ 0.75; PLATEAU → EXCITEMENT at A < 0.6; EXCITEMENT → BASELINE after `phaseTh > 20`; no-climax exit at A < 0.1 plus 6 screen s; PLATEAU → NO_CLIMAX counts S < 0.05; no NO_CLIMAX → EXCITEMENT or RECOVERY → EXCITEMENT, so with T_ref > 30 min a stimulated user stays in RECOVERY until R < 0.2 | RESPONSE.md §7.6 table verbatim: A_obs ≥ 0.75; A_obs < 0.7 with S̃ > 0.05; A < 0.03 and S̃ < 0.02 held for 20 s; S̃ < 0.05 for ≥ 60 s and A < 0.6; NO_CLIMAX → BASELINE at G < 0.1; NO_CLIMAX → EXCITEMENT on S_eff > 0.05; RECOVERY → EXCITEMENT on S_eff > 0.05 and I < 0.08 |
 | No-climax clock | k_h = 60 | max(60, remaining/30 s), remaining = time until G < 0.1, computed once at phase entry (as the recovery clock, §9.3) |
-| Clock ramps (this document; the galaxy §9.2 ramps are for the astro clock) | log ramp over 1 s, instant into ONSET; not specified for T_pre = 0; the human time of a frame is computed once at the frame's k_h, so after a mid-frame ignition the rest of that frame runs ONSET at k_h = 10 | the same: at every phase change except an instant switch into ONSET, log₁₀ k_h moves linearly from its current value to the target over 1 s of screen time (so k_h changes exponentially; `LogRamp`; a first-order approach with τ = 1 s in log space would add ≈ 1 s of screen time to each ramped phase and shift §9.6). On a transition into ONSET, stop the frame's human integration at the transition and spend the remaining screen time at the new k_h (otherwise, at 10 fps, up to 0.5 human s of the 1.5-s ONSET runs in the ignition frame and ONSET lasts 1.70–2.50 s on screen instead of 2.5 s; at 30 and 60 fps one step per frame gives 2.50 s). With T_pre = 0: k_h = 0 during ONSET (no log ramp into or out of it, since log₁₀ 0 is undefined); the clock switches instantly from 0 to 1 at ONSET → ORGASM, with normal ramps after that; ONSET ends after 2.5 s of screen time; zero-length response steps call no `onStep`, and the dopamine layer runs no substep when Δ = 0 (the frame-mean C_j then keeps its previous value, §6.4 (10)) |
-| Contraction train | tail of 0–2 minor pulses, intervals 3 s ± 25 %; Δ₀ = 0.8 s and the M&J pattern fixed | galaxy §7.5: 0–3 minor pulses, amplitude 0.10–0.20, intervals 2–4 s (this port draws each uniformly in 2–4 s); Δ₀ (0.6–0.9 s) and the EMG-like pattern as parameters; t_e = 2 s after the last pulse |
-| Ω during the tail (this document's reading of galaxy §7.4) | Ω = 1 for the whole orgasm phase | the same: Ω = 1 from the first pulse until t_e, then decays with τ = 20 s (see the galaxy notes below) |
-| Plateau-without-climax profile | gate active | orgasm gate disabled (galaxy §7.9) |
-| Extended profile (galaxy §7.9) | q = 1, interval growth 1.04, tail of 0–3 pulses; no amplitude envelope | galaxy: "longer tail, so the orgasm phase may exceed 40 s; q-envelope with 2–3 maxima". Neither is in the code: with q = 1 (15 pulses, a 12.8-s regular train), growth 1.04 and three 3-s tail pulses the orgasm phase lasts 24 s (§6.9 profile table), and even five 4-s tail pulses give only ≈ 35 s. This port records both as omitted; reaching > 40 s would need about seven or more 4-s tail pulses or a defined envelope (for example a_k × (1 + 0.3·sin(2π·k/5))), either of which needs a re-run of the extended row of §6.9 |
-| Onset spasm (galaxy §7.5) | absent | optional, off by default (when on, it fills the ONSET window and sets T_pre to its duration, ≤ 3 s) |
+| Clock ramps (this document; the RESPONSE.md §9.2 ramps are for the astro clock) | log ramp over 1 s, instant into ONSET; not specified for T_pre = 0; the human time of a frame is computed once at the frame's k_h, so after a mid-frame ignition the rest of that frame runs ONSET at k_h = 10 | the same: at every phase change except an instant switch into ONSET, log₁₀ k_h moves linearly from its current value to the target over 1 s of screen time (so k_h changes exponentially; `LogRamp`; a first-order approach with τ = 1 s in log space would add ≈ 1 s of screen time to each ramped phase and shift §9.6). On a transition into ONSET, stop the frame's human integration at the transition and spend the remaining screen time at the new k_h (otherwise, at 10 fps, up to 0.5 human s of the 1.5-s ONSET runs in the ignition frame and ONSET lasts 1.70–2.50 s on screen instead of 2.5 s; at 30 and 60 fps one step per frame gives 2.50 s). With T_pre = 0: k_h = 0 during ONSET (no log ramp into or out of it, since log₁₀ 0 is undefined); the clock switches instantly from 0 to 1 at ONSET → ORGASM, with normal ramps after that; ONSET ends after 2.5 s of screen time; zero-length response steps call no `onStep`, and the dopamine layer runs no substep when Δ = 0 (the frame-mean C_j then keeps its previous value, §6.4 (10)) |
+| Contraction train | tail of 0–2 minor pulses, intervals 3 s ± 25 %; Δ₀ = 0.8 s and the M&J pattern fixed | RESPONSE.md §7.5: 0–3 minor pulses, amplitude 0.10–0.20, intervals 2–4 s (this port draws each uniformly in 2–4 s); Δ₀ (0.6–0.9 s) and the EMG-like pattern as parameters; t_e = 2 s after the last pulse |
+| Ω during the tail (this document's reading of RESPONSE.md §7.4) | Ω = 1 for the whole orgasm phase | the same: Ω = 1 from the first pulse until t_e, then decays with τ = 20 s (see the galaxy notes below) |
+| Plateau-without-climax profile | gate active | orgasm gate disabled (RESPONSE.md §7.9) |
+| Extended profile (RESPONSE.md §7.9) | q = 1, interval growth 1.04, tail of 0–3 pulses; no amplitude envelope | galaxy: "longer tail, so the orgasm phase may exceed 40 s; q-envelope with 2–3 maxima". Neither is in the code: with q = 1 (15 pulses, a 12.8-s regular train), growth 1.04 and three 3-s tail pulses the orgasm phase lasts 24 s (§6.9 profile table), and even five 4-s tail pulses give only ≈ 35 s. This port records both as omitted; reaching > 40 s would need about seven or more 4-s tail pulses or a defined envelope (for example a_k × (1 + 0.3·sin(2π·k/5))), either of which needs a re-run of the extended row of §6.9 |
+| Onset spasm (RESPONSE.md §7.5) | absent | optional, off by default (when on, it fills the ONSET window and sets T_pre to its duration, ≤ 3 s) |
 | Integration step (this document, §6.8) | ≤ 0.5 s | ≤ 0.5 s, but ≤ 0.05 s while S and S̃ differ by more than 0.02 and during ONSET and ORGASM |
 | Deterministic reference (this document, §6.9, §9.7) | η, q ± 15 % and the tail drawn from `Math.random` directly | constructor options `{ rng = Math.random, deterministic = false }`; `deterministic` sets η = 0, q = p.q exactly and the tail to two pulses at amplitude 0.15, the first 3 s after the last regular pulse and the second 3 s later (three such pulses, each 3 s apart, for the extended profile) |
 | Demo script and initial state (this document; needed to reproduce the demo-mode results of §6.9 and §9.6) | `_demoStimulus`: in BASELINE S = 1 once the demo time exceeds 3 s of screen time; S = 1 in EXCITEMENT, PLATEAU, the onset phase and ORGASM, 0 in the resolution and recovery phases (multiple profile: S = 1 in RESOLUTION_EARLY while demoPeaks < 2); plateau-without-climax profile: S = 0 once the demo time exceeds 75 s (12 human min after stimulation starts); demo time counts screen seconds and restarts at BASELINE re-entry; S is evaluated once per frame, at its start. Rapid profile: both post-orgasm G time constants (60 s and 10 min) × 0.5 (`gDecayScale`). After the orgasm, while S_eff > 0.05, G ← max(G after the two-stage decay, that value relaxed toward ν with τ_G) (galaxy: "effective new stimulation can raise G again"). Initial state: σ = 0.1, N = 0.1, D = 0.2, all other states 0 | the same, except the multiple-profile row of §9.8 (stimulation released when the second ORGASM phase begins) |
 
 **Galaxy text points this port settles** (the galaxy document should be corrected to match):
-(a) galaxy §7.4 says both that "the contraction train runs at Ω = 1" and that "after the last
+(a) RESPONSE.md §7.4 says both that "the contraction train runs at Ω = 1" and that "after the last
 pulse, Ω decays with τ = 20 s"; this port keeps Ω = 1 until t_e. Decaying from the last pulse
 instead lowers the Ψ peak from 0.83 to 0.78 and moves the "dip" minimum from 0.955× to 0.946×.
 (b) With T_pre = 0, k_h = 0 and a human-time "T_pre elapsed" transition would never run; ONSET must
 end on screen time (row above). (c) The galaxy distraction control does not state its size; this
 port uses X ← min(1, X + 0.6) per press, as the code does. (d) Galaxy §7.4's opioid "peak ≈ 0.8–0.9
 for a default orgasm" holds for a 15-s orgasm (0.83); trains of 8–19 s give 0.67–0.92. (e) Ψ and R
-exceed their declared ranges (galaxy §7.3: Ψ 0–1, R 0–~1.5) with repeated orgasms, because both
+exceed their declared ranges (RESPONSE.md §7.3: Ψ 0–1, R 0–~1.5) with repeated orgasms, because both
 accumulate: with stimulation held in the multiple profile, Ψ reaches ≈ 4.4 after 10 orgasms, the
 uncapped R sum 2.6 and O 2.7. Ô and Ψ̂ are capped in the dopamine layer, and R is capped at 1.5 (row
 above); the galaxy text should state the caps. (f) Galaxy §5.3/§6: Fiorino et al. 1997 used 15-min
 samples and cannot resolve a single ejaculation; NAcc dopamine falls after each ejaculation from
 its copulation level (Lorrain et al. 1999, 3-min samples); microdialysis bins are 3–15 min, not
-5–10 min. The galaxy §5.3 post-orgasm row ("stays raised after a single ejaculation … declines
+5–10 min. The RESPONSE.md §5.3 post-orgasm row ("stays raised after a single ejaculation … declines
 only with satiety") should read: NAcc dopamine falls from its copulation level after each
 ejaculation (rat, 3-min samples; Lorrain et al. 1999) but stays above baseline in 15-min samples
 across repeated ejaculations until satiety (Fiorino, Coury & Phillips 1997); a single
@@ -1305,7 +1304,7 @@ interruptible; Ω = 1 until t_e); "sustained" default; S = 1 from 60 s until the
 is **deterministic** so that it can be reproduced from the text: level noise η = 0, q = 0.5
 (9 regular pulses at train times 0, 0.80, 1.60, 2.40, 3.26, 4.20, 5.21, 6.29 and 7.47 s) and two
 minor tail pulses of amplitude 0.15 at train times 10.47 s and 13.47 s (3 s after pulse 9 and 3 s
-apart), so t_e = 15.47 s (galaxy §7.5 example). Where the level noise or the random train matters,
+apart), so t_e = 15.47 s (RESPONSE.md §7.5 example). Where the level noise or the random train matters,
 the median and range over 20 seeds (q ± 15 %, 0–3 tail pulses, 8.3–19.3-s trains) are given as well.
 The text alone suffices to reproduce this table: an implementation written only from §6.4–§6.5,
 §6.7 (including its demo-script and initial-state row, which the demo-mode results need) and galaxy
@@ -1334,7 +1333,7 @@ are unknown.
 | 17 | Prolactin → mesolimbic opt-in (z_R = 0.2) | — (speculative) | NAcc 1.06 / 0.94 / 0.91 / 0.90 / 0.92 in 10-min bins after the orgasm; minimum 0.90× at +30 min |
 | 18 | κ-opioid brake | 5–10 % in plateau (hypothesis) | F_K = 0.943 in plateau (5.7 %), 6.8 % at most |
 | 19 | Bounds | positive, finite, no runaway | no NaN or negative value; C/C₀ in [0.42, 3.82] over the default, "dip", pulse-locked, distraction, withdrawal and held-stimulation runs (up to 4.0× with T_pre ≤ 0.5 s); max D2 0.83, max D1 0.054; returns to rest |
-| 20 | Response timeline with the closed loop | galaxy §7.4: θ median 7.4 min, deterministic 8.1 min; rebuild ≈ 8.8 min after T_ref; R < 0.2 at ≈ 95 min | θ median 7.37 min (10–90 %: 6.63–8.13; 300 seeds; deterministic 8.12); open loop with the same seeds ≈ 7.4 (6.70–8.19; deterministic 8.12; ten 300-seed batches: 10 % points 6.65–6.86, 90 % points 8.07–8.26); stimulation resumed at T_ref = 15 min: next θ 8.0 min later ("sustained") or 8.4 min ("dip"), against 8.8 min open loop; T_ref = 10 s with stimulation held: 7.6 / 7.8 min after t_e (open loop 8.8); baseline re-entered 94.4 min after the orgasm end; R(60 min) = 0.47 |
+| 20 | Response timeline with the closed loop | RESPONSE.md §7.4: θ median 7.4 min, deterministic 8.1 min; rebuild ≈ 8.8 min after T_ref; R < 0.2 at ≈ 95 min | θ median 7.37 min (10–90 %: 6.63–8.13; 300 seeds; deterministic 8.12); open loop with the same seeds ≈ 7.4 (6.70–8.19; deterministic 8.12; ten 300-seed batches: 10 % points 6.65–6.86, 90 % points 8.07–8.26); stimulation resumed at T_ref = 15 min: next θ 8.0 min later ("sustained") or 8.4 min ("dip"), against 8.8 min open loop; T_ref = 10 s with stimulation held: 7.6 / 7.8 min after t_e (open loop 8.8); baseline re-entered 94.4 min after the orgasm end; R(60 min) = 0.47 |
 | 21 | Frame-rate independence | onset peak identical at 10–240 fps | 38.30 nM at 10, 30, 60 and 240 fps (maximum over dopamine substeps, with interpolation and step cap) |
 
 **Expected ranges by profile and hypothesis** (demo mode, 60 fps, deterministic as above, 1-s clock
@@ -1379,7 +1378,7 @@ Default-on channels (the A11 beam, the TIDA withdrawal dip, κ feedback) are dra
 | κ-opioid feedback | g_K = 0.2 on the relative D1 excess | 0 | Spanagel et al. 1992 (direction only); hypothesis |
 | Session satiety | off | g_sat = 1/(1 + (n_eff/3)²), n_eff = Σ_k e^(−(t − t_e,k)/3 h), multiplies P_VTAl,m; a "novel stimulus" event halves n_eff (a partial reset) | rat only (Beach & Jordan 1956; Fiorino et al. 1997: renewed copulation with a novel female restored only part of the rise, +34 % against +95 %); off because the demo loops |
 | TIDA withdrawal share | s_T = 0.6 (assumption) | 0 (prolactin-releasing factors only) | unresolved; TIDA activity at orgasm never measured |
-| Onset window | T_pre = 1.5 s, interruptible | emission setting: u_pre on, T_pre ≈ 2.5 s, cannot be cancelled | galaxy §7.2, §7.4, §7.9; the emission setting applies to bodies with a prostate and seminal vesicles and is never a sex-coded preset |
+| Onset window | T_pre = 1.5 s, interruptible | emission setting: u_pre on, T_pre ≈ 2.5 s, cannot be cancelled | RESPONSE.md §7.2, §7.4, §7.9; the emission setting applies to bodies with a prostate and seminal vesicles and is never a sex-coded preset |
 
 ---
 
@@ -1923,7 +1922,7 @@ The code was written against an unsaved draft and diverges from this text. This 
 
 | Item | Current code | Canonical (this text) | Section |
 |---|---|---|---|
-| Response model | pre-correction galaxy constants, Q = max(I, R), `inevitability` 2.5 s, s·X inside the 1/τ_A bracket, Ah and A^1.5, 0.035·Ω oxytocin, vasopressin fall 600 s, vitals, phase transitions, no-climax clock 60, tail 0–2 pulses | corrected galaxy §7.4–§7.9 port, ONSET with T_pre/u_pre and cancel, and every other row of the §6.7 table | §6.7 |
+| Response model | pre-correction galaxy constants, Q = max(I, R), `inevitability` 2.5 s, s·X inside the 1/τ_A bracket, Ah and A^1.5, 0.035·Ω oxytocin, vasopressin fall 600 s, vitals, phase transitions, no-climax clock 60, tail 0–2 pulses | corrected RESPONSE.md §7.4–§7.9 port, ONSET with T_pre/u_pre and cancel, and every other row of the §6.7 table | §6.7 |
 | Dopamine interface (`dopamine.js`, `response.js`, `main.js`) | `step(h, model)` from `onStep(h, S)`; inputs read from the post-step model; k_h not available in `step` | `step(h, model, prev)` from `onStep(h, prev)` with the pre-step snapshot (`snapshot()` contents as in §9.1); `khNow` set before the step loop; `tHuman` and `tIgnite` exposed; existing exports kept (only `DopamineModel` is imported, by `main.js`); `response.js` constructor options `{ rng, deterministic }` for the §6.9 reference; on a transition into ONSET the rest of the frame runs at the new k_h; `setSwitch(name, value)`, `novelStimulus()` and `ResponseModel.setOnset({ Tpre, uPre })` with one `main.js`/`ui.js` handler per §6.10 row (today only `onHypothesis`) | §6.2, §6.7, §6.8, §6.10, §9.1 |
 | Dopaminergic drive D | own D* in `response.js`, never shown, not computed from dopamine | D = clamp(0.2 + 1.6·(C̄_shell/C0 − 1)) written by `dopamine.js` | §6.4 (11), §6.7 |
 | Firing | ν·(1 + βδ), hard clamp at 30 Hz | soft saturation at ν_sat = 20 Hz | §6.4 (5) |
@@ -2124,7 +2123,7 @@ The code was written against an unsaved draft and diverges from this text. This 
 | Volume_transmission.md (resolved to Neuromodulation) | L9, L21, L56 |
 | Temporal_difference_learning.md | whole file checked: no dopamine content |
 
-`orgasm-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_*.md`: Mesolimbic_pathway.md L23, L31,
+`brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_*.md`: Mesolimbic_pathway.md L23, L31,
 L39; Prolactin.md L34, L40; Refractory_period_sex.md L25, L29, L33; Medial and dopamine-related nodes
 of Nucleus_accumbens.md L41, L53; Periaqueductal_gray.md L34–L44.
 
@@ -2134,7 +2133,7 @@ Ventral tegmental area (no path).
 
 ### 11.2. Project files
 
-- `orgasm-galaxy/research/ANALYSIS.md` §5.1–§5.3 (imaging caveats, activation table, time course),
+- `RESPONSE.md` §5.1–§5.3 (imaging caveats, activation table, time course),
   §6 (neurochemistry table and caveats), §7.2–§7.9 (response model, phase machine, clocks, profiles),
   §10 (realism and photosensitivity rules). Cited by section because that file is being revised in
   parallel; as of writing §5.2 starts near L541, §6 near L657, §7.4 near L770 and §10 near L1388.
@@ -2147,7 +2146,7 @@ Ventral tegmental area (no path).
   `color.js` (blackbody colours), `main.js` (views, budgets, frame dt clamp 0.1 s), `dopamine.js`
   (implementation that diverges from this text, §9.8).
 - Reference simulation. **The text alone suffices to reproduce §6.9 and §9.6**: independent
-  implementations written only from galaxy §7.2–§7.9, the §6.7 port table (including its
+  implementations written only from RESPONSE.md §7.2–§7.9, the §6.7 port table (including its
   demo-script and initial-state row) and §6.4–§6.5 give the
   same deterministic values (for example onset 38.30 nM at +0.58 s with VTA-l 10.70 Hz; climax
   53.29 nM at +0.70 s with 17.41 / 13.66 / 9.10 Hz; θ 8.12 min; "sustained" 1.28 / 1.25 / 1.18 /
