@@ -1,4 +1,8 @@
-// Entry point: hardware detection, brain generation and the animation loop.
+// Entry point: hardware detection, brain generation and the animation loop. The orgasm scenario runs
+// through the Brain System frame loop (research/ANALYSIS.md B.6, B.13): SimClock owns kh and hands
+// it to the scenario's own clock through the delegate; OrgasmAdapter advances the response and
+// dopamine models over the clock's human interval and steps the dopamine layer after every
+// response step (onStep(h, prev), DOPAMINE.md §9.1).
 
 import { createContext, GpuTimer } from './gl-utils.js';
 import { TIERS, detectTier, AdaptiveQuality } from './performance.js';
@@ -7,6 +11,8 @@ import { BrainRenderer } from './renderer.js';
 import { OrbitCamera } from './camera.js';
 import { ResponseModel, PHASES } from './response.js';
 import { DopamineModel } from './dopamine.js';
+import { SimClock } from './clock.js';
+import { OrgasmAdapter } from './sim/orgasm-adapter.js';
 import { CENTER, MM } from './anatomy.js';
 import { NEURON_COOL, NEURON_WARM, DOPAMINE_RGB, blackbodyRGB } from './color.js';
 import { Hud } from './ui.js';
@@ -25,11 +31,6 @@ function fatal(message) {
 // Short pause so the loading text gets painted. rAF is not used: it stalls in a background tab.
 const nextFrame = () => new Promise((r) => setTimeout(r, 40));
 
-function fmtHuman(sec) {
-  if (sec < 60) return `${sec < 10 ? sec.toFixed(1).replace(/\.0$/, '') : Math.round(sec)} s`;
-  if (sec < 3600) return `${(sec / 60).toFixed(sec < 600 ? 1 : 0).replace(/\.0$/, '')} min`;
-  return `${(sec / 3600).toFixed(1).replace(/\.0$/, '')} h`;
-}
 function fmtClock(sec) {
   const s = Math.max(0, Math.round(sec));
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), r = s % 60;
@@ -85,9 +86,19 @@ async function start() {
   let view = VIEWS[params.get('view')] ? params.get('view') : 'whole';
   const camera = new OrbitCamera(canvas, { reducedMotion, ...VIEWS[view].camera, fov: 0.55, minDistance: 0.9, maxDistance: 7, spin: 0.03 });
   const baseSpin = reducedMotion ? 0 : camera.autoSpin;
-  const model = new ResponseModel();
+  const seed = Number.isFinite(Number(params.get('seed'))) && params.get('seed') !== null ? Number(params.get('seed')) : 1;
+  const model = new ResponseModel({ seed });
   const dopamine = new DopamineModel();
-  model.onStep = (h) => dopamine.step(h, model);   // the dopamine layer follows every human-time substep
+  dopamine.setReducedMotion(reducedMotion);
+  // The adapter installs the onStep wiring (B.5) and writes the command records the kernel reads.
+  const adapter = new OrgasmAdapter(model, dopamine);
+  const clock = new SimClock();
+  const startScenario = () => {
+    adapter.start({ mode: model.mode, profile: model.profileId, hypothesis: dopamine.hypothesis, seed });
+    clock.delegate(adapter.clock);
+    clock.markEpoch();
+  };
+  startScenario();
   const gpuTimer = new GpuTimer(gl);
 
   const applyQuality = () => {
@@ -101,8 +112,7 @@ async function start() {
   let histHead = 0, histAcc = 0;
   let paused = false;
   const resetAll = () => {
-    model.reset();
-    dopamine.reset();
+    startScenario();
     naccHist.fill(0);
   };
   const setView = (v) => {
@@ -121,6 +131,9 @@ async function start() {
     onTref: (sec) => model.setTref(sec),
     onView: (v) => setView(v === 'next' ? VIEW_ORDER[(VIEW_ORDER.indexOf(view) + 1) % VIEW_ORDER.length] : v),
     onHypothesis: (id) => dopamine.setHypothesis(id),
+    onOnset: (o) => model.setOnset(o),                              // DOPAMINE.md §6.10 onset window
+    onSwitch: (name, value) => dopamine.setSwitch(name, value),     // the other §6.10 rows
+    onNovelStimulus: () => dopamine.novelStimulus(),
     onReset: () => resetAll(),
     onQuality: async (value) => {
       if (value === 'auto') { quality.unlock(); return; }
@@ -138,7 +151,11 @@ async function start() {
       quality.force(idx);
     },
   });
-  hud.syncSettings({ mode: model.mode, level: model.level, profile: model.profileId, tref: model.p.tref, view, hypothesis: dopamine.hypothesis });
+  const p = dopamine.p;
+  hud.syncSettings({
+    mode: model.mode, level: model.level, profile: model.profileId, tref: model.p.tref, view, hypothesis: dopamine.hypothesis,
+    onset: { uPre: model.p.uPre }, switches: { pulseLocked: p.pulseLocked, zR: p.zR > 0, kappa: p.gK > 0, sT: p.sT > 0, satiety: p.satiety, imaging: p.imaging },
+  });
   if (forced >= 0) document.getElementById('quality').value = String(forced);
 
   // 3. Size: CSS size × DPR (capped per tier) × adaptive render scale.
@@ -157,7 +174,7 @@ async function start() {
 
   // Brightness calibration (linear HDR units before ACES).
   const tune = { neurons: 0.05, bathing: 0.3, somata: 0.7, axons: 0.22, release: 0.35, lanterns: 0.03, exposure: 1.1, bloom: 0.8, lambda: 0.6 };
-  window.__brain = { tune, model, dopamine, camera, quality, renderer, tick: (now) => tick(now), setView };   // console inspection and testing
+  window.__brain = { tune, model, dopamine, adapter, clock, camera, quality, renderer, tick: (now) => tick(now), setView };   // console inspection and testing
 
   const fibre = blackbodyRGB(4200);
   let animT = 0, hudTimer = 0, last = performance.now(), dimmed = false;
@@ -171,13 +188,15 @@ async function start() {
     quality.sample(dt, gpuMs);
 
     const sdt = paused ? 0 : dt;
-    const clk = model.update(sdt);
+    const s = clock.advance(sdt);
+    clock.settleDelegate(adapter.advance(sdt, s.t0H, s.h, s.source), adapter.kh);
     model.events.length = 0;
-    dopamine.updateVisuals(sdt, model, clk.kh);
+    dopamine.updateVisuals(sdt, model, clock.kh);
     animT += sdt;
 
-    // "Letting go" at the climax is shown at the interface: the HUD dims and the camera stops drifting.
-    const climax = model.phase === 'orgasm' || model.phase === 'inevitability';
+    // "Letting go" at the climax is shown at the interface: the HUD dims and the camera stops
+    // drifting, only inside the orgasm scenario (B.13; ONSET and ORGASM).
+    const climax = adapter.climax;
     if (climax !== dimmed) { dimmed = climax; hud.setDimmed(climax); }
     camera.autoSpin = climax ? 0 : baseSpin;
     camera.update(dt, canvas.width / canvas.height, animT);
@@ -215,9 +234,11 @@ async function start() {
         phaseName: PHASES[model.phase].name,
         phaseDesc: PHASES[model.phase].desc,
         arousal: model.Aeff,
-        clock: `1 s = ${fmtHuman(clk.kh)}`,
+        clock: clock.label(),
+        kh: clock.kh, clockSource: clock.source, timeHuman: clock.tH - clock.epochH,
+        scenario: { id: 'orgasm', active: adapter.active },
         refractory: { active: refractory, pct: model.I, remaining: fmtClock(remaining) },
-        vitals: model.vitals(),
+        vitals: adapter.vitals(),
         pulses: model.pulses,
         dopamine: da,
         modulators: dopamine.modulators(model),

@@ -1,22 +1,82 @@
 {
   "hooks": {
-    "PreToolUse": [
+    "SessionStart": [
       {
-        "matcher": "Bash|Grep",
         "hooks": [
           {
             "type": "command",
-            "command": "C:/Users/User/AppData/Local/Programs/Python/Python312/Scripts/graphify.EXE hook-guard search",
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/graph-gate/run.sh\" session-start || true",
+            "timeout": 30,
+            "statusMessage": "Starting the graph gate"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/graph-gate/run.sh\" prompt || true",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Grep|Glob|Bash|PowerShell|Read|mcp__graphify__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/graph-gate/run.sh\" pre || true",
             "timeout": 10
           }
         ]
-      },
+      }
+    ],
+    "PostToolUse": [
       {
-        "matcher": "Read|Glob",
+        "matcher": "Bash|PowerShell|Read|mcp__graphify__.*",
         "hooks": [
           {
             "type": "command",
-            "command": "C:/Users/User/AppData/Local/Programs/Python/Python312/Scripts/graphify.EXE hook-guard read",
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/graph-gate/run.sh\" post || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "matcher": "Bash|PowerShell|mcp__graphify__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/graph-gate/run.sh\" post || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/graph-gate/run.sh\" stop || true",
+            "timeout": 30,
+            "statusMessage": "Checking the turn's graph impact query"
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PROJECT_DIR}/.claude/hooks/graph-gate/run.sh\" subagent-start || true",
             "timeout": 10
           }
         ]

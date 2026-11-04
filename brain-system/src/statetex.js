@@ -16,7 +16,9 @@
 //
 // Assumption (B.4 is silent): the kernel hands display state over as `kernel.display = { nodes,
 // paths, gut }` (Float32Array, 4 values per texel in the layout above) and `kernel.packets(out)`
-// records { pathId, uHead, sigmaU, gain, fibre, dir }, where pathId is the body buffer's path id.
+// records { pathId, uHead, sigmaU, gain, fibre, dir }, where pathId is the body buffer's path id. The
+// kernel's own pathId is a graph path name (graph.paths), so main.js maps its packets onto the body
+// buffer's geometry paths first (wiring.js PacketMap) and passes them as `packets`.
 
 import * as A from './anatomy.js';
 import { createDataTexture, updateDataTexture, deleteDataTexture } from './gl-utils.js';
@@ -303,7 +305,7 @@ export class StateTextures {
       if (q.pathId !== runPath) { close(); runPath = q.pathId; runStart = n; runCount = 0; }
       if (runCount >= PARAMS.perVertex) continue;
       const fibre = typeof q.fibre === 'number' ? FIBRES[q.fibre] : q.fibre;
-      const eff = !!(q.effOnly || q.efferenceOnly);
+      const eff = !!(q.effOnly || q.efferenceOnly || q.efference);   // kernel.packets() names it `efference` (contracts.d.ts Packet)
       const dir = (typeof q.dir === 'string' ? /^aff/.test(q.dir) : q.dir < 0) ? -1 : 1;
       const gain = PARAMS.packetPeak * (PARAMS.classGain[fibre] ?? 1) * Math.tanh(Math.max(0, q.gain ?? 1))
         * (eff ? PARAMS.efferenceGain : 1) * (q.scale ?? 1);

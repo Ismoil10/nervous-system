@@ -1,6 +1,9 @@
 # Files excluded from the Graphify graph (tool configuration, launchers, binaries); patterns match in every project
 CLAUDE.md
 .claude/
+.mcp.json
 start.bat
 screenshots/
 .handoff/
+# out of scope: all work is on brain-system/
+anger-galaxy/

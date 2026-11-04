@@ -1,3 +1,4 @@
+// @ts-check
 // Simulation kernel (§11.6–§11.10; A.4, A.5): one deterministic multi-rate integrator in human time.
 // Layers run on fixed grids (EV exact, NF 0.5 ms, CV 10 ms, GI 100 ms, EN 1 s, IM 10 s, CR 60 s); every
 // trajectory is a function of tH and the event log only, so traces do not depend on frame rate or kh.
@@ -132,7 +133,7 @@ class RateNet {
     const byT = Array.from({ length: N }, () => []), byS = Array.from({ length: N }, () => []);
     for (const e of E) { byT[this.map[e.to]].push(e); byS[this.map[e.from]].push(e); }
     const M = E.length;
-    this.off = new Int32Array(N + 1); this.src = new Int32Array(M); this.w = new Float64Array(M);
+    this.off = new Int32Array(N + 1); this.src = new Int32Array(M); this.w = new Float64Array(M); this.w0 = new Float64Array(M);
     this.dI = new Int32Array(M); this.dF = new Float64Array(M); this.mask = new Uint8Array(M); this.mask0 = new Uint8Array(M);
     this.csrEdge = new Int32Array(M);
     this.csrOf = new Map();                // graph edge index → CSR slot
@@ -141,7 +142,7 @@ class RateNet {
       this.off[i] = k;
       for (const e of byT[i]) {
         const ds = Math.max(1, e.delay / HNF);
-        this.src[k] = this.map[e.from]; this.w[k] = e.w; this.dI[k] = Math.floor(ds); this.dF[k] = ds - Math.floor(ds);
+        this.src[k] = this.map[e.from]; this.w[k] = this.w0[k] = e.w; this.dI[k] = Math.floor(ds); this.dF[k] = ds - Math.floor(ds);
         this.mask[k] = this.mask0[k] = e.nets; this.csrEdge[k] = e.i; this.csrOf.set(e.i, k); k++;
       }
     }
@@ -211,10 +212,12 @@ class RateNet {
 // Kernel
 // ---------------------------------------------------------------------------------------------------
 export class Kernel {
+  /** @param {import('./contracts').KernelOptions} [opts] */
   constructor({ graph, plugins = [], seed = 1, age = PARAMS.defaults.age, settle = true, probe = false, options = {} } = {}) {
     this.plugins = plugins.map((p, i) => ({ p, i })).sort((a, b) => (a.p.order ?? 100) - (b.p.order ?? 100) || a.i - b.i).map((x) => x.p);
     this.graph = graph ?? buildGraph({ plugins: this.plugins, options });
     this.seed = seed;
+    this.options = options;   // per-plugin options by plugin id (also passed to buildGraph); create(k) reads k.options[id]
     this.isProbe = probe;
     this.cpuMs = 0;
     this.t = 0;
@@ -249,7 +252,7 @@ export class Kernel {
     this.declare('_cvQuietSince', -1);
     this.declare('_episodeT0', -1);
     this.declare('_episodeLogged', 0);
-    this.declareStore('_k', () => ({ holds: {}, cuts: [], intervention: null, pulses: [] }));
+    this.declareStore('_k', () => ({ holds: {}, cuts: [], scales: {}, intervention: null, pulses: [] }));
 
     // Plugins: create (declarations and hooks), finalise storage, init (links).
     this.instances = new Map();
@@ -286,6 +289,8 @@ export class Kernel {
   }
   array(name) { const a = this._arrays.get(name); if (!a) throw new Error(`kernel: unknown array '${name}'`); return a.view; }
   idx(name) { return this.varIndex.get(name) ?? -1; }
+  // True when a module declared `name` (false for a ref() fallback constant or an unknown name).
+  declared(name) { const i = this.varIndex.get(name); return i !== undefined && this._meta[i].owner !== 'fallback'; }
   ref(name, fallback = 0) {
     const i = this.varIndex.get(name);
     if (i !== undefined) return i;
@@ -365,7 +370,10 @@ export class Kernel {
   edgeIndex(fromId, toId) { const a = this.nodeIndex(fromId), b = this.nodeIndex(toId); if (a < 0 || b < 0) return -1; const g = this.graph; for (let q = g.outOff[a]; q < g.outOff[a + 1]; q++) if (g.edges[g.outEdge[q]].to === b) return g.outEdge[q]; return -1; }
   rand(layer) { return rngNext(this.rng, LIDX[layer]); }
   command(t = this.t) {
-    const c = this._cmd?.commands; if (!c || !c.length) return null;
+    const c = this._cmd?.commands; if (!c) return null;
+    // OrgasmAdapter's CommandRing (zero-order hold by tH, §11.14), or a plain array of records.
+    if (typeof c.sample === 'function') return c.sample(t, this._cmdOut || (this._cmdOut = {}));
+    if (!c.length) return null;
     let lo = 0, hi = c.length - 1; if (c[0].tH > t) return null;
     while (lo < hi) { const m = (lo + hi + 1) >> 1; if (c[m].tH <= t) lo = m; else hi = m - 1; }
     return c[lo];
@@ -387,7 +395,7 @@ export class Kernel {
     for (let b = 0; b < 5 && p > 0; b++) if (mask & (1 << b)) p *= this._g(b, t);
     return p;
   }
-  edgeGate(e, t = this.t) { return this.stores._k.cuts.includes(e) ? 0 : this.gate(this.graph.edges[e].nets, t); }
+  edgeGate(e, t = this.t) { const k = this.stores._k; return k.cuts.includes(e) ? 0 : this.gate(this.graph.edges[e].nets, t) * (k.scales[e] ?? 1); }
   _gates(t) {
     if (t === this._gtT) return this.gt;
     const gv = [0, 1, 2, 3, 4].map((b) => this._g(b, t)), body = this.bodyOn ? 1 : 0, gt = this.gt;
@@ -417,6 +425,22 @@ export class Kernel {
     if (cut && k < 0) { cuts.push(e); cuts.sort((a, b) => a - b); } else if (!cut && k >= 0) cuts.splice(k, 1);
     const q = this.nf.csrOf.get(e);
     if (q !== undefined) { this.nf.mask[q] = cut ? CUT_MASK : this.nf.mask0[q]; this._wakeExt(this.nf.findTarget(q)); }
+  }
+  // Partial edge gain g ∈ [0, 1] (§11.12: §6.15 zone of partial preservation, central-cord inner tracts).
+  // Scales the edge's drive (ring weight, event-packet area) and edgeGate; g = 1 removes the scale.
+  // Scales are reset with the cuts when an intervention is applied.
+  scaleEdge(e, g = 1) {
+    const sc = this.stores._k.scales, v = clamp(g);
+    if (v === 1) delete sc[e]; else sc[e] = v;
+    const q = this.nf.csrOf.get(e);
+    if (q !== undefined) { this.nf.w[q] = this.nf.w0[q] * v; this._wakeExt(this.nf.findTarget(q)); }
+  }
+  edgeScale(e) { return this.stores._k.scales[e] ?? 1; }
+  // Ring weights from the stored scales (after a store reset or a restore).
+  _applyScales() {
+    const nf = this.nf, sc = this.stores._k.scales ?? {};
+    nf.w.set(nf.w0);
+    for (const key of Object.keys(sc)) { const q = nf.csrOf.get(Number(key)); if (q !== undefined) nf.w[q] = nf.w0[q] * sc[key]; }
   }
   // Wake an NF node from outside the NF update (hooks of other layers, events, packets).
   _wakeExt(j) {
@@ -458,7 +482,7 @@ export class Kernel {
   }
   // Event-log entries newer than `since` (seq); returns the newest seq.
   events(out = [], since = 0) { out.length = 0; for (const e of this.logRing) if (e.seq > since) out.push(e); return this.logSeq; }
-  // Visible packets: { edge, pathId, uHead (0 at the source, 1 at the target), sigmaU, gain, amp, fibre, dir, lead, efference }.
+  // Visible packets: { edge, seq (stable per packet), pathId, uHead (0 at the source, 1 at the target), sigmaU, gain, amp, fibre, dir, lead, efference }.
   packets(out = []) {
     const g = this.graph, cuts = this.stores._k.cuts, t = this.t;
     const list = this.heap.slice().sort((a, b) => a.seq - b.seq);
@@ -467,7 +491,7 @@ export class Kernel {
       const e = g.edges[p.edge], span = p.tArr - p.tEmit;
       if (t < p.tEmit) continue;
       const cond = e.len / e.v / 1000;
-      out.push({ edge: p.edge, pathId: typeof e.path === 'string' ? e.path : null, from: e.fromId, to: e.toId,
+      out.push({ edge: p.edge, seq: p.seq, pathId: typeof e.path === 'string' ? e.path : null, from: e.fromId, to: e.toId,
         uHead: span > 0 ? clamp((t - p.tEmit) / span) : 1,
         sigmaU: span > 0 ? ((SLOW_FIBRES.has(e.fibre) ? PARAMS.dispersionSlow : PARAMS.dispersionFast) * cond) / span : 0,
         gain: p.eff || cuts.includes(p.edge) ? 0 : this.gate(e.nets, t), amp: p.amp, fibre: e.fibre, dir: e.dir, lead: p.lead, efference: p.eff });
@@ -490,11 +514,15 @@ export class Kernel {
   // --- External control (B.4) ---
   setBodyMode(mode, tH) { return this.schedule({ type: 'body', mode, tH }); }
   setNet(id, on, tH) { if (!(id in NET)) throw new Error(`kernel: unknown network '${id}'`); return this.schedule({ type: 'net', net: id, on: !!on, tH }); }
-  // Presets carry functions, so events keep only the id; the object lives in a registry (snapshot-safe).
+  // Presets carry functions, so events keep only the id and a registry key; the object lives in a
+  // registry (snapshot-safe). One key per call, so presets that share an id with different params
+  // (e.g. 'sci' at two levels) each apply their own object.
   setIntervention(preset, tH) {
     const id = preset ? (preset.id ?? 'custom') : null;
-    if (preset) (this._presets ??= new Map()).set(id, preset);
-    return this.schedule({ type: 'intervention', presetId: id, tH });
+    // `_presets` and `_bodyRest` are created lazily; the casts only tell the type checker (no runtime change).
+    let key = null;
+    if (preset) { const reg = (/** @type {any} */ (this)._presets ??= new Map()); key = `${id}#${reg.size}`; reg.set(key, preset); }
+    return this.schedule({ type: 'intervention', presetId: id, presetKey: key, tH });
   }
   setPosture(p, tH) { return this.schedule({ type: 'posture', value: p === 'upright' || p === 1 ? 1 : 0, tH }); }
   setArousalState(s, tH) { return this.schedule({ type: 'arousal', state: s, tH }); }
@@ -659,7 +687,7 @@ export class Kernel {
   _deliver(p) {
     if (p.eff) return;
     const e = this.graph.edges[p.edge];
-    const g = this.stores._k.cuts.includes(p.edge) ? 0 : this.gate(e.nets, p.tArr);
+    const g = this.stores._k.cuts.includes(p.edge) ? 0 : this.gate(e.nets, p.tArr) * (this.stores._k.scales[p.edge] ?? 1);
     if (g === 0) { this._dropped = (this._dropped ?? 0) + 1; return; }
     if (p.sig > 0) {
       const tgt = this.nf.map[e.to];
@@ -765,8 +793,10 @@ export class Kernel {
         break;
       }
       case 'intervention': {
-        const k = this.stores._k, preset = ev.presetId ? this._presets?.get(ev.presetId) ?? null : null;
+        const k = this.stores._k, reg = /** @type {any} */ (this)._presets;
+        const preset = ev.presetId ? reg?.get(ev.presetKey ?? ev.presetId) ?? null : null;
         for (const e of k.cuts.slice()) this.cutEdge(e, false);
+        for (const e of Object.keys(k.scales)) this.scaleEdge(Number(e), 1);
         k.intervention = ev.presetId ?? null;
         preset?.apply?.(this);
         this.log({ kind: 'intervention', node: null, label: k.intervention ?? 'none' });
@@ -797,6 +827,7 @@ export class Kernel {
     for (let i = 0; i < this._varsDeclared; i++) if (!keep.has(this._names[i])) vars[i] = this._init[i];
     for (const a of this._arrays.values()) a.view.fill(a.init);
     for (const d of this._storeDecl) this._replaceStore(d.name, d.factory());
+    this.nf.mask.set(this.nf.mask0); this._applyScales();   // the fresh _k store holds no cuts or scales
     for (let b = 0; b < 5; b++) { const v = this._netVar[b]; vars[v.g0] = vars[v.on]; vars[v.dir] = 0; vars[v.t0] = 0; }
     this.t = 0; this.n.fill(0); this.due.fill(1); this._lastNF = -1;
     this.heap.length = 0; this.evq.length = 0; this.logRing.length = 0; this._gtT = NaN;
@@ -864,14 +895,15 @@ export class Kernel {
   _restoreBodyRest() {
     const vars = this.vars;
     const key = JSON.stringify({ nets: NET_IDS.map((n) => vars[this.varIndex.get(`net.${n}`)]), age: vars[this.varIndex.get('age')], posture: vars[this.varIndex.get('posture')] });
-    this._bodyRest ??= new Map();
-    let s = this._bodyRest.get(key);
+    const self = /** @type {any} */ (this);
+    self._bodyRest ??= new Map();
+    let s = self._bodyRest.get(key);
     if (!s) {
       const probe = new Kernel({ graph: this.graph, plugins: this.plugins, seed: this.seed, settle: false, probe: true });
       for (const name of ['age', 'posture', 'timeOfDay', ...NET_IDS.map((n) => `net.${n}`)]) probe.set(name, this.get(name));
       probe.settle({});
       s = probe.snapshot();
-      this._bodyRest.set(key, s);
+      self._bodyRest.set(key, s);
     }
     for (let i = 0; i < this._varsDeclared; i++) if (this._meta[i].body) vars[i] = s.vars[i];
     for (const a of this._arrays.values()) if (a.body) a.view.set(s.pool.subarray(a.off, a.off + a.length));
@@ -909,6 +941,7 @@ export class Kernel {
     this.heap = c.heap; this.evq = c.events; this.logRing = c.logRing;
     for (const k of ['r', 'rest', 'ext', 'bias', 'val', 'quietFrom', 'awake', 'above', 'logged', 'lastSched', 'lastEmit', 'hist', 'imp', 'mask']) nf[k].set(c.nf[k]);
     nf.active.set(c.nf.active); nf.na = c.nf.na; nf.pending = c.nf.pending; nf.maxDelta = c.nf.maxDelta; nf.qs = c.nf.qs;
+    this._applyScales();
     for (let i = 0; i < nf.W; i++) { nf.wheel[i].length = 0; for (const x of c.nf.wheel[i]) nf.wheel[i].push(x); }
     this._gtT = NaN; this._inT = NaN; this._ctx = 'idle';
   }

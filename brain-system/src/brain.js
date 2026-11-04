@@ -5,31 +5,67 @@
 // swallow the picture), with deep structures drawn denser so they read through the cortex.
 
 import {
-  MM, R, KIND, NUCLEI, DA_GROUPS, BRAINSTEM, PATHWAYS, TERMINALS,
-  sdCerebrum, sdCerebellum, insideCallosalWindow, folding, corticalRegion, noise3, spline, mulberry32, len3,
-  NUCLEI_V2, V2, RELABEL, PARENT, AREAS, AREA_NONE, REGION_IDS,
+  MM, R, KIND, NUCLEI, DA_GROUPS, BRAINSTEM, CRUS, SPINAL_Z, GEOMETRY, PATHWAYS, TERMINALS,
+  sdCerebrum, sdCerebellum, notchDistance, insideCallosalWindow, folding, corticalRegion, noise3, spline, mulberry32, len3,
+  ellipsoidR2, ellipsoidPoint, NUCLEI_V2, V2, RELABEL, PARENT, AREAS, AREA_NONE, REGION_IDS,
 } from './anatomy.js';
 
 export const FLOATS = 12;   // a0: pos.xyz, lum · a1: normal.xyz | path data, seed · a2: region, daW, tint, kind
 export const DA_KIND = { SOMA: 10, AXON: 11, VARICOSITY: 12 };
 
-// Extra brain buffer (generateBrainExtra): the new nuclei of research/ANALYSIS.md §3.16–§3.17
-// and the anterior-insula extension, drawn with the neuron program in a buffer of their own so
-// the generateBrain buffer stays bit-identical (B.2, B.5). The buffer is floor-stratified (B.8).
+// Construction details of the post-port build (DOPAMINE.md §7.2–§7.6, reconciled in §9.8).
+export const BUILD_PARAMS = {
+  cortex: {
+    ribbon: 2.6,                  // ribbon depth under the hull (mm; mean thickness 2.5, §7.2 item 3)
+    sulcalDrop: 0.75,             // probability scale of dropping a sulcal sample (occluded walls)
+    sulcalDim: 6,                 // flux × e^(−depth/6 mm) in sulci (§7.2 item 3, §9.8)
+    notchBand: 1.5,               // reject or relabel surface points within 1.5 mm of the notch ellipsoid (§7.2 item 3)
+    notchMedialX: 15,             // medial notch window |x| ≤ 15 mm …
+    notchWindowY: [-45, 8],       // … and −45 < y ≤ +8: rejected (diencephalon and midbrain emerge there)
+    occipitalY: -72,              // medial notch points behind y −72 are `occipital`, the rest `temporal`
+  },
+  insula: { c: [37, -3, 4], r: [4, 26, 11], backFace: -0.2, depth: 2, lum: 0.7, tint: 0.2 },   // §7.3 insula ribbon
+  cerebellum: {
+    foliaPeriod: 2.2,             // folia groups ~2.2 mm apart (§7.2 item 4, §9.8)
+    grooveReject: 0.15,           // groove points rejected with p ≤ 0.15 …
+    grooveDim: 0.17,              // … and dimmed by ≤ 17 %: areal drop 1 − 0.85·0.83 = 29.5 % ≤ 30 % (§7.2 item 4, §10)
+  },
+  lumNucleus: 0.85,               // deep-nucleus flux factor (§7.4: dense floors must not become false hot spots)
+  lumGland: 0.35,                 // glandular haze (pituitary gland, stalk)
+  lumBrainstem: 0.5,
+  lumWhite: 0.32,
+  vtaOtherRatio: 0.35 / 0.65,     // non-DA VTA stars per VTA + midline DA soma (§7.5; rat VTA ~35 % GABA + glutamate)
+  // Voids (§7.3): lateral ventricles (right side, mirrored) and the third-ventricle lumen. They
+  // remove only white-matter, brainstem and cortical points, never nucleus or dopamine points.
+  lateralVentricles: [
+    { c: [6, 14, 16], r: [3, 8, 5] },        // frontal horn
+    { c: [9, -10, 23], r: [4, 14, 3] },      // body
+    { c: [28, -40, 12], r: [4, 5, 4] },      // atrium
+    { c: [36, -20, -8.5], r: [1.5, 9, 2] },  // temporal horn
+  ],
+  thirdVentricle: { halfWidth: 2, yFront: 4, yBack: -20, top: 8, floorZ: -14, floorBreakY: -6, floorBackZ: -4 },
+  // §8.1 bathing rule: neuron-star amber = uDaGain (0.3) · d_point · E_r, E_r already carrying w_vis.
+  // Weight 1 for every region except the tinted modulator regions and the cerebellum (§7.3, §8.1).
+  bathingZero: ['pituitaryGland', 'raphe', 'rmtg', 'vta', 'vtaMedial', 'pag', 'arcuate', 'cerebellum'],
+};
+
+// Extra brain buffer (generateBrainExtra): the new nuclei of research/ANALYSIS.md §3.16–§3.17,
+// drawn with the neuron program in a buffer of their own so the post-port generateBrain buffer
+// stays bit-identical (B.2, B.5). The buffer is floor-stratified (B.8).
 export const EXTRA_PARAMS = {
   floors: [40, 80, 120, 120],   // minimum stars per new nucleus at low/medium/high/ultra; a bilateral pair counts once (§13.4; B.16)
-  insulaShare: 0.14,            // share of every stratum given to the anterior-insula extension ([model]): the largest share at which the
-                                // B.8 high budget (10,800) still meets the high-tier floor; ≈ 0.4 of the coded insula's star density
+  insulaShare: 0,               // share of every stratum given to the anterior-insula extension: 0 since Phase 0a, because
+                                // generateBrain draws the whole §7.3 ribbon itself (§3.17; the extension filled y > +8 of it before)
   areaColumn: true,             // a cortical patch also takes the stars straight above a deep centre (areaIds; [model])
-  lumNucleus: 0.42,             // flux factor of nucleus stars (as NUCLEI in generateBrain)
-  lumGland: 0.35,               // flux factor of gland haze (pineal; as the pituitary)
+  lumNucleus: BUILD_PARAMS.lumNucleus,   // flux factor of nucleus stars (as NUCLEI in generateBrain)
+  lumGland: BUILD_PARAMS.lumGland,       // flux factor of gland haze (pineal; as the pituitary)
   tintJitter: 0.15,             // added to the structure tint × u (as NUCLEI)
-  insula: { c: [37, -3, 4], r: [4, 26, 11] },        // insular ribbon of DOPAMINE.md §7.3, adopted by §3.17 (mm)
-  insulaCoded: { c: [36, -9, 2], r: [4, 17, 10] },   // ribbon drawn by generateBrain (brain.js step 2); its (y, z) footprint is not redrawn
-  insulaBackFace: -0.2,         // lateral cap only: directions with dx ≥ −0.2·|d| (as the coded insula)
-  insulaDepth: 2,               // inward jitter (mm; as the coded insula)
-  insulaLum: 0.7,               // flux factor (as the coded insula)
-  insulaTint: 0.2,              // tint (as the coded insula)
+  insula: BUILD_PARAMS.insula,         // insular ribbon of DOPAMINE.md §7.3, adopted by §3.17 (mm)
+  insulaCoded: BUILD_PARAMS.insula,    // ribbon drawn by generateBrain; its (y, z) footprint is not redrawn (the whole ribbon since Phase 0a)
+  insulaBackFace: BUILD_PARAMS.insula.backFace,
+  insulaDepth: BUILD_PARAMS.insula.depth,
+  insulaLum: BUILD_PARAMS.insula.lum,
+  insulaTint: BUILD_PARAMS.insula.tint,
 };
 
 class Sampler {
@@ -49,6 +85,19 @@ class Sampler {
     for (;;) {
       const x = this.range(-1, 1), y = this.range(-1, 1), z = this.range(-1, 1);
       if (x * x + y * y + z * z <= 1) return [c[0] + x * r[0], c[1] + y * r[1], c[2] + z * r[2], len3(x, y, z)];
+    }
+  }
+  // Right-side point of an ellipsoid volume (rotated with `axes`; Gaussian border with `edge`),
+  // with its normalised radius as the fourth value.
+  inVolume(d) {
+    const E = GEOMETRY.edge;
+    for (;;) {
+      const x = this.range(-1, 1), y = this.range(-1, 1), z = this.range(-1, 1);
+      const q2 = x * x + y * y + z * z;
+      if (q2 > 1) continue;
+      const rho = Math.sqrt(q2);
+      if (d.edge === 'gauss' && rho > E.core && this.u() > Math.exp(-0.5 * ((rho - E.core) / E.sigma) ** 2)) continue;
+      return [...ellipsoidPoint(d, x, y, z), rho];
     }
   }
 }
@@ -75,6 +124,75 @@ function tubeSampler(pts) {
       return [p[0] + ax * cx + bx * cy, p[1] + ay * cx + by * cy, p[2] + az * cx + bz * cy, r];
     }
   };
+}
+
+// Volume of a tube (mm³): swept cross-section π·rx·ry along the centreline.
+function tubeVolume(pts, steps = 256) {
+  const pos = spline(pts);
+  let v = 0;
+  for (let k = 0; k < steps; k++) {
+    const a = pos(k / steps), b = pos((k + 1) / steps);
+    v += Math.PI * 0.5 * (a[3] * (a[4] ?? a[3]) + b[3] * (b[4] ?? b[3])) * len3(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+  }
+  return v;
+}
+
+// Membership of a right-side point in a tube (swept discs with flat end caps): dense centreline
+// samples (≤ 0.5 mm apart) with the cross-section frame of tubeSampler; the nearest sample decides
+// (offset along the tangent within one sample spacing, normalised in-plane r² ≤ 1).
+function tubeTest(pts) {
+  const pos = spline(pts);
+  let length = 0;
+  for (let k = 0; k < 64; k++) { const a = pos(k / 64), b = pos((k + 1) / 64); length += len3(b[0] - a[0], b[1] - a[1], b[2] - a[2]); }
+  const n = Math.max(16, Math.ceil(length / 0.5)), ds = length / n;
+  const S = [];
+  const box = [Infinity, Infinity, Infinity, -Infinity, -Infinity, -Infinity];
+  for (let k = 0; k <= n; k++) {
+    const u = k / n, p = pos(u), q = pos(Math.min(1, u + 0.01)), o = pos(Math.max(0, u - 0.01));
+    let tx = q[0] - o[0], ty = q[1] - o[1], tz = q[2] - o[2];
+    const tl = len3(tx, ty, tz) || 1; tx /= tl; ty /= tl; tz /= tl;
+    let ax = 1 - tx * tx, ay = -tx * ty, az = -tx * tz;
+    const al = len3(ax, ay, az) || 1; ax /= al; ay /= al; az /= al;
+    const bx = ty * az - tz * ay, by = tz * ax - tx * az, bz = tx * ay - ty * ax;
+    const rx = p[3], ry = p[4] ?? p[3], rm = Math.max(rx, ry);
+    S.push([p[0], p[1], p[2], rx, ry, ax, ay, az, bx, by, bz, tx, ty, tz]);
+    for (let i = 0; i < 3; i++) { box[i] = Math.min(box[i], p[i] - rm); box[i + 3] = Math.max(box[i + 3], p[i] + rm); }
+  }
+  return (x, y, z) => {
+    if (x < box[0] || y < box[1] || z < box[2] || x > box[3] || y > box[4] || z > box[5]) return false;
+    let best = Infinity, b = null;
+    for (const s of S) { const d = (x - s[0]) ** 2 + (y - s[1]) ** 2 + (z - s[2]) ** 2; if (d < best) { best = d; b = s; } }
+    const dx = x - b[0], dy = y - b[1], dz = z - b[2];
+    if (Math.abs(dx * b[11] + dy * b[12] + dz * b[13]) > ds) return false;
+    return ((dx * b[5] + dy * b[6] + dz * b[7]) / b[3]) ** 2 + ((dx * b[8] + dy * b[9] + dz * b[10]) / b[4]) ** 2 <= 1;
+  };
+}
+
+// Is a point inside any NUCLEI, DA_GROUPS or BRAINSTEM volume (crura included)? Cortical points
+// there are rejected (§7.2 item 3). Bilateral volumes are tested at |x|; the midline ones are symmetric.
+let deepVolumes = null;
+function insideDeepVolume(x, y, z) {
+  deepVolumes ||= [
+    ...[...NUCLEI.filter((d) => d.type === 'e'), ...DA_GROUPS, CRUS].map((d) => {
+      const m = d.axes ? Math.max(...d.r) : 0;
+      const lo = d.axes ? d.c.map((c) => c - m) : d.c.map((c, k) => c - d.r[k]), hi = d.axes ? d.c.map((c) => c + m) : d.c.map((c, k) => c + d.r[k]);
+      return (ax, py, pz) => ax >= lo[0] && py >= lo[1] && pz >= lo[2] && ax <= hi[0] && py <= hi[1] && pz <= hi[2] && ellipsoidR2(d, ax, py, pz) <= 1;
+    }),
+    ...NUCLEI.filter((d) => d.type === 't').map((d) => tubeTest(d.pts)),
+    tubeTest(BRAINSTEM),
+  ];
+  const ax = Math.abs(x);
+  return deepVolumes.some((f) => f(ax, y, z));
+}
+
+// Voids (§7.3): lateral ventricles and the third-ventricle lumen with its sloping floor.
+export function insideVoid(x, y, z) {
+  const T = BUILD_PARAMS.thirdVentricle, ax = Math.abs(x);
+  if (ax <= T.halfWidth && y <= T.yFront && y >= T.yBack && z <= T.top) {
+    const floor = y >= T.floorBreakY ? T.floorZ : T.floorZ + (T.floorBreakY - y) * (T.floorBackZ - T.floorZ) / (T.floorBreakY - T.yBack);
+    if (z >= floor) return true;
+  }
+  return BUILD_PARAMS.lateralVentricles.some((v) => ellipsoidR2(v, ax, y, z) <= 1);
 }
 
 // Outer surface of an implicit body seen from a centre: a θ×φ grid of ray hits, triangulated,
@@ -147,21 +265,34 @@ function shuffleRecords(buf, count, s, start = 0) {
   }
 }
 
-// Dopamine innervation weight per region (0..1): how strongly local neurons are bathed by
-// released dopamine. Striatum densest, prefrontal moderate, other cortex sparse, cerebellum none.
-const DA_WEIGHT = {
-  [R.naccShell]: 1, [R.naccCore]: 1, [R.dorsalStriatum]: 0.95, [R.pfc]: 0.32, [R.ofc]: 0.28, [R.acc]: 0.38,
-  [R.insula]: 0.12, [R.amygdala]: 0.45, [R.hippocampus]: 0.12, [R.mpoa]: 0.7, [R.pvn]: 0.55, [R.arcuate]: 0.4,
-  [R.pituitary]: 0.5, [R.frontal]: 0.06, [R.temporal]: 0.05, [R.parietal]: 0.04, [R.occipital]: 0.02,
-  [R.thalamus]: 0.08, [R.pallidum]: 0.2, [R.hypothalamus]: 0.25, [R.spinal]: 0.3,
-};
+// Dopamine bathing weight of a neuron star (§8.1): 1 for lit regions, 0 for the tinted modulator
+// regions and the cerebellum, times a per-point jitter d_point ∈ [0.75, 1.25].
+const BATHING_ZERO = new Set(BUILD_PARAMS.bathingZero.map((id) => R[id]));
+export const bathingWeight = (region) => (BATHING_ZERO.has(region) ? 0 : 1);
+const bathing = (region, x, y, z) => bathingWeight(region) * (0.75 + 0.5 * (0.5 + 0.5 * noise3(x / 9, y / 9, z / 9)));
 
 // Corpus callosum and ventricles stay (nearly) empty: white matter is axons, not neurons.
 const SHARES = { cortex: 0.585, insula: 0.016, cerebellum: 0.165, nuclei: 0.165, brainstem: 0.059, white: 0.01 };
 
-let cortexGrid = null, cerebellumGrid = null;
+// Release-site allocation per TERMINALS entry (§7.5): field size × density weight (r_x·r_y·r_z
+// per ellipsoid, a fixed 900 per tube, 2,500 per cortical field). Every field receives exactly
+// this count (the axon pass no longer overruns into the last field, §7.6).
+const fieldVol = (t) => (t.type === 'e' ? t.r[0] * t.r[1] * t.r[2] : t.type === 't' ? 900 : 2500);
+export function releaseAllocation(vari) {
+  const w = TERMINALS.map((t) => fieldVol(t) * t.density), sum = w.reduce((a, b) => a + b, 0);
+  return w.map((v) => Math.round(vari * v / sum));
+}
+// Axon points per pathway: exactly round(axon · share) (§7.6, §9.7).
+export const axonAllocation = (axon) => PATHWAYS.map((pw) => Math.round(axon * pw.share));
+// Somata per cell group (§7.5).
+export const somaAllocation = (soma) => DA_GROUPS.map((g) => Math.round(soma * g.share));
 
+let cortexGrid = null, cerebellumGrid = null, bsVolumes = null;
+
+// `da` gives the dopamine budget { soma, axon, vari }; `da.total` is ignored, the buffer holds
+// exactly the records written (soma + axon + vari allocations; returned as daCount and daTotal).
 export function generateBrain({ neurons, da }, seed = 1848) {
+  const P = BUILD_PARAMS;
   const s = new Sampler(seed);
   const buf = new Float32Array(neurons * FLOATS);
   let n = 0;
@@ -174,26 +305,58 @@ export function generateBrain({ neurons, da }, seed = 1848) {
     buf[o + 8] = region; buf[o + 9] = daW; buf[o + 10] = tint; buf[o + 11] = kind;
     n++;
   };
-  const daW = (region, x, y, z) => (DA_WEIGHT[region] ?? 0.03) * (0.75 + 0.5 * (0.5 + 0.5 * noise3(x / 9, y / 9, z / 9)));
+  const somata = somaAllocation(da.soma);
+
+  // 0. Leading, unshuffled block (§7.4, §7.5): the non-dopaminergic VTA stars (`vtaOther`), a fixed
+  //    count of 0.35/0.65 × the VTA and midline DA somata, placed in the VTA and midline-column
+  //    ellipsoids in proportion to their somata, so every tier draws all of them. Region `vta`,
+  //    `vtaMedial` within 3.5 mm of the midline; bathing weight 0 (teal GABA tint, never amber).
+  const vtaGroups = DA_GROUPS.map((g, i) => [g, somata[i]]).filter(([g]) => g.region === R.vta || g.region === R.vtaMedial);
+  const vtaSomata = vtaGroups.reduce((a, [, c]) => a + c, 0);
+  const nVtaOther = Math.round(P.vtaOtherRatio * vtaSomata);
+  let placed = 0;
+  vtaGroups.forEach(([g, c], i) => {
+    const count = i === vtaGroups.length - 1 ? nVtaOther - placed : Math.round(nVtaOther * c / vtaSomata);
+    placed += count;
+    for (let k = 0; k < count; k++) {
+      const q = s.inVolume(g);
+      const side = g.mid ? 1 : (s.u() < 0.5 ? 1 : -1);
+      const x = q[0] * side;
+      const region = Math.abs(x) < GEOMETRY.vtaMedialX ? R.vtaMedial : R.vta;
+      put(x, q[1], q[2], s.lum() * P.lumNucleus, 0, 0, 0, region, 0, 0.4 + 0.15 * s.u(), KIND.NUCLEUS);
+    }
+  });
+  const lead = n;
 
   // 1. Cerebral cortex: a 2.5 mm ribbon under the hull. Seen from outside, the walls of a sulcus are
   //    hidden by the neighbouring gyri, so most sulcal points are dropped (as if occluded) and the
-  //    rest sink to the fundus and dim: sulci read as dark lines between brighter crowns.
+  //    rest sink to the fundus and dim: sulci read as dark lines between brighter crowns. The ribbon
+  //    does not follow the inferior-medial notch (the cut where hypothalamus, midbrain and pons
+  //    emerge), and no cortical point lies inside a deep volume or a ventricle (§7.2 item 3, §7.3).
+  const C = P.cortex;
   cortexGrid ||= surfaceGrid((x, y, z) => sdCerebrum(x, y, z, 1), [30, -20, 8], 112, 224, 130);
   const nCortex = Math.round(neurons * SHARES.cortex);
   for (let k = 0; k < nCortex;) {
     const { p, n: nn } = cortexGrid.sample(s);
     if (p[0] < 3.5 && insideCallosalWindow(p[1], p[2])) continue;
+    let notchRegion = -1;
+    if (Math.abs(notchDistance(p[0], p[1], p[2])) <= C.notchBand) {
+      const medial = p[0] <= C.notchMedialX;
+      if (medial && p[1] > C.notchWindowY[0] && p[1] <= C.notchWindowY[1]) continue;
+      if (!medial) notchRegion = R.temporal;                                       // uncus, parahippocampal gyrus
+      else if (p[1] <= C.notchWindowY[0]) notchRegion = p[1] < C.occipitalY ? R.occipital : R.temporal;   // basal occipitotemporal surface
+    }
     const side = s.u() < 0.5 ? 1 : -1;
     const x0 = p[0] * side, nx = nn[0] * side;
     const f = folding(x0, p[1], p[2]);
-    if (s.u() < 0.75 * f.sulcus) continue;
+    if (s.u() < C.sulcalDrop * f.sulcus) continue;
     const sink = f.sulcus > 0.04 ? f.depth * (0.3 + 0.7 * s.u()) : 0;
-    const d = sink + 2.6 * s.u();
+    const d = sink + C.ribbon * s.u();
     const x = x0 - nx * d, y = p[1] - nn[1] * d, z = p[2] - nn[2] * d;
-    const region = corticalRegion(x0, p[1], p[2]);
-    const lum = s.lum() * Math.exp(-sink / 5) * (1.15 - 0.3 * f.sulcus);
-    put(x, y, z, lum, nx, nn[1], nn[2], region, daW(region, x, y, z), 0.15 + 0.2 * s.u(), KIND.CORTEX);
+    if (insideVoid(x, y, z) || insideDeepVolume(x, y, z)) continue;
+    const region = notchRegion >= 0 ? notchRegion : corticalRegion(x0, p[1], p[2]);
+    const lum = s.lum() * Math.exp(-sink / C.sulcalDim) * (1.15 - 0.3 * f.sulcus);
+    put(x, y, z, lum, nx, nn[1], nn[2], region, bathing(region, x, y, z), 0.15 + 0.2 * s.u(), KIND.CORTEX);
     if (region === R.pfc || region === R.ofc || region === R.acc) {
       if (!cortexBy.has(region)) cortexBy.set(region, []);
       if (cortexBy.get(region).length < 6000) cortexBy.get(region).push([x, y, z]);
@@ -201,44 +364,48 @@ export function generateBrain({ neurons, da }, seed = 1848) {
     k++;
   }
 
-  // 2. Insula: cortex folded deep inside the Sylvian fissure, under the opercula.
+  // 2. Insula: cortex folded deep inside the Sylvian fissure, under the opercula. The §7.3 ribbon,
+  //    centre (±37, −3, 4), half-extents (4, 26, 11): y −29…+23, anterior insula included.
+  const I = P.insula;
   const nIns = Math.round(neurons * SHARES.insula);
   for (let k = 0; k < nIns; k++) {
     const side = s.u() < 0.5 ? 1 : -1;
     let dx, dy, dz;
-    do { dx = s.gauss(); dy = s.gauss(); dz = s.gauss(); } while (dx < -0.2 * len3(dx, dy, dz));
+    do { dx = s.gauss(); dy = s.gauss(); dz = s.gauss(); } while (dx < I.backFace * len3(dx, dy, dz));
     const l = len3(dx, dy, dz);
-    const x = side * (36 + 4 * dx / l), y = -9 + 17 * dy / l, z = 2 + 10 * dz / l;
-    put(x - side * 2 * s.u(), y, z, s.lum() * 0.7, side * dx / l, dy / l, dz / l, R.insula, daW(R.insula, x, y, z), 0.2, KIND.CORTEX);
+    const x = side * (I.c[0] + I.r[0] * dx / l), y = I.c[1] + I.r[1] * dy / l, z = I.c[2] + I.r[2] * dz / l;
+    put(x - side * I.depth * s.u(), y, z, s.lum() * I.lum, side * dx / l, dy / l, dz / l, R.insula, bathing(R.insula, x, y, z), I.tint, KIND.CORTEX);
   }
 
   // 3. Cerebellum: a densely folded sheet whose fissures fan backward from the fourth ventricle and
   //    the peduncles, like the pages of a half-open book: level sets of the sagittal angle about a
   //    transverse axis at the front of the cerebellum, warped so they are not perfectly regular.
-  //    Folia groups are ≈ 2.4 mm apart; grooves sink and dim by at most 30 %, so the stripes never
-  //    form a high-contrast grating (photosensitivity). Points fill the outer ~6 mm, where the
-  //    folded cortex lies, so the cerebellum reads as solid rather than as a hollow shell.
+  //    Folia groups are ≈ 2.2 mm apart; grooves are rejected and dimmed by at most 30 % combined, so
+  //    the stripes never form a high-contrast grating (photosensitivity). Points fill the outer
+  //    ~6 mm, where the folded cortex lies, so the cerebellum reads as solid rather than as a shell.
+  const CB = P.cerebellum;
   cerebellumGrid ||= surfaceGrid(sdCerebellum, [0, -62, -36], 80, 160, 70);
   const nCb = Math.round(neurons * SHARES.cerebellum);
   for (let k = 0; k < nCb; k++) {
     const { p, n: nn } = cerebellumGrid.sample(s);
     const ang = Math.atan2(p[2] + 33, -(p[1] + 38)) * 26 + 0.12 * Math.abs(p[0]);   // arc length (mm) at r ≈ 26 mm
-    const groove = 0.5 + 0.5 * Math.cos((ang + 2.5 * noise3(p[0] / 12, p[1] / 12, p[2] / 12)) / 2.4 * 2 * Math.PI);
-    if (s.u() < 0.35 * (1 - groove)) { k--; continue; }
+    const groove = 0.5 + 0.5 * Math.cos((ang + 2.5 * noise3(p[0] / 12, p[1] / 12, p[2] / 12)) / CB.foliaPeriod * 2 * Math.PI);
+    if (s.u() < CB.grooveReject * (1 - groove)) { k--; continue; }
     const sink = (1 - groove) ** 2 * 2.5;
     const d = sink + 6 * s.u() ** 1.7;
-    put(p[0] - nn[0] * d, p[1] - nn[1] * d, p[2] - nn[2] * d, s.lum() * (0.7 + 0.3 * groove), nn[0], nn[1], nn[2],
+    put(p[0] - nn[0] * d, p[1] - nn[1] * d, p[2] - nn[2] * d, s.lum() * (1 - CB.grooveDim * (1 - groove)), nn[0], nn[1], nn[2],
       R.cerebellum, 0, 0.3 + 0.2 * s.u(), KIND.CEREBELLUM);
   }
 
-  // 4. Deep nuclei: filled volumes (no facing attenuation), denser than cortex per mm³.
-  const nNuc = Math.round(neurons * SHARES.nuclei);
+  // 4. Deep nuclei: filled volumes (no facing attenuation), denser than cortex per mm³. The VTA
+  //    stars of step 0 belong to this budget. Hypothalamic nuclei have soft Gaussian borders.
+  const nNuc = Math.max(0, Math.round(neurons * SHARES.nuclei) - nVtaOther);
   const nucSamplers = NUCLEI.map((d) => (d.type === 't' ? tubeSampler(d.pts) : null));
   const shareSum = NUCLEI.reduce((a, d) => a + d.share, 0);
   NUCLEI.forEach((d, i) => {
     const count = Math.round(nNuc * d.share / shareSum);
     for (let k = 0; k < count; k++) {
-      const q = d.type === 't' ? nucSamplers[i](s) : s.inEllipsoid(d.c, d.r);
+      const q = d.type === 't' ? nucSamplers[i](s) : s.inVolume(d);
       const side = d.mid ? 1 : (s.u() < 0.5 ? 1 : -1);
       const x = q[0] * side, y = q[1], z = q[2];
       let region = d.region;
@@ -246,38 +413,56 @@ export function generateBrain({ neurons, da }, seed = 1848) {
         const u = (Math.abs(x) - 11.5) / 3.2, v = (y - 12.5) / 4, w = (z + 6.5) / 3.2;
         if (u * u + v * v + w * w < 1) region = R.naccCore;
       }
-      // The pituitary is glandular tissue, not neurons: a faint haze (drawn as soft wide sprites).
-      const kind = region === R.pituitary ? KIND.GLAND : KIND.NUCLEUS;
-      put(x, y, z, s.lum() * (kind === KIND.GLAND ? 0.35 : 0.42), 0, 0, 0, region, daW(region, x, y, z), d.tint + 0.15 * s.u(), kind);
+      // The pituitary gland and its stalk are glandular tissue, not neurons: a faint haze drawn as
+      // soft wide sprites, the lobes under `pituitaryGland`, the stalk under `medianEminence` (§7.3).
+      const kind = region === R.pituitaryGland || region === R.medianEminence ? KIND.GLAND : KIND.NUCLEUS;
+      put(x, y, z, s.lum() * (kind === KIND.GLAND ? P.lumGland : P.lumNucleus), 0, 0, 0, region, bathing(region, x, y, z), d.tint + 0.15 * s.u(), kind);
     }
   });
 
-  // 5. Brainstem and upper spinal cord.
+  // 5. Brainstem and upper spinal cord, with the crus ellipsoids as filler at the tube's density.
+  //    Points below z −72 are the cord (`spinal`). Third-ventricle points are carved out (§7.3).
   const bs = tubeSampler(BRAINSTEM);
+  bsVolumes ||= { tube: tubeVolume(BRAINSTEM), crus: 2 * (4 / 3) * Math.PI * CRUS.r[0] * CRUS.r[1] * CRUS.r[2] };
   const nBs = Math.round(neurons * SHARES.brainstem);
-  for (let k = 0; k < nBs; k++) {
+  const nCrus = Math.round(nBs * bsVolumes.crus / (bsVolumes.tube + bsVolumes.crus));
+  for (let k = 0; k < nBs - nCrus;) {
     const q = bs(s);
-    const region = q[2] < -64 ? R.spinal : R.brainstem;
-    put(q[0], q[1], q[2], s.lum() * 0.5, 0, 0, 0, region, region === R.spinal ? 0.1 : 0.02, 0.4 + 0.2 * s.u(), KIND.BRAINSTEM);
+    if (insideVoid(q[0], q[1], q[2])) continue;
+    const region = q[2] < SPINAL_Z ? R.spinal : R.brainstem;
+    put(q[0], q[1], q[2], s.lum() * P.lumBrainstem, 0, 0, 0, region, bathing(region, q[0], q[1], q[2]), 0.4 + 0.2 * s.u(), KIND.BRAINSTEM);
+    k++;
+  }
+  for (let k = 0; k < nCrus;) {
+    const q = s.inVolume(CRUS);
+    const side = s.u() < 0.5 ? 1 : -1;
+    const x = q[0] * side;
+    if (insideVoid(x, q[1], q[2])) continue;
+    put(x, q[1], q[2], s.lum() * P.lumBrainstem, 0, 0, 0, R.brainstem, bathing(R.brainstem, x, q[1], q[2]), 0.4 + 0.2 * s.u(), KIND.BRAINSTEM);
+    k++;
   }
 
-  // 6. White matter: the corpus callosum arching between the hemispheres (faint, axons only).
+  // 6. White matter: the corpus callosum arching between the hemispheres (faint, axons only; no
+  //    bathing). Points in the ventricles are carved out.
   const cc = spline([[0, 31, 8], [0, 26, 18], [0, 12, 24], [0, -8, 26], [0, -26, 23], [0, -37, 15], [0, -40, 8]]);
   while (n < neurons) {
     const u = s.u(), c = cc(u);
     const x = s.gauss() * 13;
     if (Math.abs(x) > 34) continue;
     const thick = 2 + 2.5 * (Math.exp(-(((u - 0.05) / 0.12) ** 2)) + Math.exp(-(((u - 0.93) / 0.1) ** 2)));
-    put(x, c[1] + s.gauss() * 1.2, c[2] + 0.2 * Math.abs(x) + s.gauss() * thick * 0.5, s.lum() * 0.32, 0, 0, 0,
-      R.whiteMatter, 0, 0.05, KIND.WHITE);
+    const y = c[1] + s.gauss() * 1.2, z = c[2] + 0.2 * Math.abs(x) + s.gauss() * thick * 0.5;
+    if (insideVoid(x, y, z)) continue;
+    put(x, y, z, s.lum() * P.lumWhite, 0, 0, 0, R.whiteMatter, 0, 0.05, KIND.WHITE);
   }
-  shuffleRecords(buf, n, s);
+  shuffleRecords(buf, n - lead, s, lead);
 
-  // --- Dopamine system ---
-  const dbuf = new Float32Array(da.total * FLOATS);
+  // --- Dopamine system: exactly the allocated records (§7.6, §9.7) ---
+  const axons = axonAllocation(da.axon), sites = releaseAllocation(da.vari);
+  const total = [...somata, ...axons, ...sites].reduce((a, b) => a + b, 0);
+  const dbuf = new Float32Array(total * FLOATS);
   let m = 0;
   const dput = (x, y, z, lum, a, b, c, region, w, kind) => {
-    if (m >= da.total) return;
+    if (m >= total) return;
     const o = m * FLOATS;
     dbuf[o] = x * MM; dbuf[o + 1] = y * MM; dbuf[o + 2] = z * MM; dbuf[o + 3] = lum;
     dbuf[o + 4] = a; dbuf[o + 5] = b; dbuf[o + 6] = c; dbuf[o + 7] = s.u();
@@ -286,35 +471,39 @@ export function generateBrain({ neurons, da }, seed = 1848) {
   };
   const ranges = {};
 
-  // Cell bodies: one drawn soma stands for several hundred real dopamine neurons.
+  // Cell bodies: one drawn soma stands for several hundred real dopamine neurons. VTA somata within
+  // 3.5 mm of the midline take `vtaMedial` (VTA-m), the others `vta` (VTA-l) (§8.1).
   ranges.soma = [m, 0];
-  for (const g of DA_GROUPS) {
-    const count = Math.round(da.soma * g.share);
-    for (let k = 0; k < count; k++) {
-      const q = s.inEllipsoid(g.c, g.r);
-      const side = s.u() < 0.5 ? 1 : -1;
-      dput(q[0] * side, q[1], q[2], 0.6 + 0.8 * s.u(), 0, 0, 0, g.region, q[3], DA_KIND.SOMA);
+  DA_GROUPS.forEach((g, i) => {
+    for (let k = 0; k < somata[i]; k++) {
+      const q = s.inVolume(g);
+      const side = g.mid ? 1 : (s.u() < 0.5 ? 1 : -1);
+      const x = q[0] * side;
+      const region = g.region === R.vta && Math.abs(x) < GEOMETRY.vtaMedialX ? R.vtaMedial : g.region;
+      dput(x, q[1], q[2], 0.6 + 0.8 * s.u(), 0, 0, 0, region, q[3], DA_KIND.SOMA);
     }
-  }
+  });
   ranges.soma[1] = m - ranges.soma[0];
 
   // Axon bundles as streamlines (as in diffusion tractography): each pathway is a bundle of fibres
   // with fixed offsets in the cross-section, ~1 mm wide in the medial forebrain bundle and fanning
   // out to the pathway's terminal spread. Points are strung along each fibre, so threads read as
-  // threads; a slow wander keeps them from looking machine-made.
+  // threads; a slow wander keeps them from looking machine-made. A pathway of `count` points has
+  // floor(count/fibres) points on every fibre plus one on the first (count mod fibres) fibres.
   ranges.axon = [m, 0];
   PATHWAYS.forEach((pw, pi) => {
     const pos = spline(pw.pts);
-    const count = Math.round(da.axon * pw.share);
+    const count = axons[pi];
     const fibres = Math.max(6, Math.round(Math.sqrt(count) * 1.1));
-    const per = Math.ceil(count / fibres);
+    const per = Math.floor(count / fibres), extra = count - per * fibres;
     for (let f = 0; f < fibres; f++) {
+      const nf = per + (f < extra ? 1 : 0);
       const side = f % 2 ? 1 : -1;
       const a0 = s.gauss() * 0.8, b0 = s.gauss() * 0.8;              // offset in the bundle (mm)
       const a1 = s.gauss() * pw.fan, b1 = s.gauss() * pw.fan;        // offset at the terminal fan
       const ph = s.u() * 6.283, lumF = 0.55 + 0.45 * s.u();
-      for (let k = 0; k < per; k++) {
-        const u = Math.min(1, (k + s.u()) / per);
+      for (let k = 0; k < nf; k++) {
+        const u = Math.min(1, (k + s.u()) / nf);
         const p = pos(u), q = pos(Math.min(1, u + 0.01)), o = pos(Math.max(0, u - 0.01));
         let tx = q[0] - o[0], ty = q[1] - o[1], tz = q[2] - o[2];
         const tl = len3(tx, ty, tz) || 1; tx /= tl; ty /= tl; tz /= tl;
@@ -337,10 +526,8 @@ export function generateBrain({ neurons, da }, seed = 1848) {
   // w = normalized distance from the field centre: the glow spreads outward as dopamine rises.
   ranges.vari = [m, 0];
   const lanterns = [];
-  const fieldVol = (t) => (t.type === 'e' ? t.r[0] * t.r[1] * t.r[2] : t.type === 't' ? 900 : 2500);
-  const volSum = TERMINALS.reduce((a, t) => a + fieldVol(t) * t.density, 0);
-  for (const t of TERMINALS) {
-    const count = Math.round(da.vari * fieldVol(t) * t.density / volSum);
+  TERMINALS.forEach((t, ti) => {
+    const count = sites[ti];
     const tube = t.type === 't' ? tubeSampler(t.pts) : null;
     const pool = t.type === 'cortex' ? cortexBy.get(t.region) || [] : null;
     const centre = t.type === 'cortex' && pool.length ? pool.reduce((a, p) => [a[0] + p[0] / pool.length, a[1] + p[1] / pool.length, a[2] + p[2] / pool.length], [0, 0, 0]) : null;
@@ -368,24 +555,24 @@ export function generateBrain({ neurons, da }, seed = 1848) {
       lanterns.push([q[0] * (t.type === 'cortex' ? 1 : side) * MM, q[1] * MM, q[2] * MM, size * MM * (0.8 + 0.4 * s.u()),
         s.u(), q[3], 0, 0, t.region, 0, 0, 13]);
     }
-  }
+  });
   ranges.vari[1] = m - ranges.vari[0];
   shuffleRecords(dbuf, ranges.vari[1], s, ranges.vari[0]);
 
   return {
-    neurons: buf, neuronCount: n,
-    da: dbuf.subarray(0, m * FLOATS), daCount: m, daRanges: ranges,
+    neurons: buf, neuronCount: n, leadCount: lead,
+    da: dbuf.subarray(0, m * FLOATS), daCount: m, daTotal: m, daRanges: ranges,
+    daAlloc: { soma: somata, axon: axons, vari: sites },
     lanterns: Float32Array.from(lanterns.flat()), lanternCount: lanterns.length,
   };
 }
 
 // =====================================================================================
-// Brain-system additions (research/ANALYSIS.md B.5). generateBrain above is unchanged.
+// Brain-system additions (research/ANALYSIS.md B.5). generateBrain above is unchanged after Phase 0a.
 // =====================================================================================
 
-// Dopamine bathing weight of a star: the rule of generateBrain's daW, applied to the region whose
-// dopamine channels the star inherits (PARENT), so new structures are bathed like their parent.
-const bathing = (region, x, y, z) => (DA_WEIGHT[region] ?? 0.03) * (0.75 + 0.5 * (0.5 + 0.5 * noise3(x / 9, y / 9, z / 9)));
+// Extra-buffer stars use the §8.1 bathing rule of generateBrain (`bathing`), applied to the region
+// whose dopamine channels the star inherits (PARENT), so new structures are bathed like their parent.
 
 // Volume of a NUCLEI_V2 structure in mm³, both sides (weights the remainder stratum).
 function structureVolume(d) {
@@ -535,11 +722,16 @@ function compileRule(rule) {
   const shellRegion = rule.shell ? R[rule.shell.id] : -1;
   return (x, y, z) => {
     if (host) {
-      const ex = x - host.c[0], ey = y - host.c[1], ez = z - host.c[2];
+      // In the host's own frame (the post-port thalamus is yawed 15°, §7.3); the outward normal
+      // is rotated back to world axes before its lateral (x) component is tested.
+      const wx = x - host.c[0], wy = y - host.c[1], wz = z - host.c[2];
+      const A = host.axes ?? [[1, 0, 0], [0, 1, 0], [0, 0, 1]];
+      const [ex, ey, ez] = A.map((a) => wx * a[0] + wy * a[1] + wz * a[2]);
       const qn = len3(ex / host.r[0], ey / host.r[1], ez / host.r[2]);
       const depth = qn > 1e-9 ? (1 - qn) * len3(ex, ey, ez) / qn : Infinity;   // radial distance to the surface
-      const gx = ex / host.r[0] ** 2, gy = ey / host.r[1] ** 2, gz = ez / host.r[2] ** 2;
-      if (depth <= rule.shell.thickness && gx / (len3(gx, gy, gz) || 1) >= rule.shell.minNormalX) return shellRegion;
+      const g = [ex / host.r[0] ** 2, ey / host.r[1] ** 2, ez / host.r[2] ** 2];
+      const gx = g[0] * A[0][0] + g[1] * A[1][0] + g[2] * A[2][0];
+      if (depth <= rule.shell.thickness && gx / (len3(g[0], g[1], g[2]) || 1) >= rule.shell.minNormalX) return shellRegion;
     }
     let best = 0, bd = Infinity;
     targets.forEach((t, k) => {
@@ -552,7 +744,7 @@ function compileRule(rule) {
 }
 
 // Rewrites the region float (a2.x) of the generateBrain stars that A.3.3 and §3.17 relabel
-// (pallidum → gpe/gpi, raphe → dr/mnr, pituitary → anterior/posterior lobe, thalamus → its 11
+// (pallidum → gpe/gpi, raphe → dr/mnr, pituitary gland → anterior/posterior lobe, thalamus → its 11
 // subnuclei). Nothing else in the record changes, so positions and flux stay bit-identical and the
 // relabelled stars keep their parent's dopamine channels through PARENT. Idempotent. The extra
 // buffer already carries the new regions and is left alone.

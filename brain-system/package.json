@@ -4,6 +4,7 @@
   "type": "module",
   "description": "Brain System: a procedural star-built brain and body (plain ES modules, no build step). package.json exists only so Node runs src/*.js as ES modules in the headless tests.",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "typecheck": "tsc -p ."
   }
 }

@@ -13,3 +13,6 @@ graphify-out/.graphify_chunk_*.json
 
 # Handoff backups (their states are commits in the history)
 .handoff/backup-*/
+
+# macOS Finder metadata
+.DS_Store

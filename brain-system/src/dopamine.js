@@ -11,8 +11,8 @@
 //
 // Units: s (human time), nM, Hz. Concentrations are calibrated on rat microdialysis and
 // voltammetry; human dopamine during sex has never been measured (§4).
-// Assumption until the region split lands: an id of §9.1 that anatomy.js lacks falls back to its
-// parent region (`vtaMedial` → vta, `a14` → pvn, `pituitaryGland` → pituitary).
+// Region ids are the post-port set of anatomy.js (§7.3, §9.1): `vtaMedial`, `a14`, `caudate`,
+// `medianEminence` and `pituitaryGland` exist, so no id falls back to a parent region.
 
 import { R, REGION_COUNT, PATHWAYS } from './anatomy.js';
 import { PATH_HIST } from './shaders.js';
@@ -24,12 +24,12 @@ const relax = (x, target, h, tau) => target + (x - target) * Math.exp(-h / tau);
 // --- Cell groups: tonic rate ν0 (Hz) and prediction-error gain β (s) (§6.5) ---
 export const POPS = [
   { id: 'VTAl', nu0: 4.0, beta: 25, label: 'VTA lateral', region: R.vta, autoreceptor: true },
-  { id: 'VTAm', nu0: 5.0, beta: 10, label: 'VTA medial', region: R.vtaMedial ?? R.vta, autoreceptor: true },
+  { id: 'VTAm', nu0: 5.0, beta: 10, label: 'VTA medial', region: R.vtaMedial, autoreceptor: true },
   { id: 'SNc', nu0: 4.0, beta: 6, label: 'Substantia nigra', region: R.snc, autoreceptor: true },
   { id: 'A11', nu0: 2.0, beta: 0, label: 'A11', region: R.a11 },
   { id: 'A12', nu0: 2.0, beta: 0, label: 'A12 (TIDA)', region: R.arcuate },
   { id: 'A13', nu0: 2.0, beta: 0, label: 'A13 (zona incerta)', region: R.zonaIncerta },
-  { id: 'A14', nu0: 2.0, beta: 0, label: 'A14', region: R.a14 ?? R.pvn },
+  { id: 'A14', nu0: 2.0, beta: 0, label: 'A14', region: R.a14 },
 ];
 const P = Object.fromEntries(POPS.map((p, i) => [p.id, i]));
 
@@ -37,7 +37,7 @@ const P = Object.fromEntries(POPS.map((p, i) => [p.id, i]));
 // and `whiteMatter` take no dopamine glow; `hypothalamus` is drawn from mean(MPOA, PVN) × 0.5.
 const visual = (...pairs) => {
   const regions = [], wVis = [];
-  for (const [r, w] of pairs) if (r !== undefined) { regions.push(r); wVis.push(w); }
+  for (const [r, w] of pairs) { regions.push(r); wVis.push(w); }
   return { regions, wVis };
 };
 
@@ -99,11 +99,10 @@ const PATH_SOURCE = {
 };
 
 // Modulator tints on their source nuclei: low chroma, so they never compete with dopamine amber (§8.1).
-const defined = (...ids) => ids.filter((r) => r !== undefined);
 export const MODULATORS = {
-  prolactin: { regions: [R.pituitaryGland ?? R.pituitary], rgb: desaturate([1.0, 0.55, 0.68], 0.55) },
+  prolactin: { regions: [R.pituitaryGland], rgb: desaturate([1.0, 0.55, 0.68], 0.55) },
   serotonin: { regions: [R.raphe], rgb: desaturate([0.62, 0.55, 1.0], 0.5) },
-  gaba: { regions: defined(R.rmtg, R.vta, R.vtaMedial), rgb: desaturate([0.45, 0.95, 0.9], 0.55) },
+  gaba: { regions: [R.rmtg, R.vta, R.vtaMedial], rgb: desaturate([0.45, 0.95, 0.9], 0.55) },
   opioid: { regions: [R.pag, R.arcuate], rgb: desaturate([0.75, 1.0, 0.55], 0.6) },
 };
 
@@ -384,23 +383,19 @@ export class DopamineModel {
     for (let i = 0; i < POPS.length; i++) {
       v.fire[i] = relax(v.fire[i], this.nu[i] / POPS[i].nu0, dts, p.tauVisFloor);
     }
-    // Cell-group lanterns: VTA-l on `vta`, VTA-m on `vtaMedial` (mean on one slot without that id; §8.1).
+    // Cell-group lanterns: VTA-l on `vta`, VTA-m on `vtaMedial` (§8.1); A8 is pooled with the SNc.
     const spikeMax = p.hzMax / p.somaKMax;
     const setGroup = (r, lvl, nuHz) => {
       this.da[r * 4] = lvl;
       this.da[r * 4 + 1] = (this.da[r * 4 + 1] + dts * Math.min(spikeMax, p.somaRate * nuHz)) % 4096;
     };
-    if (R.vtaMedial !== undefined) {
-      setGroup(R.vta, v.fire[P.VTAl], this.nu[P.VTAl]);
-      setGroup(R.vtaMedial, v.fire[P.VTAm], this.nu[P.VTAm]);
-    } else {
-      setGroup(R.vta, 0.5 * (v.fire[P.VTAl] + v.fire[P.VTAm]), 0.5 * (this.nu[P.VTAl] + this.nu[P.VTAm]));
-    }
+    setGroup(R.vta, v.fire[P.VTAl], this.nu[P.VTAl]);
+    setGroup(R.vtaMedial, v.fire[P.VTAm], this.nu[P.VTAm]);
     setGroup(R.snc, v.fire[P.SNc], this.nu[P.SNc]);
     setGroup(R.a11, v.fire[P.A11], this.nu[P.A11]);
     setGroup(R.arcuate, v.fire[P.A12], this.nu[P.A12]);
     setGroup(R.zonaIncerta, v.fire[P.A13], this.nu[P.A13]);
-    setGroup(POPS[P.A14].region, v.fire[P.A14], this.nu[P.A14]);
+    setGroup(R.a14, v.fire[P.A14], this.nu[P.A14]);
 
     // Flow along the fibres: firing history of each pathway's source, newest first. The 2-s visual
     // travel time is a declared slowdown (real conduction takes 40–200 ms; §8.1, §9.3).
