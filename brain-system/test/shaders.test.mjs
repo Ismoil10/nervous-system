@@ -286,4 +286,30 @@ describe('camera (§13.11)', () => {
     rm.flyTo({ yaw: 1, pitch: 0.2, distance: 20, target: [0, 0, -1] });
     assert.deepEqual([rm.distance, rm.yaw, rm.goal, cut], [20, 1, null, 1]);
   });
+  test('zoom towards the cursor keeps the point under it; a pan drag moves the scene with the cursor', () => {
+    const c600 = { ...canvas, clientHeight: 600 };
+    const cam = new OrbitCamera(c600, { distance: 35, yaw: -0.35, pitch: 0.1, target: [0, -0.2, -7.9], fov: 0.55, maxDistance: 45 });
+    cam.update(0, 800 / 600, 0);
+    // Client pixel of a point (units) through the current view and projection.
+    const px = (q) => {
+      const v = cam.view, p = cam.proj;
+      const cx = v[0] * q[0] + v[4] * q[1] + v[8] * q[2] + v[12], cy = v[1] * q[0] + v[5] * q[1] + v[9] * q[2] + v[13];
+      const w = -(v[2] * q[0] + v[6] * q[1] + v[10] * q[2] + v[14]);
+      return [(p[0] * cx / w * 0.5 + 0.5) * 800, (0.5 - p[5] * cy / w * 0.5) * 600];
+    };
+    // A point on the plane through the target facing the camera, off the screen centre.
+    const { origin, dir } = cam.unproject(250, 420);
+    const fwd = cam.target.map((t, i) => (t - cam.eye[i]) / cam.distance);
+    const s = cam.distance / dir.reduce((a, d, i) => a + d * fwd[i], 0);
+    const q = origin.map((o, i) => o * 0.01 + dir[i] * s);
+    for (let i = 0; i < 5; i++) { cam.zoomAt(0.6, 250, 420); cam.update(0, 800 / 600, 0); }
+    const [x, y] = px(q);
+    assert.ok(Math.abs(cam.distance - 35 * 0.6 ** 5) < 1e-9);
+    assert.ok(Math.abs(x - 250) < 1e-3 && Math.abs(y - 420) < 1e-3, `${x} ${y}`);   // Float32 view matrix
+    const t0 = [...cam.target], [x0, y0] = px(t0);
+    cam.pan(100, -50);
+    cam.update(0, 800 / 600, 0);
+    const [x1, y1] = px(t0);
+    assert.ok(Math.abs(x1 - x0 - 100) < 1e-3 && Math.abs(y1 - y0 + 50) < 1e-3, `${x1 - x0} ${y1 - y0}`);
+  });
 });

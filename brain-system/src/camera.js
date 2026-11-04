@@ -66,15 +66,20 @@ export class OrbitCamera {
     this._bind();
   }
 
+  // Left drag orbits; right or middle drag, or Shift/Ctrl + left drag, pans; the wheel and a pinch zoom
+  // towards the point under the cursor; a two-finger drag pans; a double click flies halfway in
+  // towards the clicked point. So any part of the body can be brought to the centre and examined.
   _bind() {
     const c = this.canvas;
     const pointers = new Map();
-    let pinchDist = 0;
+    let pinchDist = 0, mid = null;
     c.addEventListener('pointerdown', (e) => {
       c.setPointerCapture(e.pointerId);
-      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      pointers.set(e.pointerId, { x: e.clientX, y: e.clientY, pan: e.button === 1 || e.button === 2 || e.shiftKey || e.ctrlKey });
       this.lastInteraction = performance.now();
       this.goal = null;
+      this.velYaw = this.velPitch = 0;
+      if (pointers.size === 2) mid = null;
     });
     c.addEventListener('pointermove', (e) => {
       const p = pointers.get(e.pointerId);
@@ -82,35 +87,80 @@ export class OrbitCamera {
       const dx = e.clientX - p.x, dy = e.clientY - p.y;
       p.x = e.clientX; p.y = e.clientY;
       if (pointers.size === 1) {
-        this.velYaw = -dx * 0.0045;
-        this.velPitch = -dy * 0.0035;
-        this.yaw += this.velYaw;
-        this.pitch += this.velPitch;
+        if (p.pan) this.pan(dx, dy);
+        else {
+          this.velYaw = -dx * 0.0045;
+          this.velPitch = -dy * 0.0035;
+          this.yaw += this.velYaw;
+          this.pitch += this.velPitch;
+        }
       } else if (pointers.size === 2) {
         const [a, b] = [...pointers.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
-        if (pinchDist) this.zoom(pinchDist / d);
+        const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+        if (pinchDist && d > 0) this.zoomAt(pinchDist / d, m.x, m.y);
+        if (mid) this.pan(m.x - mid.x, m.y - mid.y);
         pinchDist = d;
+        mid = m;
       }
       this.lastInteraction = performance.now();
     });
     c.addEventListener('pointerdown', () => { this.dragging = true; });
     const release = (e) => {
       pointers.delete(e.pointerId);
-      if (pointers.size < 2) pinchDist = 0;
+      if (pointers.size < 2) { pinchDist = 0; mid = null; }
       this.dragging = pointers.size > 0;
     };
     c.addEventListener('pointerup', release);
     c.addEventListener('pointercancel', release);
+    c.addEventListener('contextmenu', (e) => e.preventDefault());   // right drag pans
     c.addEventListener('wheel', (e) => {
       e.preventDefault();
-      this.zoom(Math.exp(e.deltaY * 0.0011));
+      this.zoomAt(Math.exp(e.deltaY * 0.0011), e.clientX, e.clientY);
       this.lastInteraction = performance.now();
     }, { passive: false });
+    c.addEventListener('dblclick', (e) => {
+      const goal = this._zoomGoal(0.5, e.clientX, e.clientY);
+      this.flyTo({ yaw: this.yaw, pitch: this.pitch, ...goal });
+      this.lastInteraction = performance.now();
+    });
   }
 
   zoom(factor) {
     this.distance = Math.min(this.maxDistance, Math.max(this.minDistance, this.distance * factor));
+    this.goal = null;
+  }
+
+  // Zoom by `factor` keeping the point under the client pixel fixed on screen: eye and target both
+  // move towards that point (on the plane through the target facing the camera).
+  zoomAt(factor, clientX, clientY) {
+    const g = this._zoomGoal(factor, clientX, clientY);
+    this.distance = g.distance;
+    this.target = g.target;
+    this.goal = null;
+  }
+
+  _zoomGoal(factor, clientX, clientY) {
+    const d0 = this.distance;
+    const d1 = Math.min(this.maxDistance, Math.max(this.minDistance, d0 * factor));
+    const target = [...this.target];
+    const ray = this._rayDir(clientX, clientY);
+    const fwd = [0, 1, 2].map((i) => (this.target[i] - this.eye[i]) / d0);
+    const cos = ray[0] * fwd[0] + ray[1] * fwd[1] + ray[2] * fwd[2];
+    if (cos > 0.05) {
+      const k = 1 - d1 / d0, s = d0 / cos;
+      for (let i = 0; i < 3; i++) target[i] += (this.eye[i] + ray[i] * s - target[i]) * k;
+    }
+    return { distance: d1, target };
+  }
+
+  // Move the target with the cursor: a drag of (dx, dy) CSS px slides the scene by the same amount on
+  // the plane through the target.
+  pan(dx, dy) {
+    const h = this.canvas.clientHeight || 1;
+    const s = (2 * this.distance * Math.tan(this.fovEff / 2)) / h;
+    const v = this.view;   // rows of the rotation: right (0, 4, 8), up (1, 5, 9)
+    for (let i = 0; i < 3; i++) this.target[i] += (-v[i * 4] * dx + v[i * 4 + 1] * dy) * s;
     this.goal = null;
   }
 
@@ -135,18 +185,22 @@ export class OrbitCamera {
 
   // Ray through a client (CSS) pixel, in mm of the body frame (A.2): { origin, dir } with dir unit.
   unproject(clientX, clientY) {
+    return { origin: this.eye.map((e) => e / MM), dir: this._rayDir(clientX, clientY) };
+  }
+
+  // Unit direction of the ray through a client pixel (world axes).
+  _rayDir(clientX, clientY) {
     const r = this.canvas.getBoundingClientRect();
     const nx = ((clientX - r.left) / r.width) * 2 - 1;
     const ny = 1 - ((clientY - r.top) / r.height) * 2;
     const t = Math.tan(this.fovEff / 2);
     const cx = nx * t * this.aspect, cy = ny * t;
     const v = this.view;   // rows of the rotation: right (0, 4, 8), up (1, 5, 9), back (2, 6, 10)
-    let dx = v[0] * cx + v[1] * cy - v[2];
-    let dy = v[4] * cx + v[5] * cy - v[6];
-    let dz = v[8] * cx + v[9] * cy - v[10];
+    const dx = v[0] * cx + v[1] * cy - v[2];
+    const dy = v[4] * cx + v[5] * cy - v[6];
+    const dz = v[8] * cx + v[9] * cy - v[10];
     const n = Math.hypot(dx, dy, dz);
-    dx /= n; dy /= n; dz /= n;
-    return { origin: this.eye.map((e) => e / MM), dir: [dx, dy, dz] };
+    return [dx / n, dy / n, dz / n];
   }
 
   update(dt, aspect, time) {

@@ -13,6 +13,7 @@ const LAYOUT = [{ loc: 0, size: 4 }, { loc: 1, size: 4 }, { loc: 2, size: 4 }];
 const BODY_LAYOUT = [{ loc: 0, size: 4 }, { loc: 1, size: 4 }, { loc: 2, size: 4 }, { loc: 3, size: 4 }];
 const REF = { neurons: 240000, axon: 16000, vari: 11000 };
 const PREV_UNIT = 7;   // cross-fade source (units 2–6 hold the state textures)
+const BONE = 3;        // tissue class index of the bone range (shaders.js TISSUE order)
 
 // Body budgets per tissue class (order of shaders.js TISSUE): skin, organ, muscle, bone, cord,
 // nerve, ganglion (autonomic chain, ganglia, splanchnic and vagal streams), enteric, vessel/immune.
@@ -133,6 +134,7 @@ export class BrainRenderer {
     this.joints = new Float32Array(4 * 2 * S.JOINT_SLOTS);
     for (let k = 0; k < S.JOINT_SLOTS; k++) this.joints[k * 8 + 3] = 1;
     this.skinDim = 0;
+    this.skeleton = true;   // Views "Skeleton" toggle (§13.13; main.js starts it off)
     this.motion = true;
     this.reducedMotion = false;
     this.senseFull = false;
@@ -251,6 +253,9 @@ export class BrainRenderer {
 
   setJoints(data) { this.joints.set(data.subarray ? data.subarray(0, this.joints.length) : data.slice(0, this.joints.length)); }
   setSkinDim(x) { this.skinDim = clamp(x, PARAMS.skinDim[0], PARAMS.skinDim[1]); }
+  // Views "Skeleton" toggle (§13.13, off by default; §13.15 ribs only as irregular hints): the bone
+  // class range is drawn only while it is on.
+  setSkeleton(on) { this.skeleton = !!on; }
   setReducedMotion(on) { this.reducedMotion = !!on; this.motion = !on; }
   setLimbMotion(on) { this.motion = !!on && !this.reducedMotion; }
   setSenseOrgansFull(on) { this.senseFull = !!on; }
@@ -333,7 +338,10 @@ export class BrainRenderer {
 
   get bodyVisible() { return !!(this.body && this.bodyVAO && this.bodyFade > 0); }
   get extraPoints() { return this.counts ? this.counts.extra : 0; }
-  get bodyPoints() { return this.counts && this.bodyVisible ? this.counts.body : 0; }
+  get bodyPoints() {
+    if (!this.counts || !this.bodyVisible) return 0;
+    return this.counts.body - (this.skeleton || !this.body.ranges ? 0 : this.counts.bodyClass[BONE]);
+  }
   get pointCount() {
     const c = this.counts;
     return c ? c.neurons + c.extra + c.axon + c.vari + this.bodyPoints : 0;
@@ -472,7 +480,10 @@ export class BrainRenderer {
     gl.uniform4fv(u.uJoint, this.joints);
     gl.bindVertexArray(this.bodyVAO.vao);
     if (!b.ranges) { gl.drawArrays(gl.POINTS, 0, b.count); return; }
-    for (let k = 0; k < 9; k++) if (b.ranges[k] && c.bodyClass[k] > 0) gl.drawArrays(gl.POINTS, b.ranges[k][0], c.bodyClass[k]);
+    for (let k = 0; k < 9; k++) {
+      if (k === BONE && !this.skeleton) continue;
+      if (b.ranges[k] && c.bodyClass[k] > 0) gl.drawArrays(gl.POINTS, b.ranges[k][0], c.bodyClass[k]);
+    }
   }
 
   // Copy of the last scene for the cross-fade.

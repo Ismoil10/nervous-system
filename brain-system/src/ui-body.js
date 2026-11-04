@@ -466,6 +466,7 @@ export class BodyHud {
     this.paused = false;
     this.time = { locked: false, kh: 1, source: 'adaptive', dragging: false };
     this.overlays = Object.fromEntries([...OVERLAYS, ...VIEW_TOGGLES].map(([id]) => [id, false]));
+    this.offToggles = new Set();   // overlay or Views toggles main.js reports it cannot draw (setToggleAvailable)
     this.arousal = PARAMS.arousalDefault;
     this.stim = { sense: this.bodyMode === 'body' ? 'touch' : 'vision', mode: null, site: null, side: null,
       picking: false, reopen: false };
@@ -1200,7 +1201,7 @@ export class BodyHud {
   _bindBrainsys() {
     const e = this.el;
     const sw = (btn, id) => btn.addEventListener('click', () => {
-      if (!this.caps.overlay) return;
+      if (!this.caps.overlay || this.offToggles.has(id)) return;
       this.overlays[id] = !this.overlays[id];
       btn.setAttribute('aria-checked', String(this.overlays[id]));
       this.h.onOverlay(id, this.overlays[id]);
@@ -1346,6 +1347,16 @@ export class BodyHud {
   // main.js arms or disarms picking without a handler call (e.g. after a pick).
   setPicking(armed) {
     this._setPicking(armed, false);
+  }
+
+  // main.js greys an overlay or Views toggle that the renderer cannot draw yet, with the reason as
+  // its tooltip, so the HUD never offers a switch that does nothing.
+  setToggleAvailable(id, ok, why = '') {
+    const btn = this.el.overlays[id] ?? this.el.viewToggles[id];
+    if (!btn) return;
+    if (ok) this.offToggles.delete(id); else this.offToggles.add(id);
+    btn.setAttribute('aria-disabled', String(!ok || !this.caps.overlay));
+    btn.title = ok ? '' : why;
   }
 
   get scenarioIsOrgasm() {
