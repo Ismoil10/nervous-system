@@ -110,13 +110,13 @@
             <div><dt>Dorsal striatum</dt><dd id="da-dstr">—</dd></div>
             <div><dt>Prefrontal cortex</dt><dd id="da-mpfc">—</dd></div>
             <div><dt>Amygdala</dt><dd id="da-amy">—</dd></div>
-            <div><dt>Medial preoptic area</dt><dd id="da-mpoa">—</dd></div>
+            <div><dt>Medial preoptic area (% rest)</dt><dd id="da-mpoa">—</dd></div>
             <div><dt>Paraventricular nucleus</dt><dd id="da-pvn">—</dd></div>
-            <div><dt>Median eminence (TIDA)</dt><dd id="da-me">—</dd></div>
-            <div><dt>Spinal cord (A11)</dt><dd id="da-spinal">—</dd></div>
+            <div><dt>Median eminence (TIDA, % rest)</dt><dd id="da-me">—</dd></div>
+            <div><dt>Spinal cord (A11, % rest)</dt><dd id="da-spinal">—</dd></div>
           </dl>
           <dl class="stats">
-            <div><dt>VTA firing</dt><dd><span id="vta-burst" class="pill burst" hidden>burst</span><span id="fire-vta">—</span></dd></div>
+            <div><dt>VTA-l firing</dt><dd><span id="vta-burst" class="pill burst" hidden>burst</span><span id="fire-vta">—</span></dd></div>
             <div><dt>SNc firing</dt><dd id="fire-snc">—</dd></div>
             <div><dt>TIDA firing</dt><dd id="fire-tida">—</dd></div>
           </dl>
@@ -427,11 +427,27 @@
               <input id="tref" type="range" min="0" max="1000" step="1" value="496" aria-valuetext="15 min">
             </div>
             <div class="field">
-              <label for="hypothesis" class="field-head">Post-orgasm dopamine hypothesis</label>
+              <label for="hypothesis" class="field-head">Post-orgasm accumbens dopamine</label>
               <select id="hypothesis">
-                <option value="satiety" selected>Serotonergic satiety (dip)</option>
-                <option value="sustained">Sustained (rat PEI)</option>
+                <option value="sustained" selected>Sustained above rest (default; model choice)</option>
+                <option value="dip">Serotonergic dip below rest (rat, inferred from Lorrain et al. 1997, 1999)</option>
               </select>
+            </div>
+            <div class="field">
+              <label for="onset-window" class="field-head">Onset window</label>
+              <select id="onset-window">
+                <option value="interruptible" selected>1.5 s, interruptible (default)</option>
+                <option value="emission">Emission setting: 2.5 s, cannot be stopped</option>
+              </select>
+            </div>
+            <div class="field checks" role="group" aria-label="Hypothesis switches">
+              <label class="check"><input id="hyp-pulse" type="checkbox"> Pulse-locked climax dopamine (hypothesis)</label>
+              <label class="check"><input id="hyp-prolactin" type="checkbox"> Prolactin brake on mesolimbic dopamine (speculative)</label>
+              <label class="check"><input id="hyp-kappa" type="checkbox" checked> κ-opioid feedback (hypothesis)</label>
+              <label class="check"><input id="hyp-tida" type="checkbox" checked> Tuberoinfundibular withdrawal at orgasm (assumption)</label>
+              <label class="check"><input id="hyp-satiety" type="checkbox"> Session satiety (rat)</label>
+              <button type="button" id="hyp-novel" disabled>Novel stimulus</button>
+              <label class="check"><input id="hyp-imaging" type="checkbox"> Imaging overlay: blood flow, not dopamine</label>
             </div>
           </div>
         </div>
@@ -676,8 +692,8 @@
 
       <h3>The model</h3>
       <p>
-        Seven dopamine cell groups (lateral and medial VTA, SNc, A11–A14) drive extracellular
-        dopamine in nine terminal fields, with Michaelis–Menten uptake, D1/D2 receptor binding,
+        Seven A-groups (A8–A14) feed seven model populations (A8 pooled with A9, A10 split into
+        lateral and medial VTA), which drive extracellular dopamine in nine terminal fields, with Michaelis–Menten uptake, D1/D2 receptor binding,
         autoreceptors, release plasticity and a reward-prediction-error signal. Prolactin, GABA,
         endogenous opioids, serotonin and oxytocin act only as modulators of dopamine.
       </p>
@@ -688,7 +704,8 @@
         <li>Human dopamine during sex has never been measured.</li>
         <li>Concentrations are calibrated on rat microdialysis and voltammetry.</li>
         <li>Human imaging measures blood flow, not dopamine.</li>
-        <li>The effect of prolactin on brain dopamine is a hypothesis.</li>
+        <li>Prolactin: an established short-loop action on tuberoinfundibular neurons (rodent); a brake on mesolimbic dopamine is an opt-in hypothesis.</li>
+        <li>The oxytocin readout is a model proxy, not a measured level.</li>
         <li>The efferent route of the inflammatory reflex is contested.</li>
         <li>Model latencies are always shown next to their measured target range.</li>
       </ul>

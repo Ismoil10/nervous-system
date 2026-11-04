@@ -3,7 +3,7 @@
   "configurations": [
     {
       "name": "anger-galaxy",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",
         "http.server",
@@ -17,7 +17,7 @@
     },
     {
       "name": "brain-system",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",
         "http.server",
@@ -30,18 +30,18 @@
       "port": 8768
     },
     {
-      "name": "brain-system-backup",
-      "runtimeExecutable": "python",
+      "name": "brain-system-verify",
+      "runtimeExecutable": "python3",
       "runtimeArgs": [
         "-m",
         "http.server",
-        "8769",
+        "8770",
         "--bind",
         "127.0.0.1",
         "--directory",
-        ".handoff/backup-brain-system-pre-build"
+        "brain-system"
       ],
-      "port": 8769
+      "port": 8770
     }
   ]
 }

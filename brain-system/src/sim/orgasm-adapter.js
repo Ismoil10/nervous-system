@@ -1,9 +1,15 @@
 // Orgasm scenario adapter (research/ANALYSIS.md §11.14, B.4, B.13): wraps the legacy ResponseModel
 // and DopamineModel so that the orgasm scenario runs inside the Brain System frame loop.
 //
-//   clock(dtS)            the SimClock delegate: the legacy LogRamp kh of this frame, verbatim
-//   advance(dtS, t0H, h)  the legacy update() body over the clock's [t0H, t0H + h]: S from the
-//                         demo script (screen dt) or the manual level, then advanceHuman(h, S)
+//   clock(dtS)            the SimClock delegate: ResponseModel.stepClock(dtS), the scenario's own
+//                         kh of this frame, verbatim (0 in an ONSET with T_pre = 0, DOPAMINE.md §9.3)
+//   advance(dtS, t0H, h, source)
+//                         the legacy update() body from t0H: S from the demo script (screen dt) or
+//                         the manual level, then advanceFrame(dtS, S). On a transition into ONSET the
+//                         rest of the frame runs at the ONSET clock (DOPAMINE.md §9.1), so the human
+//                         time reached can be less than h; advance() returns the tH reached and the
+//                         caller hands it to SimClock.settleDelegate(tH, adapter.kh). Under a user
+//                         lock (source 'user') the frame runs at h/dtS instead.
 //
 // With all networks on, every ResponseModel and DopamineModel state equals the legacy update(dt)
 // path at every human substep for the same frame times and seed (A.8 #21;
@@ -20,8 +26,8 @@ export const PARAMS = {
   // Records kept. One frame needs ceil(h / 0.5 s) records: ≤ 1,080 at the 0.1-s frame clamp and the
   // largest legacy recovery kh (30 h / 20 s = 5,400); the rest is room for a kernel backlog (§11.14) [model].
   ringCapacity: 4096,
-  // Phase ids for which `climax` is true (B.13; 'onset' after the DOPAMINE.md §9.8 port).
-  climaxPhases: ['inevitability', 'orgasm', 'onset'],
+  // Phase ids for which `climax` is true (B.13; the post-port phase id 'onset', DOPAMINE.md §9.8).
+  climaxPhases: ['onset', 'orgasm'],
   // Basal values while neuroendocrine is off: prolactin R and oxytocin O are relative surges, 0 at rest (§11.14).
   basalR: 0,
   basalO: 0,
@@ -90,7 +96,7 @@ export class OrgasmAdapter {
     this.onSubstep = null;                                    // optional (h) => void after each substep
     this._t = 0;                                              // tH stamp of the next record
     this.clock = this.clock.bind(this);                       // handed to SimClock.delegate as a bare function
-    response.onStep = (h) => this._substep(h);
+    response.onStep = (h, prev) => this._substep(h, prev);
   }
 
   // B.13: reset both models with the seeded stream and apply the scn-orgasm settings.
@@ -120,20 +126,27 @@ export class OrgasmAdapter {
     this.commands.clear();
   }
 
-  // The SimClock delegate: the legacy LogRamp step of this frame (response.js update(), first line).
-  clock(dtS) { return this.response.kh.step(dtS); }
+  // The SimClock delegate: the scenario clock of this frame (response.js update(), first line).
+  clock(dtS) { return this.response.stepClock(dtS); }
 
-  // The legacy update() body over [t0H, t0H + h]; dormant while the scenario is inactive.
-  advance(dtS, t0H, h) {
-    if (!this.active) return;
+  // The scenario's kh at the end of the last frame (differs from the delegate's value in the frame
+  // that enters ONSET).
+  get kh() { return this.response.khNow; }
+
+  // The legacy update() body from t0H; dormant while the scenario is inactive. Returns the tH reached.
+  advance(dtS, t0H, h, source = 'delegate') {
+    if (!this.active) return t0H;
     const r = this.response;
     this._applyBodyMode();
     this._t = t0H;
     const S = r.stimulusFor(dtS);
-    r.advanceHuman(h, S);
-    r.phaseT += dtS;
-    // Every frame writes at least one record; stamp the last one exactly at the frame's end time.
-    if (this.commands.size) this.commands.tH[this.commands._slot(this.commands.size - 1)] = t0H + h;
+    const locked = source !== 'delegate';
+    if (locked && dtS > 0) r.khNow = h / dtS;
+    const reached = r.advanceFrame(dtS, S, locked);
+    const t1H = t0H + reached;
+    // Stamp the last record exactly at the frame's end time (a frame without a substep writes none).
+    if (this.commands.size) this.commands.tH[this.commands._slot(this.commands.size - 1)] = t1H;
+    return t1H;
   }
 
   get climax() { return this.active && PARAMS.climaxPhases.includes(this.response.phase); }
@@ -164,10 +177,10 @@ export class OrgasmAdapter {
     else if (r.p.kappa !== PROFILES[r.profileId].kappa) r.p.kappa = PROFILES[r.profileId].kappa;
   }
 
-  _substep(h) {
+  _substep(h, prev) {
     const r = this.response;
     if (!this.nets.neuroendocrine) { r.R = PARAMS.basalR; r.O = PARAMS.basalO; }
-    this.dopamine.step(h, r);
+    this.dopamine.step(h, r, prev);
     this._t += h;
     const d = r.drive();
     this.commands.push(this._t, d.h, d.h, r.G, d.hold, r.Omega);

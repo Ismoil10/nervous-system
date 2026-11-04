@@ -1,16 +1,21 @@
 // Brain part of the geometry tests (research/ANALYSIS.md B.14 `geometry.test.mjs`, phase 1, B.15):
-// the generateBrain buffer stays bit-identical per tier (seed 1848); the appended region ids,
+// the post-port generateBrain buffer (DOPAMINE.md §7.3 and §9.8 applied, Phase 0a) stays
+// bit-identical per tier (seed 1848); the dopamine records match their allocations exactly
+// (DOPAMINE.md §9.7, fourth test); the §7.3 Monte Carlo checks hold; the appended region ids,
 // PARENT and the relabels are consistent; the extra buffer is floor-stratified; the new
 // structures lie inside the brain and overlap only where §3.16 says real borders interdigitate.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import {
-  REGION_IDS, REGION_COUNT, LEGACY_REGION_COUNT, REGION_ALIASES, R, KIND, NUCLEI, BRAINSTEM, PARENT, NUCLEI_V2, V2,
-  RELABEL, AREAS, AREA_NONE, BRAIN_TRACTS, PORTS, CN_ATTACH, BRAIN_PARAMS, MIDLINE, nodePos, portPos,
-  sdCerebrum, sdCerebellum, spline, len3, mulberry32, MM,
+  REGION_IDS, REGION_COUNT, LEGACY_REGION_COUNT, REGION_ALIASES, OWN_CHANNEL_IDS, R, KIND, NUCLEI, DA_GROUPS, BRAINSTEM, CRUS,
+  PATHWAYS, TERMINALS, SPINAL_Z, PARENT, NUCLEI_V2, V2, RELABEL, AREAS, AREA_NONE, BRAIN_TRACTS, PORTS, CN_ATTACH, BRAIN_PARAMS,
+  MIDLINE, nodePos, portPos, ellipsoidR2, ellipsoidPoint, sdCerebrum, sdCerebellum, spline, len3, mulberry32, MM,
 } from '../src/anatomy.js';
-import { generateBrain, generateBrainExtra, applyRelabel, areaIds, FLOATS, EXTRA_PARAMS } from '../src/brain.js';
+import {
+  generateBrain, generateBrainExtra, applyRelabel, areaIds, FLOATS, EXTRA_PARAMS, BUILD_PARAMS, DA_KIND,
+  releaseAllocation, bathingWeight,
+} from '../src/brain.js';
 
 // Tier sizes of src/performance.js TIERS (B.8) and the dopamine budget of main.js daBudget.
 const TIERS = [
@@ -21,22 +26,25 @@ const TIERS = [
 ];
 const daBudget = (t) => ({ soma: 3500, axon: t.axon, vari: t.vari, total: 3500 + t.axon + t.vari });
 
-// SHA-256 of the generateBrain output (seed 1848), recorded from the code before the
-// brain-system additions (Node 24.15). Any change here means the legacy buffer moved.
+// SHA-256 of the generateBrain output (seed 1848). Re-recorded from the post-port generator
+// (Phase 0a: DOPAMINE.md §7.3 geometry and §9.8 construction details; Node 26), which is the
+// "bit-identical" reference of research/ANALYSIS.md from here on (B.5). Any change here means the
+// post-port buffer moved. daCount is the sum of the soma, axon and release-site allocations.
 const GOLDEN = {
-  low: { neurons: '0a97cac7969f4645b49b075bae8d4a6adb0804d787dca2238c32a46fc31a048c', da: 'f1ac1fee42e5dc68aa32f930d8ea592b86ee1a35ba8924e4dbd6952512223344', lanterns: '59002a58139605dc3be9ca31b16c19c12223d2fde564e5d608a326b46b36c5a4', daCount: 13500 },
-  medium: { neurons: 'c9d547d7bb9e789775b956b348d2a014ea28bb4e393fb51cc2023d0e9b133415', da: 'd3c9a79064c13cd21bc16160728887311163860afe8bccd4c670f1c2e44856cf', lanterns: '24f883018ff81550fcf62d5694a296f4908280a401f5a6b1012a6b250d4c8b5f', daCount: 20500 },
-  high: { neurons: 'e77450df4c2a7645bc4361c201eed4b2ef909c9806856f490634b3806c9bee65', da: '333133f13816e01d11901e22bfeeee331ebba501c7c86c4a2ed13671ea39b219', lanterns: 'cd76797ccd153d2ee7c136c278e02498b6ad9d300a18610dbfa0e43476ea35f4', daCount: 30500 },
-  ultra: { neurons: '0903516cdbefe2a2802e514fa7fd3f60f575c48f49be009dd63f6a67b4a74e8e', da: 'dc65fc06ca39d6207de7fb9304d772d93caac23bf823ab44e80771f9d5836664', lanterns: '78801015c5d62cb7478c0adfce932260dfafef89de8f45b3da99ea6213a4eb31', daCount: 43500 },
+  low: { neurons: 'ceb03076112f54292e0c12f3310c611b1b01a7e68541827e565827890defb848', da: 'a36d6be9d0a4f7e456eb044ff5e9bb30cfe8a265452759e77b15189949cc92a3', lanterns: 'ff314df31743dd0342afe7d5a3a6d3307f743e27806e5396d677c9d6dec98eeb', daCount: 13500 },
+  medium: { neurons: '327496625d676900a2a4c40272cc47f1ee256ad8d5eaf1955b80e5a89e0c7943', da: 'f2c0e3fc8e750f05dcc2c0b4a86a72cd77e9112f4f7d0ec066232d08927be256', lanterns: '36acb1f7880d8f9a943948e406c98d589686c25c127a0e7a02803dfe564e7800', daCount: 20499 },
+  high: { neurons: 'e13408e36ace815c6d27f54d3edc1940c57d789d6e6deccca3e2691a36d71023', da: '36ffc85bfb2c3aee6fcbe5f23a2b244a53adb47c88c203196c7e50ecc48caab5', lanterns: 'fe06b24a6c7d8fb909ef750266e2210e4283e5f61ba97239a0df3b741cdc6f9a', daCount: 30500 },
+  ultra: { neurons: '58043f36cd85bda72f0396ea755b0f3938dfb7fe462ce74846f1ad71da76883a', da: 'ff13cc39f991fe52c16cadc5d3980cb7a4ecd0e614962bdd37dcc7f7ef8fb0ac', lanterns: '6bd630d423d2042b7cbeb5f8dd727a9ce9bbd61b30298aa7856e0620bc48f0b4', daCount: 43501 },
 };
 const sha = (a) => createHash('sha256').update(Buffer.from(a.buffer, a.byteOffset, a.byteLength)).digest('hex');
 
 const LEGACY_IDS = [
   'cortex', 'frontal', 'pfc', 'ofc', 'acc', 'insula', 'parietal', 'temporal', 'occipital',
   'cerebellum', 'dentate', 'thalamus', 'dorsalStriatum', 'naccCore', 'naccShell', 'pallidum',
-  'amygdala', 'hippocampus', 'hypothalamus', 'mpoa', 'pvn', 'arcuate', 'pituitary', 'vta', 'snc',
+  'amygdala', 'hippocampus', 'hypothalamus', 'mpoa', 'pvn', 'arcuate', 'pituitaryGland', 'vta', 'snc',
   'zonaIncerta', 'a11', 'rmtg', 'raphe', 'pag', 'brainstem', 'spinal', 'whiteMatter',
 ];
+const POST_PORT = ['vtaMedial', 'a14', 'caudate'];   // DOPAMINE.md §8.1, §9.1 (appended after A.3.3)
 const THAL_SUB = ['thalAnt', 'thalMD', 'thalVA', 'thalVL', 'thalVPL', 'thalVPM', 'thalVPMpc', 'thalVMpo', 'thalCM', 'thalPulv', 'thalRet'];
 // A.3.3 groups (89 new ids).
 const A33 = {
@@ -55,9 +63,13 @@ const freshMedium = () => {
   return { ...mediumBrain, neurons: mediumBrain.neurons.slice() };
 };
 
+// One post-port build per tier, shared by the tests below.
+const built = new Map();
+const brainAt = (t) => { if (!built.has(t.name)) built.set(t.name, generateBrain({ neurons: t.neurons, da: daBudget(t) })); return built.get(t.name); };
+
 test('generateBrain is bit-identical per tier (seed 1848)', () => {
   for (const t of TIERS) {
-    const b = generateBrain({ neurons: t.neurons, da: daBudget(t) });
+    const b = brainAt(t);
     const g = GOLDEN[t.name];
     assert.equal(b.neuronCount, t.neurons, `${t.name} neuron count`);
     assert.equal(sha(b.neurons), g.neurons, `${t.name} neuron buffer`);
@@ -68,39 +80,265 @@ test('generateBrain is bit-identical per tier (seed 1848)', () => {
   }
 });
 
-test('region ids: indices 0–32 unchanged, the 89 A.3.3 ids appended, aliases on the old ids', () => {
+// --- Post-port dopamine records (DOPAMINE.md §9.7, fourth test; §7.5, §7.6, §9.8) ---
+test('every tier writes exactly the allocated dopamine records; da.total equals the records written', () => {
+  const sum = (a) => a.reduce((x, y) => x + y, 0);
+  assert.ok(Math.abs(sum(PATHWAYS.map((p) => p.share)) - 1) < 1e-9, 'axon shares sum to 1.000 (§7.6)');
+  const somaWant = DA_GROUPS.map((g) => Math.round(3500 * g.share));
+  assert.deepEqual(somaWant, [570, 130, 2000, 300, 125, 125, 125, 125], 'the 3,500-soma split of §7.5');
+  const spinal = TERMINALS.findIndex((t) => t.region === R.spinal);
+  for (const t of TIERS) {
+    const b = brainAt(t);
+    const axonWant = PATHWAYS.map((pw) => Math.round(t.axon * pw.share));
+    const variWant = releaseAllocation(t.vari);
+    assert.ok(Math.abs(sum(axonWant) - t.axon) <= PATHWAYS.length / 2, `${t.name} axon allocation ≈ budget`);
+    assert.ok(Math.abs(sum(variWant) - t.vari) <= TERMINALS.length / 2, `${t.name} release allocation ≈ budget`);
+    assert.deepEqual(b.daAlloc, { soma: somaWant, axon: axonWant, vari: variWant });
+    const axonGot = new Array(PATHWAYS.length).fill(0), variGot = new Map(), somaGot = new Map();
+    let soma = 0;
+    for (let i = 0; i < b.daCount; i++) {
+      const o = i * FLOATS, kind = b.da[o + 11], region = b.da[o + 8];
+      if (kind === DA_KIND.AXON) axonGot[b.da[o + 4]]++;
+      else if (kind === DA_KIND.VARICOSITY) variGot.set(region, (variGot.get(region) || 0) + 1);
+      else if (kind === DA_KIND.SOMA) { soma++; somaGot.set(region, (somaGot.get(region) || 0) + 1); }
+      else assert.fail(`record ${i}: unknown kind ${kind}`);
+    }
+    PATHWAYS.forEach((pw, k) => assert.equal(axonGot[k], axonWant[k], `${t.name} ${pw.id}: round(axon·share) points`));
+    TERMINALS.forEach((f, k) => assert.equal(variGot.get(f.region) || 0, variWant[k], `${t.name} ${REGION_IDS[f.region]}: allocated release sites`));
+    assert.ok(variWant[spinal] > 0 && variGot.get(R.spinal) === variWant[spinal], `${t.name} spinal field complete`);
+    assert.equal(soma, 3500);
+    assert.equal(b.daCount, sum(somaWant) + sum(axonWant) + sum(variWant), `${t.name} da.total = records written`);
+    assert.equal(b.daTotal, b.daCount);
+    assert.equal(b.da.length, b.daCount * FLOATS);
+    assert.deepEqual(b.daRanges, { soma: [0, 3500], axon: [3500, sum(axonWant)], vari: [3500 + sum(axonWant), sum(variWant)] });
+    // Somata by region: A8 pooled with the SNc, A10 split into VTA-l and VTA-m, A14 on its own id.
+    assert.equal(somaGot.get(R.snc), 2300);
+    assert.equal((somaGot.get(R.vta) || 0) + somaGot.get(R.vtaMedial), 700);
+    for (const r of [R.a11, R.arcuate, R.zonaIncerta, R.a14]) assert.equal(somaGot.get(r), 125, REGION_IDS[r]);
+    assert.ok(!somaGot.has(R.pvn), 'A14 no longer on pvn');
+  }
+  // VTA somata: vtaMedial within 3.5 mm of the midline (incl. the midline column), vta beyond (§8.1).
+  const b = brainAt(TIERS[0]);
+  for (let i = 0; i < b.daRanges.soma[1]; i++) {
+    const o = i * FLOATS, r = b.da[o + 8], ax = Math.abs(b.da[o]) / MM;
+    if (r === R.vta) assert.ok(ax >= 3.5 - 1e-4, 'VTA-l soma lateral to 3.5 mm');
+    if (r === R.vtaMedial) assert.ok(ax < 3.5 + 1e-4, 'VTA-m soma within 3.5 mm');
+  }
+});
+
+// Independent volume tests from the DOPAMINE.md numbers (swept discs with flat caps for tubes).
+const lumen = (x, y, z) => {   // third-ventricle lumen with the sloping floor (§2.4, §7.3)
+  if (Math.abs(x) >= 2 || y > 4 || y < -20 || z > 8) return false;
+  return z > (y >= -6 ? -14 : -14 + (-6 - y) * 10 / 14);
+};
+const LATERAL_VENTRICLES = [[[6, 14, 16], [3, 8, 5]], [[9, -10, 23], [4, 14, 3]], [[28, -40, 12], [4, 5, 4]], [[36, -20, -8.5], [1.5, 9, 2]]];
+const inLateralVentricle = (x, y, z) => LATERAL_VENTRICLES.some(([c, r]) => ellipsoidR2({ c, r }, Math.abs(x), y, z) <= 1);
+function tubeIn(pts) {
+  const f = spline(pts), n = 1600, S = [];
+  for (let k = 0; k <= n; k++) {
+    const p = f(k / n), q = f(Math.min(1, k / n + 1e-3)), o = f(Math.max(0, k / n - 1e-3));
+    const t = [q[0] - o[0], q[1] - o[1], q[2] - o[2]], l = len3(...t);
+    S.push([p, t.map((v) => v / l)]);
+  }
+  let len = 0;
+  for (let k = 1; k <= n; k++) len += len3(S[k][0][0] - S[k - 1][0][0], S[k][0][1] - S[k - 1][0][1], S[k][0][2] - S[k - 1][0][2]);
+  const ds = len / n;
+  return (x, y, z) => {
+    let best = Infinity, b = null;
+    for (const s of S) { const d = (x - s[0][0]) ** 2 + (y - s[0][1]) ** 2 + (z - s[0][2]) ** 2; if (d < best) { best = d; b = s; } }
+    const d = [x - b[0][0], y - b[0][1], z - b[0][2]], along = d[0] * b[1][0] + d[1] * b[1][1] + d[2] * b[1][2];
+    return Math.abs(along) <= ds && best - along * along <= b[0][3] ** 2;
+  };
+}
+const nuc = (id) => NUCLEI.find((d) => d.id === id), grp = (id) => DA_GROUPS.find((d) => d.id === id);
+// Share of volume `d` (ellipsoid) for which `inside` holds (Monte Carlo, right side).
+function share(d, inside, N = 40000, seed = 11) {
+  const rnd = mulberry32(seed);
+  let hit = 0;
+  for (let k = 0; k < N;) {
+    const x = 2 * rnd() - 1, y = 2 * rnd() - 1, z = 2 * rnd() - 1;
+    if (x * x + y * y + z * z > 1) continue;
+    k++;
+    if (inside(...ellipsoidPoint(d, x, y, z))) hit++;
+  }
+  return hit / N;
+}
+
+test('§7.3 checks: third-ventricle lumen and voids, A11/A13 tissue, overlaps (Monte Carlo)', () => {
+  const b = brainAt(TIERS[2]);
+  const lumenStars = new Map();
+  for (let i = 0; i < b.neuronCount; i++) {
+    const o = i * FLOATS, p = [b.neurons[o] / MM, b.neurons[o + 1] / MM, b.neurons[o + 2] / MM], kind = b.neurons[o + 11];
+    if ([KIND.CORTEX, KIND.BRAINSTEM, KIND.WHITE].includes(kind)) {
+      assert.ok(!lumen(...p) && !inLateralVentricle(...p), `void holds a ${kind} star at ${p.map((v) => v.toFixed(1))}`);
+    } else if (lumen(...p)) lumenStars.set(REGION_IDS[b.neurons[o + 8]], (lumenStars.get(REGION_IDS[b.neurons[o + 8]]) || 0) + 1);
+  }
+  // Only protected thalamic stars at the medial edge of the yawed thalamus (§7.3: ≈ 2 at 240 k).
+  assert.deepEqual([...lumenStars.keys()].filter((k) => k !== 'thalamus'), [], 'no other nucleus star in the lumen');
+  assert.ok((lumenStars.get('thalamus') || 0) <= 20);
+  for (let i = 0; i < b.daRanges.soma[1]; i++) {
+    const o = i * FLOATS;
+    assert.ok(!lumen(b.da[o] / MM, b.da[o + 1] / MM, b.da[o + 2] / MM), 'no dopamine soma in the lumen');
+  }
+  // A11 and A13 somata sit in drawn tissue (§7.3: 99.9 % in the posterior hypothalamic and the
+  // rostromedial ZI ellipsoids).
+  const post = nuc('hypothalamusPost'), rm = nuc('zonaIncertaRm');
+  let a11 = 0, a13 = 0;
+  for (let i = 0; i < b.daRanges.soma[1]; i++) {
+    const o = i * FLOATS, p = [Math.abs(b.da[o]) / MM, b.da[o + 1] / MM, b.da[o + 2] / MM];
+    if (b.da[o + 8] === R.a11 && ellipsoidR2(post, ...p) <= 1) a11++;
+    if (b.da[o + 8] === R.zonaIncerta && ellipsoidR2(rm, ...p) <= 1) a13++;
+  }
+  assert.ok(a11 >= 0.99 * 125 && a13 >= 0.99 * 125, `A11 ${a11}/125, A13 ${a13}/125 in tissue`);
+  assert.ok(share(grp('a11'), (x, y, z) => ellipsoidR2(post, x, y, z) <= 1) > 0.99);
+  assert.ok(share(grp('a13'), (x, y, z) => ellipsoidR2(rm, x, y, z) <= 1) > 0.99);
+  // Periventricular placement: no group or hypothalamic nucleus inside the lumen (§7.3).
+  for (const d of [grp('a11'), grp('a12'), grp('a14'), grp('vta'), grp('midline'), nuc('arcuate'), nuc('pvn'), nuc('mpoa'), nuc('hypothalamus'), post, rm]) {
+    assert.equal(share(d, lumen, 20000), 0, `${d.id} clear of the lumen`);
+  }
+  assert.ok(share(nuc('thalamus'), lumen) < 0.001, 'thalamus 0.02 % in the lumen');
+  // Overlaps (§7.3 values in brackets).
+  const inE = (d) => (x, y, z) => ellipsoidR2(d, x, y, z) <= 1;
+  const amyHip = share(nuc('amygdala'), tubeIn(nuc('hippocampus').pts), 20000);
+  assert.ok(amyHip < 0.03, `amygdala inside the hippocampus ${amyHip} (1.3 %)`);
+  assert.ok(share(nuc('pallidum'), inE(nuc('putamen'))) < 0.03, 'pallidum inside the putamen (1 %)');
+  assert.ok(share(nuc('zonaIncerta'), inE(nuc('thalamus'))) < 0.03, 'ZI inside the thalamus (1.7 %)');
+  assert.equal(share(nuc('thalamus'), inE(nuc('pallidum'))), 0, 'internal capsule kept between thalamus and pallidum');
+  for (const id of ['thalamus', 'hypothalamus', 'zonaIncerta']) assert.equal(share(rm, inE(nuc(id))), 0, `rostromedial ZI clear of ${id}`);
+  for (const d of [nuc('hypothalamus'), nuc('thalamus'), nuc('pvn'), grp('vta')]) assert.equal(share(post, inE(d)), 0, `posterior hypothalamic ellipsoid clear of ${d.id}`);
+  const snc = grp('snc');
+  assert.ok(share(snc, inE(CRUS)) < 0.03, 'SNc ≈ 1 % inside the crus');
+  assert.ok(share(snc, inE(grp('vta'))) < 0.005, 'SNc clear of the VTA');
+  assert.equal(share(snc, inE(nuc('amygdala'))), 0, 'SNc clear of the amygdala');
+  // SNc tips and the STN distance (§7.3).
+  const tip = (sgn) => ellipsoidPoint(snc, 0, sgn, 0);   // the long axis points caudally: −1 is the rostral tip
+  assert.ok(len3(...tip(-1).map((v, k) => v - [13.7, -11.6, -9.2][k])) < 0.1 && len3(...tip(1).map((v, k) => v - [7.3, -25.4, -16.8][k])) < 0.1, 'SNc tips');
+  assert.ok(Math.abs(len3(...tip(-1).map((v, k) => v - [12, -13, -5][k])) - 4.75) < 0.1, 'rostral SNc tip 4.75 mm from the STN centre');
+});
+
+test('§7.2 hulls: cerebrum ≈ 1,386 cm³; cerebellum ≈ 137 cm³, down to z −65, clear of the cerebrum (Monte Carlo)', () => {
+  const rnd = mulberry32(5);
+  let cer = 0, cb = 0, both = 0, zMin = 0;
+  const N = 300000, box = [[-70, 70], [-105, 71], [-70, 78]], V = box.reduce((v, [a, c]) => v * (c - a), 1);
+  for (let k = 0; k < N; k++) {
+    const x = box[0][0] + 140 * rnd(), y = box[1][0] + 176 * rnd(), z = box[2][0] + 148 * rnd();
+    const s = x < 0 ? -1 : 1, inC = sdCerebrum(x, y, z, s) < 0, inB = sdCerebellum(x, y, z) < 0;
+    if (inC) cer++;
+    if (inB) { cb++; zMin = Math.min(zMin, z); }
+    if (inC && inB) both++;
+  }
+  const cm3 = (c) => c / N * V / 1000;
+  assert.ok(Math.abs(cm3(cer) - 1386) < 40, `cerebrum ${cm3(cer).toFixed(0)} cm³`);
+  assert.ok(Math.abs(cm3(cb) - 137) < 8, `cerebellum ${cm3(cb).toFixed(0)} cm³`);
+  assert.equal(both, 0, 'tentorial gap: no cerebrum–cerebellum overlap');
+  assert.ok(zMin < -63 && zMin > -66, `cerebellar base at z ${zMin.toFixed(1)}`);
+});
+
+test('§9.8 construction details: folia, flux, spinal label and tube, bathing, pituitary split, vtaOther block', () => {
+  const P = BUILD_PARAMS;
+  assert.equal(P.cerebellum.foliaPeriod, 2.2);
+  assert.ok((1 - P.cerebellum.grooveReject) * (1 - P.cerebellum.grooveDim) >= 0.70, 'groove drop and dim ≤ 30 % combined');
+  assert.equal(P.cortex.sulcalDim, 6);
+  assert.equal(P.lumNucleus, 0.85);
+  assert.equal(SPINAL_Z, -72);
+  assert.deepEqual(BRAINSTEM[0], [0, -24, -4, 12, 8]);
+  const cord = TERMINALS.find((t) => t.region === R.spinal);
+  assert.deepEqual(cord.pts, [[2.5, -45.5, -74, 3], [2.5, -47.5, -88, 3]]);
+  // The spinal proxy lies ≈ 97 % inside the cord part of the brainstem tube (§7.3).
+  const f = spline(cord.pts), rnd = mulberry32(9);
+  let inside = 0;
+  for (let k = 0; k < 2000; k++) {
+    const p = f(rnd()), r = 3 * Math.sqrt(rnd()), a = 2 * Math.PI * rnd();
+    // Cross-section ⟂ the tube axis (0, −2, −14)/|·|: spanned by x and (0, 0.99, −0.14).
+    if (tubeR2([p[0] + r * Math.cos(a), p[1] + 0.99 * r * Math.sin(a), p[2] - 0.14 * r * Math.sin(a)]) <= 1) inside++;
+  }
+  assert.ok(inside / 2000 > 0.9, `spinal proxy inside the cord ${(inside / 20).toFixed(1)} %`);
+  assert.equal(PATHWAYS.find((p) => p.id === 'tuberoinfundibular').to, R.medianEminence);
+  assert.ok(TERMINALS.some((t) => t.region === R.medianEminence) && !TERMINALS.some((t) => t.region === R.pituitaryGland));
+  for (const id of ['pituitaryGland', 'raphe', 'rmtg', 'vta', 'vtaMedial', 'pag', 'arcuate', 'cerebellum']) assert.equal(bathingWeight(R[id]), 0, id);
+  for (const id of ['frontal', 'pfc', 'medianEminence', 'naccShell', 'caudate', 'spinal']) assert.equal(bathingWeight(R[id]), 1, id);
+
+  const expectLead = Math.round(0.35 / 0.65 * 700);
+  for (const t of TIERS) {
+    const b = brainAt(t);
+    assert.equal(b.leadCount, expectLead, `${t.name}: ${expectLead} non-DA VTA stars in the leading block`);
+    let otherVta = 0;
+    for (let i = 0; i < b.neuronCount; i++) {
+      const o = i * FLOATS, r = b.neurons[o + 8], kind = b.neurons[o + 11], z = b.neurons[o + 2] / MM, daW = b.neurons[o + 9];
+      const ax = Math.abs(b.neurons[o]) / MM;
+      if (i < b.leadCount) {
+        assert.ok(kind === KIND.NUCLEUS && daW === 0 && (r === R.vta || r === R.vtaMedial), 'leading block: non-DA VTA stars');
+        assert.equal(r, ax < 3.5 ? R.vtaMedial : R.vta, 'vtaMedial within 3.5 mm of the midline');
+      } else if (r === R.vta || r === R.vtaMedial) otherVta++;
+      if (t.name !== 'medium') continue;
+      if (kind === KIND.BRAINSTEM) assert.equal(r === R.spinal, z < SPINAL_Z, 'spinal label below z −72');
+      if (r === R.pituitaryGland || r === R.medianEminence) assert.equal(kind, KIND.GLAND, 'gland haze');
+      if (kind === KIND.GLAND) assert.ok(r === R.pituitaryGland || r === R.medianEminence);
+      if (bathingWeight(r) === 0 || kind === KIND.WHITE) assert.equal(daW, 0, `${REGION_IDS[r]} unbathed`);
+      else assert.ok(daW >= 0.75 - 1e-6 && daW <= 1.25 + 1e-6, `${REGION_IDS[r]} d_point ${daW}`);
+    }
+    assert.equal(otherVta, 0, 'every non-DA VTA star is in the leading block');
+    assert.ok(Math.abs(b.leadCount / (b.leadCount + 700) - 0.35) < 0.001, '35 % of the VTA stars are non-dopaminergic');
+  }
+});
+
+test('§7.2 item 3 cortical ribbon: nothing in deep volumes, nothing on the medial notch window', () => {
+  const b = brainAt(TIERS[2]);
+  const ells = [...NUCLEI.filter((d) => d.type === 'e'), ...DA_GROUPS, CRUS];
+  let cortex = 0, temporalNotch = 0;
+  for (let i = 0; i < b.neuronCount; i++) {
+    const o = i * FLOATS;
+    if (b.neurons[o + 11] !== KIND.CORTEX || b.neurons[o + 8] === R.insula) continue;
+    cortex++;
+    const x = Math.abs(b.neurons[o]) / MM, y = b.neurons[o + 1] / MM, z = b.neurons[o + 2] / MM;
+    for (const d of ells) assert.ok(ellipsoidR2(d, x, y, z) > 1, `cortical star inside ${d.id}`);
+    if (x <= 18 && y > -52 && y < -8 && z < 5 && z > -95) assert.ok(tubeR2([x, y, z]) > 0.9, 'cortical star inside the brainstem tube');
+    // Medial notch window (−45 < y ≤ +8 at |x| ≤ 15): the diencephalon and midbrain emerge there.
+    assert.ok(!(x <= 12 && y > -40 && y <= 4 && z < -10), `cortical star on the medial notch window at ${[x, y, z].map((v) => v.toFixed(1))}`);
+    if (x > 15 && Math.abs(len3((x - 0) / 23, (y + 22) / 40, (z + 43) / 36) - 1) < 0.02 && b.neurons[o + 8] === R.temporal) temporalNotch++;
+  }
+  assert.ok(cortex > 0.58 * b.neuronCount);
+  assert.ok(temporalNotch > 0, 'lateral notch surface (uncus, parahippocampal gyrus) labelled temporal');
+});
+
+test('region ids: indices 0–32 unchanged, the 89 A.3.3 and 3 post-port ids appended, aliases on the old ids', () => {
   assert.deepEqual(REGION_IDS.slice(0, LEGACY_REGION_COUNT), LEGACY_IDS);
   LEGACY_IDS.forEach((id, i) => assert.equal(R[id], i));
   const added = Object.values(A33).flat();
   assert.equal(added.length, 89);
-  assert.deepEqual(REGION_IDS.slice(LEGACY_REGION_COUNT), added);
-  assert.equal(REGION_COUNT, 122);
+  assert.deepEqual(REGION_IDS.slice(LEGACY_REGION_COUNT), [...added, ...POST_PORT]);
+  assert.equal(REGION_COUNT, 125);
+  assert.ok(REGION_COUNT <= 128, 'the state texture holds 128 sided regions');
   assert.equal(REGION_COUNT, REGION_IDS.length);
   assert.equal(new Set(REGION_IDS).size, REGION_COUNT, 'ids unique');
   assert.equal(R.gpe, R.pallidum);
   assert.equal(R.dr, R.raphe);
-  assert.equal(R.pituitaryAnt, R.pituitary);
+  assert.equal(R.pituitary, 22, 'the pre-split name keeps index 22');
+  assert.equal(R.pituitaryGland, 22);
+  assert.equal(R.pituitaryAnt, R.pituitaryGland);
   for (const alias of Object.keys(REGION_ALIASES)) assert.ok(!REGION_IDS.includes(alias), `${alias} is an alias, not a new id`);
   for (const id of REGION_IDS) assert.match(id, /^[a-z][A-Za-z0-9]*$/, 'camelCase ASCII (A.3.2)');
 });
 
-test('PARENT: one legacy parent per region, identity on 0–32, relabel targets inherit their source', () => {
+test('PARENT: a legacy parent per region, identity on 0–32 and on the own-channel ids, relabel targets inherit their source', () => {
   assert.equal(PARENT.length, REGION_COUNT);
+  assert.deepEqual(OWN_CHANNEL_IDS, ['medianEminence', ...POST_PORT]);
   for (let r = 0; r < REGION_COUNT; r++) {
-    assert.ok(PARENT[r] < LEGACY_REGION_COUNT, `${REGION_IDS[r]} has a legacy parent`);
+    if (OWN_CHANNEL_IDS.includes(REGION_IDS[r])) assert.equal(PARENT[r], r, `${REGION_IDS[r]} has dopamine channels of its own`);
+    else assert.ok(PARENT[r] < LEGACY_REGION_COUNT, `${REGION_IDS[r]} has a legacy parent`);
     if (r < LEGACY_REGION_COUNT) assert.equal(PARENT[r], r);
   }
   for (const id of THAL_SUB) assert.equal(PARENT[R[id]], R.thalamus, id);
   assert.equal(PARENT[R.gpi], R.pallidum);
   assert.equal(PARENT[R.mnr], R.raphe);
-  assert.equal(PARENT[R.pituitaryPost], R.pituitary);
+  assert.equal(PARENT[R.pituitaryPost], R.pituitaryGland);
   for (const rule of RELABEL) {
     const targets = rule.rule === 'plane' ? [rule.above, rule.below] : [...rule.to, ...(rule.shell ? [rule.shell.id] : [])];
     for (const id of targets) assert.equal(PARENT[R[id]], rule.from, `${id} inherits from ${REGION_IDS[rule.from]}`);
   }
 });
 
-test('applyRelabel rewrites only the region float of pallidum, raphe, pituitary and thalamus stars', () => {
+test('applyRelabel rewrites only the region float of pallidum, raphe, pituitary-gland and thalamus stars', () => {
   const b = freshMedium(), before = b.neurons.slice();
   const res = applyRelabel(b);
   assert.ok(res.relabelled > 0);
@@ -110,10 +348,10 @@ test('applyRelabel rewrites only the region float of pallidum, raphe, pituitary 
     for (let k = 0; k < FLOATS; k++) if (k !== 8) assert.ok(Object.is(before[o + k], b.neurons[o + k]), `record ${i} field ${k} changed`);
     const from = before[o + 8], to = b.neurons[o + 8];
     if (from !== to) moved.set(`${REGION_IDS[from]}>${REGION_IDS[to]}`, (moved.get(`${REGION_IDS[from]}>${REGION_IDS[to]}`) || 0) + 1);
-    if (to === R.pituitary) assert.ok(b.neurons[o + 1] / MM > BRAIN_PARAMS.pituitarySplitY - 1e-4, 'anterior lobe: y > −2');
+    if (to === R.pituitaryGland) assert.ok(b.neurons[o + 1] / MM > BRAIN_PARAMS.pituitarySplitY - 1e-4, 'anterior lobe: y > −2');
     if (to === R.pituitaryPost) assert.ok(b.neurons[o + 1] / MM <= BRAIN_PARAMS.pituitarySplitY + 1e-4, 'posterior lobe: y ≤ −2');
   }
-  const allowed = new Set(['pallidum>gpi', 'raphe>mnr', 'pituitary>pituitaryPost', ...THAL_SUB.map((id) => `thalamus>${id}`)]);
+  const allowed = new Set(['pallidum>gpi', 'raphe>mnr', 'pituitaryGland>pituitaryPost', ...THAL_SUB.map((id) => `thalamus>${id}`)]);
   for (const key of moved.keys()) assert.ok(allowed.has(key), `unexpected relabel ${key}`);
   for (const key of allowed) assert.ok(moved.get(key) > 0, `${key} receives stars`);
   assert.ok(!Object.hasOwn(res.byRegion, 'thalamus'), 'every thalamus star goes to a subnucleus');
@@ -173,6 +411,8 @@ test('generateBrainExtra: deterministic, sized, floor-stratified', () => {
   // With the B.8 budgets the high-tier floor holds; the low and medium floors need more stars
   // than TIERS.extra gives for 77 nuclei (reported, see EXTRA_PARAMS).
   assert.ok(Math.min(...countPrefix(a, 10800)) >= 120);
+  // Since Phase 0a generateBrain draws the whole §7.3 insula, so the extension is empty.
+  assert.equal(a.insulaCount, 0);
   // Small and empty budgets.
   const small = generateBrainExtra({ neurons: 500 });
   const sc = small.structures.map((s) => s.counts.reduce((x, y) => x + y, 0));
@@ -181,20 +421,14 @@ test('generateBrainExtra: deterministic, sized, floor-stratified', () => {
   assert.equal(applyRelabel(a).relabelled, 0, 'the extra buffer is never relabelled');
 });
 
-test('extra stars lie inside their structure; the insula extension fills the new ribbon only', () => {
+test('extra stars lie inside their structure; no insula extension after the port', () => {
   const ex = generateBrainExtra({ neurons: 10800 });
   const byRegion = new Map(NUCLEI_V2.filter((d) => d.stars).map((d) => [d.region, d]));
   const tubeSamples = new Map();
   for (let i = 0; i < ex.neuronCount; i++) {
     const o = i * FLOATS, r = ex.neurons[o + 8];
     const p = [ex.neurons[o] / MM, ex.neurons[o + 1] / MM, ex.neurons[o + 2] / MM];
-    if (ex.neurons[o + 11] === KIND.CORTEX) {
-      const { c, r: rr } = EXTRA_PARAMS.insula, oc = EXTRA_PARAMS.insulaCoded;
-      assert.equal(r, R.insula);
-      assert.ok(((p[1] - oc.c[1]) / oc.r[1]) ** 2 + ((p[2] - oc.c[2]) / oc.r[2]) ** 2 > 1 - 1e-4, 'outside the coded footprint');
-      assert.ok(p[1] >= c[1] - rr[1] - 0.01 && p[1] <= c[1] + rr[1] + 0.01 && Math.abs(p[0]) <= c[0] + rr[0] + 0.01);
-      continue;
-    }
+    assert.notEqual(ex.neurons[o + 11], KIND.CORTEX, 'no insula-extension stars');
     const d = byRegion.get(r);
     const x = d.mid ? p[0] : Math.abs(p[0]);
     if (d.type === 'e') {
@@ -224,7 +458,7 @@ function tubeR2(p) {
   return ((dx * ax + dy * ay + dz * az) / q[3]) ** 2 + ((dx * bx + dy * by + dz * bz) / q[4]) ** 2;
 }
 const inLegacyNucleus = (p) => NUCLEI.some((d) => {
-  if (d.type === 'e') return ((Math.abs(p[0]) - d.c[0]) / d.r[0]) ** 2 + ((p[1] - d.c[1]) / d.r[1]) ** 2 + ((p[2] - d.c[2]) / d.r[2]) ** 2 <= 1;
+  if (d.type === 'e') return ellipsoidR2(d, Math.abs(p[0]), p[1], p[2]) <= 1;
   const f = spline(d.pts);
   for (let k = 0; k <= 200; k++) { const s = f(k / 200); if (len3(Math.abs(p[0]) - s[0], p[1] - s[1], p[2] - s[2]) <= s[3]) return true; }
   return false;
@@ -234,8 +468,13 @@ test('new structures lie inside the brain', () => {
   // The longitudinal fissure is a 1-mm modelling gap, so midline points are tested 2 mm off the midline.
   const hull = (p) => sdCerebrum(Math.max(Math.abs(p[0]), 2), p[1], p[2], 1);
   // §3.16: the olfactory bulb sits 2 mm below the frontal hull. The mammillary bodies and the TMN
-  // lie on the ventral surface of the diencephalon, behind the coded hypothalamus ellipsoid.
-  const OUTSIDE = { olfBulb: [0, 4], mammillary: [0, 6], tmn: [0, 6] };
+  // lie on the ventral surface of the diencephalon, behind the hypothalamus ellipsoid; with the
+  // post-port first BRAINSTEM point they sit on the anterior surface of the midbrain tube.
+  const OUTSIDE = { olfBulb: [0, 4] };
+  for (const id of ['mammillary', 'tmn']) {
+    const r2 = tubeR2(nodePos(id));
+    assert.ok(r2 > 1 && r2 <= 1.25, `${id} on the anterior surface of the brainstem tube (${r2.toFixed(2)})`);
+  }
   for (const d of NUCLEI_V2) {
     const p = nodePos(d.id);
     const inside = hull(p) < 0 || sdCerebellum(p[0], p[1], p[2]) < 0 || tubeR2(p) <= 1.25 || inLegacyNucleus(p);
@@ -247,22 +486,22 @@ test('new structures lie inside the brain', () => {
   }
   // Cerebellar nuclei inside the cerebellum (§3.16: 2.1–7.9 mm).
   for (const id of ['fastigial', 'interposed', 'flocculus', 'nodulus']) assert.ok(sdCerebellum(...V2[id].c) < -2, id);
-  // Brainstem centres inside the BRAINSTEM tube at r² ≤ 0.93 (§3.16); cochNuc protrudes laterally
-  // (1.22) and ic sits on the dorsal boundary as a tectal bump.
-  const LIMIT = { cochNuc: 1.25, ic: 1.05 };
+  // Brainstem centres inside the post-port BRAINSTEM tube at r² ≤ 0.93 (§3.16); cochNuc protrudes
+  // laterally (1.22), sc (1.17) and ic (1.04) sit on the dorsal boundary as tectal bumps.
+  const LIMIT = { cochNuc: 1.25, ic: 1.05, sc: 1.2 };
   for (const d of NUCLEI_V2.filter((n) => (n.group === 'bs' || n.group === 'raphe'))) {
     assert.ok(tubeR2(nodePos(d.id)) <= (LIMIT[d.id] ?? 0.95), `${d.id} inside the brainstem tube (${tubeR2(nodePos(d.id)).toFixed(2)})`);
   }
-  // Relay nuclei outside, subnuclei inside or on the edge of the coded thalamus (§3.17).
+  // Relay nuclei outside, subnuclei inside or on the edge of the post-port (15°-yawed) thalamus
+  // (§3.16: thalAnt 0.82, thalVMpo 1.01, thalRet 0.99; lgn 3.31, mgn 2.52, habenula 1.62).
   const th = NUCLEI.find((n) => n.id === 'thalamus');
-  const thR2 = (p) => ((p[0] - th.c[0]) / th.r[0]) ** 2 + ((p[1] - th.c[1]) / th.r[1]) ** 2 + ((p[2] - th.c[2]) / th.r[2]) ** 2;
+  const thR2 = (p) => ellipsoidR2(th, ...p);
   for (const id of ['lgn', 'mgn', 'habenula']) assert.ok(thR2(nodePos(id)) > 1.3, `${id} outside the thalamus`);
   for (const id of THAL_SUB) assert.ok(thR2(nodePos(id)) <= 1.25, `${id} inside the thalamus`);
+  assert.ok(Math.abs(thR2(nodePos('thalAnt')) - 0.82) < 0.02, `thalAnt r² ${thR2(nodePos('thalAnt')).toFixed(3)} (§3.16: 0.82)`);
+  // gpe/gpi centres in or on the lateral edge of the post-port pallidum (gpe r² 1.16).
   const pal = NUCLEI.find((n) => n.id === 'pallidum');
-  for (const id of ['gpe', 'gpi']) {
-    const c = V2[id].c;
-    assert.ok(((c[0] - pal.c[0]) / pal.r[0]) ** 2 + ((c[1] - pal.c[1]) / pal.r[1]) ** 2 + ((c[2] - pal.c[2]) / pal.r[2]) ** 2 < 1, `${id} centre in the pallidum`);
-  }
+  for (const id of ['gpe', 'gpi']) assert.ok(ellipsoidR2(pal, ...V2[id].c) < 1.2, `${id} centre at the pallidum`);
 });
 
 test('new nuclei overlap only where §3.16 accepts it', () => {
@@ -311,9 +550,11 @@ test('cortical areas: 46 patches inside the cerebrum; areaIds tags cortical star
     per[ids[i]]++;
   }
   AREAS.forEach((a, i) => assert.ok(per[i] >= 20, `${a.id} has stars (${per[i]})`));
-  const ex = generateBrainExtra({ neurons: 5850 });
-  const exIds = areaIds(ex);
-  assert.ok(exIds.some((v) => v === AREAS.findIndex((a) => a.id === 'insAnt')), 'the insula extension carries insAnt');
+  // The anterior insula is drawn by generateBrain since the §7.3 ribbon (y up to +23).
+  const insAnt = AREAS.findIndex((a) => a.id === 'insAnt');
+  let ant = 0;
+  for (let i = 0; i < ids.length; i++) if (ids[i] === insAnt && b.neurons[i * FLOATS + 8] === R.insula && b.neurons[i * FLOATS + 1] / MM > 8) ant++;
+  assert.ok(ant >= 20, `generateBrain insula stars in front of y +8 carry insAnt (${ant})`);
 });
 
 test('BRAIN_TRACTS reproduce the §3.16 route lengths and end at their nodes', () => {
@@ -361,7 +602,7 @@ test('PORTS: the 21 ports of A.3.3 with networks, brain-side nodes and positions
 
 test('MIDLINE flags the single midline structures (A.2)', () => {
   assert.equal(MIDLINE.length, REGION_COUNT);
-  const mid = ['pituitary', 'pituitaryPost', 'pag', 'raphe', 'mnr', 'rmg', 'rpa', 'rob', 'mnpo', 'ovlt', 'sfo', 'areaPostrema', 'medianEminence', 'pineal', 'nodulus'];
+  const mid = ['pituitaryGland', 'pituitaryPost', 'pag', 'raphe', 'mnr', 'rmg', 'rpa', 'rob', 'mnpo', 'ovlt', 'sfo', 'areaPostrema', 'medianEminence', 'pineal', 'nodulus'];
   for (let r = 0; r < REGION_COUNT; r++) assert.equal(MIDLINE[r], mid.includes(REGION_IDS[r]) ? 1 : 0, REGION_IDS[r]);
 });
 

@@ -18,11 +18,29 @@ Double-click `start.bat` — it starts a local server and opens `http://127.0.0.
 (requires Python). Or:
 
 ```bash
-python -m http.server 8768 --bind 127.0.0.1
+python3 -m http.server 8768 --bind 127.0.0.1
 ```
 
-Requires WebGL2 (Chrome, Edge, Firefox). Optional URL parameters: `?quality=low|medium|high|ultra`
-and `?view=whole|cutaway|dopamine`.
+Requires WebGL2 (Chrome, Edge, Firefox). Optional URL parameters: `?quality=low|medium|high|ultra`,
+`?view=whole|cutaway|dopamine` and `?seed=<n>`.
+
+## Tests and type check
+From `brain-system/`, with Node 24 or later:
+
+```bash
+npm test
+```
+
+runs the headless suite (`node --test`). The simulation core is type-checked without a build step:
+`src/sim/contracts.d.ts` states the contracts (graph plugins, nodes and edges, the kernel API,
+stimuli, scenarios, interventions) and the files that start with `// @ts-check` are checked
+against them. The browser never loads the `.d.ts` file and nothing is compiled:
+
+```bash
+npm run typecheck
+```
+
+`typecheck` runs `tsc -p .` and needs TypeScript's `tsc` on PATH (it is not an npm dependency).
 
 ## Controls
 - **Demo** mode (default) plays a scripted stimulation and repeats the cycle (about 2 minutes).

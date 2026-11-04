@@ -1,3 +1,5 @@
+> **Superseded** by `.handoff/STATE-AT-PAUSE.md` (the state on 4 November 2026 and the remaining plan) and `.handoff/RESUME-ON-WINDOWS.md`; read this file only where STATE-AT-PAUSE.md points to it.
+
 ultracode — use multi-agent workflows (the Workflow tool) for every substantive step of this task.
 
 # Handoff: continue the Brain System build (galaxy workspace)

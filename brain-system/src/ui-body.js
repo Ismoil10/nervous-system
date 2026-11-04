@@ -146,13 +146,13 @@ export const SENSES = [
   { id: 'hearing', label: 'Hearing', brainOnly: true, sites: ['cochlea'], modes: [
     { id: 'click', label: 'Click', p: LEVEL, dur: { fixed: 0.1 } },
     { id: 'tone', label: 'Tone', p: LEVEL, dur: D(10, 2000, 200),
-      extra: [{ key: 'freqHz', label: 'Frequency', unit: 'Hz', min: 125, max: 8000, def: 1000, log: true }, RISE] },
+      extra: [{ key: 'freq', label: 'Frequency', unit: 'Hz', min: 125, max: 8000, def: 1000, log: true }, RISE] },
     { id: 'noise', label: 'Noise', p: LEVEL, dur: D(10, 2000, 200), extra: [RISE] },
   ] },
   { id: 'touch', label: 'Touch', sites: 'skin', modes: [
     { id: 'press', label: 'Press', p: P('Force', 'mN', 0.1, 10000, 50, { log: true, marks: [0.7] }), dur: D(50, 5000, 1000) },
     { id: 'vibration', label: 'Vibration', p: P('Amplitude', 'µm', 0.1, 1000, 10, { log: true }), dur: D(100, 5000, 1000),
-      extra: [{ key: 'freqHz', label: 'Frequency', unit: 'Hz', min: 5, max: 400, def: 250, step: 1 }] },
+      extra: [{ key: 'freq', label: 'Frequency', unit: 'Hz', min: 5, max: 400, def: 250, step: 1 }] },
     { id: 'stroke', label: 'Stroke', p: P('Velocity', 'cm/s', 0.3, 30, 3, { step: 0.1, marks: [1, 10] }), dur: D(500, 5000, 2000) },
   ] },
   { id: 'pain', label: 'Pain', sites: 'skin', modes: [
@@ -164,13 +164,13 @@ export const SENSES = [
   ] },
   { id: 'temperature', label: 'Temperature', sites: 'skin', modes: [
     { id: 'warm', label: 'Warm', p: P('Contact', '°C', 15, 45, 40, { step: 0.5, marks: SKIN_T }), dur: D(1000, 60000, 10000),
-      extra: [{ key: 'rampCps', label: 'Ramp', unit: '°C/s', min: 0.5, max: 5, def: 1, step: 0.5 }] },
+      extra: [{ key: 'ramp', label: 'Ramp', unit: '°C/s', min: 0.5, max: 5, def: 1, step: 0.5 }] },
     { id: 'cool', label: 'Cool', p: P('Contact', '°C', 15, 45, 25, { step: 0.5, marks: SKIN_T }), dur: D(1000, 60000, 10000),
-      extra: [{ key: 'rampCps', label: 'Ramp', unit: '°C/s', min: 0.5, max: 5, def: 1, step: 0.5 }] },
+      extra: [{ key: 'ramp', label: 'Ramp', unit: '°C/s', min: 0.5, max: 5, def: 1, step: 0.5 }] },
   ] },
   { id: 'smell', label: 'Smell', brainOnly: true, sites: ['olfEpith'], modes: [
     { id: 'odour', label: 'Odour', p: P('Concentration', 'log₁₀ × threshold', 0, 8, 2, { step: 0.1, marks: [0, 4] }), dur: D(200, 10000, 2000),
-      extra: [{ key: 'class', label: 'Odour class', options: [['food', 'Food'], ['neutral', 'Neutral'], ['aversive', 'Aversive']], def: 'food' }] },
+      extra: [{ key: 'cls', label: 'Odour class', options: [['food', 'Food'], ['neutral', 'Neutral'], ['aversive', 'Aversive']], def: 'food' }] },
   ] },
   { id: 'taste', label: 'Taste', brainOnly: true, sites: ['tongueAnt', 'tonguePost'], modes: ['sweet', 'salty', 'sour', 'bitter', 'umami']
     .map((q) => ({ id: q, label: q[0].toUpperCase() + q.slice(1),
@@ -184,7 +184,7 @@ export const SENSES = [
   { id: 'proprioception', label: 'Proprioception', modes: [
     { id: 'imposedMovement', label: 'Imposed movement', sites: 'joint', p: P('Movement', 'deg', 0, 30, 5, { step: 0.5, marks: [1] }),
       dur: { derived: true, text: 'Set by angle and velocity' },
-      extra: [{ key: 'velDps', label: 'Velocity', unit: 'deg/s', min: 1, max: 100, def: 10, log: true }] },
+      extra: [{ key: 'velocity', label: 'Velocity', unit: 'deg/s', min: 1, max: 100, def: 10, log: true }] },
     { id: 'tendonTap', label: 'Tendon tap', sites: 'tendon', p: P('Stretch', 'mm', 0.5, 5, 2, { step: 0.1 }), dur: { fixed: 10 } },
   ] },
   { id: 'interoception', label: 'Interoception', modes: [
@@ -220,7 +220,9 @@ export const SITE_GROUPS = [
   { label: 'Skin, face and trunk', kind: 'skin', sites: [
     S('foreheadV1', 'Forehead (V1)'), S('cheekV2', 'Cheek (V2)'), S('chinV3', 'Chin (V3)'),
     S('dermatome.T4', 'Upper chest (T4)'), S('dermatome.T6', 'Xiphoid level (T6)'), S('umbilicus', 'Umbilicus (T10)', []),
-    S('dermatome.T12', 'Lower abdomen (T12)'), S('dermatome.T6.posterior', 'Posterior thorax (T6)')] },
+    S('dermatome.T12', 'Lower abdomen (T12)')] },
+  // §13.12 also lists the posterior thorax at T6; geometry.js and stimuli.js have no posterior T6 site
+  // yet, so the entry waits for one (a click on the back resolves to dermatome.T6 through picking).
   { label: 'Skin, lower limb', kind: 'skin', sites: [
     S('dermatome.L2', 'Anterior thigh (L2)'), S('dermatome.L3', 'Medial knee (L3)'), S('dermatome.L4', 'Medial malleolus (L4)'),
     S('dermatome.L5', 'Dorsum of foot (L5)'), S('heel', 'Heel'), S('footSole', 'Sole of foot'), S('bigToe', 'Big toe'),
@@ -459,6 +461,7 @@ export class BodyHud {
     this.nets = Object.fromEntries(NETWORKS.map((n) => [n.id, true]));
     this.intervention = 'none';
     this.scenarioId = this.caps.scenario ? null : 'orgasm';
+    this.scnBlocked = {};          // id → reason, for scenarios the simulation does not provide (syncSettings)
     this.scn = { active: !this.caps.scenario, tH: 0, spanH: 0, stage: '', ticksKey: '', fillK: -1 };
     this.paused = false;
     this.time = { locked: false, kh: 1, source: 'adaptive', dragging: false };
@@ -790,8 +793,8 @@ export class BodyHud {
     const m = this._mode(), d = m.dur;
     if (this.durSpec) return valueFromSlider(this.durSpec, this.el.duration.value);
     if (d.derived) {                       // imposed movement: angle ÷ velocity (§5.14)
-      const vel = this.el.params.querySelector('[data-key="velDps"]');
-      const v = vel ? valueFromSlider(m.extra.find((x) => x.key === 'velDps'), vel.value) : 10;
+      const vel = this.el.params.querySelector('[data-key="velocity"]');
+      const v = vel ? valueFromSlider(m.extra.find((x) => x.key === 'velocity'), vel.value) : 10;
       return Math.round((1000 * valueFromSlider(m.p, this.el.intensity.value)) / Math.max(1e-6, v));
     }
     return d.fixed ?? null;
@@ -1056,6 +1059,7 @@ export class BodyHud {
     for (const sc of SCENARIOS) {
       const r = e.radios[sc.id];
       let why = scenarioAvailability(sc.id, this.bodyMode, this.nets);
+      if (!why && this.scnBlocked[sc.id]) why = this.scnBlocked[sc.id];
       if (!why && !this.caps.scenario && sc.id !== this.scenarioId) why = 'Not available in this build';
       r.disabled = !!why;
       r.closest('label').title = why;
@@ -1066,7 +1070,7 @@ export class BodyHud {
   _showScenarioControls() {
     const e = this.el, k = this.k;
     const sc = scenarioById(this.scenarioId);
-    const available = !!sc && !scenarioAvailability(sc.id, this.bodyMode, this.nets);
+    const available = !!sc && !scenarioAvailability(sc.id, this.bodyMode, this.nets) && !this.scnBlocked[sc.id];
     const active = this.scn.active;
     k.setText(e.play, active ? (this.paused ? 'Resume' : 'Pause') : 'Play');
     e.play.setAttribute('aria-pressed', String(active && !this.paused));
@@ -1302,6 +1306,7 @@ export class BodyHud {
       this.el.intervention.value = this.intervention;
       this._showInterventionParams();
     }
+    if (o.scenarioUnavailable) { this.scnBlocked = { ...o.scenarioUnavailable }; this._applyScenarioAvailability(); }
     if (o.scenario !== undefined) this._showScenario(o.scenario);
     if (o.kh != null || o.timeLock !== undefined) {
       if (o.kh != null && Number.isFinite(Number(o.kh))) this.time.kh = clampKh(Number(o.kh));

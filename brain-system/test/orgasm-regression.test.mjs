@@ -1,13 +1,14 @@
 // Orgasm scenario regression (research/ANALYSIS.md A.8 #21, §11.14, §12.13, B.13, B.14).
 //
 // 1. Golden traces: the legacy ResponseModel.update(dt) path, with its seeded stream, reproduces
-//    test/golden/orgasm-legacy.json bit for bit. The golden file was recorded from response.js as
-//    it was before the Phase 0 refactor, with Math.random replaced by mulberry32(seed), so this
-//    proves that injecting the stream and extracting stimulusFor/advanceHuman changed nothing.
-//    After an intentional change (the DOPAMINE.md §9.8 port) re-record with
+//    test/golden/orgasm-legacy.json bit for bit. Phase 0a (B.15) re-recorded the file from the
+//    post-port legacy path (response.js after the DOPAMINE.md §9.8 port: 0.05-s grid, ONSET,
+//    closed-loop dopamine with onStep(h, prev)), so it now guards the ported model against
+//    unintended change. After an intentional change re-record with
 //    UPDATE_GOLDEN=1 node --test test/orgasm-regression.test.mjs
 // 2. Legacy vs adapter: SimClock (delegate) + OrgasmAdapter against update(dt), same frame-time
-//    sequence and seed, identical ResponseModel and DopamineModel state at every human substep.
+//    sequence and seed, identical ResponseModel and DopamineModel state at every human substep. The
+//    frame that enters ONSET ends at the scenario's own tH and kh (SimClock.settleDelegate).
 // 3. Adapter semantics: command ring, climax flag, dormancy, stop(), vitals pass-through, the
 //    brain-only and neuroendocrine-off forms, and a user lock replacing the delegate.
 
@@ -109,10 +110,10 @@ const MANUAL_SCRIPT = [
   [70, (m) => m.setLevel(0.8)],
 ];
 const RUNS = [
-  { id: 'demo-single', seed: 1, fps: 60, seconds: 145, mode: 'demo', profile: 'single', hypothesis: 'satiety', jitter: 11 },
-  { id: 'demo-multiple', seed: 2, fps: 30, seconds: 90, mode: 'demo', profile: 'multiple', hypothesis: 'sustained', jitter: 12 },
-  { id: 'manual-single', seed: 3, fps: 144, seconds: 80, mode: 'manual', profile: 'single', hypothesis: 'satiety', jitter: 13, script: true },
-  { id: 'demo-noclimax', seed: 5, fps: 60, seconds: 100, mode: 'demo', profile: 'noclimax', hypothesis: 'satiety', jitter: 15 },
+  { id: 'demo-single', seed: 1, fps: 60, seconds: 145, mode: 'demo', profile: 'single', hypothesis: 'sustained', jitter: 11 },
+  { id: 'demo-multiple', seed: 2, fps: 30, seconds: 90, mode: 'demo', profile: 'multiple', hypothesis: 'dip', jitter: 12 },
+  { id: 'manual-single', seed: 3, fps: 144, seconds: 80, mode: 'manual', profile: 'single', hypothesis: 'dip', jitter: 13, script: true },
+  { id: 'demo-noclimax', seed: 5, fps: 60, seconds: 100, mode: 'demo', profile: 'noclimax', hypothesis: 'sustained', jitter: 15 },
 ];
 const WINDOW_S = 2;
 const SNAP_EVERY = 5;
@@ -146,7 +147,7 @@ function traceLegacy(run, model, dopamine) {
   const dts = frameTimes(n, run.fps, run.jitter);
   const script = scriptFrames(run);
   const sub = new Hasher(), vis = new Hasher();
-  model.onStep = (h) => { dopamine.step(h, model); sub.addAll(humanState(model, dopamine)); };
+  model.onStep = (h, prev) => { dopamine.step(h, model, prev); sub.addAll(humanState(model, dopamine)); };
   const win = Math.round(WINDOW_S * run.fps), windows = [];
   for (let f = 0; f < n; f++) {
     script.get(f)?.(model);
@@ -229,7 +230,7 @@ describe('adapter path equals the legacy path at every human substep (A.8 #21, B
 
       const { model: mL, dopamine: dL } = legacyModels(run);
       let subL = [];
-      mL.onStep = (h) => { dL.step(h, mL); subL.push(humanState(mL, dL)); };
+      mL.onStep = (h, prev) => { dL.step(h, mL, prev); subL.push(humanState(mL, dL)); };
 
       // Constructed with another seed and the default profile: start() must reseed and reconfigure.
       const mA = new ResponseModel({ seed: 987 });
@@ -245,10 +246,13 @@ describe('adapter path equals the legacy path at every human substep (A.8 #21, B
       for (let f = 0; f < n; f++) {
         const fn = script.get(f);
         if (fn) { fn(mL); fn(mA); }
+        const tL0 = mL.tHuman;
         const clk = mL.update(dts[f]);
         const s = clock.advance(dts[f]);
-        adapter.advance(dts[f], s.t0H, s.h);
-        assert.ok(Object.is(s.kh, clk.kh), `frame ${f}: kh ${s.kh} vs legacy ${clk.kh}`);
+        const t1 = adapter.advance(dts[f], s.t0H, s.h, s.source);
+        clock.settleDelegate(t1, adapter.kh);
+        assert.ok(Object.is(clock.kh, clk.kh), `frame ${f}: kh ${clock.kh} vs legacy ${clk.kh}`);
+        assert.ok(Math.abs((clock.tH - s.t0H) - (mL.tHuman - tL0)) <= 1e-9 * Math.max(1, mL.tHuman), `frame ${f}: human time of the frame`);
         assert.equal(clock.source, 'delegate');
         assert.equal(subA.length, subL.length, `frame ${f}: substep count`);
         for (let k = 0; k < subL.length; k++) {
@@ -259,8 +263,8 @@ describe('adapter path equals the legacy path at every human substep (A.8 #21, B
         subL = []; subA = [];
         mL.events.length = 0; mA.events.length = 0;
         dL.updateVisuals(dts[f], mL, clk.kh);
-        dA.updateVisuals(dts[f], mA, s.kh);
-        const d = firstDiff(visualState(mL, dL, clk.kh, true), visualState(mA, dA, s.kh, true));
+        dA.updateVisuals(dts[f], mA, clock.kh);
+        const d = firstDiff(visualState(mL, dL, clk.kh, true), visualState(mA, dA, clock.kh, true));
         if (d) assert.fail(`${run.id}: frame ${f}, screen-time state: ${d}`);
       }
       assert.equal(adapter.commands.written, substeps, 'one command record per substep');
@@ -277,7 +281,13 @@ function makeAdapter(opts = {}) {
   const clock = new SimClock({ tH: 100 });
   adapter.start({ mode: 'demo', profile: 'single', seed: 1, ...opts });
   clock.delegate(adapter.clock);
-  const frame = (dt = 1 / 60) => { const s = clock.advance(dt); adapter.advance(dt, s.t0H, s.h); response.events.length = 0; return s; };
+  const frame = (dt = 1 / 60) => {
+    const s = clock.advance(dt);
+    const t1H = adapter.advance(dt, s.t0H, s.h, s.source);
+    clock.settleDelegate(t1H, adapter.kh);
+    response.events.length = 0;
+    return { ...s, t1H: clock.tH };
+  };
   return { response, dopamine, adapter, clock, frame };
 }
 
@@ -288,7 +298,9 @@ describe('OrgasmAdapter semantics (§11.14, B.4, B.13)', () => {
     for (let f = 0; f < 600; f++) {
       const s = frame(f % 50 === 7 ? 0 : 1 / 60);
       const ring = adapter.commands;
-      assert.ok(ring.written > prevWritten, 'each frame writes at least one record');
+      // A frame that passes human time writes at least one record; a paused frame writes none.
+      if (s.t1H > s.t0H) assert.ok(ring.written > prevWritten, 'each running frame writes at least one record');
+      else { assert.equal(ring.written, prevWritten, 'a paused frame writes no record'); continue; }
       const last = ring.latest();
       assert.equal(last.tH, s.t1H);
       const d = response.drive();
@@ -316,16 +328,16 @@ describe('OrgasmAdapter semantics (§11.14, B.4, B.13)', () => {
     for (let i = 1; i < ring.size; i++) assert.ok(ring.get(i).tH >= ring.get(i - 1).tH);
   });
 
-  test('climax is true only in inevitability and orgasm while active', () => {
+  test('climax is true only in onset and orgasm while active', () => {
     const { adapter, response, frame } = makeAdapter();
     const seen = new Set();
     for (let f = 0; f < 80 * 60; f++) {
       frame();
-      const inClimax = response.phase === 'inevitability' || response.phase === 'orgasm';
+      const inClimax = response.phase === 'onset' || response.phase === 'orgasm';
       assert.equal(adapter.climax, inClimax);
       if (inClimax) seen.add(response.phase);
     }
-    assert.deepEqual([...seen].sort(), ['inevitability', 'orgasm']);
+    assert.deepEqual([...seen].sort(), ['onset', 'orgasm']);
     adapter.stop();
     assert.equal(adapter.climax, false);
   });

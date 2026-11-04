@@ -4,12 +4,24 @@
 // then measure real frame times and adjust the render scale first, then the tier.
 
 // Per tier: neuron stars, dopamine axon and release-site points drawn (cell bodies and lanterns
-// are always drawn in full), bloom levels, device-pixel-ratio cap and initial render scale.
+// are always drawn in full), bloom levels, device-pixel-ratio cap and initial render scale. The
+// whole-body build adds (research/ANALYSIS.md B.8, §13.4, §8.2, §11.7):
+//   extra        stars of the separate new-nuclei buffer (generateBrainExtra), on top of `neurons` (B.8)
+//   body         body points (generateBody; the §13.4 class budgets sum to it) (B.8)
+//   bodyLod      finest body LOD generated: 1 skips the fine branches (LOD 2, ≥ 0.8 px/mm) [model] (§13.4)
+//   packets      visible packet pool (§13.4: 128 / 192 / 256 / 256; ≤ 256 texture capacity, B.7)
+//   gutSegments  displayed gut cells (§8.2: 4-cm cells, N = 125, on the two lowest tiers; 2-cm, N = 250, above)
+//   kernelMs     kernel CPU budget per frame: ≤ 2 ms on the low tier, ≤ 1 ms otherwise (B.9, §11.7)
+// The model itself is tier-independent (B.8): every tier runs the same plugins on the same grids.
 export const TIERS = [
-  { name: 'low',    label: 'Low',    neurons: 60000,  axon: 6000,  vari: 4000,  bloomLevels: 4, maxDpr: 1.0,  scale: 0.85 },
-  { name: 'medium', label: 'Medium', neurons: 130000, axon: 10000, vari: 7000,  bloomLevels: 5, maxDpr: 1.25, scale: 1.0 },
-  { name: 'high',   label: 'High',   neurons: 240000, axon: 16000, vari: 11000, bloomLevels: 6, maxDpr: 1.5,  scale: 1.0 },
-  { name: 'ultra',  label: 'Ultra',  neurons: 400000, axon: 24000, vari: 16000, bloomLevels: 6, maxDpr: 2.0,  scale: 1.0 },
+  { name: 'low',    label: 'Low',    neurons: 60000,  axon: 6000,  vari: 4000,  bloomLevels: 4, maxDpr: 1.0,  scale: 0.85,
+    extra: 3200,  body: 32500,  bodyLod: 1, packets: 128, gutSegments: 125, kernelMs: 2 },
+  { name: 'medium', label: 'Medium', neurons: 130000, axon: 10000, vari: 7000,  bloomLevels: 5, maxDpr: 1.25, scale: 1.0,
+    extra: 6500,  body: 63000,  bodyLod: 2, packets: 192, gutSegments: 125, kernelMs: 1 },
+  { name: 'high',   label: 'High',   neurons: 240000, axon: 16000, vari: 11000, bloomLevels: 6, maxDpr: 1.5,  scale: 1.0,
+    extra: 10800, body: 104000, bodyLod: 2, packets: 256, gutSegments: 250, kernelMs: 1 },
+  { name: 'ultra',  label: 'Ultra',  neurons: 400000, axon: 24000, vari: 16000, bloomLevels: 6, maxDpr: 2.0,  scale: 1.0,
+    extra: 18000, body: 158000, bodyLod: 2, packets: 256, gutSegments: 250, kernelMs: 1 },
 ];
 
 export function readGpuName(gl) {

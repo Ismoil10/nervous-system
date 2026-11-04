@@ -204,7 +204,19 @@ export class SimClock {
     this.limited = !!cpuOver;
     this.khEff = kh;
     this._t0H = t0H; this._dtS = dt;
-    return { t0H, t1H: this.tH, h, kh };
+    return { t0H, t1H: this.tH, h, kh, source: this.source };
+  }
+
+  // The delegate's own end of frame (B.13, DOPAMINE.md §9.3): after the DOPAMINE.md §9.8 port a
+  // transition into ONSET runs the rest of the frame at the ONSET clock, so the scenario reaches
+  // less human time than dt·kh and ends the frame at another kh. The adapter reports both; this
+  // frame's tH and kh become the scenario's. Ignored unless the delegate holds the clock.
+  settleDelegate(tReachedH, khEnd = this.kh) {
+    if (this.source !== 'delegate') return this.tH;
+    this.tH = Math.max(this._t0H, tReachedH);
+    this.kh = this.khEff = khEnd;
+    if (khEnd > 0) this.ramp = new LogRamp(khEnd);
+    return this.tH;
   }
 
   // Time slicing (§11.7): commit the tH the kernel reached this frame. Returns the committed tH.

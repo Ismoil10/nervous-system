@@ -1,1250 +1,1274 @@
 {
-  "anger-galaxy/src/anger.js": {
-    "mtime": 1793387585.8188906,
-    "seen": 1793433902.308195,
-    "ast_hash": "eb07d8216b338d06cc62fb5b18759bc1",
-    "semantic_hash": "eb07d8216b338d06cc62fb5b18759bc1"
-  },
-  "anger-galaxy/src/astro.js": {
-    "mtime": 1793387851.0352268,
-    "seen": 1793433902.308195,
-    "ast_hash": "f7f446ea8bcc9130211cd1b950bd2ae6",
-    "semantic_hash": "f7f446ea8bcc9130211cd1b950bd2ae6"
-  },
-  "anger-galaxy/src/camera.js": {
-    "mtime": 1793387598.6956832,
-    "seen": 1793433902.308195,
-    "ast_hash": "f13ce6e1ee0053d967a43a8b9b88dd59",
-    "semantic_hash": "f13ce6e1ee0053d967a43a8b9b88dd59"
-  },
-  "anger-galaxy/src/events.js": {
-    "mtime": 1793387628.2442596,
-    "seen": 1793433902.308195,
-    "ast_hash": "e8386c7d5a4c8e6883dca057a260af55",
-    "semantic_hash": "e8386c7d5a4c8e6883dca057a260af55"
-  },
-  "anger-galaxy/src/galaxy-model.js": {
-    "mtime": 1793387808.776052,
-    "seen": 1793433902.308195,
-    "ast_hash": "6cab5c142e3e8e5763a92d6ef3fb2759",
-    "semantic_hash": "6cab5c142e3e8e5763a92d6ef3fb2759"
-  },
-  "anger-galaxy/src/gl-utils.js": {
-    "mtime": 1793387641.3613386,
-    "seen": 1793433902.308195,
-    "ast_hash": "2d645880a186f7e8efb554503566552b",
-    "semantic_hash": "2d645880a186f7e8efb554503566552b"
-  },
-  "anger-galaxy/src/main.js": {
-    "mtime": 1793432134.2366114,
-    "seen": 1793433902.308195,
-    "ast_hash": "9f7d72c82143f865c2652634532c0c5a",
-    "semantic_hash": "9f7d72c82143f865c2652634532c0c5a"
-  },
-  "anger-galaxy/src/performance.js": {
-    "mtime": 1793387597.0168784,
-    "seen": 1793433902.308195,
-    "ast_hash": "22b86069b0248a280ebbb1ab557b7caa",
-    "semantic_hash": "22b86069b0248a280ebbb1ab557b7caa"
-  },
-  "anger-galaxy/src/renderer.js": {
-    "mtime": 1793387849.3513603,
-    "seen": 1793433902.308195,
-    "ast_hash": "852c772bc35e615f5ce921f0a70b43e6",
-    "semantic_hash": "852c772bc35e615f5ce921f0a70b43e6"
-  },
-  "anger-galaxy/src/shaders.js": {
-    "mtime": 1793387849.3513603,
-    "seen": 1793433902.308195,
-    "ast_hash": "09d75a8e2a94f870da3fc1899467374e",
-    "semantic_hash": "09d75a8e2a94f870da3fc1899467374e"
-  },
-  "anger-galaxy/src/ui.js": {
-    "mtime": 1793432131.5491498,
-    "seen": 1793433902.308195,
-    "ast_hash": "01b1c54f001ea93958f851684636490a",
-    "semantic_hash": "01b1c54f001ea93958f851684636490a"
-  },
-  "anger-galaxy/README.md": {
-    "mtime": 1793432310.1245368,
-    "seen": 1793433902.308195,
-    "ast_hash": "666d43abbe95ae41071e509a5d72cd34",
-    "semantic_hash": "666d43abbe95ae41071e509a5d72cd34"
-  },
-  "anger-galaxy/index.html": {
-    "mtime": 1793432120.808498,
-    "seen": 1793433902.308195,
-    "ast_hash": "8bb5e03e800afc5f960ddd029983a404",
-    "semantic_hash": "8bb5e03e800afc5f960ddd029983a404"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Anger.md": {
-    "mtime": 1793384733.7182753,
-    "seen": 1793433902.308195,
-    "ast_hash": "05fb60edce6e74d5711ce3b7c4c1d268",
-    "semantic_hash": "05fb60edce6e74d5711ce3b7c4c1d268"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Density_wave_theory.md": {
-    "mtime": 1793384723.5872228,
-    "seen": 1793433902.308195,
-    "ast_hash": "de193baba55a3c641aca92f49191b144",
-    "semantic_hash": "de193baba55a3c641aca92f49191b144"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Diffraction_spike.md": {
-    "mtime": 1793384731.6655245,
-    "seen": 1793433902.308195,
-    "ast_hash": "af911a19c73bdcc41a3c57863329bc64",
-    "semantic_hash": "af911a19c73bdcc41a3c57863329bc64"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Galaxy_rotation_curve.md": {
-    "mtime": 1793384725.5454504,
-    "seen": 1793433902.308195,
-    "ast_hash": "a3124bf2acb89c3685e1cf68215ca1bd",
-    "semantic_hash": "a3124bf2acb89c3685e1cf68215ca1bd"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_H_II_region.md": {
-    "mtime": 1793384728.889982,
-    "seen": 1793433902.308195,
-    "ast_hash": "d8c03c188e26b2c00d85ae4190289031",
-    "semantic_hash": "d8c03c188e26b2c00d85ae4190289031"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Initial_mass_function.md": {
-    "mtime": 1793384720.0920155,
-    "seen": 1793433902.308195,
-    "ast_hash": "3a8903cefc267d16f876a92ea09403b1",
-    "semantic_hash": "3a8903cefc267d16f876a92ea09403b1"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Ring_galaxy.md": {
-    "mtime": 1793384730.3425047,
-    "seen": 1793433902.308195,
-    "ast_hash": "a025e1bc3998a8fa3a305ad56f6ac839",
-    "semantic_hash": "a025e1bc3998a8fa3a305ad56f6ac839"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Spiral_galaxy.md": {
-    "mtime": 1793384722.0008576,
-    "seen": 1793433902.308195,
-    "ast_hash": "cc0a3415f32d6e4ec62af26c8b3d3482",
-    "semantic_hash": "cc0a3415f32d6e4ec62af26c8b3d3482"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Starburst_galaxy.md": {
-    "mtime": 1793384727.1193047,
-    "seen": 1793433902.308195,
-    "ast_hash": "6f46a482c5d6d1d22b51e16ad2f93139",
-    "semantic_hash": "6f46a482c5d6d1d22b51e16ad2f93139"
-  },
-  "anger-galaxy/raw/en_wikipedia_org_api_rest_v1_page_html_Stellar_classification.md": {
-    "mtime": 1793384718.152861,
-    "seen": 1793433902.308195,
-    "ast_hash": "29018a2dde359924183c9977f5df72a1",
-    "semantic_hash": "29018a2dde359924183c9977f5df72a1"
-  },
-  "anger-galaxy/research/ANALYSIS.md": {
-    "mtime": 1793432316.9725738,
-    "seen": 1793433902.308195,
-    "ast_hash": "fbbce9f64ee00cf04f61d930bcdc13e0",
-    "semantic_hash": "fbbce9f64ee00cf04f61d930bcdc13e0"
-  },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Human_sexual_response_cycle.md": {
-    "mtime": 1793432587.407823,
-    "seen": 1793433902.308195,
-    "ast_hash": "5c8d2c4b468e8ab8ed58e1db8766ba3b",
-    "semantic_hash": "5c8d2c4b468e8ab8ed58e1db8766ba3b"
+    "mtime": 1793694176.5582926,
+    "seen": 1793781878.1788,
+    "ast_hash": "719cdcc5c1dae086a1da33a80a2b9fa5",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Mesolimbic_pathway.md": {
-    "mtime": 1793432602.0992444,
-    "seen": 1793433902.308195,
-    "ast_hash": "d42502c9275faf8c37fff254a43650b8",
-    "semantic_hash": "d42502c9275faf8c37fff254a43650b8"
+    "mtime": 1793694176.559784,
+    "seen": 1793781878.178808,
+    "ast_hash": "85bff3e8a731cac67b48d439d17e10fc",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Nucleus_accumbens.md": {
-    "mtime": 1793432652.1139624,
-    "seen": 1793433902.308195,
-    "ast_hash": "788f286812ed04f889861dc5e2f45c4a",
-    "semantic_hash": "788f286812ed04f889861dc5e2f45c4a"
+    "mtime": 1793694176.5617135,
+    "seen": 1793781878.178815,
+    "ast_hash": "31980175b6772da0cccdba7beba9feb1",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Orgasm.md": {
-    "mtime": 1793432585.6254144,
-    "seen": 1793433902.308195,
-    "ast_hash": "7906e6b015db77984daa2a3dd355975e",
-    "semantic_hash": "7906e6b015db77984daa2a3dd355975e"
+    "mtime": 1793694176.5619154,
+    "seen": 1793781878.178816,
+    "ast_hash": "ae57d1f90e3fcc92ac14071b9ad6045c",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Oxytocin.md": {
-    "mtime": 1793432597.9029655,
-    "seen": 1793433902.308195,
-    "ast_hash": "f4cbab6dc6e1bba6e8c50f8058d5023b",
-    "semantic_hash": "f4cbab6dc6e1bba6e8c50f8058d5023b"
+    "mtime": 1793694176.5620155,
+    "seen": 1793781878.178816,
+    "ast_hash": "d5ddeea6abf86a6f1538f166faf28354",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Periaqueductal_gray.md": {
-    "mtime": 1793432661.6246338,
-    "seen": 1793433902.308195,
-    "ast_hash": "79534d74d6e3c2a5d77a7564f51a2573",
-    "semantic_hash": "79534d74d6e3c2a5d77a7564f51a2573"
+    "mtime": 1793694176.5624564,
+    "seen": 1793781878.178818,
+    "ast_hash": "2000b5d952e5babc82ec5dc12d282538",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Prolactin.md": {
-    "mtime": 1793432600.446318,
-    "seen": 1793433902.308195,
-    "ast_hash": "8475583050639c9baffb99cd3a6e41dc",
-    "semantic_hash": "8475583050639c9baffb99cd3a6e41dc"
+    "mtime": 1793694176.5628471,
+    "seen": 1793781878.178821,
+    "ast_hash": "97d9c6319417a3ea3ad0619664103121",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Refractory_period_sex.md": {
-    "mtime": 1793432588.938644,
-    "seen": 1793433902.308195,
-    "ast_hash": "a0da8a0050eb09eb6314c5adff246b30",
-    "semantic_hash": "a0da8a0050eb09eb6314c5adff246b30"
+    "mtime": 1793694176.5635045,
+    "seen": 1793781878.178824,
+    "ast_hash": "a3c11bd42a1adbed1001bfb3fdab94bb",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sex_flush.md": {
-    "mtime": 1793432593.4629052,
-    "seen": 1793433902.308195,
-    "ast_hash": "1b38e51f4e9b8caf52a01069e733a1de",
-    "semantic_hash": "1b38e51f4e9b8caf52a01069e733a1de"
+    "mtime": 1793694176.5643265,
+    "seen": 1793781878.178828,
+    "ast_hash": "4ef08b3f4dbb620b03bb1d433acc72f4",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sexual_arousal.md": {
-    "mtime": 1793432591.1075108,
-    "seen": 1793433902.308195,
-    "ast_hash": "7218bda765dc9d8bc8907f57799b29c0",
-    "semantic_hash": "7218bda765dc9d8bc8907f57799b29c0"
+    "mtime": 1793694176.5644019,
+    "seen": 1793781878.178828,
+    "ast_hash": "5a0750079f7bf060e1f1962298d2bb5a",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Vasocongestion.md": {
-    "mtime": 1793432594.4800408,
-    "seen": 1793433902.308195,
-    "ast_hash": "1bfc4f8c0d2b20a0387355794f2ef1b4",
-    "semantic_hash": "1bfc4f8c0d2b20a0387355794f2ef1b4"
+    "mtime": 1793694176.5676036,
+    "seen": 1793781878.1788402,
+    "ast_hash": "dcec32820a25336c8b60a2f001436c31",
+    "semantic_hash": ""
   },
   "brain-system/src/camera.js": {
-    "mtime": 1793463579.338565,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5712123,
+    "seen": 1793781878.178762,
     "ast_hash": "008199639521ab09be0d18dcd535e1e8",
     "semantic_hash": ""
   },
   "brain-system/src/gl-utils.js": {
-    "mtime": 1793463312.6821804,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5715954,
+    "seen": 1793781878.178764,
     "ast_hash": "c14643826f81f6697448b0721e80b6e8",
     "semantic_hash": ""
   },
   "brain-system/src/performance.js": {
-    "mtime": 1793440216.844539,
-    "seen": 1793452052.6125355,
-    "ast_hash": "e0670a587e8fc6af765abcc52a3cb070",
-    "semantic_hash": "e0670a587e8fc6af765abcc52a3cb070"
+    "mtime": 1793802222.270055,
+    "seen": 1793802228.630015,
+    "ast_hash": "ae0926f934ba73cf7f2712723e37174d",
+    "semantic_hash": ""
   },
   "brain-system/src/response.js": {
-    "mtime": 1793644026.7987678,
-    "seen": 1793644123.5977733,
-    "ast_hash": "c3ec563d27aa9beca72859da0585473c",
+    "mtime": 1793694176.571976,
+    "seen": 1793781878.178766,
+    "ast_hash": "fdd3b4ef9fbf8fc2752d5c737e8d58b9",
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1793644042.7255719,
-    "seen": 1793644123.5977733,
-    "ast_hash": "d362e8ab15d594a325a0d313d2f13493",
+    "mtime": 1793787553.1524954,
+    "seen": 1793789177.177633,
+    "ast_hash": "93323c6e4b0dbfb4f3fe6f1ac80a3701",
     "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dopamine.md": {
-    "mtime": 1793438696.2128768,
-    "seen": 1793439547.3224084,
-    "ast_hash": "035255a2145a17f82fccfbe1019ed90a",
-    "semantic_hash": "035255a2145a17f82fccfbe1019ed90a"
+    "mtime": 1793694176.556718,
+    "seen": 1793781878.178792,
+    "ast_hash": "bdf24b32512fc87390654211893fd0fd",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dopamine_receptor.md": {
-    "mtime": 1793438757.2669559,
-    "seen": 1793439547.3224084,
-    "ast_hash": "19a3565e55ff4040226c3bf817c8ae8b",
-    "semantic_hash": "19a3565e55ff4040226c3bf817c8ae8b"
+    "mtime": 1793694176.5568013,
+    "seen": 1793781878.178793,
+    "ast_hash": "79a287ec4d568b1fc66eec31cdda704f",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dopamine_transporter.md": {
-    "mtime": 1793438766.36785,
-    "seen": 1793439547.3224084,
-    "ast_hash": "4d13b059ddadcaca9bfa8800e11ccecf",
-    "semantic_hash": "4d13b059ddadcaca9bfa8800e11ccecf"
+    "mtime": 1793694176.556881,
+    "seen": 1793781878.178793,
+    "ast_hash": "dbf272c3cbb10ba1535c71f96685c9dd",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dopaminergic_pathways.md": {
-    "mtime": 1793438719.7062292,
-    "seen": 1793439547.3224084,
-    "ast_hash": "da0bb37964ffd7df6d59acd1f118786d",
-    "semantic_hash": "da0bb37964ffd7df6d59acd1f118786d"
+    "mtime": 1793694176.5569608,
+    "seen": 1793781878.178794,
+    "ast_hash": "1c06a7d62802a44609026139aa771318",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Incertohypothalamic_pathway.md": {
-    "mtime": 1793438749.0292683,
-    "seen": 1793439547.3224084,
-    "ast_hash": "83ed102195d589788fa80c65cef1d876",
-    "semantic_hash": "83ed102195d589788fa80c65cef1d876"
+    "mtime": 1793694176.558593,
+    "seen": 1793781878.178802,
+    "ast_hash": "5eff204a669fec9de87256a6a6ab5674",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Mesocortical_pathway.md": {
-    "mtime": 1793438734.77073,
-    "seen": 1793439547.3224084,
-    "ast_hash": "03272265d96aeb4a8f6dca6b3aaba9bb",
-    "semantic_hash": "03272265d96aeb4a8f6dca6b3aaba9bb"
+    "mtime": 1793694176.5596926,
+    "seen": 1793781878.178807,
+    "ast_hash": "8eb33dc0c8aaab27e262d09ecce58ea5",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Nigrostriatal_pathway.md": {
-    "mtime": 1793438727.5206532,
-    "seen": 1793439547.3224084,
-    "ast_hash": "51831b599c72d13c075bd1efca3f0587",
-    "semantic_hash": "51831b599c72d13c075bd1efca3f0587"
+    "mtime": 1793694176.561546,
+    "seen": 1793781878.178814,
+    "ast_hash": "543caf1af332d9bf43f3ab50e842a28c",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Reward_system.md": {
-    "mtime": 1793438774.4124975,
-    "seen": 1793439547.3224084,
-    "ast_hash": "f004f098b1f719d24e4aac02d9583b85",
-    "semantic_hash": "f004f098b1f719d24e4aac02d9583b85"
+    "mtime": 1793694176.56387,
+    "seen": 1793781878.178826,
+    "ast_hash": "034895f493ea3f0e3505cf31f130f795",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Substantia_nigra.md": {
-    "mtime": 1793438711.9003875,
-    "seen": 1793439547.3224084,
-    "ast_hash": "53b52ea62fef1a2a5c043330a4da46a8",
-    "semantic_hash": "53b52ea62fef1a2a5c043330a4da46a8"
+    "mtime": 1793694176.566289,
+    "seen": 1793781878.178834,
+    "ast_hash": "50a84e47db0361d28a1ffa7f4e3c4e19",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Tuberoinfundibular_pathway.md": {
-    "mtime": 1793438741.9118965,
-    "seen": 1793439547.3224084,
-    "ast_hash": "c5e0ebf8962c40e5e4382fcebfe63c97",
-    "semantic_hash": "c5e0ebf8962c40e5e4382fcebfe63c97"
+    "mtime": 1793694176.5673356,
+    "seen": 1793781878.178839,
+    "ast_hash": "7e870f8b5d96ee5e359eb1d0fbc1316d",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Ventral_tegmental_area.md": {
-    "mtime": 1793438704.1041777,
-    "seen": 1793439547.3224084,
-    "ast_hash": "68b67d82645960577a9c5f8a5be94b99",
-    "semantic_hash": "68b67d82645960577a9c5f8a5be94b99"
+    "mtime": 1793694176.5678048,
+    "seen": 1793781878.178841,
+    "ast_hash": "43a420626d1e887bb1f9fd70459ceab5",
+    "semantic_hash": ""
   },
   "brain-system/research/RESPONSE.md": {
-    "mtime": 1793644051.556044,
-    "seen": 1793644123.5977733,
-    "ast_hash": "02b4690e360bf6b87eb9493fa0270892",
+    "mtime": 1793694176.570526,
+    "seen": 1793781878.178844,
+    "ast_hash": "0baa45d7beaf713d7b302618f861a987",
     "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Autoreceptor.md": {
-    "mtime": 1793438813.7796512,
-    "seen": 1793439547.3224084,
-    "ast_hash": "3a601a42d4e34dcf53ff84833c8043e3",
-    "semantic_hash": "3a601a42d4e34dcf53ff84833c8043e3"
+    "mtime": 1793694176.554921,
+    "seen": 1793781878.178784,
+    "ast_hash": "1ee865cc52d635415aa19edd9c0a61b6",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Human_brain.md": {
-    "mtime": 1793438831.109991,
-    "seen": 1793439547.3224084,
-    "ast_hash": "e3d0d82119c30b792465fc813320ad9f",
-    "semantic_hash": "e3d0d82119c30b792465fc813320ad9f"
+    "mtime": 1793694176.5582144,
+    "seen": 1793781878.1788,
+    "ast_hash": "d4efc4548f879a115cf4b9d7cded8a37",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Medial_preoptic_nucleus.md": {
-    "mtime": 1793438790.561598,
-    "seen": 1793439547.3224084,
-    "ast_hash": "bc9cf06c2a9b63bbe7161f6ab190ced0",
-    "semantic_hash": "bc9cf06c2a9b63bbe7161f6ab190ced0"
+    "mtime": 1793694176.559578,
+    "seen": 1793781878.178807,
+    "ast_hash": "79c66ea76174b92c8543ffd2cefe6463",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Paraventricular_nucleus_of_hypothalamus.md": {
-    "mtime": 1793438799.2842762,
-    "seen": 1793439547.3224084,
-    "ast_hash": "1cb4688afb3afb659fe39039b174ad31",
-    "semantic_hash": "1cb4688afb3afb659fe39039b174ad31"
+    "mtime": 1793694176.5623088,
+    "seen": 1793781878.178818,
+    "ast_hash": "d6112f400f0825e53eb2efdf73b9b73a",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Striatum.md": {
-    "mtime": 1793438782.5699966,
-    "seen": 1793439547.3224084,
-    "ast_hash": "3e6fa0bc677e2228fa7dff7bc010d88f",
-    "semantic_hash": "3e6fa0bc677e2228fa7dff7bc010d88f"
+    "mtime": 1793694176.566124,
+    "seen": 1793781878.178833,
+    "ast_hash": "f9972e0cbe2a14510dafff13cdd10611",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Temporal_difference_learning.md": {
-    "mtime": 1793438806.7600381,
-    "seen": 1793439547.3224084,
-    "ast_hash": "fa70fa3a030d5ff9ea998d90de92c797",
-    "semantic_hash": "fa70fa3a030d5ff9ea998d90de92c797"
+    "mtime": 1793694176.566954,
+    "seen": 1793781878.178837,
+    "ast_hash": "b60a2139b47d2a6773a08b0b3360be21",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Volume_transmission.md": {
-    "mtime": 1793438822.392287,
-    "seen": 1793439547.3224084,
-    "ast_hash": "c10d67d3cd8b8e6ddc1bb658a3fb4520",
-    "semantic_hash": "c10d67d3cd8b8e6ddc1bb658a3fb4520"
+    "mtime": 1793694176.5681052,
+    "seen": 1793781878.1788428,
+    "ast_hash": "79b55160e7ed1b7b0c0c100fa03d94c7",
+    "semantic_hash": ""
   },
   "brain-system/src/anatomy.js": {
-    "mtime": 1793464156.2693324,
-    "seen": 1793465121.5182254,
-    "ast_hash": "f963d5502ab7ff78546233e42871f9b7",
+    "mtime": 1793790165.797146,
+    "seen": 1793790170.660662,
+    "ast_hash": "6cfd73d271217954f5084e501110682b",
     "semantic_hash": ""
   },
   "brain-system/src/brain.js": {
-    "mtime": 1793463888.2810814,
-    "seen": 1793465121.5182254,
-    "ast_hash": "f486cb08debad6e6e209d49e230326ec",
+    "mtime": 1793790468.3043063,
+    "seen": 1793790474.490466,
+    "ast_hash": "3c8c16dc91c643ed2f0d0e8c2dd44a81",
     "semantic_hash": ""
   },
   "brain-system/src/color.js": {
-    "mtime": 1793463269.158177,
-    "seen": 1793465121.5182254,
-    "ast_hash": "65921f97a7a0d16ef156b7eb5cb661cc",
+    "mtime": 1793694176.5713866,
+    "seen": 1793781878.178763,
+    "ast_hash": "90e502fddb10a075e47d3abc4c559f7c",
     "semantic_hash": ""
   },
   "brain-system/src/dopamine.js": {
-    "mtime": 1793466662.5816386,
-    "seen": 1793643693.0401623,
-    "ast_hash": "e6781e75b73da6382f0d29a6e70ab661",
+    "mtime": 1793790364.8458195,
+    "seen": 1793790370.3194199,
+    "ast_hash": "54cdb8a5eb675919b9b0bf925936661a",
     "semantic_hash": ""
   },
   "brain-system/src/main.js": {
-    "mtime": 1793448244.6986687,
-    "seen": 1793452052.6125355,
-    "ast_hash": "747c031edb2c3208842045ebd3ebbef1",
-    "semantic_hash": "747c031edb2c3208842045ebd3ebbef1"
+    "mtime": 1793789704.5399647,
+    "seen": 1793789710.809312,
+    "ast_hash": "6a63155018b79c2514e904c151cf0b91",
+    "semantic_hash": ""
   },
   "brain-system/src/renderer.js": {
-    "mtime": 1793463991.3032682,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.571872,
+    "seen": 1793781878.178766,
     "ast_hash": "3f227ee3d7f8adef1db072b4db64a564",
     "semantic_hash": ""
   },
   "brain-system/src/shaders.js": {
-    "mtime": 1793463553.399238,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5721512,
+    "seen": 1793781878.1787672,
     "ast_hash": "0edf73d6dadbdc910949ace824b4d0d8",
     "semantic_hash": ""
   },
   "brain-system/README.md": {
-    "mtime": 1793644036.1714418,
-    "seen": 1793644123.5977733,
-    "ast_hash": "4527b4a8d77bd17614bf211a8bd683ee",
+    "mtime": 1793793635.0234125,
+    "seen": 1793796472.880843,
+    "ast_hash": "e916a98e2c7b0fa8989cfbcd8eae075d",
     "semantic_hash": ""
   },
   "brain-system/index.html": {
-    "mtime": 1793464128.3258464,
-    "seen": 1793465121.5182254,
-    "ast_hash": "1fee33ecdc30d0c51ba65077b6fb666b",
+    "mtime": 1793789609.0213616,
+    "seen": 1793789645.3407779,
+    "ast_hash": "cee1f93d78f00d36cb85f64c1008a864",
     "semantic_hash": ""
   },
   "brain-system/src/ui.js": {
-    "mtime": 1793463868.3971524,
-    "seen": 1793465121.5182254,
-    "ast_hash": "f0407d3a0966dbcf97fd9ba28f51f5fb",
+    "mtime": 1793802051.7484214,
+    "seen": 1793802058.993568,
+    "ast_hash": "f966433082deb7a28f1299140bf6eba4",
     "semantic_hash": ""
   },
   "brain-system/research/DOPAMINE.md": {
-    "mtime": 1793644034.5561037,
-    "seen": 1793644123.5977733,
-    "ast_hash": "f08d959d55510d0ab903eee757f09986",
+    "mtime": 1793694176.5702252,
+    "seen": 1793781878.178844,
+    "ast_hash": "667895d466081b0fc47e2d46a4655fe9",
     "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Action_potential.md": {
-    "mtime": 1793449456.0248256,
-    "seen": 1793452052.6125355,
-    "ast_hash": "66a20cd36186058ce729d3b5872627af",
-    "semantic_hash": "66a20cd36186058ce729d3b5872627af"
+    "mtime": 1793694176.554229,
+    "seen": 1793781878.178781,
+    "ast_hash": "6629f7cb44d61290d966d69616ec6525",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Adrenaline.md": {
-    "mtime": 1793449337.288907,
-    "seen": 1793452052.6125355,
-    "ast_hash": "c611f2bffd462cfa87a5fa6a8ef3c239",
-    "semantic_hash": "c611f2bffd462cfa87a5fa6a8ef3c239"
+    "mtime": 1793694176.5543203,
+    "seen": 1793781878.178781,
+    "ast_hash": "3ec10fc3927312a3931108803bef1e78",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Adrenocorticotropic_hormone.md": {
-    "mtime": 1793449342.6445906,
-    "seen": 1793452052.6125355,
-    "ast_hash": "25d23b29c0125d979ed7da97617f2a5e",
-    "semantic_hash": "25d23b29c0125d979ed7da97617f2a5e"
+    "mtime": 1793694176.5544302,
+    "seen": 1793781878.178782,
+    "ast_hash": "5a51a5f928fc91bb13b86df1bf763a31",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Amygdala.md": {
-    "mtime": 1793449172.3269315,
-    "seen": 1793452052.6125355,
-    "ast_hash": "cabdb9b20f95ee34befb713cdea965e3",
-    "semantic_hash": "cabdb9b20f95ee34befb713cdea965e3"
+    "mtime": 1793694176.554527,
+    "seen": 1793781878.178782,
+    "ast_hash": "7730b06311866a49635e50f154013279",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Auditory_cortex.md": {
-    "mtime": 1793449550.4399638,
-    "seen": 1793452052.6125355,
-    "ast_hash": "8e36dd9dd95b7bdfea1165014d94dda8",
-    "semantic_hash": "8e36dd9dd95b7bdfea1165014d94dda8"
+    "mtime": 1793694176.5546203,
+    "seen": 1793781878.178783,
+    "ast_hash": "480b52737d2dbcd046239a71bb20676a",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Auditory_system.md": {
-    "mtime": 1793449537.0379348,
-    "seen": 1793452052.6125355,
-    "ast_hash": "ce9ba17820aa4390becfbc2e72b5614e",
-    "semantic_hash": "ce9ba17820aa4390becfbc2e72b5614e"
+    "mtime": 1793694176.5547101,
+    "seen": 1793781878.178783,
+    "ast_hash": "7900070a217185c3fbe195a2fa038169",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Autonomic_nervous_system.md": {
-    "mtime": 1793449748.3145118,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a83f2e66002683066f9e2f85b2fa9cbf",
-    "semantic_hash": "a83f2e66002683066f9e2f85b2fa9cbf"
+    "mtime": 1793694176.5547948,
+    "seen": 1793781878.178784,
+    "ast_hash": "b6e0e6c2a2602e11ce01b4ac5129780e",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Baroreflex.md": {
-    "mtime": 1793449781.3402126,
-    "seen": 1793452052.6125355,
-    "ast_hash": "dea3fbeb610154f6d0c6367a8fcf9473",
-    "semantic_hash": "dea3fbeb610154f6d0c6367a8fcf9473"
+    "mtime": 1793694176.555012,
+    "seen": 1793781878.178785,
+    "ast_hash": "7f531658bbbc8399d3478c7957998f77",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Basal_forebrain.md": {
-    "mtime": 1793449435.3295324,
-    "seen": 1793452052.6125355,
-    "ast_hash": "fd9a2ac0dbcb7ca66141b98ce63f174b",
-    "semantic_hash": "fd9a2ac0dbcb7ca66141b98ce63f174b"
+    "mtime": 1793694176.555114,
+    "seen": 1793781878.178785,
+    "ast_hash": "1ac73ec225c62479608f4b53cf49b1db",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Basal_ganglia.md": {
-    "mtime": 1793449155.5705478,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1a56069f922a6a187bc80b93a029382b",
-    "semantic_hash": "1a56069f922a6a187bc80b93a029382b"
+    "mtime": 1793694176.555211,
+    "seen": 1793781878.178786,
+    "ast_hash": "e183828ad982df975fb3bdbe8220566e",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Biological_neuron_model.md": {
-    "mtime": 1793449205.9397614,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1d9da6608719bf7d06db49f130c83087",
-    "semantic_hash": "1d9da6608719bf7d06db49f130c83087"
+    "mtime": 1793694176.555353,
+    "seen": 1793781878.178786,
+    "ast_hash": "f4e987b482b7af3ae6d507dd7aba1aff",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Brachial_plexus.md": {
-    "mtime": 1793449271.7371378,
-    "seen": 1793452052.6125355,
-    "ast_hash": "2df87ef8d6f2b83f8811996612b859f3",
-    "semantic_hash": "2df87ef8d6f2b83f8811996612b859f3"
+    "mtime": 1793694176.555438,
+    "seen": 1793781878.178786,
+    "ast_hash": "e16b174108467dd7ca7e820e7901c9c9",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Brainstem.md": {
-    "mtime": 1793449160.409414,
-    "seen": 1793452052.6125355,
-    "ast_hash": "d6a4368294c375f3ce7375becdb39a72",
-    "semantic_hash": "d6a4368294c375f3ce7375becdb39a72"
+    "mtime": 1793694176.5555766,
+    "seen": 1793781878.178787,
+    "ast_hash": "8a627bfaf88b2fe966cef2479259a1b1",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Cable_theory.md": {
-    "mtime": 1793449208.4939477,
-    "seen": 1793452052.6125355,
-    "ast_hash": "b654458f9755fa98c82c57972445c42a",
-    "semantic_hash": "b654458f9755fa98c82c57972445c42a"
+    "mtime": 1793694176.5556746,
+    "seen": 1793781878.178787,
+    "ast_hash": "42447669093fabbfc48fb412595a7fc6",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Central_nervous_system.md": {
-    "mtime": 1793449146.583819,
-    "seen": 1793452052.6125355,
-    "ast_hash": "017bb68664829b4ada4e96d3b490b89b",
-    "semantic_hash": "017bb68664829b4ada4e96d3b490b89b"
+    "mtime": 1793694176.5557594,
+    "seen": 1793781878.1787882,
+    "ast_hash": "4cb5bc553f657386ed304969b07661bb",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Central_pattern_generator.md": {
-    "mtime": 1793449741.7654943,
-    "seen": 1793452052.6125355,
-    "ast_hash": "4a936c47a7b178bd3f9f2e55fc524958",
-    "semantic_hash": "4a936c47a7b178bd3f9f2e55fc524958"
+    "mtime": 1793694176.5558474,
+    "seen": 1793781878.1787882,
+    "ast_hash": "653eba7adc5c6b635379dc0e63f56c31",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Cerebellum.md": {
-    "mtime": 1793449158.074317,
-    "seen": 1793452052.6125355,
-    "ast_hash": "868c08ecba76a927a49f589dad29b536",
-    "semantic_hash": "868c08ecba76a927a49f589dad29b536"
+    "mtime": 1793694176.5559304,
+    "seen": 1793781878.1787882,
+    "ast_hash": "13cac8e2b3c199a4ebafc675ae0d9238",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Cerebral_cortex.md": {
-    "mtime": 1793449149.7906983,
-    "seen": 1793452052.6125355,
-    "ast_hash": "f1daf91f29ad26387337e380df6cade8",
-    "semantic_hash": "f1daf91f29ad26387337e380df6cade8"
+    "mtime": 1793694176.556017,
+    "seen": 1793781878.1787891,
+    "ast_hash": "d04dee5490ae09605be62800914b8452",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Cochlea.md": {
-    "mtime": 1793449543.69808,
-    "seen": 1793452052.6125355,
-    "ast_hash": "93824bfa2c62ac2cd3c610f9dbf4427f",
-    "semantic_hash": "93824bfa2c62ac2cd3c610f9dbf4427f"
+    "mtime": 1793694176.5560997,
+    "seen": 1793781878.1787891,
+    "ast_hash": "aeb7ffdd0af9e204e5146bcf495e592c",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Corticospinal_tract.md": {
-    "mtime": 1793449696.9848664,
-    "seen": 1793452052.6125355,
-    "ast_hash": "5036f81dd4b1919a8d2537f9b85fd062",
-    "semantic_hash": "5036f81dd4b1919a8d2537f9b85fd062"
+    "mtime": 1793694176.5561838,
+    "seen": 1793781878.1787899,
+    "ast_hash": "4214b6a0b8d5720663a31eb6d2e83e2f",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Corticotropin-releasing_hormone.md": {
-    "mtime": 1793449339.996622,
-    "seen": 1793452052.6125355,
-    "ast_hash": "125c461ca5deb7bc4dad989989a777d5",
-    "semantic_hash": "125c461ca5deb7bc4dad989989a777d5"
+    "mtime": 1793694176.5562494,
+    "seen": 1793781878.1787899,
+    "ast_hash": "ef198a59429b86e9ba8b8b0b95bf06b1",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Cortisol.md": {
-    "mtime": 1793449334.155051,
-    "seen": 1793452052.6125355,
-    "ast_hash": "8aff00cc90a5241d92309f43edf44f86",
-    "semantic_hash": "8aff00cc90a5241d92309f43edf44f86"
+    "mtime": 1793694176.5563657,
+    "seen": 1793781878.1787899,
+    "ast_hash": "b64bb901341be198d304a5b421eec4a3",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Cranial_nerves.md": {
-    "mtime": 1793449264.1716323,
-    "seen": 1793452052.6125355,
-    "ast_hash": "930d8d9e46e7f33530a44886bdba54ab",
-    "semantic_hash": "930d8d9e46e7f33530a44886bdba54ab"
+    "mtime": 1793694176.5564413,
+    "seen": 1793781878.1787908,
+    "ast_hash": "50c01afe746d6f0c27df8f5c6392dd96",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Cytokine.md": {
-    "mtime": 1793449866.9327662,
-    "seen": 1793452052.6125355,
-    "ast_hash": "3f11135a5aec682001d24bb6a4314d75",
-    "semantic_hash": "3f11135a5aec682001d24bb6a4314d75"
+    "mtime": 1793694176.5565257,
+    "seen": 1793781878.1787908,
+    "ast_hash": "2964f52eb63288c6601fca5427b9a060",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dermatome_anatomy.md": {
-    "mtime": 1793449677.7384458,
-    "seen": 1793452052.6125355,
-    "ast_hash": "e923dc736528ef9234bb38d98cf756f2",
-    "semantic_hash": "e923dc736528ef9234bb38d98cf756f2"
+    "mtime": 1793694176.5566087,
+    "seen": 1793781878.178792,
+    "ast_hash": "c1bc7f04acb312f923aa9171cf623007",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dorsal_column_E2_80_93medial_lemniscus_pa.md": {
-    "mtime": 1793449658.8515844,
-    "seen": 1793452052.6125355,
-    "ast_hash": "070f76160e32cb155a620308c3a28936",
-    "semantic_hash": "070f76160e32cb155a620308c3a28936"
+    "mtime": 1793694176.5570388,
+    "seen": 1793781878.178794,
+    "ast_hash": "6b478a9e4f5d934ead44b8b4030774d4",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Dysautonomia.md": {
-    "mtime": 1793449933.6116316,
-    "seen": 1793452052.6125355,
-    "ast_hash": "512190087d07c3f6f69653cfa690694a",
-    "semantic_hash": "512190087d07c3f6f69653cfa690694a"
+    "mtime": 1793694176.5571134,
+    "seen": 1793781878.178794,
+    "ast_hash": "2175f40ff133f92d1dbd33d56dd3369d",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Enteric_nervous_system.md": {
-    "mtime": 1793449834.0131018,
-    "seen": 1793452052.6125355,
-    "ast_hash": "8242e9cb58b2ae104244cc4ac86ccf18",
-    "semantic_hash": "8242e9cb58b2ae104244cc4ac86ccf18"
+    "mtime": 1793694176.5571926,
+    "seen": 1793781878.178795,
+    "ast_hash": "f060b85b555b38ed47ba1070b763ded3",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Fever.md": {
-    "mtime": 1793449880.29677,
-    "seen": 1793452052.6125355,
-    "ast_hash": "825a7de25fea52721a4895d8e285abaa",
-    "semantic_hash": "825a7de25fea52721a4895d8e285abaa"
+    "mtime": 1793694176.5573068,
+    "seen": 1793781878.178795,
+    "ast_hash": "8b0582142e93863e70e975627516fd26",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Fight-or-flight_response.md": {
-    "mtime": 1793449788.0740178,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1aea561f062925d42cb7d93994636bbe",
-    "semantic_hash": "1aea561f062925d42cb7d93994636bbe"
+    "mtime": 1793694176.5573854,
+    "seen": 1793781878.178796,
+    "ast_hash": "d745b8e12da7fb88e3bd38290a9444e9",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Golgi_tendon_organ.md": {
-    "mtime": 1793449625.0686953,
-    "seen": 1793452052.6125355,
-    "ast_hash": "68a61843a50d44b6c0b000936f780fd9",
-    "semantic_hash": "68a61843a50d44b6c0b000936f780fd9"
+    "mtime": 1793694176.5574632,
+    "seen": 1793781878.178796,
+    "ast_hash": "74d04407e19bfc14e150955e6011d654",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Group_A_nerve_fiber.md": {
-    "mtime": 1793449210.780146,
-    "seen": 1793452052.6125355,
-    "ast_hash": "608941f627dccb8e8dc4a74b0f363ceb",
-    "semantic_hash": "608941f627dccb8e8dc4a74b0f363ceb"
+    "mtime": 1793694176.5575435,
+    "seen": 1793781878.178797,
+    "ast_hash": "d59e972a82c7982097d2c3a6d90c8330",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Group_C_nerve_fiber.md": {
-    "mtime": 1793449213.0604167,
-    "seen": 1793452052.6125355,
-    "ast_hash": "29aa4783de5455f1d8ab7fbd60b854a3",
-    "semantic_hash": "29aa4783de5455f1d8ab7fbd60b854a3"
+    "mtime": 1793694176.5576208,
+    "seen": 1793781878.178797,
+    "ast_hash": "386cbdfda214902c989d5360f7a97873",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Gut_E2_80_93brain_axis.md": {
-    "mtime": 1793449840.531974,
-    "seen": 1793452052.6125355,
-    "ast_hash": "14bef6cfda34474d83a571834422ed65",
-    "semantic_hash": "14bef6cfda34474d83a571834422ed65"
+    "mtime": 1793694176.5577018,
+    "seen": 1793781878.178797,
+    "ast_hash": "bcec6d1fb15adf4323b75f6c0bf14300",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Heart_rate.md": {
-    "mtime": 1793449808.5407944,
-    "seen": 1793452052.6125355,
-    "ast_hash": "18c94b7ca7a37db2e03b3fb7315727b2",
-    "semantic_hash": "18c94b7ca7a37db2e03b3fb7315727b2"
+    "mtime": 1793694176.5578074,
+    "seen": 1793781878.1787982,
+    "ast_hash": "6d480d09f741dee065ba6bbd0283c802",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Hippocampus.md": {
-    "mtime": 1793449401.3378701,
-    "seen": 1793452052.6125355,
-    "ast_hash": "e4c85e3020dba7b0dce5e4065c16469d",
-    "semantic_hash": "e4c85e3020dba7b0dce5e4065c16469d"
+    "mtime": 1793694176.5578887,
+    "seen": 1793781878.1787982,
+    "ast_hash": "092e9169d50491d5aa30c97b56cd57db",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Hirschsprung_27s_disease.md": {
-    "mtime": 1793449926.815517,
-    "seen": 1793452052.6125355,
-    "ast_hash": "573df50433dc91e7170ac69fb20c30bd",
-    "semantic_hash": "573df50433dc91e7170ac69fb20c30bd"
+    "mtime": 1793694176.5579731,
+    "seen": 1793781878.1787982,
+    "ast_hash": "7b38f59417148fe5fafa7e21f01e563a",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Hodgkin_E2_80_93Huxley_model.md": {
-    "mtime": 1793449202.494411,
-    "seen": 1793452052.6125355,
-    "ast_hash": "fd363693653db3283ec7163cab08fd62",
-    "semantic_hash": "fd363693653db3283ec7163cab08fd62"
+    "mtime": 1793694176.5580533,
+    "seen": 1793781878.1787992,
+    "ast_hash": "366906a0078b7649041efcf7e65b39d4",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Human_body.md": {
-    "mtime": 1793449900.375607,
-    "seen": 1793452052.6125355,
-    "ast_hash": "117cd921f308276154524bf128ec9fb4",
-    "semantic_hash": "117cd921f308276154524bf128ec9fb4"
+    "mtime": 1793694176.5581322,
+    "seen": 1793781878.1787992,
+    "ast_hash": "18932adfa24759a418b82b45395ccc5f",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Hypothalamic_E2_80_93pituitary_E2_80_93ad.md": {
-    "mtime": 1793449328.8808818,
-    "seen": 1793452052.6125355,
-    "ast_hash": "62acc30791a9180155ef02bb848cf07a",
-    "semantic_hash": "62acc30791a9180155ef02bb848cf07a"
+    "mtime": 1793694176.5583773,
+    "seen": 1793781878.1788008,
+    "ast_hash": "4bcaeffc0bb15f0eff7a2285849fe3aa",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Hypothalamic_E2_80_93pituitary_E2_80_93th.md": {
-    "mtime": 1793449886.6744747,
-    "seen": 1793452052.6125355,
-    "ast_hash": "56a59ccf411aafefa5f4c8d53a133e8b",
-    "semantic_hash": "56a59ccf411aafefa5f4c8d53a133e8b"
+    "mtime": 1793694176.558459,
+    "seen": 1793781878.1788008,
+    "ast_hash": "ebbd61efcb6ba4c9a47648c99e658ccb",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Hypothalamus.md": {
-    "mtime": 1793449169.4147937,
-    "seen": 1793452052.6125355,
-    "ast_hash": "58becb6c29ef6978fba0fd0436ec091c",
-    "semantic_hash": "58becb6c29ef6978fba0fd0436ec091c"
+    "mtime": 1793694176.5585327,
+    "seen": 1793781878.178802,
+    "ast_hash": "82313b7054120603f728bc660e8d68b3",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Inflammatory_reflex.md": {
-    "mtime": 1793449853.1095078,
-    "seen": 1793452052.6125355,
-    "ast_hash": "c1dbef02343283bd3f286d04cf0ba2b3",
-    "semantic_hash": "c1dbef02343283bd3f286d04cf0ba2b3"
+    "mtime": 1793694176.5587015,
+    "seen": 1793781878.178803,
+    "ast_hash": "e51e5060a4cddc888cb23f45477b202d",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Insular_cortex.md": {
-    "mtime": 1793449408.3693004,
-    "seen": 1793452052.6125355,
-    "ast_hash": "4d0754a11475ee9ab63071f42178aa25",
-    "semantic_hash": "4d0754a11475ee9ab63071f42178aa25"
+    "mtime": 1793694176.5588121,
+    "seen": 1793781878.178803,
+    "ast_hash": "e0ded8e033afd0bf4befcff3752545e8",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Interoception.md": {
-    "mtime": 1793449652.3029397,
-    "seen": 1793452052.6125355,
-    "ast_hash": "7a46354c5bcf5c7a7ebd007bcf591a1c",
-    "semantic_hash": "7a46354c5bcf5c7a7ebd007bcf591a1c"
+    "mtime": 1793694176.5588899,
+    "seen": 1793781878.178804,
+    "ast_hash": "0160a6accf46c06d74798d76d84eede9",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Interstitial_cell_of_Cajal.md": {
-    "mtime": 1793449324.0885844,
-    "seen": 1793452052.6125355,
-    "ast_hash": "8608bb7f285ce339fcc7d5c0ae8931a3",
-    "semantic_hash": "8608bb7f285ce339fcc7d5c0ae8931a3"
+    "mtime": 1793694176.558974,
+    "seen": 1793781878.178804,
+    "ast_hash": "b12d0171b15c9bc7a84c9ad2f249bf87",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Large-scale_brain_network.md": {
-    "mtime": 1793449441.994329,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a748b4792bc5045fb982742680a24e1d",
-    "semantic_hash": "a748b4792bc5045fb982742680a24e1d"
+    "mtime": 1793694176.5590494,
+    "seen": 1793781878.178804,
+    "ast_hash": "62da99e1870c04d9d97823fe8950362c",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Lateral_inhibition.md": {
-    "mtime": 1793449502.9129138,
-    "seen": 1793452052.6125355,
-    "ast_hash": "8309c2b3147f6a1dbed48e29227cb77d",
-    "semantic_hash": "8309c2b3147f6a1dbed48e29227cb77d"
+    "mtime": 1793694176.5591247,
+    "seen": 1793781878.1788049,
+    "ast_hash": "139cc194fdfcb4c783f48467a320a5e9",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Limbic_system.md": {
-    "mtime": 1793449166.5045278,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a9236820455a354e7ca947addde167ed",
-    "semantic_hash": "a9236820455a354e7ca947addde167ed"
+    "mtime": 1793694176.5592322,
+    "seen": 1793781878.1788049,
+    "ast_hash": "b46017114010cff8175bb63ecd3daac3",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Locus_coeruleus.md": {
-    "mtime": 1793449422.2294788,
-    "seen": 1793452052.6125355,
-    "ast_hash": "edea9ef198941b39844efa67b53ddd0d",
-    "semantic_hash": "edea9ef198941b39844efa67b53ddd0d"
+    "mtime": 1793694176.5593119,
+    "seen": 1793781878.178806,
+    "ast_hash": "7fa09b1cb031d3e2ebe85dd9cc9998e2",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Lumbar_plexus.md": {
-    "mtime": 1793449273.9050188,
-    "seen": 1793452052.6125355,
-    "ast_hash": "86ea7f3b225974656f01cd7cd6f7df3a",
-    "semantic_hash": "86ea7f3b225974656f01cd7cd6f7df3a"
+    "mtime": 1793694176.5593975,
+    "seen": 1793781878.178806,
+    "ast_hash": "efdfebe1c4b158cf3c4596ecb374b973",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Mechanoreceptor.md": {
-    "mtime": 1793449585.0307212,
-    "seen": 1793452052.6125355,
-    "ast_hash": "f2aa4aca2c2277ad3e6055ca6d76cf4e",
-    "semantic_hash": "f2aa4aca2c2277ad3e6055ca6d76cf4e"
+    "mtime": 1793694176.559484,
+    "seen": 1793781878.178807,
+    "ast_hash": "50d734b3b2cb584874bcd401cb3ceb38",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Motor_cortex.md": {
-    "mtime": 1793449703.5791776,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1dbeca7d53c0447eb5fb298273db1975",
-    "semantic_hash": "1dbeca7d53c0447eb5fb298273db1975"
+    "mtime": 1793694176.559873,
+    "seen": 1793781878.178808,
+    "ast_hash": "bc02a89e26ed00143ace9c330913d9e0",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Motor_neuron.md": {
-    "mtime": 1793449283.3383152,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1ce375e5b54d7bfa4c3152638e906b29",
-    "semantic_hash": "1ce375e5b54d7bfa4c3152638e906b29"
+    "mtime": 1793694176.5599926,
+    "seen": 1793781878.1788092,
+    "ast_hash": "125be43bcf45bdce0855e14a4e318651",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Muscle_spindle.md": {
-    "mtime": 1793449618.5487752,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1b11ce122dd1c529053b1b9209ff5a11",
-    "semantic_hash": "1b11ce122dd1c529053b1b9209ff5a11"
+    "mtime": 1793694176.5600832,
+    "seen": 1793781878.1788092,
+    "ast_hash": "db167d38f4ce14cc20dd86eacaa5ffc6",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Myelin.md": {
-    "mtime": 1793449469.2492392,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a556061c1560adefdea4b0c263d3fd05",
-    "semantic_hash": "a556061c1560adefdea4b0c263d3fd05"
+    "mtime": 1793694176.56026,
+    "seen": 1793781878.1788101,
+    "ast_hash": "1852500904075bca6444fe80e000864d",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Myenteric_plexus.md": {
-    "mtime": 1793449847.0131078,
-    "seen": 1793452052.6125355,
-    "ast_hash": "8dec5429c780b7b765dc31b9cf8364f3",
-    "semantic_hash": "8dec5429c780b7b765dc31b9cf8364f3"
+    "mtime": 1793694176.5603595,
+    "seen": 1793781878.1788101,
+    "ast_hash": "fd20d6cf8e2821539a359229e070bfe8",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Nerve_conduction_velocity.md": {
-    "mtime": 1793449462.4117837,
-    "seen": 1793452052.6125355,
-    "ast_hash": "0e59ed556ef3a32a5424a0b474cd8699",
-    "semantic_hash": "0e59ed556ef3a32a5424a0b474cd8699"
+    "mtime": 1793694176.5604422,
+    "seen": 1793781878.1788101,
+    "ast_hash": "9f0686fb5f5c3af866fdcc4d582831bb",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Nervous_system.md": {
-    "mtime": 1793449102.7452455,
-    "seen": 1793452052.6125355,
-    "ast_hash": "21654decc5cad9eb7602e968a5634c89",
-    "semantic_hash": "21654decc5cad9eb7602e968a5634c89"
+    "mtime": 1793694176.5605285,
+    "seen": 1793781878.1788108,
+    "ast_hash": "14d12c6fa608c4164521d1477415ab63",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neural_adaptation.md": {
-    "mtime": 1793449509.3071492,
-    "seen": 1793452052.6125355,
-    "ast_hash": "91d910f78e45fbf4f4977cf9e5a9853d",
-    "semantic_hash": "91d910f78e45fbf4f4977cf9e5a9853d"
+    "mtime": 1793694176.5606167,
+    "seen": 1793781878.1788108,
+    "ast_hash": "ed74792dfc83688a36c7dd13c47b3187",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neural_coding.md": {
-    "mtime": 1793449490.2961435,
-    "seen": 1793452052.6125355,
-    "ast_hash": "d1b3ee1d6296539c8202068449f09baa",
-    "semantic_hash": "d1b3ee1d6296539c8202068449f09baa"
+    "mtime": 1793694176.560735,
+    "seen": 1793781878.1788118,
+    "ast_hash": "4d9adcd94f183fe7cd0614c6680b7329",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neuroendocrinology.md": {
-    "mtime": 1793449326.5550466,
-    "seen": 1793452052.6125355,
-    "ast_hash": "b9f42c597992fd54bc370f0a6ea164b6",
-    "semantic_hash": "b9f42c597992fd54bc370f0a6ea164b6"
+    "mtime": 1793694176.5608227,
+    "seen": 1793781878.1788118,
+    "ast_hash": "3155e9791bc411dec34655f3b14950ef",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neuroimmune_system.md": {
-    "mtime": 1793449859.8281958,
-    "seen": 1793452052.6125355,
-    "ast_hash": "15bd6740cbcefd283bf9a20cf464c6cd",
-    "semantic_hash": "15bd6740cbcefd283bf9a20cf464c6cd"
+    "mtime": 1793694176.5609136,
+    "seen": 1793781878.1788118,
+    "ast_hash": "ff458843e2a0b65957a1e86327117934",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neuromodulation.md": {
-    "mtime": 1793449415.3079066,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a30b776348170bffc32e28dbb2220104",
-    "semantic_hash": "a30b776348170bffc32e28dbb2220104"
+    "mtime": 1793694176.560997,
+    "seen": 1793781878.178813,
+    "ast_hash": "17c06c8b9c4458a3b8ea409e4bb0e543",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neuromuscular_junction.md": {
-    "mtime": 1793449690.7685678,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a027c6dd63c7c6311ea323b472d6a7c8",
-    "semantic_hash": "a027c6dd63c7c6311ea323b472d6a7c8"
+    "mtime": 1793694176.561092,
+    "seen": 1793781878.178813,
+    "ast_hash": "a801d61f0e5d14d28c72f27ad65e8906",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neuron.md": {
-    "mtime": 1793449448.8974102,
-    "seen": 1793452052.6125355,
-    "ast_hash": "2bf96b7d52650952c5e8f170e0dea4b4",
-    "semantic_hash": "2bf96b7d52650952c5e8f170e0dea4b4"
+    "mtime": 1793694176.5613837,
+    "seen": 1793781878.178814,
+    "ast_hash": "e0a585c8bcb7cf348c2de6456bf61ef5",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Neurotransmitter.md": {
-    "mtime": 1793449483.315292,
-    "seen": 1793452052.6125355,
-    "ast_hash": "631c7163d89e8d3c9208f27ed1dd5d1c",
-    "semantic_hash": "631c7163d89e8d3c9208f27ed1dd5d1c"
+    "mtime": 1793694176.5614717,
+    "seen": 1793781878.178814,
+    "ast_hash": "90574dbbd321634b8a5c3dbdd7818dfa",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Nociception.md": {
-    "mtime": 1793449591.5713413,
-    "seen": 1793452052.6125355,
-    "ast_hash": "d6fe4bdddca8517d335f0adddbc6eaa5",
-    "semantic_hash": "d6fe4bdddca8517d335f0adddbc6eaa5"
+    "mtime": 1793694176.5616317,
+    "seen": 1793781878.178815,
+    "ast_hash": "1cabc5406d546f26184df8f67f0b0e0c",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Olfactory_system.md": {
-    "mtime": 1793449638.2796996,
-    "seen": 1793452052.6125355,
-    "ast_hash": "5ca901659fdee2cce2e2e99d31a8e31b",
-    "semantic_hash": "5ca901659fdee2cce2e2e99d31a8e31b"
+    "mtime": 1793694176.5618012,
+    "seen": 1793781878.178816,
+    "ast_hash": "70f083288d57a8efa06d1be31f11db6e",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Pain.md": {
-    "mtime": 1793449598.7901447,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1727af44ef2aae62c63da72f6e6952a8",
-    "semantic_hash": "1727af44ef2aae62c63da72f6e6952a8"
+    "mtime": 1793694176.5621347,
+    "seen": 1793781878.178817,
+    "ast_hash": "ffb3133497d49f9506beecf285e92bcf",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Parasympathetic_nervous_system.md": {
-    "mtime": 1793449761.7163973,
-    "seen": 1793452052.6125355,
-    "ast_hash": "19ff987f8c1a163f5a5b0d39b0cb100c",
-    "semantic_hash": "19ff987f8c1a163f5a5b0d39b0cb100c"
+    "mtime": 1793694176.5622222,
+    "seen": 1793781878.178817,
+    "ast_hash": "974b61222834ad3a791cf9e41cdf35ac",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Pelvic_splanchnic_nerves.md": {
-    "mtime": 1793449827.366647,
-    "seen": 1793452052.6125355,
-    "ast_hash": "72d001f8e32fbb01f2eee4ec91858ea6",
-    "semantic_hash": "72d001f8e32fbb01f2eee4ec91858ea6"
+    "mtime": 1793694176.5623825,
+    "seen": 1793781878.178818,
+    "ast_hash": "fcf23584a0cddf63cbc23bd7ec373ebe",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Peripheral_nervous_system.md": {
-    "mtime": 1793449266.8049734,
-    "seen": 1793452052.6125355,
-    "ast_hash": "5ed1a347b4336c19014d42a6ade81dc4",
-    "semantic_hash": "5ed1a347b4336c19014d42a6ade81dc4"
+    "mtime": 1793694176.562527,
+    "seen": 1793781878.1788192,
+    "ast_hash": "1aa53b1c257c1e118db85f436211c451",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Phrenic_nerve.md": {
-    "mtime": 1793449280.9075332,
-    "seen": 1793452052.6125355,
-    "ast_hash": "cdf38b769f1ac76351df6183d5d68762",
-    "semantic_hash": "cdf38b769f1ac76351df6183d5d68762"
+    "mtime": 1793694176.5626,
+    "seen": 1793781878.1788192,
+    "ast_hash": "1eb176aa444c6d888fc961731af28974",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Postcentral_gyrus.md": {
-    "mtime": 1793449671.5771177,
-    "seen": 1793452052.6125355,
-    "ast_hash": "fb3f97d03ed57a221a49950ef4d38820",
-    "semantic_hash": "fb3f97d03ed57a221a49950ef4d38820"
+    "mtime": 1793694176.5626686,
+    "seen": 1793781878.1788201,
+    "ast_hash": "6d3bc892cddc05c2eb8c20b73616b888",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Predictive_coding.md": {
-    "mtime": 1793449516.1379259,
-    "seen": 1793452052.6125355,
-    "ast_hash": "e7eae818212f073819ace82558299828",
-    "semantic_hash": "e7eae818212f073819ace82558299828"
+    "mtime": 1793694176.5627468,
+    "seen": 1793781878.1788201,
+    "ast_hash": "d160e8656308f82f04aab0136cdd3d24",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Proprioception.md": {
-    "mtime": 1793449612.0600135,
-    "seen": 1793452052.6125355,
-    "ast_hash": "b27c70f9efab1e5668276dd214c32dc7",
-    "semantic_hash": "b27c70f9efab1e5668276dd214c32dc7"
+    "mtime": 1793694176.5629337,
+    "seen": 1793781878.178821,
+    "ast_hash": "c0906b2bbffa7b92de8d9c87b80313e5",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Pudendal_nerve.md": {
-    "mtime": 1793449821.284386,
-    "seen": 1793452052.6125355,
-    "ast_hash": "44b6991e1978a510a8db64827a26ee8d",
-    "semantic_hash": "44b6991e1978a510a8db64827a26ee8d"
+    "mtime": 1793694176.5630167,
+    "seen": 1793781878.178821,
+    "ast_hash": "a30a6a969115a68f9ba19548c11ab423",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Pupillary_light_reflex.md": {
-    "mtime": 1793449734.8815775,
-    "seen": 1793452052.6125355,
-    "ast_hash": "7dd68aa7a6558f4bfacc8ba05c2a8cd2",
-    "semantic_hash": "7dd68aa7a6558f4bfacc8ba05c2a8cd2"
+    "mtime": 1793694176.563092,
+    "seen": 1793781878.1788218,
+    "ast_hash": "31f7f807f4185b9aa868ddefcf092a37",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Pupillary_response.md": {
-    "mtime": 1793449814.8139062,
-    "seen": 1793452052.6125355,
-    "ast_hash": "2f1cd152d1b12bd2d5e9a4a545cf637b",
-    "semantic_hash": "2f1cd152d1b12bd2d5e9a4a545cf637b"
+    "mtime": 1793694176.5631714,
+    "seen": 1793781878.1788218,
+    "ast_hash": "ef1e7e1a3f8bfdbc073b4a6eddf5df49",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Raphe_nuclei.md": {
-    "mtime": 1793449428.7079701,
-    "seen": 1793452052.6125355,
-    "ast_hash": "f6b07396c415c617b9872ff71658ae42",
-    "semantic_hash": "f6b07396c415c617b9872ff71658ae42"
+    "mtime": 1793694176.5632446,
+    "seen": 1793781878.178823,
+    "ast_hash": "eb67639398b2fa828f47f0e8c32fa478",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Receptive_field.md": {
-    "mtime": 1793449496.5192595,
-    "seen": 1793452052.6125355,
-    "ast_hash": "d08161242bca4d3eb98abde604d42256",
-    "semantic_hash": "d08161242bca4d3eb98abde604d42256"
+    "mtime": 1793694176.5633237,
+    "seen": 1793781878.178823,
+    "ast_hash": "42dba5ec8eef9bfe55f44871de2c8d72",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Reflex_arc.md": {
-    "mtime": 1793449709.5304267,
-    "seen": 1793452052.6125355,
-    "ast_hash": "8bd3129259e36d281a0e541ece6f657c",
-    "semantic_hash": "8bd3129259e36d281a0e541ece6f657c"
+    "mtime": 1793694176.5634227,
+    "seen": 1793781878.178823,
+    "ast_hash": "d905e86bd218e89c9f05a520871ceff8",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Respiratory_center.md": {
-    "mtime": 1793449801.7035577,
-    "seen": 1793452052.6125355,
-    "ast_hash": "40d2130f58598caa075df44c858b62d7",
-    "semantic_hash": "40d2130f58598caa075df44c858b62d7"
+    "mtime": 1793694176.5635827,
+    "seen": 1793781878.178824,
+    "ast_hash": "6c8a396a9a79105d983182f5809c17a7",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Reticular_formation.md": {
-    "mtime": 1793449163.466367,
-    "seen": 1793452052.6125355,
-    "ast_hash": "b320f178f53f743819d6aecddb0f6ba6",
-    "semantic_hash": "b320f178f53f743819d6aecddb0f6ba6"
+    "mtime": 1793694176.5636604,
+    "seen": 1793781878.178825,
+    "ast_hash": "367cde88afcc4bffe7e39928bc438a83",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Retina.md": {
-    "mtime": 1793449523.2285693,
-    "seen": 1793452052.6125355,
-    "ast_hash": "582efc08712533819e7916ea29db3236",
-    "semantic_hash": "582efc08712533819e7916ea29db3236"
+    "mtime": 1793694176.5637674,
+    "seen": 1793781878.178825,
+    "ast_hash": "ee8b567065764ecb45611ee2f6529249",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sacral_plexus.md": {
-    "mtime": 1793449276.2633097,
-    "seen": 1793452052.6125355,
-    "ast_hash": "69e8e4f5b686fd321b6d34e80edddac1",
-    "semantic_hash": "69e8e4f5b686fd321b6d34e80edddac1"
+    "mtime": 1793694176.5639977,
+    "seen": 1793781878.178826,
+    "ast_hash": "8327161bdd3284dd383425b9620c133d",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sciatic_nerve.md": {
-    "mtime": 1793449278.6882603,
-    "seen": 1793452052.6125355,
-    "ast_hash": "f21250463ebbb64f7cb03de7d8c9c552",
-    "semantic_hash": "f21250463ebbb64f7cb03de7d8c9c552"
+    "mtime": 1793694176.5640948,
+    "seen": 1793781878.178826,
+    "ast_hash": "b9127354ff0124658bac9cbe07d6bbff",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sensory_nervous_system.md": {
-    "mtime": 1793449220.9222486,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a9fa74ea2d544a3c83a23cb0619512ea",
-    "semantic_hash": "a9fa74ea2d544a3c83a23cb0619512ea"
+    "mtime": 1793694176.5641751,
+    "seen": 1793781878.178827,
+    "ast_hash": "50bd8c81e5163e2c8e1f66d95507f840",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sensory_neuron.md": {
-    "mtime": 1793449223.5457554,
-    "seen": 1793452052.6125355,
-    "ast_hash": "6f096f34b2251b68ad435a3a8a1d2ce1",
-    "semantic_hash": "6f096f34b2251b68ad435a3a8a1d2ce1"
+    "mtime": 1793694176.5642564,
+    "seen": 1793781878.178827,
+    "ast_hash": "f1569cb58654fb5b2d052ec1cbd2ebaf",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sickness_behavior.md": {
-    "mtime": 1793449873.3730266,
-    "seen": 1793452052.6125355,
-    "ast_hash": "51637ec943a2cfe85be41a5e662ab8f4",
-    "semantic_hash": "51637ec943a2cfe85be41a5e662ab8f4"
+    "mtime": 1793694176.5644903,
+    "seen": 1793781878.178829,
+    "ast_hash": "5427231ae2fed992d2b4a229247dba73",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Somatic_nervous_system.md": {
-    "mtime": 1793449269.171183,
-    "seen": 1793452052.6125355,
-    "ast_hash": "ac5c4f67df7886bbe8431683a4d8155d",
-    "semantic_hash": "ac5c4f67df7886bbe8431683a4d8155d"
+    "mtime": 1793694176.5645714,
+    "seen": 1793781878.178829,
+    "ast_hash": "6c1cd729e17e20ec5f1daf6dee182e9e",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Somatosensory_system.md": {
-    "mtime": 1793449578.454619,
-    "seen": 1793452052.6125355,
-    "ast_hash": "82f444a44b23f6a093207d27c53d0e99",
-    "semantic_hash": "82f444a44b23f6a093207d27c53d0e99"
+    "mtime": 1793694176.564662,
+    "seen": 1793781878.1788301,
+    "ast_hash": "08c50f2e91ffee2c0cb49a51c6738c27",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Spinal_cord.md": {
-    "mtime": 1793449684.4796143,
-    "seen": 1793452052.6125355,
-    "ast_hash": "108848cdedd21e5d5aa7de3273781397",
-    "semantic_hash": "108848cdedd21e5d5aa7de3273781397"
+    "mtime": 1793694176.564741,
+    "seen": 1793781878.1788301,
+    "ast_hash": "9417873f0364384785f5aa92d6d931b1",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Spinal_cord_injury.md": {
-    "mtime": 1793449907.5647573,
-    "seen": 1793452052.6125355,
-    "ast_hash": "d1914befd1d5cc1891d9c0513c47c44a",
-    "semantic_hash": "d1914befd1d5cc1891d9c0513c47c44a"
+    "mtime": 1793694176.5654426,
+    "seen": 1793781878.1788301,
+    "ast_hash": "889d4701907b559a845d275acd72a27b",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Spinal_nerve.md": {
-    "mtime": 1793449261.4675977,
-    "seen": 1793452052.6125355,
-    "ast_hash": "40dce3bd242831032c48a539c20cc2f4",
-    "semantic_hash": "40dce3bd242831032c48a539c20cc2f4"
+    "mtime": 1793694176.5655398,
+    "seen": 1793781878.178831,
+    "ast_hash": "5ba20e2356582317143ad39aa58a61c8",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Spinothalamic_tract.md": {
-    "mtime": 1793449665.5416522,
-    "seen": 1793452052.6125355,
-    "ast_hash": "7a9c83902c99b573d79a860aee32732f",
-    "semantic_hash": "7a9c83902c99b573d79a860aee32732f"
+    "mtime": 1793694176.5656316,
+    "seen": 1793781878.178831,
+    "ast_hash": "2c9a79316b3945ea4a88950f9b45d54f",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Startle_response.md": {
-    "mtime": 1793449728.2391973,
-    "seen": 1793452052.6125355,
-    "ast_hash": "77a01940f8006afba6e448fd3a4bac19",
-    "semantic_hash": "77a01940f8006afba6e448fd3a4bac19"
+    "mtime": 1793694176.5657296,
+    "seen": 1793781878.1788318,
+    "ast_hash": "5c8fa1002d21354d2b0b089494b6eb64",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Stevens_27s_power_law.md": {
-    "mtime": 1793449215.2580018,
-    "seen": 1793452052.6125355,
-    "ast_hash": "130a1c9c4a300d484e67c89c4c464928",
-    "semantic_hash": "130a1c9c4a300d484e67c89c4c464928"
+    "mtime": 1793694176.5658188,
+    "seen": 1793781878.1788318,
+    "ast_hash": "f1ee1fcab94e56120e4d78bae0400b50",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Stretch_reflex.md": {
-    "mtime": 1793449721.8307207,
-    "seen": 1793452052.6125355,
-    "ast_hash": "5a500625775e1d78c2d192c5d93810df",
-    "semantic_hash": "5a500625775e1d78c2d192c5d93810df"
+    "mtime": 1793694176.5659025,
+    "seen": 1793781878.1788318,
+    "ast_hash": "604f16fe5eed11796f1f3fb359653899",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Submucosal_plexus.md": {
-    "mtime": 1793449321.971678,
-    "seen": 1793452052.6125355,
-    "ast_hash": "f785ff30abac08fff0bbefc628db118e",
-    "semantic_hash": "f785ff30abac08fff0bbefc628db118e"
+    "mtime": 1793694176.56621,
+    "seen": 1793781878.178833,
+    "ast_hash": "115d2ca0a19c916fbe50e20439f40278",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Suprachiasmatic_nucleus.md": {
-    "mtime": 1793449893.3848782,
-    "seen": 1793452052.6125355,
-    "ast_hash": "3f8959d827f3a3b6bbfdfb3aceb76635",
-    "semantic_hash": "3f8959d827f3a3b6bbfdfb3aceb76635"
+    "mtime": 1793694176.5663705,
+    "seen": 1793781878.178834,
+    "ast_hash": "774f64e0b8a48a26fa4aadc395401d73",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sympathectomy.md": {
-    "mtime": 1793449920.0616431,
-    "seen": 1793452052.6125355,
-    "ast_hash": "37db00fd4ebdd3b3eddbdc0f863aaed7",
-    "semantic_hash": "37db00fd4ebdd3b3eddbdc0f863aaed7"
+    "mtime": 1793694176.5664685,
+    "seen": 1793781878.178834,
+    "ast_hash": "34493797bea39a2545e187216a1c3383",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sympathetic_nervous_system.md": {
-    "mtime": 1793449754.928435,
-    "seen": 1793452052.6125355,
-    "ast_hash": "a33106effb7536693fe7f37b9c24bce8",
-    "semantic_hash": "a33106effb7536693fe7f37b9c24bce8"
+    "mtime": 1793694176.5665436,
+    "seen": 1793781878.178835,
+    "ast_hash": "09f0be60f6f1b561daf673aba5b42e09",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sympathetic_trunk.md": {
-    "mtime": 1793449774.851874,
-    "seen": 1793452052.6125355,
-    "ast_hash": "170b71f048d989cf3ffee9c99397dae3",
-    "semantic_hash": "170b71f048d989cf3ffee9c99397dae3"
+    "mtime": 1793694176.566614,
+    "seen": 1793781878.178835,
+    "ast_hash": "0efebeff0b9cde0136dc4527bb48b886",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Sympathoadrenal_system.md": {
-    "mtime": 1793449331.2502587,
-    "seen": 1793452052.6125355,
-    "ast_hash": "2c643d6e6ae4dbd1a541644e4f519380",
-    "semantic_hash": "2c643d6e6ae4dbd1a541644e4f519380"
+    "mtime": 1793694176.5666926,
+    "seen": 1793781878.1788359,
+    "ast_hash": "0d20fc0bd40e094ad0e78b954c65191d",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Synapse.md": {
-    "mtime": 1793449476.204689,
-    "seen": 1793452052.6125355,
-    "ast_hash": "3b3ffb98e64652a94b96d675d483c1f5",
-    "semantic_hash": "3b3ffb98e64652a94b96d675d483c1f5"
+    "mtime": 1793694176.5667713,
+    "seen": 1793781878.1788359,
+    "ast_hash": "005dae4454c4261f45cc374cd32236d2",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Taste.md": {
-    "mtime": 1793449645.3504002,
-    "seen": 1793452052.6125355,
-    "ast_hash": "1e36d253f4a43b57aad529d550c6691b",
-    "semantic_hash": "1e36d253f4a43b57aad529d550c6691b"
+    "mtime": 1793694176.5668786,
+    "seen": 1793781878.178837,
+    "ast_hash": "7f311da432cb7c3d9c204d1659c55b2d",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Thalamus.md": {
-    "mtime": 1793449152.6306262,
-    "seen": 1793452052.6125355,
-    "ast_hash": "9387d6054cb5b654f0612ad35eaec368",
-    "semantic_hash": "9387d6054cb5b654f0612ad35eaec368"
+    "mtime": 1793694176.5670626,
+    "seen": 1793781878.178838,
+    "ast_hash": "060f5467c60d17e367ce1211265c4927",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Thermoreceptor.md": {
-    "mtime": 1793449605.0945327,
-    "seen": 1793452052.6125355,
-    "ast_hash": "fa7e9dacd2ea16503abef627afb16bff",
-    "semantic_hash": "fa7e9dacd2ea16503abef627afb16bff"
+    "mtime": 1793694176.567151,
+    "seen": 1793781878.178838,
+    "ast_hash": "d5e8fbdc9b4ef88caffa480a7e59713e",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Thermoregulation.md": {
-    "mtime": 1793449795.2069178,
-    "seen": 1793452052.6125355,
-    "ast_hash": "2c1864e2d84ed445ba53a44a14f8b659",
-    "semantic_hash": "2c1864e2d84ed445ba53a44a14f8b659"
+    "mtime": 1793694176.567236,
+    "seen": 1793781878.178838,
+    "ast_hash": "d64f059e32440289d8c961154002a7e2",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Vagotomy.md": {
-    "mtime": 1793449914.0691304,
-    "seen": 1793452052.6125355,
-    "ast_hash": "37058ed95f70f5db73d886ecbde04e26",
-    "semantic_hash": "37058ed95f70f5db73d886ecbde04e26"
+    "mtime": 1793694176.5674188,
+    "seen": 1793781878.178839,
+    "ast_hash": "34d13228708c786b4328d53faa3e035f",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Vagus_nerve.md": {
-    "mtime": 1793449768.4670968,
-    "seen": 1793452052.6125355,
-    "ast_hash": "e9abac9262921e968214314210c4276b",
-    "semantic_hash": "e9abac9262921e968214314210c4276b"
+    "mtime": 1793694176.567498,
+    "seen": 1793781878.1788402,
+    "ast_hash": "86add7acb35838585ebb32254d43f270",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Vasopressin.md": {
-    "mtime": 1793449345.4715981,
-    "seen": 1793452052.6125355,
-    "ast_hash": "58d91c843f1c17cd807bfd3e44bbea70",
-    "semantic_hash": "58d91c843f1c17cd807bfd3e44bbea70"
+    "mtime": 1793694176.56768,
+    "seen": 1793781878.1788402,
+    "ast_hash": "7f773a82f8f3c42e318ec2caa0b76831",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Vestibular_system.md": {
-    "mtime": 1793449631.534868,
-    "seen": 1793452052.6125355,
-    "ast_hash": "351d7a5e461e0d17bd9d8da166c755f9",
-    "semantic_hash": "351d7a5e461e0d17bd9d8da166c755f9"
+    "mtime": 1793694176.5678852,
+    "seen": 1793781878.178841,
+    "ast_hash": "336ada9ee263e02328776076c7e2dc2b",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Visual_cortex.md": {
-    "mtime": 1793449530.1147306,
-    "seen": 1793452052.6125355,
-    "ast_hash": "6d9c2f1c24704f133f45bc10710a93e7",
-    "semantic_hash": "6d9c2f1c24704f133f45bc10710a93e7"
+    "mtime": 1793694176.5679677,
+    "seen": 1793781878.178842,
+    "ast_hash": "234b0511c765615435ac18b87967c2df",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Visual_system.md": {
-    "mtime": 1793449226.3198392,
-    "seen": 1793452052.6125355,
-    "ast_hash": "f1db385b7f9f51554267e96efdaa3ec7",
-    "semantic_hash": "f1db385b7f9f51554267e96efdaa3ec7"
+    "mtime": 1793694176.5680482,
+    "seen": 1793781878.178842,
+    "ast_hash": "36d4d29fab780a58538371238e439739",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Weber_E2_80_93Fechner_law.md": {
-    "mtime": 1793449217.9605167,
-    "seen": 1793452052.6125355,
-    "ast_hash": "2a9928bcfcc0c53eef6bda6a22f071ce",
-    "semantic_hash": "2a9928bcfcc0c53eef6bda6a22f071ce"
+    "mtime": 1793694176.5681882,
+    "seen": 1793781878.1788428,
+    "ast_hash": "714f92fbcc55644dd6695f11760ba035",
+    "semantic_hash": ""
   },
   "brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Withdrawal_reflex.md": {
-    "mtime": 1793449715.6611996,
-    "seen": 1793452052.6125355,
-    "ast_hash": "82c25a955b1aa5bf0e270466362bcf30",
-    "semantic_hash": "82c25a955b1aa5bf0e270466362bcf30"
+    "mtime": 1793694176.5682943,
+    "seen": 1793781878.1788428,
+    "ast_hash": "574a19ad52bed9f32fd366d7c685e7b3",
+    "semantic_hash": ""
   },
   "brain-system/package.json": {
-    "mtime": 1793462956.3912196,
-    "seen": 1793465121.5182254,
-    "ast_hash": "6f3fddb26c1819ca904768613aafa37d",
+    "mtime": 1793793493.3963583,
+    "seen": 1793793500.683441,
+    "ast_hash": "abd054fa11da6691330178e826470836",
     "semantic_hash": ""
   },
   "brain-system/src/body/frame.js": {
-    "mtime": 1793463562.7033532,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5708215,
+    "seen": 1793781878.17876,
     "ast_hash": "e68d2e717113a1e2915d0b40f3fc4bb3",
     "semantic_hash": ""
   },
   "brain-system/src/body/geometry.js": {
-    "mtime": 1793464234.0978105,
-    "seen": 1793465121.5182254,
-    "ast_hash": "4c4063cb0285b8063ccd9b20586b8035",
+    "mtime": 1793694176.5710013,
+    "seen": 1793781878.178761,
+    "ast_hash": "3652e1f7ef86d6a3681bafc413d04f17",
     "semantic_hash": ""
   },
   "brain-system/src/clock.js": {
-    "mtime": 1793463942.244577,
-    "seen": 1793465121.5182254,
-    "ast_hash": "4440af6794de87a555567d0d555112b3",
+    "mtime": 1793789381.8001215,
+    "seen": 1793789388.522717,
+    "ast_hash": "ac847be13b0658de09ffb0f93fe2c479",
     "semantic_hash": ""
   },
   "brain-system/src/safety.js": {
-    "mtime": 1793464191.9569623,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.57206,
+    "seen": 1793781878.1787672,
     "ast_hash": "6540657e731ef6314b521e7e9e77e5cb",
     "semantic_hash": ""
   },
   "brain-system/src/sim/graph.js": {
-    "mtime": 1793464159.9753973,
-    "seen": 1793465121.5182254,
-    "ast_hash": "47c5d70641b337ea875b479e53893242",
+    "mtime": 1793798721.3255696,
+    "seen": 1793798722.847129,
+    "ast_hash": "e0cacaae62dc6a2fa66a79793d78b3c0",
     "semantic_hash": ""
   },
   "brain-system/src/sim/kernel.js": {
-    "mtime": 1793464128.026196,
-    "seen": 1793465121.5182254,
-    "ast_hash": "a0ecc7ed96e86f2dfb898c6869dd5003",
+    "mtime": 1793802341.487555,
+    "seen": 1793802347.821695,
+    "ast_hash": "bc2f3ae98af6404798fc4bc63077043c",
     "semantic_hash": ""
   },
   "brain-system/src/sim/orgasm-adapter.js": {
-    "mtime": 1793463283.1379373,
-    "seen": 1793465121.5182254,
-    "ast_hash": "3d2dfb661f8fad6208e9ac99ca695026",
+    "mtime": 1793789381.9168394,
+    "seen": 1793789388.522722,
+    "ast_hash": "fb23f046aed3888d3d998f625f493682",
     "semantic_hash": ""
   },
   "brain-system/src/statetex.js": {
-    "mtime": 1793463404.23189,
-    "seen": 1793465121.5182254,
-    "ast_hash": "fdf091b490545931dfbe1ec9adc15067",
+    "mtime": 1793802207.4859831,
+    "seen": 1793802214.4363189,
+    "ast_hash": "8235d6eee33181f9ae414fb558acbf9c",
     "semantic_hash": ""
   },
   "brain-system/src/ui-body.js": {
-    "mtime": 1793464134.5929766,
-    "seen": 1793465121.5182254,
-    "ast_hash": "c0d57af39d67e4d678ba7bc1dbe78909",
+    "mtime": 1793802042.9462917,
+    "seen": 1793802049.391692,
+    "ast_hash": "084c669b4da43e06707d9354b0fb0835",
     "semantic_hash": ""
   },
   "brain-system/test/clock.test.mjs": {
-    "mtime": 1793463936.5619607,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5733347,
+    "seen": 1793781878.1787698,
     "ast_hash": "b66944ec6e24fa556c0d2e3618cfe73c",
     "semantic_hash": ""
   },
   "brain-system/test/dopamine.test.mjs": {
-    "mtime": 1793644026.9237778,
-    "seen": 1793644123.5977733,
-    "ast_hash": "8e81ea641783a0531b0a36152386e053",
+    "mtime": 1793789302.9612195,
+    "seen": 1793789309.0107388,
+    "ast_hash": "1d802278bd266cf76ee1c56850b7a767",
     "semantic_hash": ""
   },
   "brain-system/test/geometry-brain.test.mjs": {
-    "mtime": 1793464164.5668828,
-    "seen": 1793465121.5182254,
-    "ast_hash": "500a039e80ee0a69a87c7a4406eb4215",
+    "mtime": 1793790689.8926072,
+    "seen": 1793790695.992023,
+    "ast_hash": "9381c8616192cdc3a1ed3f822324362b",
     "semantic_hash": ""
   },
   "brain-system/test/golden/orgasm-legacy.json": {
-    "mtime": 1793463646.0081453,
-    "seen": 1793465121.5182254,
-    "ast_hash": "a4a9a20ba20980e34d251e44d9275da5",
+    "mtime": 1793790785.5185957,
+    "seen": 1793790791.572427,
+    "ast_hash": "55a0f92eacc8fc9c2da873d8f0e1bb05",
     "semantic_hash": ""
   },
   "brain-system/test/hud-static.test.mjs": {
-    "mtime": 1793464135.328661,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5737298,
+    "seen": 1793781878.178772,
     "ast_hash": "d5f1a7fd9f0e9fbf7b450f8f153ffc3a",
     "semantic_hash": ""
   },
   "brain-system/test/orgasm-regression.test.mjs": {
-    "mtime": 1793463613.876526,
-    "seen": 1793465121.5182254,
-    "ast_hash": "926f3446154a42a68d7a346e74ea7740",
+    "mtime": 1793789412.850733,
+    "seen": 1793789420.9029171,
+    "ast_hash": "fe3fbc3f50eecbf4f207395daccac9cd",
     "semantic_hash": ""
   },
   "brain-system/test/safety.test.mjs": {
-    "mtime": 1793464204.112572,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5739062,
+    "seen": 1793781878.178773,
     "ast_hash": "905b5376acf4ba528cbf3ac346309327",
     "semantic_hash": ""
   },
   "brain-system/test/shaders.test.mjs": {
-    "mtime": 1793464086.9696236,
-    "seen": 1793465121.5182254,
+    "mtime": 1793694176.5739768,
+    "seen": 1793781878.178773,
     "ast_hash": "7349ec399d9579f30e6810925485811c",
     "semantic_hash": ""
   },
   "brain-system/research/ANALYSIS.md": {
-    "mtime": 1793644026.5634048,
-    "seen": 1793644123.5977733,
-    "ast_hash": "874f8514d0acf4aabbe2e4552a3bd44f",
+    "mtime": 1793694176.5697508,
+    "seen": 1793781878.178844,
+    "ast_hash": "a3b69f88cbf75088796e17826ad9ff54",
+    "semantic_hash": ""
+  },
+  "brain-system/src/body/generate.js": {
+    "mtime": 1793791316.3190966,
+    "seen": 1793791322.59878,
+    "ast_hash": "3dc9f28a89f5d4ea61607504c483774a",
+    "semantic_hash": ""
+  },
+  "brain-system/src/body/picking.js": {
+    "mtime": 1793791160.3533263,
+    "seen": 1793791166.112802,
+    "ast_hash": "c62b05cf59c51f46ee63899b134c836f",
+    "semantic_hash": ""
+  },
+  "brain-system/test/geometry-body.test.mjs": {
+    "mtime": 1793791264.8212545,
+    "seen": 1793791270.2306612,
+    "ast_hash": "4b916bfe8ac6476ad3dc88aeeb16ff53",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/stimuli.js": {
+    "mtime": 1793798811.4581943,
+    "seen": 1793798817.882433,
+    "ast_hash": "05d80b8ca5717e760aba7ba5dbbcd503",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/sensory.js": {
+    "mtime": 1793799591.8919256,
+    "seen": 1793799593.8443909,
+    "ast_hash": "34e2438600548119bf3a5ecc055e98d5",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/brainnet.js": {
+    "mtime": 1793793575.2019773,
+    "seen": 1793793581.774973,
+    "ast_hash": "7a2153dad859b42c8cbc6b944b1751a2",
+    "semantic_hash": ""
+  },
+  "brain-system/test/determinism.test.mjs": {
+    "mtime": 1793791954.4528034,
+    "seen": 1793791960.5539641,
+    "ast_hash": "55e3dd71924cf33205a1b22a96fb9a2c",
+    "semantic_hash": ""
+  },
+  "brain-system/test/brainnet.test.mjs": {
+    "mtime": 1793792269.5126305,
+    "seen": 1793792275.917187,
+    "ast_hash": "ccde74ed33c473d08efaced6a406a444",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/scenarios.js": {
+    "mtime": 1793800926.1482587,
+    "seen": 1793800933.514307,
+    "ast_hash": "dc61aa7e555cb56cf03eb50e39cfe33e",
+    "semantic_hash": ""
+  },
+  "brain-system/test/scenarios.test.mjs": {
+    "mtime": 1793800926.1484778,
+    "seen": 1793800933.51432,
+    "ast_hash": "da44b84c785c282dffa400dc14859cf4",
+    "semantic_hash": ""
+  },
+  "brain-system/tsconfig.json": {
+    "mtime": 1793793333.4063144,
+    "seen": 1793793340.659158,
+    "ast_hash": "9f0263f02d23571e9ed14f0993503235",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/contracts.d.ts": {
+    "mtime": 1793802341.4877791,
+    "seen": 1793802347.821692,
+    "ast_hash": "9f2d3759325a3d0c843c03ada9d93509",
+    "semantic_hash": ""
+  },
+  "brain-system/test/budget.test.mjs": {
+    "mtime": 1793793421.3988001,
+    "seen": 1793793428.111673,
+    "ast_hash": "3213f62735815475815827500f280d0d",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/endocrine.js": {
+    "mtime": 1793801048.607182,
+    "seen": 1793801055.1584299,
+    "ast_hash": "ba9c96a226d70c99c342d99d80090d7f",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/autonomic.js": {
+    "mtime": 1793800579.6412685,
+    "seen": 1793800586.0945978,
+    "ast_hash": "773611ada4605b45231d3d6389992dcb",
+    "semantic_hash": ""
+  },
+  "brain-system/test/endocrine.test.mjs": {
+    "mtime": 1793800982.719622,
+    "seen": 1793800989.215615,
+    "ast_hash": "e4d759fe3bd01da8f8b48a0aab7baf0d",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/immune.js": {
+    "mtime": 1793801172.3539755,
+    "seen": 1793801178.3937778,
+    "ast_hash": "0dab52b208cf2637884b83cc311bbd21",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/enteric.js": {
+    "mtime": 1793800729.6752403,
+    "seen": 1793800736.658776,
+    "ast_hash": "190f1650c699d91c168646405d6a1423",
+    "semantic_hash": ""
+  },
+  "brain-system/test/autonomic.test.mjs": {
+    "mtime": 1793800884.5852365,
+    "seen": 1793800891.57727,
+    "ast_hash": "c79631d23203967fa1cf5b18b3306f90",
+    "semantic_hash": ""
+  },
+  "brain-system/test/immune.test.mjs": {
+    "mtime": 1793800801.3795223,
+    "seen": 1793800802.349208,
+    "ast_hash": "1ddd4ddd341f678e82ba862fc480871a",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/somatic.js": {
+    "mtime": 1793800650.6343062,
+    "seen": 1793800657.408319,
+    "ast_hash": "2bce450c00d0fb0185570e5dbe75d9db",
+    "semantic_hash": ""
+  },
+  "brain-system/test/enteric.test.mjs": {
+    "mtime": 1793800729.6754968,
+    "seen": 1793800736.658787,
+    "ast_hash": "fb946d628beacdd2b2e5b325b45d9a11",
+    "semantic_hash": ""
+  },
+  "brain-system/test/somatic.test.mjs": {
+    "mtime": 1793800954.9689302,
+    "seen": 1793800960.6478798,
+    "ast_hash": "2511f7041395379a0ebc3274003294a9",
+    "semantic_hash": ""
+  },
+  "brain-system/src/sim/interventions.js": {
+    "mtime": 1793802027.8317723,
+    "seen": 1793802034.766398,
+    "ast_hash": "4861fd61e71f39a42bd8915d3d8a2465",
+    "semantic_hash": ""
+  },
+  "brain-system/test/interventions.test.mjs": {
+    "mtime": 1793799209.229995,
+    "seen": 1793799214.963006,
+    "ast_hash": "44d486f9f2f969082ab89f6294425455",
+    "semantic_hash": ""
+  },
+  "brain-system/test/switches.test.mjs": {
+    "mtime": 1793801151.8615284,
+    "seen": 1793801157.382411,
+    "ast_hash": "a6f2e27c527639d5a5d6b4988c2aabb2",
+    "semantic_hash": ""
+  },
+  "brain-system/test/latency.test.mjs": {
+    "mtime": 1793799663.6795216,
+    "seen": 1793799671.068695,
+    "ast_hash": "430cc9bb2bf575d3db5097e468c889d2",
+    "semantic_hash": ""
+  },
+  "brain-system/test/orgasm-switched.test.mjs": {
+    "mtime": 1793799730.619875,
+    "seen": 1793799737.369449,
+    "ast_hash": "b43ba79283a18c6454fe436a093fab30",
     "semantic_hash": ""
   }
 }

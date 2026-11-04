@@ -10,11 +10,14 @@ export const CENTER = [0, -16, 6];         // camera target (mm): middle of the 
 // Regions drive both the dopamine model (per-region concentration) and the imaging-based
 // activity map. The order is the index used in vertex attributes and the per-region state.
 // Indices 0–32 are the original set and never move; the brain-system ids of
-// research/ANALYSIS.md A.3.3 (89 ids, §3.15) are appended after `whiteMatter`.
+// research/ANALYSIS.md A.3.3 (89 ids, §3.15) are appended after `whiteMatter`, then the post-port
+// ids of DOPAMINE.md §8.1 and §9.1 (Phase 0a). Index 22 is the pituitary gland haze since the
+// §7.3 split (`pituitaryGland`; the stalk and the median eminence are `medianEminence`); the old
+// name `pituitary` stays as an alias. `dorsalStriatum` is the putamen since `caudate` has its own id.
 export const REGION_IDS = [
   'cortex', 'frontal', 'pfc', 'ofc', 'acc', 'insula', 'parietal', 'temporal', 'occipital',
   'cerebellum', 'dentate', 'thalamus', 'dorsalStriatum', 'naccCore', 'naccShell', 'pallidum',
-  'amygdala', 'hippocampus', 'hypothalamus', 'mpoa', 'pvn', 'arcuate', 'pituitary', 'vta', 'snc',
+  'amygdala', 'hippocampus', 'hypothalamus', 'mpoa', 'pvn', 'arcuate', 'pituitaryGland', 'vta', 'snc',
   'zonaIncerta', 'a11', 'rmtg', 'raphe', 'pag', 'brainstem', 'spinal', 'whiteMatter',
   // Thalamus (13)
   'thalAnt', 'thalMD', 'thalVA', 'thalVL', 'thalVPL', 'thalVPM', 'thalVPMpc', 'thalVMpo', 'thalCM',
@@ -32,14 +35,21 @@ export const REGION_IDS = [
   'nodulus', 'olfBulb', 'olfTubercle',
   // Splits (6 new; `gpe`, `dr` and `pituitaryAnt` reuse the old ids, see REGION_ALIASES)
   'gpi', 'mnr', 'rmg', 'rpa', 'rob', 'pituitaryPost',
+  // Post-port dopamine ids (DOPAMINE.md §7.3, §8.1, §9.1): VTA somata within 3.5 mm of the midline
+  // and the midline column (VTA-m), the A14 somata (no longer on `pvn`), the caudate (w_vis 0.89).
+  'vtaMedial', 'a14', 'caudate',
 ];
-export const REGION_ALIASES = { gpe: 'pallidum', dr: 'raphe', pituitaryAnt: 'pituitary' };   // A.3.3 splits
+// A.3.3 splits; `pituitary` is the pre-split name of index 22 (DOPAMINE.md §7.3).
+export const REGION_ALIASES = { gpe: 'pallidum', dr: 'raphe', pituitary: 'pituitaryGland', pituitaryAnt: 'pituitaryGland' };
 export const R = Object.fromEntries([
   ...REGION_IDS.map((id, i) => [id, i]),
   ...Object.entries(REGION_ALIASES).map(([alias, id]) => [alias, REGION_IDS.indexOf(id)]),
 ]);
-export const REGION_COUNT = REGION_IDS.length;
+export const REGION_COUNT = REGION_IDS.length;   // ≤ 128: the state texture holds 2 · 128 sided columns (statetex.js)
 export const LEGACY_REGION_COUNT = 33;     // regions of the original build (indices 0–32)
+// Post-port ids with dopamine channels of their own (dopamine.js writes them directly), so they are
+// their own PARENT rather than inheriting a legacy region's channels (DOPAMINE.md §8.1, §9.1).
+export const OWN_CHANNEL_IDS = ['medianEminence', 'vtaMedial', 'a14', 'caudate'];
 
 // Constants of the brain-system additions (research/ANALYSIS.md). Coordinates live in the
 // tables further down, one row per structure, each citing its section.
@@ -98,36 +108,58 @@ export function noise3(x, y, z) {
 }
 
 // --- Signed distance helpers (millimetres; approximate for ellipsoids) ---
-function sdEllipsoid(x, y, z, c, r) {
-  const qx = (x - c[0]) / r[0], qy = (y - c[1]) / r[1], qz = (z - c[2]) / r[2];
+// `rzDown` (optional) is the z half-axis below the centre: r_z = z < c_z ? rzDown : r[2] (§7.3).
+function sdEllipsoid(x, y, z, c, r, rzDown = r[2]) {
+  const rz = z < c[2] ? rzDown : r[2];
+  const qx = (x - c[0]) / r[0], qy = (y - c[1]) / r[1], qz = (z - c[2]) / rz;
   const k0 = len3(qx, qy, qz);
-  const k1 = len3(qx / r[0], qy / r[1], qz / r[2]);
-  return k0 < 1e-9 ? -Math.min(r[0], r[1], r[2]) : k0 * (k0 - 1) / k1;
+  const k1 = len3(qx / r[0], qy / r[1], qz / rz);
+  return k0 < 1e-9 ? -Math.min(r[0], r[1], rz) : k0 * (k0 - 1) / k1;
 }
 function smin(a, b, k) { const h = clamp(0.5 + 0.5 * (b - a) / k); return b + (a - b) * h - k * h * (1 - h); }
 function smax(a, b, k) { return -smin(-a, -b, k); }
 
+// Hull constants (mm). Cerebrum: DOPAMINE.md §7.2 item 1; cerebellum: §7.2 item 4 and the §7.3
+// `sdCerebellum` row (inferior half lowered, tentorial carve; the optional posterior enlargement is
+// not applied).
+export const HULL = {
+  cerebrum: { c: [0, -17, 14], r: [68, 86, 62], baseZ: -23, baseRise: 0.12, temporal: { c: [43, -15, -21], r: [24, 44, 21] } },
+  notch: { c: [0, -22, -43], r: [23, 40, 36] },                     // inferior-medial notch (§7.2 items 1, 3)
+  cerebellum: {
+    hemisphere: { c: [23, -63, -37], r: [26, 27, 21], rzDown: 28 }, // r_z 21 above z −37, 28 below (§7.3)
+    vermis: { c: [0, -61, -31], r: [10, 27, 21], rzDown: 25 },      // r_z 25 below z −31 (§7.3)
+    tentorialGap: 1.5,                                               // carve d = smax(d, −sdCerebrum + 1.5, 2) (§7.2 item 4)
+    tentorialK: 2,
+  },
+};
+export const notchDistance = (x, y, z) => sdEllipsoid(x, y, z, HULL.notch.c, HULL.notch.r);
+
 // Cerebrum, one hemisphere (s = +1 right, −1 left). A single ellipsoid for the frontal–parietal–
 // occipital mass with a flattened orbital base, temporal lobes that hang below the Sylvian
 // fissure, an inferior-medial notch where the diencephalon and brainstem emerge, and the
-// longitudinal fissure as a plane 1 mm from the midline. Volume ≈ 1,050 cm³ for both hemispheres.
+// longitudinal fissure as a plane 1 mm from the midline. Volume ≈ 1,386 cm³ for both hemispheres
+// (MNI-sized; a native adult cerebrum is ≈ 1,000–1,100 cm³; DOPAMINE.md §7.2 item 1).
 export function sdCerebrum(x, y, z, s) {
-  let d = sdEllipsoid(x, y, z, [0, -17, 14], [68, 86, 62]);
-  d = smax(d, -(z + 23 - 0.12 * Math.max(0, -y - 10)), 5);             // orbital and basal surface
-  d = smin(d, sdEllipsoid(x, y, z, [s * 43, -15, -21], [24, 44, 21]), 5); // temporal lobe
-  d = smax(d, -sdEllipsoid(x, y, z, [0, -22, -43], [23, 40, 36]), 5);   // inferior-medial notch
+  const H = HULL.cerebrum;
+  let d = sdEllipsoid(x, y, z, H.c, H.r);
+  d = smax(d, -(z - H.baseZ - H.baseRise * Math.max(0, -y - 10)), 5);  // orbital and basal surface
+  d = smin(d, sdEllipsoid(x, y, z, [s * H.temporal.c[0], H.temporal.c[1], H.temporal.c[2]], H.temporal.r), 5); // temporal lobe
+  d = smax(d, -notchDistance(x, y, z), 5);                              // inferior-medial notch
   d = smax(d, 1 - s * x, 2);                                            // longitudinal fissure
   return d;
 }
 
 // Cerebellum: two hemispheres and the vermis under the tentorium, notched in front for the
-// fourth ventricle and the pons.
+// fourth ventricle and the pons, and carved off the cerebrum with a 1.5-mm tentorial gap so the
+// two hulls no longer interpenetrate (§7.2 item 4; ≈ 137 cm³ MNI, z −65…−16).
 export function sdCerebellum(x, y, z) {
+  const C = HULL.cerebellum, h = C.hemisphere, v = C.vermis;
   let d = smin(
-    smin(sdEllipsoid(x, y, z, [23, -63, -37], [26, 27, 21]), sdEllipsoid(x, y, z, [-23, -63, -37], [26, 27, 21]), 6),
-    sdEllipsoid(x, y, z, [0, -61, -31], [10, 27, 21]), 6);
+    smin(sdEllipsoid(x, y, z, h.c, h.r, h.rzDown), sdEllipsoid(x, y, z, [-h.c[0], h.c[1], h.c[2]], h.r, h.rzDown), 6),
+    sdEllipsoid(x, y, z, v.c, v.r, v.rzDown), 6);
   d = smax(d, -sdEllipsoid(x, y, z, [0, -36, -36], [15, 12, 24]), 4);
   d = smax(d, z - (-12 + 0.35 * (y + 45)), 4);                          // tentorial (superior) surface
+  d = smax(d, -sdCerebrum(x, y, z, x < 0 ? -1 : 1) + C.tentorialGap, C.tentorialK);   // tentorial carve
   return d;
 }
 
@@ -189,95 +221,164 @@ export function folding(x, y, z) {
   return { depth, sulcus: Math.max(sul, major.w) };
 }
 
+// --- Rotated ellipsoids (DOPAMINE.md §7.3: SNc and crura, thalamus) ---
+// A volume with `axes` holds three orthonormal right-side directions, one per half-axis r[0..2];
+// without `axes` the ellipsoid is axis-aligned. Positions are right-side (mirror x for the left).
+const unit = (v) => { const l = len3(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l]; };
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+// Frame of a band along `from` → `to`: [mediolateral (horizontal, ⟂ long), long, dorsoventral].
+function bandAxes(from, to) {
+  const long = unit([to[0] - from[0], to[1] - from[1], to[2] - from[2]]);
+  const ml = unit([-long[1], long[0], 0]);
+  return [ml, long, cross(long, ml)];
+}
+const yawAxes = (deg) => { const a = deg * Math.PI / 180, c = Math.cos(a), s = Math.sin(a); return [[c, s, 0], [-s, c, 0], [0, 0, 1]]; };
+
+export const GEOMETRY = {
+  // SNc axis (±13, −13, −10) → (±8, −24, −16); centre at its midpoint, half-axes 4 (mediolateral),
+  // 8.5 (long), 2 (dorsoventral): tips (±13.7, −11.6, −9.2) and (±7.3, −25.4, −16.8) (§2.4, §7.3).
+  snAxis: [[13, -13, -10], [8, -24, -16]],
+  snc: { c: [10.5, -18.5, -13], r: [4, 8.5, 2] },
+  crus: { c: [13.5, -18, -16.5], r: [4, 9, 2.5] },                  // cerebral peduncle, parallel to the SNc axis (§7.3)
+  thalamusYaw: 15,                                                  // ° about +z (right side), anterior pole medial: long axis (∓sin 15°, cos 15°, 0) (§7.3)
+  // Gaussian edge of the VTA and the hypothalamic nuclei (§7.2 item 5): uniform density inside the
+  // normalised radius `core`, then exp(−½((ρ − core)/sigma)²) out to the drawn surface ρ = 1
+  // (0.25 of the core density there) ([model]: the spec gives no width; truncated at ρ = 1 so the
+  // periventricular groups stay lateral to the third-ventricle lumen).
+  edge: { core: 0.5, sigma: 0.3 },
+  vtaMedialX: 3.5,                                                  // |x| below which a VTA point is VTA-m (`vtaMedial`; §8.1)
+};
+export const SN_AXES = bandAxes(...GEOMETRY.snAxis);
+export const THALAMUS_AXES = yawAxes(GEOMETRY.thalamusYaw);
+
+// Normalised r² of a right-side point in an ellipsoid volume (rotated when it has `axes`).
+export function ellipsoidR2(d, x, y, z) {
+  const ex = x - d.c[0], ey = y - d.c[1], ez = z - d.c[2];
+  if (!d.axes) return (ex / d.r[0]) ** 2 + (ey / d.r[1]) ** 2 + (ez / d.r[2]) ** 2;
+  let q = 0;
+  for (let k = 0; k < 3; k++) { const a = d.axes[k]; q += ((ex * a[0] + ey * a[1] + ez * a[2]) / d.r[k]) ** 2; }
+  return q;
+}
+// Point of an ellipsoid volume for unit-ball coordinates (u, v, w).
+export function ellipsoidPoint(d, u, v, w) {
+  if (!d.axes) return [d.c[0] + u * d.r[0], d.c[1] + v * d.r[1], d.c[2] + w * d.r[2]];
+  const A = d.axes, a = u * d.r[0], b = v * d.r[1], g = w * d.r[2];
+  return [0, 1, 2].map((k) => d.c[k] + a * A[0][k] + b * A[1][k] + g * A[2][k]);
+}
+
 // --- Deep structures (bilateral unless `mid`) ---
-// type 'e': ellipsoid { c, r }; type 't': tube { pts: [[x,y,z,radius], …] }.
+// type 'e': ellipsoid { c, r, axes? }; type 't': tube { pts: [[x,y,z,radius], …] }. `edge: 'gauss'`
+// marks the soft Gaussian border of §7.2 item 5. Positions and radii are the DOPAMINE.md §7.3
+// (post-port) values; the rows cite the §7.3 change they apply.
 export const NUCLEI = [
-  { id: 'thalamus', region: R.thalamus, type: 'e', c: [11, -18, 7], r: [8, 15, 9], share: 0.20, tint: 0.55 },
-  { id: 'caudate', region: R.dorsalStriatum, type: 't', pts: [[13, 15, 8, 7], [14, 4, 15, 5.5], [17, -10, 21, 3.8], [23, -27, 18, 2.8], [29, -33, 6, 2.2], [31, -22, -7, 1.6]], share: 0.12, tint: 0.45 },
-  { id: 'putamen', region: R.dorsalStriatum, type: 'e', c: [25, 2, 1], r: [5.5, 15, 9], share: 0.16, tint: 0.45 },
-  { id: 'pallidum', region: R.pallidum, type: 'e', c: [19, -3, 0], r: [3.5, 8, 5], share: 0.04, tint: 0.6 },
+  { id: 'thalamus', region: R.thalamus, type: 'e', c: [11, -18, 8], r: [8.5, 16, 9.5], axes: THALAMUS_AXES, share: 0.20, tint: 0.55 },   // §7.3 NUCLEI radii, 15° yaw
+  { id: 'caudate', region: R.caudate, type: 't', pts: [[12, 23, 6, 4.5], [13, 15, 8, 7], [14, 4, 15, 5.5], [17, -10, 21, 3.8], [23, -27, 18, 2.8], [29, -33, 6, 2.2], [31, -22, -7, 1.6]], share: 0.12, tint: 0.45 },   // §7.3 caudate head point
+  { id: 'putamen', region: R.dorsalStriatum, type: 'e', c: [26, 2, 3], r: [5, 18, 11], share: 0.16, tint: 0.45 },             // §7.3 NUCLEI radii
+  { id: 'pallidum', region: R.pallidum, type: 'e', c: [18.5, -4, -1], r: [3.5, 9, 6], share: 0.04, tint: 0.6 },               // §7.3 NUCLEI radii
   { id: 'nacc', region: R.naccShell, type: 'e', c: [10, 12, -8], r: [5, 6, 4.5], share: 0.06, tint: 0.4 },
-  { id: 'amygdala', region: R.amygdala, type: 'e', c: [23, -5, -18], r: [7, 8, 7], share: 0.07, tint: 0.5 },
-  { id: 'hippocampus', region: R.hippocampus, type: 't', pts: [[25, -8, -20, 6], [29, -19, -15, 5], [30, -31, -7, 4], [24, -39, 3, 3]], share: 0.08, tint: 0.5 },
-  { id: 'hypothalamus', region: R.hypothalamus, type: 'e', c: [5, -3, -10], r: [4.5, 9, 5], share: 0.035, tint: 0.35 },
-  { id: 'mpoa', region: R.mpoa, type: 'e', c: [3.5, 4, -10], r: [2.6, 3.2, 3], share: 0.012, tint: 0.35 },
-  { id: 'pvn', region: R.pvn, type: 'e', c: [3, -4, -6], r: [1.8, 3, 2.4], share: 0.008, tint: 0.35 },
-  { id: 'arcuate', region: R.arcuate, type: 'e', c: [2, -7, -13], r: [2, 3, 2], share: 0.005, tint: 0.35 },
-  { id: 'pituitary', region: R.pituitary, type: 'e', c: [0, 0, -32], r: [6, 4.5, 3], share: 0.010, tint: 0.3, mid: true },
-  { id: 'stalk', region: R.pituitary, type: 't', pts: [[0, -6, -15, 1.3], [0, -3, -22, 1.1], [0, -1, -28, 1.2]], share: 0.002, tint: 0.3, mid: true },
+  { id: 'amygdala', region: R.amygdala, type: 'e', c: [23, -4, -17], r: [7, 8, 7], share: 0.07, tint: 0.5 },                  // §7.3 amygdala centre
+  { id: 'hippocampus', region: R.hippocampus, type: 't', pts: [[26, -12, -21, 5.5], [29, -21, -15, 5.5], [30, -31, -7, 4.5], [24, -39, 3, 3]], share: 0.08, tint: 0.5 },   // §7.3
+  { id: 'hypothalamus', region: R.hypothalamus, type: 'e', c: [5.5, -3, -10], r: [3.5, 9, 5], share: 0.035, tint: 0.35, edge: 'gauss' },   // §7.3
+  // Posterior hypothalamic / periventricular-grey ellipsoid that holds A11 (§7.3; NUCLEI share ≈ 0.002).
+  { id: 'hypothalamusPost', region: R.hypothalamus, type: 'e', c: [3.8, -14, -5.2], r: [1.8, 2.6, 2.0], share: 0.002, tint: 0.35, edge: 'gauss' },
+  { id: 'mpoa', region: R.mpoa, type: 'e', c: [4, 4, -10], r: [2.0, 3.2, 3], share: 0.012, tint: 0.35, edge: 'gauss' },      // §7.3
+  { id: 'pvn', region: R.pvn, type: 'e', c: [3.5, -4, -6], r: [1.5, 3, 2.4], share: 0.008, tint: 0.35, edge: 'gauss' },      // §7.3 wall placement
+  { id: 'arcuate', region: R.arcuate, type: 'e', c: [3, -7, -13], r: [1.0, 3, 2], share: 0.005, tint: 0.35, edge: 'gauss' }, // §7.3 wall placement
+  // Glandular haze (kind GLAND): the lobes are `pituitaryGland`, the stalk `medianEminence` (§7.2 item 8, §7.3).
+  { id: 'pituitaryGland', region: R.pituitaryGland, type: 'e', c: [0, 0, -32], r: [6, 4.5, 3], share: 0.010, tint: 0.3, mid: true },
+  { id: 'stalk', region: R.medianEminence, type: 't', pts: [[0, -6, -15, 1.3], [0, -3, -22, 1.1], [0, -1, -28, 1.2]], share: 0.002, tint: 0.3, mid: true },
   { id: 'zonaIncerta', region: R.zonaIncerta, type: 'e', c: [12, -16, -3], r: [2.2, 5, 2], share: 0.006, tint: 0.4 },
-  // Non-dopaminergic neurons inside the dopamine groups: the VTA is ~35 % GABA and glutamate
-  // cells (rat), the SNc almost purely dopaminergic.
-  { id: 'vtaOther', region: R.vta, type: 'e', c: [4, -16, -12], r: [3, 5, 3.5], share: 0.004, tint: 0.4 },
-  { id: 'sncOther', region: R.snc, type: 'e', c: [11, -18, -12], r: [3.5, 7, 2.8], share: 0.002, tint: 0.4 },
+  // Rostromedial zona incerta around A13 (§7.3; 71 mm³, the density of the whole ZI).
+  { id: 'zonaIncertaRm', region: R.zonaIncerta, type: 'e', c: [7.2, -12, -4.8], r: [2.5, 3.4, 2.0], share: 0.005, tint: 0.4 },
+  // Non-dopaminergic SNc neurons (the SNc is almost purely dopaminergic). The non-DA VTA stars
+  // (`vtaOther`) are a fixed count drawn by brain.js from the VTA groups (§7.5), not a share.
+  { id: 'sncOther', region: R.snc, type: 'e', c: GEOMETRY.snc.c, r: GEOMETRY.snc.r, axes: SN_AXES, share: 0.002, tint: 0.4 },
   { id: 'pag', region: R.pag, type: 'e', c: [0, -31, -7], r: [6, 5, 6], share: 0.02, tint: 0.45, mid: true },
   { id: 'raphe', region: R.raphe, type: 't', pts: [[0, -27, -9, 2.2], [0, -30, -17, 2.4], [0, -32, -26, 2.2]], share: 0.01, tint: 0.4, mid: true },
   { id: 'rmtg', region: R.rmtg, type: 'e', c: [4, -28, -18], r: [2, 3, 2], share: 0.004, tint: 0.4 },
   { id: 'dentate', region: R.dentate, type: 'e', c: [15, -57, -35], r: [5, 7, 5], share: 0.03, tint: 0.5 },
 ];
 
-// Dopaminergic cell groups (Dahlström–Fuxe A-groups) drawn as lantern sources.
+// Dopaminergic cell groups (Dahlström–Fuxe A-groups) drawn as lantern sources. Shares are the
+// 3,500-soma split of §7.5 (SNc 2,000; VTA + midline 700; A8 300; A11–A14 125 each; §7.3 shares
+// row). The 700 A10 somata are split over the bilateral VTA and the midline column in proportion
+// to their ellipsoid volumes (440 : 101 mm³ → 570 : 130; [model]). A8 is pooled with the SNc
+// (region `snc`, §8.1); VTA somata within 3.5 mm of the midline take `vtaMedial` (brain.js).
+const SOMATA = 3500;
 export const DA_GROUPS = [
-  { id: 'vta', region: R.vta, label: 'VTA (A10)', type: 'e', c: [4, -16, -12], r: [3, 5, 3.5], share: 0.30 },
-  { id: 'snc', region: R.snc, label: 'Substantia nigra pars compacta (A9)', type: 'e', c: [11, -18, -12], r: [3.5, 7, 2.8], share: 0.52 },
-  { id: 'a11', region: R.a11, label: 'A11', type: 'e', c: [3, -14, -6], r: [1.5, 2, 1.5], share: 0.03 },
-  { id: 'a12', region: R.arcuate, label: 'A12 (TIDA)', type: 'e', c: [2, -7, -13], r: [1.8, 2.6, 1.8], share: 0.05 },
-  { id: 'a13', region: R.zonaIncerta, label: 'A13', type: 'e', c: [12, -16, -3], r: [2, 4, 1.8], share: 0.05 },
-  { id: 'a14', region: R.pvn, label: 'A14', type: 'e', c: [2.5, -1, -8], r: [1.2, 4, 2.5], share: 0.05 },
+  { id: 'vta', region: R.vta, label: 'VTA (A10)', type: 'e', c: [4, -16, -12], r: [3, 5, 3.5], share: 570 / SOMATA, edge: 'gauss' },
+  { id: 'midline', region: R.vtaMedial, label: 'Midline IF / RLi / CLi (A10)', type: 'e', c: [0, -20, -11], r: [2, 4, 3], share: 130 / SOMATA, mid: true },   // §2.4, §7.3
+  { id: 'snc', region: R.snc, label: 'Substantia nigra pars compacta (A9)', type: 'e', c: GEOMETRY.snc.c, r: GEOMETRY.snc.r, axes: SN_AXES, share: 2000 / SOMATA },   // §7.3 rotated SNc
+  { id: 'a8', region: R.snc, label: 'A8 (retrorubral field)', type: 'e', c: [10, -26, -13], r: [2.5, 3, 2.5], share: 300 / SOMATA },   // §2.4, §7.3
+  { id: 'a11', region: R.a11, label: 'A11', type: 'e', c: [3.5, -14, -5], r: [1.5, 2, 1.5], share: 125 / SOMATA },                    // §7.3
+  { id: 'a12', region: R.arcuate, label: 'A12 (TIDA)', type: 'e', c: [3, -7, -13], r: [1.0, 2.6, 1.8], share: 125 / SOMATA },         // §7.3 wall placement
+  { id: 'a13', region: R.zonaIncerta, label: 'A13', type: 'e', c: [7, -12, -5], r: [2, 3, 1.8], share: 125 / SOMATA },                // §7.3 A13 site
+  { id: 'a14', region: R.a14, label: 'A14', type: 'e', c: [2.8, -1, -9], r: [0.8, 7, 5], share: 125 / SOMATA },                       // §7.3 periventricular sheet
 ];
 
 // Brainstem and the upper spinal cord: a tube with an elliptical cross-section [x radius, y radius].
+// First point (0, −24, −4, 12, 8) instead of the diencephalic (0, −16, 0, 13, 11) (§7.2 item 6, §7.3).
 export const BRAINSTEM = [
-  [0, -16, 0, 13, 11], [0, -24, -10, 14, 12], [0, -26, -22, 16, 13], [0, -27, -33, 17, 12],
+  [0, -24, -4, 12, 8], [0, -24, -10, 14, 12], [0, -26, -22, 16, 13], [0, -27, -33, 17, 12],
   [0, -34, -47, 10, 9], [0, -40, -60, 8, 7], [0, -44, -74, 6.5, 5.5], [0, -46, -88, 6, 5],
 ];
+// Cerebral-peduncle (crus) ellipsoids ventral and lateral to the SN: white matter drawn as
+// brainstem filler at the density of the tube (region `brainstem`, kind BRAINSTEM; §7.3).
+export const CRUS = { id: 'crus', region: R.brainstem, type: 'e', c: GEOMETRY.crus.c, r: GEOMETRY.crus.r, axes: SN_AXES };
+export const SPINAL_Z = -72;   // brainstem-tube points below z −72 are labelled `spinal` (§2.4, §9.8)
 
 // Dopamine projections: spline bundles from a cell group to a terminal field (MNI mm).
-// Mirrored for the left hemisphere. `fan` is the terminal spread radius in mm.
+// Mirrored for the left hemisphere. `fan` is the terminal spread radius in mm. Control points and
+// axon shares are DOPAMINE.md §7.6 (they sum to 1.000 without the optional tuberohypophyseal
+// fibres, which are not drawn: nigrostriatal → putamen 0.26). `from` is the region of the flow
+// source (VTA-l `vta`, VTA-m `vtaMedial`, A13 `zonaIncerta`); dopamine.js PATH_SOURCE names it.
 export const PATHWAYS = [
   { id: 'mesolimbic', label: 'Mesolimbic: VTA → nucleus accumbens', from: R.vta, to: R.naccShell, share: 0.20, fan: 4.5,
     pts: [[4, -16, -12], [6, -9, -11], [8, -1, -10], [9, 6, -9], [10, 12, -8]] },
-  { id: 'mesoAmygdala', label: 'Mesolimbic: VTA → amygdala', from: R.vta, to: R.amygdala, share: 0.05, fan: 5,
-    pts: [[4, -16, -12], [9, -11, -14], [16, -7, -17], [23, -5, -18]] },
-  { id: 'mesoHippocampal', label: 'Mesolimbic: VTA → hippocampus', from: R.vta, to: R.hippocampus, share: 0.03, fan: 5,
-    pts: [[4, -16, -12], [12, -17, -14], [22, -19, -15], [28, -20, -14]] },
-  { id: 'mesocorticalMedial', label: 'Mesocortical: VTA → medial prefrontal cortex', from: R.vta, to: R.pfc, share: 0.12, fan: 9,
+  { id: 'mesoAmygdala', label: 'Mesolimbic: VTA → amygdala', from: R.vtaMedial, to: R.amygdala, share: 0.05, fan: 5,
+    pts: [[4, -16, -12], [6, -9, -11], [10, -4, -10], [16, -3, -12], [20, -4, -15], [23, -4, -17]] },
+  { id: 'mesoHippocampal', label: 'Mesolimbic: VTA → hippocampus', from: R.vtaMedial, to: R.hippocampus, share: 0.03, fan: 5,
+    pts: [[4, -16, -12], [6, -9, -11], [10, -4, -10], [16, -3, -12], [20, -4, -15], [25, -11, -20], [28, -20, -14]] },
+  { id: 'mesocorticalMedial', label: 'Mesocortical: VTA → medial prefrontal cortex', from: R.vtaMedial, to: R.pfc, share: 0.10, fan: 9,
     pts: [[4, -16, -12], [6, -8, -10], [8, 2, -8], [9, 14, -6], [9, 26, -2], [8, 38, 6], [7, 48, 15]] },
-  { id: 'mesocorticalOrbital', label: 'Mesocortical: VTA → orbitofrontal cortex', from: R.vta, to: R.ofc, share: 0.06, fan: 8,
+  { id: 'mesocorticalOrbital', label: 'Mesocortical: VTA → orbitofrontal cortex', from: R.vtaMedial, to: R.ofc, share: 0.05, fan: 8,
     pts: [[4, -16, -12], [6, -8, -10], [8, 2, -8], [10, 14, -7], [15, 25, -12], [20, 36, -16]] },
-  { id: 'mesocorticalCingulate', label: 'Mesocortical: VTA → anterior cingulate', from: R.vta, to: R.acc, share: 0.05, fan: 7,
+  { id: 'mesocorticalCingulate', label: 'Mesocortical: VTA → anterior cingulate', from: R.vtaMedial, to: R.acc, share: 0.05, fan: 7,
     pts: [[4, -16, -12], [6, -8, -10], [8, 2, -8], [8, 14, -4], [7, 25, 6], [6, 30, 18], [5, 22, 30]] },
-  { id: 'nigrostriatalPutamen', label: 'Nigrostriatal: SNc → putamen', from: R.snc, to: R.dorsalStriatum, share: 0.28, fan: 9,
+  { id: 'slMFB', label: 'Mesocortical (superolateral MFB): VTA → dorsolateral prefrontal cortex', from: R.vtaMedial, to: R.pfc, share: 0.04, fan: 9,
+    pts: [[4, -16, -12], [8, -11, -8], [11, -4, -3], [15, 5, 2], [20.5, 16, 5], [22, 28, 10], [34, 36, 24]] },
+  { id: 'nigrostriatalPutamen', label: 'Nigrostriatal: SNc → putamen', from: R.snc, to: R.dorsalStriatum, share: 0.26, fan: 9,
     pts: [[11, -18, -12], [14, -12, -8], [18, -7, -3], [22, -2, 1], [25, 3, 1]] },
-  { id: 'nigrostriatalCaudate', label: 'Nigrostriatal: SNc → caudate', from: R.snc, to: R.dorsalStriatum, share: 0.13, fan: 6,
+  { id: 'nigrostriatalCaudate', label: 'Nigrostriatal: SNc → caudate', from: R.snc, to: R.caudate, share: 0.13, fan: 6,
     pts: [[11, -18, -12], [13, -10, -6], [14, -2, 2], [14, 6, 7], [13, 13, 9]] },
-  { id: 'incertoMpoa', label: 'Incertohypothalamic: A13/A14 → medial preoptic area', from: R.zonaIncerta, to: R.mpoa, share: 0.03, fan: 2.5,
-    pts: [[12, -16, -3], [8, -8, -6], [5, -2, -8], [3.5, 4, -10]] },
-  { id: 'incertoPvn', label: 'Incertohypothalamic: A13/A14 → paraventricular nucleus', from: R.zonaIncerta, to: R.pvn, share: 0.02, fan: 2,
-    pts: [[12, -16, -3], [7, -8, -5], [3, -4, -6]] },
-  { id: 'tuberoinfundibular', label: 'Tuberoinfundibular: arcuate (A12) → median eminence → pituitary', from: R.arcuate, to: R.pituitary, share: 0.015, fan: 2,
-    pts: [[2, -7, -13], [0.8, -6, -15], [0.3, -3, -22], [0, -1, -28], [0, 0, -32]] },
-  { id: 'diencephalospinal', label: 'Diencephalospinal: A11 → spinal cord', from: R.a11, to: R.spinal, share: 0.025, fan: 2,
-    pts: [[3, -14, -6], [3, -22, -16], [2.5, -28, -32], [3, -36, -50], [3, -42, -66], [3, -46, -86]] },
+  { id: 'incertoMpoa', label: 'Incertohypothalamic: A13 → medial preoptic area', from: R.zonaIncerta, to: R.mpoa, share: 0.03, fan: 2.5,
+    pts: [[7, -12, -5], [6, -6, -6], [5, -2, -8], [4, 4, -10]] },
+  { id: 'incertoPvn', label: 'Incertohypothalamic: A13 → paraventricular nucleus', from: R.zonaIncerta, to: R.pvn, share: 0.02, fan: 2,
+    pts: [[7, -12, -5], [5, -8, -5], [3.5, -4, -6]] },
+  { id: 'tuberoinfundibular', label: 'Tuberoinfundibular: arcuate (A12) → median eminence', from: R.arcuate, to: R.medianEminence, share: 0.015, fan: 2,
+    pts: [[3, -7, -13], [0.8, -6, -15]] },
+  { id: 'diencephalospinal', label: 'Diencephalospinal: A11 → spinal cord (lumbosacral targets, proxy)', from: R.a11, to: R.spinal, share: 0.025, fan: 2,
+    pts: [[3.5, -14, -5], [2.5, -24, -9], [2, -32, -13], [2.5, -34, -22], [3, -36, -34], [3, -40, -48], [3.5, -45, -62], [3.5, -48, -76], [3.5, -49, -88]] },
 ];
 
 // Terminal fields: where dopamine is released (volume for varicosities and lantern glows).
 // Shell and core of the accumbens share the accumbens volume and are split by distance from
-// the core centre. Cortical fields are sampled from the cortical sheet of their region.
+// the core centre. Cortical fields are sampled from the cortical sheet of their region. Shapes
+// follow the NUCLEI rows (§7.3); the spinal tube is the grey-matter proxy medial to the §7.6 route.
 export const TERMINALS = [
   { region: R.naccShell, type: 'e', c: [10, 12, -8], r: [5, 6, 4.5], density: 1.0, lanterns: 14 },
   { region: R.naccCore, type: 'e', c: [11.5, 12.5, -6.5], r: [3.2, 4, 3.2], density: 1.0, lanterns: 6 },
-  { region: R.dorsalStriatum, type: 'e', c: [25, 2, 1], r: [5.5, 15, 9], density: 1.0, lanterns: 40 },
-  { region: R.dorsalStriatum, type: 't', pts: [[13, 15, 8, 7], [14, 4, 15, 5.5], [17, -10, 21, 3.8], [23, -27, 18, 2.8]], density: 0.9, lanterns: 22 },
-  { region: R.amygdala, type: 'e', c: [23, -5, -18], r: [7, 8, 7], density: 0.25, lanterns: 8 },
-  { region: R.hippocampus, type: 't', pts: [[25, -8, -20, 6], [29, -19, -15, 5], [30, -31, -7, 4]], density: 0.08, lanterns: 4 },
-  { region: R.mpoa, type: 'e', c: [3.5, 4, -10], r: [2.6, 3.2, 3], density: 0.6, lanterns: 3 },
-  { region: R.pvn, type: 'e', c: [3, -4, -6], r: [1.8, 3, 2.4], density: 0.5, lanterns: 2 },
-  { region: R.pituitary, type: 'e', c: [0, -6, -15], r: [2.5, 2.5, 1.5], density: 0.8, lanterns: 2, mid: true },   // median eminence
+  { region: R.dorsalStriatum, type: 'e', c: [26, 2, 3], r: [5, 18, 11], density: 1.0, lanterns: 40 },   // putamen
+  { region: R.caudate, type: 't', pts: [[12, 23, 6, 4.5], [13, 15, 8, 7], [14, 4, 15, 5.5], [17, -10, 21, 3.8], [23, -27, 18, 2.8]], density: 0.9, lanterns: 22 },
+  { region: R.amygdala, type: 'e', c: [23, -4, -17], r: [7, 8, 7], density: 0.25, lanterns: 8 },
+  { region: R.hippocampus, type: 't', pts: [[26, -12, -21, 5.5], [29, -21, -15, 5.5], [30, -31, -7, 4.5]], density: 0.08, lanterns: 4 },
+  { region: R.mpoa, type: 'e', c: [4, 4, -10], r: [2.0, 3.2, 3], density: 0.6, lanterns: 3 },
+  { region: R.pvn, type: 'e', c: [3.5, -4, -6], r: [1.5, 3, 2.4], density: 0.5, lanterns: 2 },
+  { region: R.medianEminence, type: 'e', c: [0, -6, -15], r: [2.5, 2.5, 1.5], density: 0.8, lanterns: 2, mid: true },
   { region: R.pfc, type: 'cortex', density: 0.10, lanterns: 26 },
   { region: R.ofc, type: 'cortex', density: 0.09, lanterns: 14 },
   { region: R.acc, type: 'cortex', density: 0.12, lanterns: 10 },
-  { region: R.spinal, type: 't', pts: [[3, -42, -66, 3], [3, -46, -86, 3]], density: 0.2, lanterns: 2 },
+  { region: R.spinal, type: 't', pts: [[2.5, -45.5, -74, 3], [2.5, -47.5, -88, 3]], density: 0.2, lanterns: 2 },   // §7.3, §9.8
 ];
 
 // Catmull–Rom spline through control points (arrays of [x, y, z, …]); returns a sampler
@@ -301,9 +402,10 @@ export function spline(pts) {
 
 // =====================================================================================
 // Brain-system additions (research/ANALYSIS.md §3, §11; Appendix A.3.3 and B.5).
-// Nothing above this line moves: NUCLEI, DA_GROUPS, BRAINSTEM, PATHWAYS and TERMINALS stay as
-// they are, so the generateBrain buffer is unchanged. The structures below are drawn in a
-// separate buffer (brain.js generateBrainExtra) or obtained by relabelling existing stars.
+// NUCLEI, DA_GROUPS, BRAINSTEM, PATHWAYS and TERMINALS above hold the post-port (DOPAMINE.md §7.3,
+// Phase 0a) geometry and stay as they are from here on, so the generateBrain buffer of the
+// post-port build is the reference (B.5). The structures below are drawn in a separate buffer
+// (brain.js generateBrainExtra) or obtained by relabelling existing stars.
 // =====================================================================================
 
 // --- New brain structures (§3.16; right side, mirrored unless `mid`) ---
@@ -427,7 +529,7 @@ export const V2 = Object.fromEntries(NUCLEI_V2.map((d) => [d.id, d]));
 export const RELABEL = [
   { from: R.pallidum, rule: 'nearest', metric: 'euclid', to: ['gpe', 'gpi'] },                    // §3.17: nearer of the two centres
   { from: R.raphe, rule: 'nearest', metric: 'euclid', to: ['dr', 'mnr'] },                        // §3.17: raphe tube → dr + mnr
-  { from: R.pituitary, rule: 'plane', axis: 1, at: BRAIN_PARAMS.pituitarySplitY, above: 'pituitaryAnt', below: 'pituitaryPost' },   // A.3.3
+  { from: R.pituitaryGland, rule: 'plane', axis: 1, at: BRAIN_PARAMS.pituitarySplitY, above: 'pituitaryAnt', below: 'pituitaryPost' },   // A.3.3 (gland haze only; the stalk is `medianEminence`)
   { from: R.thalamus, rule: 'nearest', metric: 'scaled',                                          // B.8: 11 subnuclei as relabels
     to: ['thalAnt', 'thalMD', 'thalVA', 'thalVL', 'thalVPL', 'thalVPM', 'thalVPMpc', 'thalVMpo', 'thalCM', 'thalPulv'],
     shell: { id: 'thalRet', thickness: BRAIN_PARAMS.thalRetThickness, minNormalX: BRAIN_PARAMS.thalRetMinNormalX } },
@@ -446,7 +548,8 @@ export const MIDLINE = (() => {
 
 // --- Parent region: whose dopamine channels and imaging activity a new id inherits (B.5) ---
 // Relabelled ids inherit from the region their stars came from, so brain-only rendering is
-// unchanged; new nuclei inherit from the existing region that contains or adjoins them.
+// unchanged; new nuclei inherit from the existing region that contains or adjoins them. The
+// post-port ids of OWN_CHANNEL_IDS are their own parent (dopamine.js drives them directly).
 // Choices for new nuclei are [model]; DOPAMINE.md defines no dopamine field of its own for them.
 const PARENT_OF = {
   thalamus: ['thalAnt', 'thalMD', 'thalVA', 'thalVL', 'thalVPL', 'thalVPM', 'thalVPMpc', 'thalVMpo', 'thalCM', 'thalPulv',
@@ -456,7 +559,7 @@ const PARENT_OF = {
   snc: ['snr'],
   amygdala: ['bnst', 'cea'],
   hypothalamus: ['scn', 'son', 'vlpo', 'lh', 'tmn', 'dmh', 'vmh', 'mammillary', 'mnpo', 'ovlt', 'sfo'],
-  pituitary: ['medianEminence', 'pituitaryPost'],
+  pituitaryGland: ['pituitaryPost'],
   raphe: ['mnr', 'rmg', 'rpa', 'rob'],
   dentate: ['fastigial', 'interposed'],
   cerebellum: ['flocculus', 'nodulus'],
@@ -469,6 +572,7 @@ export const PARENT = (() => {
   const p = new Uint8Array(REGION_COUNT).fill(255);
   for (let r = 0; r < LEGACY_REGION_COUNT; r++) p[r] = r;
   for (const [parent, ids] of Object.entries(PARENT_OF)) for (const id of ids) p[R[id]] = R[parent];
+  for (const id of OWN_CHANNEL_IDS) p[R[id]] = R[id];
   return p;
 })();
 
@@ -615,7 +719,7 @@ export const PORTS = [
 export const PORT = Object.fromEntries(PORTS.map((p) => [p.id, p]));
 
 // --- Positions (mm, right side) of any structure id: new and existing nuclei, cortical areas,
-// nerve attachments, the pituitary lobes and the ports. null for ids without a position. ---
+// dopamine cell groups, nerve attachments, the pituitary lobes and the ports. null for ids without a position. ---
 const tubeMid = (pts) => spline(pts)(0.5).slice(0, 3);
 function capCentroidY(c, r, splitY, upper) {
   // Centroid of the ellipsoid cap beyond a y-plane (closed form for a solid cap of a unit sphere).
@@ -627,11 +731,13 @@ export function nodePos(id) {
   const v = V2[id];
   if (v) return v.pos ? [...v.pos] : v.type === 't' ? tubeMid(v.pts) : [...v.c];
   if (id === 'pituitaryAnt' || id === 'pituitaryPost') {
-    const g = NUCLEI.find((d) => d.id === 'pituitary');
+    const g = NUCLEI.find((d) => d.id === 'pituitaryGland');
     return [g.c[0], capCentroidY(g.c, g.r, BRAIN_PARAMS.pituitarySplitY, id === 'pituitaryAnt'), g.c[2]];
   }
   const legacy = NUCLEI.find((d) => d.id === (REGION_ALIASES[id] ?? id) || (d.region === R[id] && R[id] < LEGACY_REGION_COUNT));
   if (legacy) return legacy.type === 't' ? tubeMid(legacy.pts) : [...legacy.c];
+  const group = DA_GROUPS.find((g) => g.id === id || g.region === R[id]);   // vta, vtaMedial (midline column), a14, …
+  if (group) return [...group.c];
   if (id in AREA) return [...AREAS[AREA[id]].c];
   if (id in CN_ATTACH) return [...CN_ATTACH[id]];
   if (id === 'junction') return [...BRAIN_PARAMS.junction];

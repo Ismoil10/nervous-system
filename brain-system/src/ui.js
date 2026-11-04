@@ -54,12 +54,14 @@ const KIT = { $, show, readout, setText, num, nonNeg, clamp01, DASH, MINUS };
 const nmKey = (v) => (v < 9.95 ? Math.round(v * 10) : 1000 + Math.round(v));   // one decimal under 10 nM
 const nmText = (k) => (k < 1000 ? (k / 10).toFixed(1) : String(k - 1000));
 const fmtNm = (k) => `${nmText(k)} nM`;
-const RATIO_NONE = 999;
-const fmtCore = (k) => {                                 // NAcc core: "34 nM · ×2.3"
-  const r = k % 1000;
-  const nm = fmtNm((k - r) / 1000);
-  return r === RATIO_NONE ? nm : `${nm} · ×${(r / 10).toFixed(1)}`;
+// NAcc rows (DOPAMINE.md §8.6): tonic level C̄ and the last peak (substep maximum, slow hold),
+// "21.8 nM · peak 38.3". The key packs both nM keys.
+const NM_SPAN = 10000;
+const fmtTonicPeak = (k) => {
+  const pk = k % NM_SPAN, tonic = (k - pk) / NM_SPAN;
+  return pk === NM_SPAN - 1 ? fmtNm(tonic) : `${fmtNm(tonic)} · peak ${nmText(pk)}`;
 };
+const fmtRest = (k) => `${k}%`;                           // % of the resting level (MPOA, ME, A11; §8.6)
 const fmtHz = (k) => `${(k / 10).toFixed(1)} Hz`;
 const occKey = (p) => (p < 9.95 ? Math.round(p * 10) : 1000 + Math.round(p));  // p in percent
 const fmtOcc = (k) => `${nmText(k)}%`;
@@ -144,12 +146,19 @@ const SPARK_TONIC = 15;
 const DASHED = [3, 3];
 const SOLID = [];
 
-// Terminal fields shown in nM (payload key, element id). NAcc core has its own row with the ratio.
+// Terminal fields (payload key, element id, unit; DOPAMINE.md §8.6): nM, or % of rest for the
+// MPOA, the median eminence and the spinal field. The NAcc rows show the tonic level and last peak.
 const DA_FIELDS = [
-  ['naccShell', 'da-nacc-shell'], ['dStriatum', 'da-dstr'], ['mPFC', 'da-mpfc'], ['amygdala', 'da-amy'],
-  ['mpoa', 'da-mpoa'], ['pvn', 'da-pvn'], ['medEminence', 'da-me'], ['spinal', 'da-spinal'],
+  ['dStriatum', 'da-dstr', 'nm'], ['mPFC', 'da-mpfc', 'nm'], ['amygdala', 'da-amy', 'nm'],
+  ['mpoaPct', 'da-mpoa', 'pct'], ['pvn', 'da-pvn', 'nm'], ['medEminencePct', 'da-me', 'pct'], ['spinalPct', 'da-spinal', 'pct'],
 ];
-const FIRING = [['vta', 'fire-vta'], ['snc', 'fire-snc'], ['tida', 'fire-tida']];
+const NACC_ROWS = [['naccCoreTonic', 'naccCorePeak', 'da-nacc-core'], ['naccShellTonic', 'naccShellPeak', 'da-nacc-shell']];
+// Firing rows: lateral VTA (the population behind the NAcc core), SNc and TIDA (§8.6).
+const FIRING = [['vtaL', 'fire-vta'], ['snc', 'fire-snc'], ['tida', 'fire-tida']];
+// Hypothesis switches of DOPAMINE.md §6.10 (element id → DopamineModel.setSwitch name).
+const HYP_SWITCHES = [['hyp-pulse', 'pulseLocked'], ['hyp-prolactin', 'zR'], ['hyp-kappa', 'kappa'],
+  ['hyp-tida', 'sT'], ['hyp-satiety', 'satiety'], ['hyp-imaging', 'imaging']];
+const TIDA_SHARE = 0.6;                                   // s_T default (DOPAMINE.md §6.5, §6.10)
 // Modulators: payload key, element id and the payload value that fills the bar completely. The
 // last four (§13.13) are relative to the relaxed waking state; their row shows once main.js sends them.
 const MODULATORS = [
@@ -163,9 +172,10 @@ const DEFAULT_TINTS = new Set(['prolactin', 'serotonin', 'gaba', 'opioid']);
 // A prediction error beyond these bounds is tinted (amber positive, blue-grey negative).
 const RPE_POS = 0.05;
 const RPE_NEG = -0.05;
-// The burst pill shows above BURST_ON and hides below BURST_OFF, so it never flickers.
-const BURST_ON = 0.3;
-const BURST_OFF = 0.15;
+// The burst/pause pill follows the sign of δ (DOPAMINE.md §8.6): it shows beyond ±PILL_ON and
+// hides inside ±PILL_OFF, so it never flickers.
+const PILL_ON = 0.3;
+const PILL_OFF = 0.15;
 // Event log (B.9: 12 entries) and its polite announcements (§13.13: at most one per 2 s).
 const EVENT_LOG_LENGTH = 12;
 const ANNOUNCE_MS = 2000;
@@ -185,7 +195,8 @@ export class Hud {
       modeDemo: $('mode-demo'), modeManual: $('mode-manual'),
       level: $('stim-level'), levelVal: $('stim-val'),
       profile: $('profile'), tref: $('tref'), trefVal: $('tref-val'),
-      view: $('view'), hypothesis: $('hypothesis'), quality: $('quality'), reset: $('reset'),
+      view: $('view'), hypothesis: $('hypothesis'), onset: $('onset-window'), novel: $('hyp-novel'),
+      quality: $('quality'), reset: $('reset'),
       info: $('info'), infoCard: $('info-card'), infoBtn: $('info-btn'), infoClose: $('info-close'),
       vitalsChip: $('vitals-chip'), pulsesRow: $('row-pulses'), bpRow: $('row-bp'),
       vitalsTrace: $('vitals-trace'), vitalsVar: $('vitals-var'), vitalsSpan: $('vitals-span'), vitalsSpark: $('vitals-spark'),
@@ -196,7 +207,7 @@ export class Hud {
     this.r = {
       arousal: r('arousal-val'),
       pulses: r('pulses'),
-      naccCore: r('da-nacc-core'), d1: r('occ-d1'), d2: r('occ-d2'), rpe: r('rpe'),
+      d1: r('occ-d1'), d2: r('occ-d2'), rpe: r('rpe'),
       gain: r('mod-gain'),
       fpsBadge: r('fps-badge'), fps: r('fps'), points: r('points'), res: r('res'), gpuMs: r('gpu-ms'),
       bodyPoints: r('body-points'), extraPoints: r('extra-points'), packets: r('packets'), kernelMs: r('kernel-ms'),
@@ -204,7 +215,9 @@ export class Hud {
     this.vit = Object.fromEntries(VITAL_ROWS.map((id) => [id, { row: $(`row-${id}`), tag: $(`tag-${id}`), r: r(id), tagText: '' }]));
     this.perfRows = { bodyPoints: $('body-points-row'), extraPoints: $('extra-points-row'), packets: $('packets-row'),
       kernelMs: $('kernel-ms-row'), clockLimited: $('clock-limited-row') };
-    this.daRows = DA_FIELDS.map(([key, id]) => ({ key, r: r(id) }));
+    this.daRows = DA_FIELDS.map(([key, id, unit]) => ({ key, unit, r: r(id) }));
+    this.naccRows = NACC_ROWS.map(([tonic, peak, id]) => ({ tonic, peak, r: r(id) }));
+    this.hypSwitches = HYP_SWITCHES.map(([id, name]) => ({ el: $(id), name }));
     this.fireRows = FIRING.map(([key, id]) => ({ key, r: r(id) }));
     this.modRows = MODULATORS.map(([key, id, full]) => {
       const el = $(id);
@@ -229,7 +242,7 @@ export class Hud {
     this.refK = -1;
     this.refRemaining = null;
     this.rpeState = 0;
-    this.burstOn = false;
+    this.pillState = 0;          // 1 burst, -1 pause, 0 hidden
     this.orgasm = null;          // the orgasm scenario is active: Stimulate, Distract, meters, Space and D
     this.paused = false;
     this.tintsKey = '';
@@ -388,6 +401,15 @@ export class Hud {
 
     e.profile.addEventListener('change', () => h.onProfile?.(e.profile.value));
     e.hypothesis.addEventListener('change', () => h.onHypothesis?.(e.hypothesis.value));
+    e.onset.addEventListener('change', () => h.onOnset?.(e.onset.value === 'emission' ? { uPre: true } : { Tpre: 1.5, uPre: false }));
+    for (const sw of this.hypSwitches) {
+      sw.el.addEventListener('change', () => {
+        const on = sw.el.checked;
+        if (sw.name === 'satiety') e.novel.disabled = !on;
+        h.onSwitch?.(sw.name, sw.name === 'sT' ? (on ? TIDA_SHARE : 0) : on);
+      });
+    }
+    e.novel.addEventListener('click', () => h.onNovelStimulus?.());
     e.quality.addEventListener('change', () => h.onQuality?.(e.quality.value));
     e.view.addEventListener('change', () => this._userView(e.view.value));
     e.tref.addEventListener('input', () => {
@@ -618,14 +640,20 @@ export class Hud {
 
   // Shows the current settings without calling any handler. tref is in seconds; quality is
   // 'auto' or '0'..'3' (optional). The whole-body keys (bodyMode, nets, intervention, scenario,
-  // kh, timeLock, arousalState, overlays, age, limbMotion, reducedMotion, sense) go to ui-body.js.
+  // kh, timeLock, arousalState, overlays, age, limbMotion, reducedMotion, sense, scenarioUnavailable)
+  // go to ui-body.js.
   syncSettings(o = {}) {
-    const { mode, level, profile, tref, view, hypothesis, quality } = o;
+    const { mode, level, profile, tref, view, hypothesis, quality, onset, switches } = o;
     const e = this.el;
     if (mode != null) this._showMode(mode);
     if (level != null) this._showLevel(level);
     if (profile != null) e.profile.value = String(profile);
     if (hypothesis != null) e.hypothesis.value = String(hypothesis);
+    if (onset != null) e.onset.value = onset.uPre ? 'emission' : 'interruptible';
+    if (switches) {
+      for (const sw of this.hypSwitches) if (sw.name in switches) sw.el.checked = !!switches[sw.name];
+      e.novel.disabled = !switches.satiety;
+    }
     if (quality != null) e.quality.value = String(quality);
     if (tref != null && Number.isFinite(Number(tref))) {
       const s = Number(tref);
@@ -740,12 +768,15 @@ export class Hud {
   _updateDopamine(s) {
     const e = this.el, d = s.dopamine;
     if (d) {
-      const core = nonNeg(d.naccCore), ratio = nonNeg(d.ratioNacc);
-      const rk = ratio === null ? RATIO_NONE : Math.min(RATIO_NONE - 1, Math.round(ratio * 10));
-      show(this.r.naccCore, core === null ? null : nmKey(core) * 1000 + rk, fmtCore);
+      for (const row of this.naccRows) {
+        const tonic = nonNeg(d[row.tonic]), peak = nonNeg(d[row.peak]);
+        const pk = peak === null ? NM_SPAN - 1 : Math.min(NM_SPAN - 2, nmKey(peak));
+        show(row.r, tonic === null ? null : nmKey(tonic) * NM_SPAN + pk, fmtTonicPeak);
+      }
       for (const row of this.daRows) {
         const v = nonNeg(d[row.key]);
-        show(row.r, v === null ? null : nmKey(v), fmtNm);
+        if (row.unit === 'pct') show(row.r, v === null ? null : Math.round(v), fmtRest);
+        else show(row.r, v === null ? null : nmKey(v), fmtNm);
       }
       for (const row of this.fireRows) {
         const v = nonNeg(d[row.key]);
@@ -764,11 +795,16 @@ export class Hud {
         e.rpe.classList.toggle('neg', state === -1);
       }
 
-      const burst = nonNeg(d.burst) ?? 0;
-      const on = this.burstOn ? burst > BURST_OFF : burst > BURST_ON;
-      if (on !== this.burstOn) {
-        this.burstOn = on;
-        e.vtaBurst.hidden = !on;
+      // Burst or pause from the sign of δ (§8.6), with hysteresis.
+      const x = delta ?? 0, p = this.pillState;
+      const next = p === 1 ? (x > PILL_OFF ? 1 : x < -PILL_ON ? -1 : 0)
+        : p === -1 ? (x < -PILL_OFF ? -1 : x > PILL_ON ? 1 : 0)
+          : (x > PILL_ON ? 1 : x < -PILL_ON ? -1 : 0);
+      if (next !== p) {
+        this.pillState = next;
+        e.vtaBurst.hidden = next === 0;
+        if (next !== 0) e.vtaBurst.textContent = next > 0 ? 'burst' : 'pause';
+        e.vtaBurst.classList.toggle('pause', next < 0);
       }
     }
     this._drawSpark(s.history, s.historyHead | 0);

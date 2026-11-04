@@ -1,3 +1,4 @@
+// @ts-check
 // Simulation graph: schema constants (A.3.2), the network plugin contract and buildGraph (§11.3–§11.5).
 // The graph is a static table of nodes and edges. Every network module contributes its own fragment;
 // buildGraph merges the fragments, resolves ids, computes lengths and delays from polylines and the
@@ -117,7 +118,8 @@
  *    relaxes toward g·h_cmd + (1 − g) (basal replacement); AND edges multiply every listed gain.
  *    Brain nodes always compute their commands. k.bodyOn is false in brain-only mode; the kernel
  *    dispatches 'net' { net, on, tH } and 'body' { mode, tH } when a switch is applied.
- *    Interventions: k.cutEdge(e, cut) removes an edge; a preset object { id, apply(k) } passed to
+ *    Interventions: k.cutEdge(e, cut) removes an edge, k.scaleEdge(e, g) keeps a fraction g of its
+ *    drive (§6.15 partial preservation); a preset object { id, apply(k) } passed to
  *    k.setIntervention calls apply after all cuts are reset, and 'intervention' is dispatched.
  *
  * 7. PACKETS AND EVENTS (§11.8). The kernel emits packets on NF axon and tract edges ≥ 50 mm by itself

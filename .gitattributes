@@ -1,1 +1,5 @@
 graphify-out/graph.json merge=graphify
+# hook scripts run under sh/Git Bash and Python: LF on every checkout (a CRLF run.sh exits 2,
+# which Claude Code reads as a block on every tool call)
+*.sh text eol=lf
+*.py text eol=lf
