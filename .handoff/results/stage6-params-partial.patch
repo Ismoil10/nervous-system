@@ -1,0 +1,512 @@
+diff --git a/brain-system/src/body/frame.js b/brain-system/src/body/frame.js
+index 9c4831b..cce4f9a 100644
+--- a/brain-system/src/body/frame.js
++++ b/brain-system/src/body/frame.js
+@@ -209,11 +209,14 @@ export function polylineLength(pts) {
+ export const rootLength = (seg) => polylineLength(rootPath(seg, 1));
+ 
+ // --- Dermatome key points (§2.7, ISNCSCI [G Dermatome_anatomy L61–L87]) and site segments (§6.6) ---
++// §2.7: C3 on the midclavicular line over the clavicle midpoint; T5 the T4–T6 midpoint; T6 level with
++// the xiphoid tip (§2.6 `lm.xiphoidTip`, z −410); T7–T9 the quarter points of xiphoid tip → umbilicus
++// (−410 → −580); T10 the umbilical level; T11 the midpoint of the umbilicus and the T12 ligament level.
+ export const DERMATOME_POINTS = {
+-  C2: [15, -105, -50], C3: [60, 50, -215], C4: [175, -15, -222], C5: [215, 5, -545], C6: [280, -30, -910],
++  C2: [15, -105, -50], C3: [95, 20, -222], C4: [175, -15, -222], C5: [215, 5, -545], C6: [280, -30, -910],
+   C7: [240, -35, -930], C8: [205, -35, -915], T1: [161, -6, -570], T2: [150, -25, -265], T3: [95, 85, -340],
+-  T4: [95, 87, -370], T5: [95, 86, -379], T6: [95, 84, -388], T7: [95, 78, -454], T8: [95, 76, -498],
+-  T9: [95, 74, -541], T10: [95, 78, -585], T11: [95, 82, -654], T12: [72, 94, -722], L1: [55, 67, -829],
++  T4: [95, 87, -370], T5: [95, 86, -390], T6: [95, 84, -410], T7: [95, 78, -453], T8: [95, 76, -495],
++  T9: [95, 74, -538], T10: [95, 78, -580], T11: [95, 82, -651], T12: [72, 94, -722], L1: [55, 67, -829],
+   L2: [37, 43, -936], L3: [19, -31, -1150], L4: [41, -45, -1605], L5: [85, 120, -1640], S1: [105, -85, -1640],
+   S2: [80, -92, -1165], S3: [55, -139, -815],
+ };
+diff --git a/brain-system/src/body/geometry.js b/brain-system/src/body/geometry.js
+index 86895d8..9fbf6a3 100644
+--- a/brain-system/src/body/geometry.js
++++ b/brain-system/src/body/geometry.js
+@@ -168,7 +168,9 @@ export const JOINTS = {   // §2.6 (right side)
+ };
+ export const LANDMARKS = {   // §2.6, §2.7 (right side where sided)
+   'lm.acromion': [200, -20, -232], 'lm.shoulderTop': [200, -20, -220], 'lm.cervicale': [0, -110, -185],
+-  'lm.jugularNotch': [0, 60, -229], 'lm.sternalAngle': [0, 80, -280], 'lm.xiphoid': [0, 92, -388],
++  'lm.jugularNotch': [0, 60, -229], 'lm.sternalAngle': [0, 80, -280],
++  'lm.xiphoid': [0, 92, -388],       // §2.6 the xiphisternal joint
++  'lm.xiphoidTip': [0, 92, -410],    // §2.6 the xiphoid tip, ≈ 22 below the joint: the "xiphoid level" of §2.7 and §2.12
+   'lm.iliacCrest': [150, -30, -587], 'lm.asis': [118, 50, -700], 'lm.pubicTubercle': [25, 60, -745],
+   'lm.trochanter': [170, -20, -739], 'lm.symphysis': [0, 55, -757], 'lm.mastoid': [55, -40, -70], 'lm.gonion': [50, -5, -125],
+ };
+@@ -450,14 +452,14 @@ const BLADDER = bladderAt();
+ 
+ export const ORGANS = [
+   { id: 'heart', group: 'heart', type: 'e', c: [-22, 15, -352], r: [52, 45, 55], clipBelow: -392 },        // §2.8
+-  { id: 'heart', group: 'heart', type: 'e', c: [-62, 40, -377], r: [26, 20, 14], clipBelow: -392, model: true }, // [model] apex lobe toward (−85, 55, −390)
++  { id: 'heart', group: 'heart', type: 'e', c: [-62, 40, -377], r: [26, 20, 14], clipBelow: -392, model: true }, // §2.8 [model] apex lobe; apex point (−80, 50, −384) on its surface
+   { id: 'ventricles', group: 'heart', type: 'e', c: [-35, 25, -372], r: [40, 35, 40], clipBelow: -392 },  // §2.8
+   { id: 'saNode', group: 'heart', type: 'e', c: [30, 0, -312], r: [4, 4, 4] },                            // §2.8
+   { id: 'avNode', group: 'heart', type: 'e', c: [5, -2, -350], r: [3, 3, 3] },                            // §2.8
+   { id: 'lungs', side: 1, group: 'lungs', type: 'e', c: [78, -18, -318], r: [62, 80, 118], carve: ['heart', 'ventricles'], aboveDiaphragm: true }, // §2.8
+   { id: 'lungs', side: -1, group: 'lungs', type: 'e', c: [-82, -22, -328], r: [56, 78, 112], carve: ['heart', 'ventricles'], aboveDiaphragm: true },
+   { id: 'liver', group: 'liver', type: 'e', c: [44, 8, -440], r: [90, 68, 55], carve: ['kidney', 'adrenalCortex', 'lungs'], belowDiaphragm: true }, // §2.8
+-  { id: 'liver', group: 'liver', type: 'e', c: [-45, 26, -432], r: [48, 32, 20], belowDiaphragm: true, model: true }, // [model] left lobe to the tip (−90, 30, −430)
++  { id: 'liver', group: 'liver', type: 'e', c: [-45, 26, -432], r: [48, 32, 20], belowDiaphragm: true, model: true }, // §2.8 [model] left lobe; tip (−90, 30, −430) at radius 0.95
+   { id: 'liver', group: 'liver', type: 'e', c: [70, 60, -495], r: [15, 15, 15] },                        // §2.8 gallbladder fundus
+   { id: 'spleen', group: 'spleen', type: 'e', c: [-108, -55, -458], r: [22, 42, 58], carve: ['kidney'], belowDiaphragm: true }, // §2.8, A.2
+   { id: 'pancreas', group: 'pancreas', type: 'tube', pts: [[26, 28, -542, 13], [2, 18, -515, 12], [-12, 18, -505, 11], [-45, -8, -488, 10], [-80, -28, -465, 8]] }, // §2.8
+@@ -828,7 +830,7 @@ const IC = {
+   yca: [-72, -98, -111, -110, -110, -110, -109, -107, -104, -101, -98],
+   xma: [152, 154, 153, 152, 151, 148, 144, 140, 138, 136, 134],
+   yae: [84, 96, 100, 102, 100, 98, 96, 94, 92, 94, 96],
+-  zant: [-250, -300, -340, -370, -379, -388, -454, -498, -541, -585, -650],
++  zant: [-250, -300, -340, -370, -390, -410, -453, -495, -538, -580, -651],   // §2.12: the §2.7 dermatome levels
+ };
+ // Oesophageal plexus rows: oesophagus + (0, ±12, 0) for z −320 to −405 (§2.12).
+ const OES_PLEXUS_Z = [-320, -340, -392, -405];
+diff --git a/brain-system/src/safety.js b/brain-system/src/safety.js
+index e5bc916..720e4b3 100644
+--- a/brain-system/src/safety.js
++++ b/brain-system/src/safety.js
+@@ -41,7 +41,7 @@ export const PARAMS = {
+   vasoMax: 0.15,            // §13.15 vasoconstriction dimming ≤ 15 % …
+   vasoTau: 2,               // §13.15 … with τ ≥ 2 s
+   dilationMax: 0.10,        // §13.7 dilation ≤ +10 %
+-  packetRate: 3,            // §13.15 packets ≤ 3 per s past any bundle point and per window
++  packetRate: 2,            // §13.8, §13.15 packets ≤ 2 per s past any bundle point and per window (per-source cap below the WCAG ceiling of 3)
+   pointHz: 2,               // §13.15 single points ≤ 2 Hz
+   rhythmHz: 1,              // §13.9 rhythm rule: cycle-by-cycle only while f × kh ≤ 1 Hz
+   lanternMinK: 2200,        // §13.15 lantern colour ≥ 2,200 K
+diff --git a/brain-system/src/sim/autonomic.js b/brain-system/src/sim/autonomic.js
+index bbb2d6a..b9971f9 100644
+--- a/brain-system/src/sim/autonomic.js
++++ b/brain-system/src/sim/autonomic.js
+@@ -103,27 +103,40 @@ export const PARAMS = {
+   scr: { tauFast: 0.75, tauSlow: 3.0, gain: 6.0,   // µS per unit phasic drive (Bateman A·(e^(−t/3) − e^(−t/0.75))) [model]
+     sclBase: 5, sclMin: 2, tauScl: 30 },            // µS model baseline (Dawson et al. 2007); τ [model]
+   // Offsets (§7.4, §7.8 defence, §11.13 couplings) [model]: per unit salience / lcPhasic / u_stress.
+-  // defence.vag 0.12: the transient vagal withdrawal that carries the hotObject HR rise; calibrated with
+-  // somatic and autonomic together to §12.20 row 12 (paired +5–15 bpm; prototype +6.1) (§7.15: §7 owns
+-  // the defence gains) [model].
++  // defence.vag 0.12: the transient vagal withdrawal that carries the hotObject HR rise; owner §7.8
++  // (defence and orienting responses; the offset gains are not yet tabulated there, §7.15). Calibrated
++  // with somatic and autonomic together to §12.20 row 12 (paired +5–15 bpm; prototype +6.1) [model].
+   defence: { vag: 0.12, sym: 0.05, skin: 0.05 },
+   emo: { palm: 0.5, sole: 0.5, forehead: 0.2, axilla: 0.3 },
+-  // stress.symAdr 0.185: with the endocrine module, tone.symAdr / rest peaks near ×4.1, so the adrenaline
+-  // pool reproduces the §12.11 input profile (×4.12 at 14 min) that endocrine's stand-in gives without
+-  // this module (§9.10) [model].
++  // stress.symAdr 0.185: owner §7.6 (value-table row "Stress offset onto fSymAdr"), [model] stage-4 calibration. With
++  // the endocrine module, tone.symAdr / rest peaks near ×4.1 (§9.4 drive), so the adrenaline pool
++  // reproduces the §12.11 input profile (×4.12 at 14 min, §9.10) that endocrine's stand-in gives without
++  // this module. ×4 (≈ 181 pg/mL) is a high-end laboratory stressor; the SAM channel is gated by
++  // autonomic ∧ neuroendocrine.
+   stress: { symCard: 0.15, vag: 0.10, symMus: 0.05, symSpl: 0.05, symAdr: 0.185, pup: 0.10, palm: 0.05 },
+   // Spinal cord injury rule (§7.8): each channel follows the bulbospinal drive of the IML segments it
+   // leaves the cord from (§7.2 outflow; sided entries 'T1.R', else both sides) [model segment map]. Below
+-  // a lesion the bulbospinal drive is zero and a segmental spinal tone remains, a fraction of the
+-  // channel's rest tone scaled by the §6 spinal-shock phase 1–4 (depressed early, recovering late;
+-  // Ditunno et al. 2004) [model]: chronic tetraplegia keeps roughly a third to a half of resting
+-  // sympathetic activity (Mathias & Frankel [recalled]).
++  // a lesion the bulbospinal drive is zero and a segmental spinal tone remains, a fraction ρ of the
++  // channel's rest tone indexed by the §6.15 spinal-shock phase 1–4.
+   bulbospinal: {
+     symCard: ['T1', 'T3'], symMus: ['T1', 'T3', 'T6', 'L1'], symSpl: ['T6'], symSkin: ['T1', 'T3', 'T6', 'L1'],
+     sudoPalm: ['T1.R', 'T3.R'], sudoSole: ['L1.R'], sudoForehead: ['T1'], sudoAxilla: ['T3'], symAdr: ['T6'], symBat: ['T1', 'T3'],
+     symPupR: ['T1.R'], symPupL: ['T1.L'], symGut: ['T6'], sacral: ['S2'],
+   },
+-  spinalRest: [0, 0.1, 0.2, 0.4, 0.5],   // index = phase 1–4 (0 unused) [model]
++  // ρ by phase (index = phase 1–4, 0 unused), owner §7.8 (row "SCI spinal tone ρ" and the SCI rule;
++  // [model] stage-4 calibration revised at stage 6, low; phase index §6.15).
++  // ρ is the spinal and intrinsic vascular-tone fraction below a complete lesion, not resting
++  // sympathetic firing, which microneurography finds low or absent there (Stjernberg, Blumberg & Wallin
++  // 1986 [secondary]): ≤ 0.15 for the muscle, splanchnic and cardiac channels and the others, up to 0.3
++  // for the skin channels (vasoconstrictor and sudomotor), which are less depressed. The phase windows
++  // follow Ditunno et al. 2004 for timing only; the late-phase change belongs to reflex gain (the
++  // dysreflexia surge), not to resting tone. The recalled "third to a half" (Mathias & Frankel) is a
++  // plasma noradrenaline figure and is not used.
++  spinalRest: {
++    deep: [0, 0.02, 0.05, 0.10, 0.15],
++    skin: [0, 0.04, 0.10, 0.20, 0.30],   // skin series ×2 of the deep one, 0.3 at phase 4 [model]
++  },
++  spinalSkin: ['symSkin', 'sudoPalm', 'sudoSole', 'sudoForehead', 'sudoAxilla'],
+   // §11.14 offset gains (§7 owns them, §7.15) [model]: cmdSym onto tone.symCard (sym) and tone.symMus,
+   // tone.symSpl (vasc); cmdVag subtracted from tone.vagCard. The vascular share is small so that the
+   // baroreflex does not cancel the cardiac offsets through a pressor response.
+@@ -363,6 +376,7 @@ class Autonomic {
+     });
+     this.bsPass = new Float64Array(this.bsEdges.length).fill(1);
+     this.restOf = STAGES.map((S) => PARAMS.ch[S.cmd].rest);
++    this.skinStage = STAGES.map((S) => PARAMS.spinalSkin.includes(S.cmd));   // §7.8 skin series of ρ
+     this._pupilRest();
+   }
+ 
+@@ -422,7 +436,8 @@ class Autonomic {
+       vars[this.vIvAdr] = PRESET_PARAMS.heartTransplant.betaSupersensitivity;
+       this._cut([['cardiacPlexus', 'saNode'], ['stellate.R', 'saNode'], ['stellate.L', 'heart']]);
+     } else if (id === 'atropine') {
+-      set(['vagCard', 'ewR', 'ewL', 'vagGut', 'sal', 'sacral', ...SUDO], 0);
++      set(['vagCard', 'vagGut', 'sal', 'sacral', ...SUDO], 0);
++      set(['ewR', 'ewL'], PRESET_PARAMS.atropine.ew);   // systemic dose: sluggish but present light reflex (§7.11)
+     } else if (id === 'truncalVagotomy') {
+       set(['vagGut'], 0);
+     } else if (id === 'sympathectomyT2T3') {
+@@ -553,10 +568,11 @@ class Autonomic {
+     // the supraspinal command is replaced by the segmental spinal tone (§7.8 SCI rule).
+     const g = k.g('autonomic', t);
+     this._bulbospinal(t);
+-    const rho = P.spinalRest[clamp(Math.round(vars[this.vIvPhase]), 1, 4)];
++    const phase = clamp(Math.round(vars[this.vIvPhase]), 1, 4);
++    const rhoDeep = P.spinalRest.deep[phase], rhoSkin = P.spinalRest.skin[phase];
+     let gap = 0;
+     for (let s = 0; s < STAGES.length; s++) {
+-      const S = STAGES[s], c = this.cmdOf[s];
++      const S = STAGES[s], c = this.cmdOf[s], rho = this.skinStage[s] ? rhoSkin : rhoDeep;
+       const x = this.ring[c * RING + (((n - this.dS[s]) % RING) + RING) % RING];
+       const f = this._bsShare(s), xs = f === 1 ? x : f * x + (1 - f) * rho * this.restOf[s];
+       const tgt = g * vars[this.vIv[s]] * xs, i = this.vTone[s], cur = vars[i];
+@@ -582,8 +598,11 @@ class Autonomic {
+     const k = this.k, vars = k.vars, P = PARAMS, tn = (id) => vars[this.vTone[SI[id]]];
+     const ageEff = vars[this.vIvAge] >= 0 ? vars[this.vIvAge] : vars[this.r.age];
+     const fT = 1 + P.kT * (vars[this.v.tCore] - 37);
+-    const gA = k.g('autonomic', t), gN = k.g('neuroendocrine', t);
+-    const sEff = tn('symCard') + P.kAdr * vars[this.vIvAdr] * (vars[this.r.adrenaline] - 1) * gA * gN;
++    // β1 action of plasma adrenaline (§7.5, §11.13): a humoral edge carries only its own network
++    // (§11.3 rule 3), so it is gated by g.neuroendocrine alone and denervated targets stay responsive;
++    // g.autonomic acts on the release edge (endocrine.js cmdA), not here.
++    const gN = k.g('neuroendocrine', t);
++    const sEff = tn('symCard') + P.kAdr * vars[this.vIvAdr] * (vars[this.r.adrenaline] - 1) * gN;
+     const v = tn('vagCard');
+     const base = ihr(ageEff) * fT * (1 + P.kS * sEff);
+     const hr = base / (1 + P.kV * v);
+@@ -712,7 +731,11 @@ class Autonomic {
+ // --- Interventions as data (§7.11; semantics §11.12, A.5). apply(k) runs after all cuts are reset. ---
+ export const PRESET_PARAMS = {
+   heartTransplant: { donorAge: null, betaSupersensitivity: 2 },     // adrenaline effect × 2 [model] (§7.11)
+-  atropine: {},
++  // §7.11 systemic atropine (vagal-blockade dose ≈ 0.02–0.04 mg/kg): pupil +1–2 mm with a sluggish but
++  // present light reflex, not the fixed 7–8 mm pupil of topical atropine. EW factor [model]: rest pupil
++  // 4.0 → 5.1 mm (+1.1; the full EW block gives +1.3, so the band is reached only for ew ≤ 0.23), and the
++  // 1,000 cd/m² step constricts by 15 % of the intact 0.70 mm.
++  atropine: { ew: 0.15 },
+   truncalVagotomy: { selective: false },
+   sympathectomyT2T3: { side: 'R', stellate: false },
+   pureAutonomicFailure: { sym: 0.1, vagCard: 0.3, sudo: 0.1 },      // §7.11
+@@ -725,7 +748,7 @@ const preset = (id, label, expected) => ({
+ /** @type {import('./contracts').InterventionPreset[]} */
+ export const INTERVENTIONS = [
+   preset('heartTransplant', 'Heart transplant', 'HR = IHR(donor age) · f_T; RSA and baroreflex HR ≈ 0; adrenaline effect ×2'),
+-  preset('atropine', 'Atropine', 'HR ≈ 110; pupils dilated and unreactive; anhidrosis; no RSA'),
++  preset('atropine', 'Atropine', 'HR ≈ 110; pupils +1–2 mm, light reflex sluggish but present; dry mouth; anhidrosis; no RSA'),
+   preset('truncalVagotomy', 'Truncal vagotomy', 'heart unaffected; fVagGut 0'),
+   preset('sympathectomyT2T3', 'T2–T3 sympathectomy', 'no palmar sweating or hand vasoconstriction; stellate option adds Horner signs'),
+   preset('pureAutonomicFailure', 'Pure autonomic failure', 'OH with near-fixed HR (ΔHR/ΔSBP < 0.5); anhidrosis'),
+diff --git a/brain-system/src/sim/endocrine.js b/brain-system/src/sim/endocrine.js
+index 9deb399..f8a85f4 100644
+--- a/brain-system/src/sim/endocrine.js
++++ b/brain-system/src/sim/endocrine.js
+@@ -93,10 +93,15 @@ export const PARAMS = {
+   kScalar: Math.LN2 / (7 * 86400),
+   // Display units at basal (§9.9; the kernel carries ratios).
+   display: { acth: 20, cortisol: 12, adrenaline: 44, noradrenalinePl: 250, avp: 2, oxytocin: 2 },
+-  // Clock vote (A.4): HPA active → kh ≤ 60; active while a pool is more than activeEps (relative) from its
+-  // current target [model]. A pool that tracks the circadian envelope lags its target by τ · dx/dt, which
+-  // stays under ≈ 5 % even for the open-loop axis after a gland is removed (ACTH, adrenalectomy); a stress
+-  // transient is far above it. activeFloor: relative to at least 0.1 of basal (pools that go to 0).
++  // Clock vote (A.4): HPA active → kh ≤ 60. Owner §11.7 ("Endocrine target" row; presets A.4), [model]
++  // stage-4 calibration: gap = max over crhRel, acthRel, S, cortisolRel and the adrenaline pool of
++  // |x − target| / max(x, target, activeFloor), voting while gap > activeEps. The target is the current
++  // steady state (circadian drive and clamps included), not 1. A pool that tracks the circadian envelope
++  // lags its target by τ · dx/dt, which stays under ≈ 5 % even for the open-loop axis after a gland is
++  // removed (ACTH, adrenalectomy); a stress transient is far above it. 0.08 also sits above the ≈ 7 %
++  // ultradian ripple of the displayed cortisol pool (n 6, max/min 1.07): if §9.4 is re-tuned so that the
++  // cortisol pool pulses by more than 8 %, this threshold must move with it. activeFloor: relative to at
++  // least 0.1 of basal (pools that go to 0).
+   khActive: 60, activeEps: 0.08, activeFloor: 0.1,
+   // Graph (§9.2 positions; §2 anchors; §9.8 transport delays).
+   pos: {
+diff --git a/brain-system/src/sim/enteric.js b/brain-system/src/sim/enteric.js
+index cd91e44..6e33d0f 100644
+--- a/brain-system/src/sim/enteric.js
++++ b/brain-system/src/sim/enteric.js
+@@ -108,11 +108,12 @@ export const PARAMS = {
+     rTau: 180,               // s; r̃ low-pass (τ 3 min)
+     gPylOn: 1, gPylOff: 0.05,
+     brake: { ne: 0.5, aut: 0.3, ent: 0.2 },
+-    // brakeGain × B: a departure from the §8.8 brake (B = 0.5·g.ne + 0.3·g.aut + 0.2·g.ent ≤ 1). With B
+-    // as written the 600-kcal meal empties at ≈ 2.9 kcal/min, against the §8.13 model output "linear
+-    // emptyRate (r_set at 600 kcal) ≈ 1.8" (r_set = 1.84); the two §8 statements disagree, so §8 has to
+-    // decide. ×16 keeps the switch weights of B and reproduces §8.13 (≈ 1.8 kcal/min at 1 h) [model].
+-    brakeGain: 16,
++    // §8.8 pyloric brake G = G_pyl/(1 + brakeGain·B·(r̃/r_set)⁴), B = 0.5·g.ne + 0.3·g.aut + 0.2·g.ent
++    // (= 1 with all networks on; the weights are the share of the brake each network supplies).
++    // brakeGain 8 (§8.8 row, [model] re-tuned to Tougas et al. 2000 and the §8.13 rows): steady delivery
++    // ≈ 1.0 × r_set, mean emptyRate over 60–180 min ≈ 1.9 kcal/min at 600 kcal (§8.13). Gains 4–8 pass
++    // every §8.18 retention window; 1 overshoots r_set and 16 puts 4 h retention at the 10 % edge.
++    brakeGain: 8,
+     waterHalf: 15, waterHalfNoAcc: 8,   // min
+     mlPerKcal: 1.2,
+     basalVolume: 50,         // mL; fasting gastric contents [model]
+@@ -819,7 +820,7 @@ class Enteric {
+     const E0 = vars[i.E0];
+     const rSet = E0 > 0 ? Math.min(G.rSetMax, G.rSetK * Math.sqrt(E0 / G.rSetRef)) : G.rSetLiquid;
+     const B = G.brakeGain * (G.brake.ne * gN + G.brake.aut * gA + G.brake.ent * gE);
+-    const gPyl = G.gPylOff + (G.gPylOn - G.gPylOff) * gEs;
++    const gPyl = Math.max(G.gPylOn * gEs, G.gPylOff);   // G_pyl = max(g.enteric, 0.05): one 5 % floor (§8.8, §11.13)
+     const Gc = gPyl / (1 + B * (vars[i.rLP] / rSet) ** 4);
+     const k1 = A / G.kTrit / 60, k2 = (A * Gc) / G.kEmpty / 60;
+     const dS = vars[i.fSolid] * (1 - Math.exp(-k1 * dt));
+diff --git a/brain-system/src/sim/immune.js b/brain-system/src/sim/immune.js
+index c08e472..5b4b75c 100644
+--- a/brain-system/src/sim/immune.js
++++ b/brain-system/src/sim/immune.js
+@@ -40,6 +40,10 @@ export const PARAMS = {
+   dtx: 2100,              // s, transcription delay before macrophage activation (§10.2)
+   tauMac: 900,            // s (§10.2)
+   tauTNF: 1500, tauIL6: 4800, tauIL10: 3600, tauPGE: 2700,   // s (§10.2)
++  // IL-10 input delay δ_IL10 (§10.2 row, [model], low): dil10/dt reads tnf(t − δ_IL10). A first-order
++  // low-pass of tnf cannot peak at 3 h whatever its τ or gain; 4,000–5,000 s puts the peak at
++  // 2.83–3.10 h (§10.9 target 3 ± 1 h). 4,500 s is the middle of that range.
++  dIL10: 4500,
+   tauIL1B: 1200,          // s; tissue IL-1β compartment [model], not in the §10.2 table (see below)
+   aTNF: 14, aIL6: 2.2, aIL10: 1.0, c10: 1.0,                 // model units (§10.2)
+   aIL1B: 1.0,             // model units; tissue IL-1β per unit of `mac` [model]
+@@ -206,6 +210,9 @@ class Immune {
+     // Transcription delay ring on the IM grid (§11.6: "transcription delay ring").
+     this.ringLen = Math.round(PARAMS.dtx / 10) + 1;
+     k.declareArray('imm.lpsRing', this.ringLen, 0);
++    // IL-10 input delay ring (δ_IL10, §10.2) on the same grid and step counter.
++    this.tnfRingLen = Math.round(PARAMS.dIL10 / 10) + 1;
++    k.declareArray('imm.tnfRing', this.tnfRingLen, 0);
+     this.vN = k.declare('imm.n', 0);
+ 
+     k.on('lps', (ev) => this.onLps(ev));
+@@ -218,6 +225,7 @@ class Immune {
+   /** @param {KernelApi} k */
+   init(k) {
+     this.ring = k.array('imm.lpsRing');
++    this.tnfRing = k.array('imm.tnfRing');
+     // Cross-module reads: A.3.4 names with their A.5 basal fallbacks (cortisol basal, tCore 37.0).
+     this.vCortisol = k.ref('cortisolRel', 1);
+     this.vTCore = k.ref('tCore', 37.0);
+@@ -304,8 +312,11 @@ class Immune {
+     const tnfModel = v[this.vTnf] / P.sTNF;
+     const il6T = P.aIL6 * tnfModel * brakeC * brakeC * P.sIL6;
+     v[this.vIl6] = il6T + (v[this.vIl6] - il6T) * dec(P.tauIL6);
+-    // Type 2: upregulated by cortisol and not braked by ACh on its own source term (§10.2, §10.5).
+-    const il10T = P.aIL10 * tnfModel * (1 + P.c10 * excess) * P.sIL10;
++    // Type 2: upregulated by cortisol and not braked by ACh on its own source term (§10.2, §10.5); the
++    // source reads tnf δ_IL10 earlier (the oldest slot of the ring), cortisol now.
++    this.tnfRing[n % this.tnfRingLen] = tnfModel;
++    const tnfDelayed = this.tnfRing[(n + 1) % this.tnfRingLen];
++    const il10T = P.aIL10 * tnfDelayed * (1 + P.c10 * excess) * P.sIL10;
+     v[this.vIl10] = il10T + (v[this.vIl10] - il10T) * dec(P.tauIL10);
+     const il1bT = P.aIL1B * mac * P.sIL1B;
+     v[this.vIl1b] = il1bT + (v[this.vIl1b] - il1bT) * dec(P.tauIL1B);
+diff --git a/brain-system/src/sim/scenarios.js b/brain-system/src/sim/scenarios.js
+index 9f704bb..b437e08 100644
+--- a/brain-system/src/sim/scenarios.js
++++ b/brain-system/src/sim/scenarios.js
+@@ -68,7 +68,7 @@ const SCN = [
+     events: [stim(0, { sense: 'pain', mode: 'heat', site: 'palm', side: 'R', intensity: 55, durationMs: 5000 }),
+       stim(0, { sense: 'pain', mode: 'heat', site: 'indexTip', side: 'R', intensity: 55, durationMs: 5000 })],
+     inputs: (tH) => (tH >= 0 ? { heat: { site: 'palm', side: 'R', tempC: 55 } } : {}),
+-    clockKeys: [{ tH0: 0, tH1: 0.4, kh: 0.02 }, { tH0: 0.4, tH1: 1.2, kh: 0.35 }, { tH0: 1.2, tH1: 30, kh: 1 }],
++    clockKeys: [{ tH0: 0, tH1: 0.4, kh: 0.02 }, { tH0: 0.4, tH1: 1.2, kh: 0.3 }, { tH0: 1.2, tH1: 30, kh: 1 }],   // §12.4
+     stages: [
+       { tH: 0, name: 'Contact', text: 'Contact with a 55 °C object, right palm and fingers (model input, §12.3).' },
+       { tH: 0.224, name: 'Transduction', text: 'Heat reaches the nociceptor terminals at 150 µm after ≈ 224 ms (model contact-heat run, §12.3).' },
+@@ -228,7 +228,7 @@ const SCN = [
+       CP({ id: 'cck50', row: 29, label: 'CCK at 50 % of its plateau', v: 'var:cck', m: 't50', w: [0, 3600], range: [282, 882], target: '§8', tolerance: '§12.20 row 29: 9.7 min from meal start ±5 min', needs: ['enteric'] }),   // cck is declared and computed by enteric (A.3.4 owner §8)
+       CP({ id: 'retentionTest', row: 28, label: 'Gastric retention 1/2/4 h (255-kcal test meal)', open: 'needs the test-meal variant and a retention readout (A.3.4 has gastricSolid and gastricLiquid only)', needs: ['enteric'] }),
+       CP({ id: 'pph', row: 30, label: 'Postprandial SBP fall (autonomic off)', v: 'var:sbp', m: 'peakDelta', sign: -1, w: [1800, 3600], range: [20, Infinity], unit: 'mmHg', target: '§7', nets: { autonomic: false }, needs: ['enteric', 'autonomic'] }),
+-      CP({ id: 'entericOff', row: 31, label: 'Emptying stops (enteric off): solid retention ≥ 99 % at 4 h', v: 'var:gastricSolid', m: 'valueAt', w: [0, 14520], range: [0.99 * 0.65 * 600, Infinity], unit: 'kcal', target: 'A.5', nets: { enteric: false }, needs: ['enteric'] }),
++      CP({ id: 'entericOff', row: 31, label: 'Emptying falls to the §8.8 5 % floor (enteric off): solid retention ≥ 95 % at 4 h', v: 'var:gastricSolid', m: 'valueAt', w: [0, 14520], range: [0.95 * 0.65 * 600, Infinity], unit: 'kcal', target: 'A.5', nets: { enteric: false }, needs: ['enteric'] }),
+     ],
+   },
+   {
+diff --git a/brain-system/src/sim/somatic.js b/brain-system/src/sim/somatic.js
+index 39a8236..4d7386c 100644
+--- a/brain-system/src/sim/somatic.js
++++ b/brain-system/src/sim/somatic.js
+@@ -87,11 +87,13 @@ export const PARAMS = {
+   nSyn: { blinkR1: 2, blinkR2: 3 },   // §6.10 centres
+   fibreV: { aalphaArm: 55, aalphaLeg: 50 },   // α-motor CV arm / leg, A.9 (§4.4)
+   synV: 20,                // m/s, short intraspinal hops (TRACT_V.cns) for interneuron edges
+-  // Startle (§6.11, §12.6, §12.22). Recruitment delays are [model] central delays chosen inside the
+-  // §6.11 onset bands (neck 75–121, shoulder 100–121, arms 125–195, legs 145–395 ms); conduction runs
+-  // on the reticulospinal edge (TRACT_V.cns, low confidence).
++  // Startle (§6.11, §12.6, §12.22). Recruitment delays: §6.11 row "Model recruitment delays (EMG
++  // onset)", [model] stage-4 calibration, low: central delays after pnc activation, added to the
++  // reticulospinal conduction (TRACT_V.cns, low confidence). They sit in the lower half of the §6.11
++  // latency bands (neck 75–121, shoulder 100–121, arms 125–195, legs 145–395 ms; low confidence, measure
++  // not stated) and keep the Brown et al. 1991 EMG order: sternocleidomastoid first, caudal later.
+   startle: {
+-    recruit: { neck: 0.068, shoulder: 0.085, arm: 0.115, leg: 0.15 },   // s [model]
++    recruit: { neck: 0.068, shoulder: 0.085, arm: 0.115, leg: 0.15 },   // s, §6.11 [model] stage-4 calibration
+     thresholdDb: 80,       // dB SPL, acoustic startle threshold (§6.11)
+     kHab: 0.25, tauRec: 300, rho: 1,   // habituation trace (§4.9, §5.12)
+     lineS: 0.512,          // s of NF history held by the plugin's delay line (≥ conduction + recruitment)
+@@ -99,8 +101,10 @@ export const PARAMS = {
+   },
+   stateFactor: [1.1, 1.0, 0.9, 0.7, 0.6, 0.1],   // wakeAlert … rem (§6.11)
+   jendrassik: 1.5,         // optional flag, × tendon reflexes (§6.11)
+-  // SCI phases (§6.15): tendon and cutaneous/flexor gains below the lesion [model].
+-  sciPhase: [null, { tendon: 0, flexor: 0.05 }, { tendon: 0.1, flexor: 0.3 }, { tendon: 1.2, flexor: 1.0 }, { tendon: 2.5, flexor: 1.5 }],
++  // SCI phases (§6.15 phase table): tendon and cutaneous/flexor gains below the lesion [model]. Phase 3
++  // tendon 1.8 so the displayed §6.11 grade is the hyperreflexia the phase describes (3+ at 1.98 after
++  // the 1.1 wake-alert factor; the earlier 1.2 graded 2+).
++  sciPhase: [null, { tendon: 0, flexor: 0.05 }, { tendon: 0.1, flexor: 0.3 }, { tendon: 1.8, flexor: 1.2 }, { tendon: 2.5, flexor: 1.5 }],
+   sciLevels: ['C2', 'C4', 'C6', 'T1', 'T6', 'T10', 'L2', 'S2'],   // §6.15; default C6
+   dysreflexiaLevel: 'T6',  // at or above: the §7 rule (flag on the preset)
+   stump: { motorHold: 3, motorZero: 9, sensoryZero: 11 },   // d, distal excitability (§6.15) [model]
+@@ -198,7 +202,10 @@ const nervesOf = (route) => { if (!route) return []; const base = route.split('.
+   return ROUTE_NERVES[base] ?? [base]; };
+ // §6.3 tract boxes: top of the η range (anterior limit) per tract, for the anterior-cord preset.
+ // bulbospinal: the §7 sympathetic premotor axons in the lateral funiculus (Nathan & Smith 1987 [recalled]),
+-// so an anterior-cord lesion cuts them (autonomic dysfunction is part of that syndrome) [model η].
++// so an anterior-cord lesion cuts them (autonomic dysfunction is part of that syndrome). Owner §6.3 (cord
++// cross-section map, row "Bulbospinal sympathetic premotor axons"); 0.20 is a [model] stage-4 calibration
++// geometry value, not a physiological gain. §6.3 tabulates that box as η −0.30…−0.05, so its anterior limit
++// is −0.05; the anterior-cord rule only tests η > −0.4 (§6.15), so both values give the same cut.
+ const TRACT_ETA = { dc: -0.40, stt: 0.60, cstLat: -0.02, cstAnt: 0.97, rsPont: 0.75, lvst: 0.92, descMod: -0.30, bsResp: 0.50, bulbospinal: 0.20 };
+ export const NERVE_SECTIONS = ['radial', 'median', 'ulnar', 'axillary', 'musculocutaneous', 'femoral', 'obturator', 'sciatic', 'tibial', 'commonFibular', 'phrenic', 'cn7.motor'];
+ 
+diff --git a/brain-system/src/sim/stimuli.js b/brain-system/src/sim/stimuli.js
+index 2817b09..f3d01b9 100644
+--- a/brain-system/src/sim/stimuli.js
++++ b/brain-system/src/sim/stimuli.js
+@@ -235,8 +235,10 @@ export const RECEPTORS = {
+   AMH2: R({ sense: 'pain', modes: ['heat'], I0: 46, Imax: 54, tauA: [10], kA: 0.3, fibre: 'Adelta', tRecModel: 'contactHeat' }),
+   AMH1: R({ sense: 'pain', modes: ['heat', 'pinprick', 'pressure'], I0: 53, Imax: 61, tauA: [10], kA: 0.3, fibre: 'Adelta', tRecModel: 'contactHeat' }),
+   Cpoly: R({ sense: 'pain', modes: ['heat', 'pressure', 'itch'], I0: 44, Imax: 52, tauA: [10], kA: 0.3, fibre: 'C', rmax: 30, tRecModel: 'contactHeat' }),
+-  // Thermoreceptors under contact heat (§11.9) reach their own threshold at the terminal: the paradoxical
+-  // cold discharge above 45 °C (§5.6), warm fibres at skin + I0 [model].
++  // Thermoreceptors under contact heat (§11.9) reach their own threshold θ at the terminal. Owner §5.6
++  // (thermoreceptors): cold 45 °C, the paradoxical cold-fibre discharge (Dodt & Zotterman 1952, cat);
++  // warm 33.5 °C = the 32 °C skin baseline + I0 1.5 °C, the middle of the +1–2 °C warm detection
++  // threshold. Both are model recruitment thresholds, not psychophysical ones [model].
+   cold: R({ sense: 'temperature', modes: ['cool', 'cold', 'heat'], I0: 0.75, Imax: 17, tauA: [30], kA: 0.7, fibre: 'Adelta', tRecModel: 'contactHeat', thetaHeat: 45 }),
+   warm: R({ sense: 'temperature', modes: ['warm', 'heat'], I0: 1.5, Imax: 13, tauA: [30], kA: 0.7, fibre: 'C', rmax: 30, tRecModel: 'contactHeat', thetaHeat: 33.5 }),
+   Ia: R({ sense: 'proprioception', modes: ['tendonTap', 'imposedMovement'], I0: 0.5, Imax: 50, tauA: [0.2], kA: 0.5, fibre: 'Ia', rmax: 300 }),
+diff --git a/brain-system/test/autonomic.test.mjs b/brain-system/test/autonomic.test.mjs
+index 2ca20a3..753d354 100644
+--- a/brain-system/test/autonomic.test.mjs
++++ b/brain-system/test/autonomic.test.mjs
+@@ -287,11 +287,22 @@ describe('brain-only mode (A.5, §11.10 rule 5)', () => {
+ describe('interventions (§7.11, §11.12)', () => {
+   const run = (p, T = 120) => { const k = kernel(); k.setIntervention(p, 0.5); k.advanceTo(T); return k; };
+ 
+-  test('atropine: HR ≈ 110 (model 108), pupils dilated and unreactive, anhidrosis (§7.11, V3)', () => {
+-    const k = run(preset('atropine'));
++  test('atropine (systemic): HR ≈ 110 (model 108), pupils +1–2 mm with a sluggish but present light reflex, anhidrosis (§7.11, V3)', () => {
++    const k = run(preset('atropine')), k0 = run(null);
+     assert.ok(k.get('hr') > 104 && k.get('hr') < 112, `hr ${k.get('hr')}`);
+-    assert.ok(Math.abs(k.get('pupilD.R') - 5.3) < 0.01, `pupil ${k.get('pupilD.R')}`);
++    const dD = k.get('pupilD.R') - k0.get('pupilD.R');
++    assert.ok(dD >= 1 && dD <= 2, `pupil ${k.get('pupilD.R')} (rest ${k0.get('pupilD.R')}, +${dD} mm)`);
+     assert.ok(k.get('tone.fSudo.palm') < 1e-6 && k.get('tone.sal') < 1e-6);
++    // The 1,000 cd/m² step still constricts both pupils, by less than the intact reflex.
++    const light = (kk) => {
++      const d0 = kk.get('pupilD.R');
++      kk.schedule(makeStimulus({ sense: 'vision', mode: 'step', side: 'R', intensity: 3, durationMs: 1000, tOnset: kk.t + 1 }));
++      let dMax = 0; const t1 = kk.t + 4;
++      while (kk.t < t1) { kk.advance(0.01); dMax = Math.max(dMax, d0 - kk.get('pupilD.R')); }
++      return dMax;
++    };
++    const cA = light(k), c0 = light(k0);
++    assert.ok(cA > 0.02 && cA < 0.5 * c0, `constriction ${cA} mm under atropine vs ${c0} mm intact`);
+   });
+ 
+   test('heart transplant: HR = IHR(donor age) · f_T, no baroreflex HR on standing (§7.11, V4)', () => {
+@@ -335,8 +346,11 @@ describe('spinal cord injury (§7.8 rule, §6.15 preset; V19)', () => {
+     const k = run(spinalCordInjury({ level: 'C6', phase: 4 }));
+     for (const seg of ['T1', 'T3', 'T6', 'L1']) for (const s of ['R', 'L']) assert.equal(k.edgeGate(bs(k, seg, s)), 0, `${seg}.${s}`);
+     assert.equal(k.edgeGate(k.edgeIndex('portSacral.R', 'cord.S2.spn.R')), 0, 'sacral column');
+-    // Chronic phase: the spinal tone is half of rest; the baroreflex cannot raise it, only the vagus moves.
+-    assert.ok(Math.abs(k.get('tone.symCard') - 0.5 * PARAMS.ch.symCard.rest) < 1e-3, `symCard ${k.get('tone.symCard')}`);
++    // Chronic phase: the spinal tone is ρ = 0.15 of rest (§7.8: ≤ 0.15 for cardiac, muscle and splanchnic,
++    // up to 0.3 for skin); the baroreflex cannot raise it, only the vagus moves.
++    assert.equal(PARAMS.spinalRest.deep[4], 0.15); assert.equal(PARAMS.spinalRest.skin[4], 0.3);
++    assert.ok(Math.abs(k.get('tone.symCard') - PARAMS.spinalRest.deep[4] * PARAMS.ch.symCard.rest) < 1e-3, `symCard ${k.get('tone.symCard')}`);
++    assert.ok(Math.abs(k.get('tone.symSkin') - PARAMS.spinalRest.skin[4] * PARAMS.ch.symSkin.rest) < 1e-3, `symSkin ${k.get('tone.symSkin')}`);
+     assert.ok(k.get('map') < k0.get('map') - 5, `map ${k0.get('map')} → ${k.get('map')}`);
+     assert.ok(k.get('tone.vagCard') < k0.get('tone.vagCard'), 'vagal tone falls with the pressure (intact baroreflex limb)');
+     const k1 = run(spinalCordInjury({ level: 'C6', phase: 1 }));
+diff --git a/brain-system/test/clock.test.mjs b/brain-system/test/clock.test.mjs
+index f82434e..b938390 100644
+--- a/brain-system/test/clock.test.mjs
++++ b/brain-system/test/clock.test.mjs
+@@ -133,7 +133,7 @@ describe('SimClock', () => {
+       const r = mulberry32(fps);
+       const c = new SimClock({ kh: 1, tH: 10 });
+       const origin = c.tH + 3;                                       // 3 s pre-roll at ×1 (§12.4)
+-      c.setKeyframes([{ tH0: 0, tH1: 0.4, kh: 0.02 }, { tH0: 0.4, tH1: 1.2, kh: 0.35 }, { tH0: 1.2, tH1: 30, kh: 1 }], { originH: origin });
++      c.setKeyframes([{ tH0: 0, tH1: 0.4, kh: 0.02 }, { tH0: 0.4, tH1: 1.2, kh: 0.3 }, { tH0: 1.2, tH1: 30, kh: 1 }], { originH: origin });   // hotObject (§12.4)
+       let atOnset = null, waitFrames = 0, prevT = c.tH;
+       let dt = 1 / fps;
+       for (let f = 0; f < 60 * fps && c.tH < origin + 2; f++) {
+diff --git a/brain-system/test/enteric.test.mjs b/brain-system/test/enteric.test.mjs
+index 3f24939..16c6587 100644
+--- a/brain-system/test/enteric.test.mjs
++++ b/brain-system/test/enteric.test.mjs
+@@ -154,7 +154,7 @@ describe('meal checkpoints (§12.10, §12.20)', () => {
+     assert.equal(r.status, 'pass', `${r.value}`);
+   });
+ 
+-  test('row 31: enteric off, solid retention ≥ 99 % at 4 h', (t) => {
++  test('row 31: enteric off, emptying at the §8.8 5 % floor, solid retention ≥ 95 % at 4 h', (t) => {
+     const r = byId.entericOff;
+     t.diagnostic(`gastricSolid ${r.value.toFixed(2)} kcal (≥ ${r.range[0].toFixed(1)})`);
+     assert.equal(r.status, 'pass', `${r.value}`);
+@@ -181,9 +181,12 @@ describe('meal checkpoints (§12.10, §12.20)', () => {
+     assert.ok(k.get('hunger') < 0.2, `hunger ${k.get('hunger')}`);
+     assert.ok(k.get('satiety') > 0.5, `satiety ${k.get('satiety')}`);
+     p.advanceTo(3600);
+-    const r = k.get('emptyRate');
+-    assert.ok(r > 1.65 && r < 1.95, `emptyRate ${r} kcal/min (§8.13 linear emptyRate ≈ 1.8 = r_set at 600 kcal)`);
+     assert.ok(k.get('cck') > 4 && k.get('cck') < 8, `cck ${k.get('cck')} pM`);
++    // §8.13: mean emptyRate over 60–180 min ≈ 1.9 kcal/min (≈ 1.0 × r_set 1.84 at 600 kcal, brakeGain 8).
++    let sum = 0, n = 0;
++    for (let t = 3660; t <= 10800; t += 60) { p.advanceTo(t); sum += k.get('emptyRate'); n++; }
++    const r = sum / n;
++    assert.ok(r > 1.75 && r < 2.05, `mean emptyRate ${r} kcal/min over 60–180 min (§8.13 ≈ 1.9)`);
+   });
+ });
+ 
+@@ -202,7 +205,7 @@ describe('switch-off behaviour (A.5, §8.16, §11.10)', () => {
+     assert.ok(k.get('ec5ht') > 1, 'EC 5-HT is paracrine (tissue): unaffected');
+   });
+ 
+-  test('enteric off: sphincters closed, emptying and transit stop, slow waves persist, no MMC, vagMech halved', () => {
++  test('enteric off: sphincters closed, emptying at the §8.8 5 % floor (solids stop, liquid at G_pyl 0.05), transit stops, slow waves persist, no MMC, vagMech halved', () => {
+     const { k, p } = mealTo(1800);
+     const sol0 = k.get('gastricSolid');
+     k.setNet('enteric', false, k.t);
+@@ -319,7 +322,9 @@ describe('§8.18 model checks', () => {
+     assert.ok(v >= 3.5 && v <= 5.5, `front velocity ${v.toFixed(2)} cm/min`);
+   });
+ 
+-  test('#7 duodenal lipid 30 kcal: first vagal packet at the solitary-nucleus port ≤ 1.5 s; CCK rises', () => {
++  // §8.18 test 7 is now the sustained vagChem rise (≥ 20 s after the lipid reaches s 55–80, peak at
++  // 60–120 s); the ≤ 1.5 s first packet below is kept only as the §8.9 conduction check.
++  test('#7 duodenal lipid 30 kcal: first vagal packet at the solitary-nucleus port ≤ 1.5 s (§8.9 conduction check); CCK rises', () => {
+     const k = kernel();
+     const e = k.edgeIndex('rec.duodenum.vagChem', 'portVisc.R');
+     k.schedule(makeStimulus({ sense: 'interoception', mode: 'duodenalLipid', site: 'duodenum', intensity: 30, tOnset: 10 }));
+diff --git a/brain-system/test/safety.test.mjs b/brain-system/test/safety.test.mjs
+index 4b46117..df22235 100644
+--- a/brain-system/test/safety.test.mjs
++++ b/brain-system/test/safety.test.mjs
+@@ -204,10 +204,11 @@ describe('display rules', () => {
+     assert.equal(lanternK(2300), 2300);
+   });
+ 
+-  test('rate gate: ≤ 3 packets per s past a bundle point', () => {
+-    const g = new RateGate(3, 1);
++  test('rate gate: ≤ 2 packets per s past a bundle point (§13.8, §13.15 per-source cap)', () => {
++    assert.equal(PARAMS.packetRate, 2);
++    const g = new RateGate();
+     const ok = [0, 0.1, 0.2, 0.3, 0.9, 1.05, 1.15, 1.25].map((t) => g.allow('median', t));
+-    assert.deepEqual(ok, [true, true, true, false, false, true, true, true]);
++    assert.deepEqual(ok, [true, true, false, false, false, true, true, false]);
+   });
+ 
+   test('transition counter needs the darker state below 0.8', () => {
