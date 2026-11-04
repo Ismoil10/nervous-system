@@ -1,3 +1,5 @@
+> **Superseded** by `.handoff/RESUME.md` and `.handoff/STATE-AT-PAUSE.md` (the pause on Windows, 5 November 2026). Kept for the record of the Mac-to-Windows move.
+
 # Move the Brain System build from the Mac to Windows
 
 Three parts, in this order:

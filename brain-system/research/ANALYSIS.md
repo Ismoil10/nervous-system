@@ -72,7 +72,7 @@ The document follows that order. Analysis: reference geometry (§2), brain syste
 
 **Brain only (`bodyMode = 'brain'`).** The brain renders exactly as the post-port build (the DOPAMINE.md §9.8 port, including its §7.3 geometry, applied in Phase 0a, B.15) apart from the new nuclei, cortical areas and geometry splits of §3 and §13, and the body is frozen and hidden. All CNS dynamics keep running: the rate graph, the arousal and sleep state machine, the SCN, the fictive respiratory rhythm, tonic sympathetic premotor drive, hypothalamic and pituitary commands and the dopamine model. Commands addressed to the body leave the brain ports (§3) as "efference only" packets that fade at the port. The special senses stay, injected at their first central station: the retina, optic nerve and olfactory bulb are CNS, and hearing, balance and taste, whose receptors and ganglia are peripheral, are kept by design (A.8 #5). The manual panel therefore offers only vision, hearing, smell, taste and balance (A.6). Blood-borne inputs to the brain are clamped at basal on a life-support assumption, and the body vitals show "—" (A.5; A.8 #10). Scenarios run in a central form or are greyed (A.3.5). The mode is only a partial analogue of the encéphale isolé (Bremer 1935, C [unverified]): the cut is at the same level, but that preparation keeps all cranial-nerve input, whereas this mode silences every afferent channel except the special senses.
 
-**Whole body (`bodyMode = 'body'`).** This is the default at first load: all five networks on, the "Upper body" view, no scenario playing (A.7). The star figure (§2, §13) appears around the unchanged brain in the same frame (A.2); cord, nerves, ganglia, organs, gut and vessels are simulated, the `tissue` layer runs, stimuli can be applied at body sites and the vitals are live. Switching to brain only freezes and hides the body, and switching back resets body states to the resting steady state (A.5).
+**Whole body (`bodyMode = 'body'`).** This is the default at first load: all five networks on, with the orgasm scenario playing in demo mode on the Dopamine system view (A.7; user decision, 5 November 2026); `?scenario=none` opens at rest on the "Upper body" view. The star figure (§2, §13) appears around the unchanged brain in the same frame (A.2); cord, nerves, ganglia, organs, gut and vessels are simulated, the `tissue` layer runs, stimuli can be applied at body sites and the vitals are live. Switching to brain only freezes and hides the body, and switching back resets body states to the resting steady state (A.5).
 
 ### 1.7. The five networks
 
@@ -107,7 +107,7 @@ Appendix A binds every convention; this summary names the binding text.
 | Table columns | `Quantity · Value · Unit · Species · Conf. · Source`; coordinates `Structure · id · Position (x, y, z) mm · Extent mm · Frame · Conf. · Source` | A.1 |
 | Notation | En-dash ranges (18–23), "≈", Unicode minus "−", "× 10ⁿ", comma thousands (86,000); identifiers and paths in backticks | A.1 |
 | Units | SI with mm, ms, s, min, h, mmHg, bpm, °C, dB SPL, cd/m², µS, pg/mL, µg/dL, pM; delay in ms = L_mm / v_mps | A.1 |
-| Cross-references | "§7.4"; "DOPAMINE.md §6.4"; "`src/anatomy.js` L196" | A.1 |
+| Cross-references | "§7.4"; "DOPAMINE.md §6.4"; "`src/anatomy.js` L321" | A.1 |
 | Frames | One MNI-152 mm frame for brain and body (x right, y anterior, z superior); right side listed; left-sided organs at negative x | A.2 |
 | Names, clocks | Ids in camelCase ASCII, sided `id.R` / `id.L`; tH for physiology, tS for display and safety, kh in human s per screen s | A.3, A.4 |
 | Endings | Each section ends with Open questions | A.1 |
@@ -126,7 +126,7 @@ Species tags: **H** human, **Mk** macaque, **SM** squirrel monkey, **R** rat, **
 ### 1.10. Content rules
 
 - **Non-explicit (A.1).** No genital structures. Pelvic anatomy is limited to schematic nerves and plexuses, the bladder, the rectum and an unlabelled pelvic-floor field. The pudendal nerve ends at the perineal midline. The S4–S5 perianal band, perineal sites and the pelvic-floor field are never pickable from any view; `dermatome.S3` is pickable only from posterior views (§13.12). The figure has no sex characteristics and is built on male reference proportions (A.9; §2). The orgasm scenario is described only clinically and by reference to DOPAMINE.md.
-- **Photosensitivity.** Limits in A.9, owned by §13; they extend DOPAMINE.md §10 rules 1–6 and WCAG 2.1 Success Criterion 2.3.1 to packets, heartbeats, organ responses and toggle fades.
+- **Photosensitivity.** Limits in A.9, owned by §13; they extend DOPAMINE.md §10 rules 1–6 and WCAG 2.2 Success Criterion 2.3.1 (unchanged from 2.1) to packets, heartbeats, organ responses and toggle fades.
 - **No audio, symbolic stimuli, reduced motion** (A.6; A.8 #22, #23; §13). The camera never moves for a balance stimulus.
 - **Disclosures.** One star stands for many neurons, small structures are enlarged for legibility, values are species-tagged estimates, and travel is slowed when kh < 1 (§13; DOPAMINE.md §10 rules 11–12). Contested findings are shown as contested (e.g. A.8 #16).
 
@@ -184,7 +184,7 @@ Section numbers citable from `src/`, `README.md` and `index.html`: §1 scope and
 ### 1.14. Sources
 
 - **Literature:** Azevedo et al. 2009 (H); Bremer 1935 (C) [unverified]; Davis et al. 1982 (R); Fernández & Goldberg 1971 (SM) [unverified]; Gershon & Tack 2007 (H) [unverified]; Hursh 1939 (C); Mouton et al. 1994 (H) [unverified]; Raphan, Matsuo & Cohen 1979 (Mk); Schwarzacher, Rüb & Deller 2011 (H); Smith et al. 1991 (R, in vitro).
-- **Standards:** W3C WCAG 2.1, SC 2.3.1 (as DOPAMINE.md §11.4). **[T]:** the DRG as afferent relay; the brain share of body 5-HT; the rodent SCN count.
+- **Standards:** W3C WCAG 2.2 — SC 2.3.1, whose text is unchanged from 2.1 (as DOPAMINE.md §11.4), and SC 2.5.8, which exists only in 2.2 (§13.12 touch targets). **[T]:** the DRG as afferent relay; the brain share of body 5-HT; the rodent SCN count.
 - **Captures (`brain-system/raw/`):** Baroreflex L35; Group_A_nerve_fiber L37, L46–L47; Locus_coeruleus L48; Myenteric_plexus L67; Nerve_conduction_velocity L35, L44–L45, L62; Neuromodulation L54, L77; Paraventricular_nucleus_of_hypothalamus L42; Respiratory_center L34, L40, L42, L48, L50; Startle_response L33, L45, L47; Suprachiasmatic_nucleus L41; Thalamus L52, L62; Vestibular_system L137; Volume_transmission L54, L77.
 - **Project files:** `brain-system/research/DOPAMINE.md` conventions, §1, §2.5, §4.1, §6.7, §6.9, §8.2, §9.6, §9.8, §10, §11; `RESPONSE.md` §7.4–§7.9; `brain-system/index.html` L7, L20.
 - **Graph checks:** `graphify query` (respiratory rhythm generator; serotonin distribution; DOPAMINE.md sections); `explain` (Dorsal and Ventral respiratory group; Baroreflex Solitary nucleus; PnC; Inflammatory reflex; Ampullary Cupula); `path` Dorsal respiratory group → Ventral respiratory group → Pre-Botzinger complex, Vagus nerve → Solitary nucleus, Cochlear Root Neurons → PnC, LLN → PnC. Graph-wide paths from Cochlear nucleus and Baroreceptors were noisy, so the captures were read at the cited lines. **Web checks:** Bremer 1935; Mouton et al. 1994 (abstract).
@@ -217,10 +217,10 @@ Scratch scripts tested skin depth, clearance and path lengths; they are model ch
 |---|---|---|---|---|---|
 | Origin and axes | MNI-152 origin (≈ anterior commissure); x right, y anterior, z superior | — | H | high | A.2; `src/anatomy.js` L1 |
 | Render scale `MM` | 0.01 (1 unit = 100 mm); figure spans z +0.88 to −16.72 units | units/mm | — | high | `src/anatomy.js` L7 |
-| Scalp vertex | (0, −20, 88) | mm | H | medium | A.2; cerebrum top z 76 (`src/anatomy.js` L81) + ≈ 12 mm of tissue [T] |
+| Scalp vertex | (0, −20, 88) | mm | H | medium | A.2; cerebrum top z 76 (`HULL.cerebrum`, `src/anatomy.js` L126 post-port) + ≈ 12 mm of tissue [T] |
 | Floor plane | z = −1,672; h = z + 1,672 | mm | — | low | [model]; A.8 #1 |
 | Cervicomedullary junction | (0, −45, −72) | mm | H | low | DOPAMINE.md §2.4 (L278) |
-| `BRAINSTEM` tube end | (0, −46, −88), half-axes (6, 5). Drawn as today but functionally upper cord: segments C1–C2 lie inside it | mm | — | low | `src/anatomy.js` L196–L199 |
+| `BRAINSTEM` tube end | (0, −46, −88), half-axes (6, 5). Drawn as today but functionally upper cord: segments C1–C2 lie inside it | mm | — | low | `BRAINSTEM`, `src/anatomy.js` L321–L324 post-port |
 | Posture and sides | Standing anatomical position, with organs in standing positions. The right side is listed and the left mirrors x; the vagus, phrenic, visceral routes and unpaired organs are listed per side. Left organs have x < 0 | — | — | — | A.2 |
 
 ### 2.2. Reference subject and landmark heights
@@ -300,7 +300,7 @@ Cord sections are ellipses whose axes are the Frostell et al. 2016 diameters, ta
 | Segments | 31 (C1–C8, T1–T12, L1–L5, S1–S5, Co1) | — | H | high | [G Spinal_nerve L33] |
 | Conus tip | L1–L2 vertebrae | — | H | medium | [G Spinal_cord L45, L70]; A.2 |
 | Dural sac end; filum terminale | sac ends at the S2 vertebra (0, −73, −676); filum runs conus → sac end → coccyx dorsum (0, −70, −760) | mm | H | medium; low | [G Spinal_cord L78, L70]; course [T] |
-| Enlargements | cervical: segments C4–T1, z −114 to −172 (vertebrae C3–C7; the capture gives C4–T1, within ±1 level); lumbar: segments L1–S2, z −404 to −479 (vertebrae T10–L1) | mm | H | medium | [G Spinal_cord L72] |
+| Enlargements | cervical: segments C5–T1, z −129 to −172 (the capture gives the vertebral levels C4–T1, which these segments lie opposite within ±1 level); lumbosacral: segments L2–S3, z −416 to −484 (the capture gives vertebrae T10–L1) | mm | H | medium | [G Spinal_cord L72]; segmental ranges [T] |
 | Transverse diameter by segment | C1–C8 11.3, 11.5, 12.0, 12.8, 13.3, 13.1, 12.5, 11.3; T1–T12 10.7, 10.0, 9.6, 9.5, 9.2, 8.7, 8.4, 8.3, 8.6, 8.6, 8.3, 8.2; L1–L5 8.6, 9.1, 9.4, 9.3, 8.8; S1–S5 8.4, 7.1, 6.3, 5.5, 4.7 (± 1.5–3.5, 2 SD) | mm | H | medium | Frostell et al. 2016, Table 5 (pooled post-mortem, myelographic and MRI) |
 | AP diameter by segment | C1–C8 8.3, 8.2, 8.0, 7.7, 7.4, 7.0, 6.9, 6.8; T1–T12 6.9, 6.9, 6.8, 6.6, 6.4, 6.4, 6.3, 6.3, 6.5, 6.5, 6.4, 6.4; L1–L5 6.7, 7.2, 7.5, 7.5, 7.1; S1–S5 6.8, 5.8, 5.2, 4.6, 3.9 (± 1.6–3.2, 2 SD) | mm | H | medium | same |
 | Segment–vertebra rule | C1 at the foramen magnum; C2–C7 one vertebra higher; C8 between C6 and C7; T1 at C7; T2 at C7/T1; T3–T8 two higher; T9 at T6/T7; T10–T12 three higher; L1–L2 at T10; L3–L4 at T11; L5 at T12; S1–S5 at L1; Co1 at L1–L2 | — | H | low | [T] (±1 level); lens-BG |
@@ -329,7 +329,7 @@ The torso is lofted through elliptical sections, the limbs are tapered capsules,
 |---|---|---|---|---|---|---|
 | Torso sections, centre (0, y, z) | `torso.z185` … `torso.z835` | z −185, −260, −370, −420, −560, −600, −740, −835; y −20, −20, −15, −15, −10, −12, −20, −20 | half-breadth × half-depth 65 × 60, 170 × 120, 165 × 125, 155 × 120, 145 × 110 (waist), 160 × 115, 175 × 125, 175 × 125 (crotch fillet into the thighs; no genital geometry, A.1) | body | low | lens-BG (girths [T]) |
 | Acromion; shoulder skin | `lm.acromion.R`, `lm.shoulderTop.R` | (200, −20, −232); skin (200, −20, −220), over the AC joint (175, −15, −222) | — | body | low | 0.818 H [secondary]; [model] |
-| Trunk landmarks | `lm.cervicale`, `.jugularNotch`, `.sternalAngle`, `.xiphoid` | (0, −110, −185); (0, 60, −229), 13 below the loft; (0, 80, −280); (0, 92, −388) | — | body | low | lens-BG [T] |
+| Trunk landmarks | `lm.cervicale`, `.jugularNotch`, `.sternalAngle`, `.xiphoid`, `.xiphoidTip` | (0, −110, −185); (0, 60, −229), 13 below the loft; (0, 80, −280); (0, 92, −388) = the xiphisternal joint (§2.4); (0, 92, −410) = the xiphoid tip, ≈ 22 below the joint, the single "xiphoid level" used by the §2.7 and §2.12 trunk levels | — | body | low | lens-BG [T]; tip offset [T] |
 | Pelvic landmarks | `lm.iliacCrest.R`, `.asis.R`, `.pubicTubercle.R`, `.trochanter.R` | (150, −30, −587); (118, 50, −700); (25, 60, −745); (170, −20, −739) | — | body | low | lens-BG; 0.530 H [secondary] |
 | Pubic symphysis | `lm.symphysis` | (0, 55, −757) | z −737 to −777; inner surface y ≈ 45 | body | low | lens-BG y 50 (bladder clearance) |
 | Upper-limb joints | `shoulder.R`, `elbow.R`, `wrist.R`, `palmC.R`, `finger.R` | glenohumeral (185, −25, −268); elbow (195, −30, −563), carrying angle ≈ 8–10°; wrist (232, −22, −818); palm (238, −15, −870); index MCP (248, −15, −918) | hand box half (43, 15); finger r 9; thumb r 11 | body | low | lens-BG; MCP [model] |
@@ -347,13 +347,13 @@ The definitions come from the capture; the coordinates are placements on the dra
 
 | Structure | id | Position (x, y, z) mm | Extent mm | Frame | Conf. | Source |
 |---|---|---|---|---|---|---|
-| C2 (lateral to the occipital protuberance); C3 (supraclavicular fossa); C4 (AC joint) | `dermatome.C2.R` … `.C4.R` | (15, −105, −50); (60, 50, −215); (175, −15, −222) | skin | body | low | [G Dermatome_anatomy L61–L63] |
+| C2 (lateral to the occipital protuberance); C3 (supraclavicular fossa at the midclavicular line); C4 (AC joint) | `dermatome.C2.R` … `.C4.R` | (15, −105, −50); (95, 20, −222), on the skin over the clavicle midpoint (97.5, 20, −223.5), site radius 10; (175, −15, −222) | skin | body | low | [G Dermatome_anatomy L61–L63]; C3 moved 35 lateral from the lens value (60, 50, −215), which lay at the medial fossa, off the midclavicular line |
 | C5 (lateral antecubital fossa); C6, C7, C8 (dorsal proximal phalanx of thumb, middle, little finger) | `.C5.R` … `.C8.R` | (215, 5, −545); (280, −30, −910); (240, −35, −930); (205, −35, −915) | skin | body | low | [G Dermatome_anatomy L64–L67] |
 | T1 (medial antecubital fossa); T2 (axillary apex, hidden with the arms down) | `.T1.R`, `.T2.R` | (161, −6, −570); (150, −25, −265) | skin | body | low | [G Dermatome_anatomy L68, L69] |
-| T3–T6 (midclavicular line: 3rd, 4th (nipple level), 5th space; xiphisternal level) | `.T3.R` … `.T6.R` | (95, 85, −340); (95, 87, −370); (95, 86, −379); (95, 84, −388), level with the §2.6 xiphisternal landmark | skin | body | low | [G Dermatome_anatomy L70–L73] |
-| T7–T9 (¼, ½, ¾ xiphoid → umbilicus); T10 (umbilical level); T11 (midway to the inguinal ligament) | `.T7.R` … `.T11.R` | (95, 78, −454); (95, 76, −498); (95, 74, −541); (95, 78, −585); (95, 82, −654) | skin | body | low | [G Dermatome_anatomy L74–L78] |
-| T12 (inguinal-ligament midpoint); L1 (midway T12–L2); L2 (anteromedial thigh) | `.T12.R`, `.L1.R`, `.L2.R` | (72, 94, −722); (55, 67, −829); (37, 43, −936) | skin; the ligament lies ≈ 30 deeper (no groin crease) | body | low | [G Dermatome_anatomy L79–L81] |
-| L3 (medial femoral epicondyle); L4 (medial malleolus); L5 (3rd MTP joint, dorsum) | `.L3.R` … `.L5.R` | (19, −31, −1150); (41, −45, −1605); (85, 120, −1640) | skin | body | low | [G Dermatome_anatomy L82–L84] |
+| T3–T6 (midclavicular line: 3rd, 4th (nipple level), 5th space; xiphoid level) | `.T3.R` … `.T6.R` | (95, 85, −340); (95, 87, −370); (95, 86, −390), the midpoint of T4 and T6; (95, 84, −410), level with the §2.6 `lm.xiphoidTip` | skin | body | low | [G Dermatome_anatomy L70–L73]; the capture's T6 is the level of the xiphoid process, not of the xiphisternal joint |
+| T7–T9 (¼, ½, ¾ xiphoid tip → umbilicus); T10 (umbilical level); T11 (midway to the inguinal ligament) | `.T7.R` … `.T11.R` | (95, 78, −453); (95, 76, −495); (95, 74, −538); (95, 78, −580); (95, 82, −651) | skin | body | low | [G Dermatome_anatomy L74–L78]; fractions of −410 → −580, T11 the midpoint of −580 and the T12 ligament level −722 |
+| T12 (inguinal-ligament midpoint); L1 (midway T12–L2); L2 (anteromedial thigh) | `.T12.R`, `.L1.R`, `.L2.R` | (72, 94, −722); (55, 67, −829); (37, 43, −936) | skin; the ligament midpoint (≈ (71.5, 55, −722)) lies ≈ 40 deeper (no groin crease) | body | low | [G Dermatome_anatomy L79–L81] |
+| L3 (medial femoral condyle, above the knee); L4 (medial malleolus); L5 (3rd MTP joint, dorsum) | `.L3.R` … `.L5.R` | (19, −31, −1150); (41, −45, −1605); (85, 120, −1640) | skin | body | low | [G Dermatome_anatomy L82–L84] |
 | S1 (lateral calcaneus); S2 (popliteal fossa); S3 (ischial tuberosity) | `.S1.R` … `.S3.R` | (105, −85, −1640); (80, −92, −1165); (55, −139, −815) | skin | body | low | [G Dermatome_anatomy L85–L87] |
 | S4–S5 perianal band | `dermatome.S4`, `.S5` | posterior, \|x\| ≤ 15, z −825 to −840 | not pickable | body | low | [G Dermatome_anatomy L88]; A.1 |
 | Hand, forearm and foot sites | `indexTip.R`, `palm.R`, `forearmDorsal.R`, `footSole.R`, `heel.R`, `bigToe.R` | (258, −15, −1000); (238, 0, −870); (214, −60, −690); (85, 30, −1672); (78, −75, −1672); (78, 170, −1660) | skin | body | medium (index); low | A.2; [model] |
@@ -362,7 +362,7 @@ The definitions come from the capture; the coordinates are placements on the dra
 
 ### 2.8. Organs, glands and receptor sites
 
-Solid organs are ellipsoids. Where neighbours press, they are carved with a 3 mm gap, which reproduces the real impressions on the liver and spleen. The heart is clipped at the central-tendon plane (z −392), and the lungs are carved by the heart and by both domes. Organ roles belong to other sections:
+Solid organs are ellipsoids. Where neighbours press, they are carved with a 3 mm gap, which reproduces the real impressions on the liver and spleen. The heart is clipped at the central-tendon plane (z −392), and the lungs are carved by the heart and by both domes. Two organs are unions of more than one ellipsoid: the heart (main solid, apex lobe and ventricles) and the liver (main right-lobe solid, left lobe and the gallbladder fundus). A stated apex or tip point is the extreme point of the **union**, so it must be tested against every primitive of that organ and not against the main ellipsoid alone; the volumes below likewise distinguish the main solid from the union. Organ roles belong to other sections:
 - §7: heart, airways, vessels, bladder, glands, brown fat.
 - §8: gut, pancreas, liver.
 - §9: adrenal, thyroid.
@@ -370,13 +370,13 @@ Solid organs are ellipsoids. Where neighbours press, they are carved with a 3 mm
 
 | Structure | id | Position (x, y, z) mm | Extent mm | Frame | Conf. | Source |
 |---|---|---|---|---|---|---|
-| Heart; apex; ventricles | `heart`, `ventricles` | (−22, 15, −352); apex (−85, 55, −390) (left 5th space, above the z −392 clipping plane); ventricles (−35, 25, −372) | half (52, 45, 55); (40, 35, 40) | body | low | A.2; [T]; [model] |
+| Heart (main solid; apex lobe); apex point; ventricles | `heart`, `ventricles` | main (−22, 15, −352); apex lobe (−62, 40, −377); apex point (−80, 50, −384) (left 5th space, above the z −392 clipping plane, on the apex-lobe surface at normalised radius 0.99); ventricles (−35, 25, −372) | half (52, 45, 55); apex lobe (26, 20, 14), 31 % of it inside the main solid and the ventricles so the union stays joined; (40, 35, 40). All three clipped below z −392 | body | low | A.2; [T]; apex lobe [model] (`src/body/geometry.js` L453). The lens apex (−85, 55, −390) lay at radius 1.65 in the main solid and outside the union; moved 9 mm onto the drawn surface |
 | SA node; AV node | `saNode`, `avNode` | (30, 0, −312), at the SVC–atrial junction; (5, −2, −350) | r 4; r 3 | body | low | A.2; lens-BG [T] |
 | Lungs; hila | `lungs.R`, `lungs.L`, `lungStretch.R` | (78, −18, −318); (−82, −22, −328); hila (±45, −20, −300) | (62, 80, 118); (56, 78, 112), carved | body | low | lens-BG [T] |
 | Trachea → carina | `airways` | cricoid (0, 20, −172) → (0, −10, −290); bronchi to the hila | r 9 | body | low | lens-BG (C6 → T4/T5), start lowered to the larynx base |
 | Diaphragm | `diaphragm` | right dome (55, −5, −382); left dome (−55, −5, −395); central tendon (0, 15, −392); costal attachments z −440 to −470; crura to L1–L3 | sheet, end-expiration | body | low | lens-BG [T] |
 | Diaphragmatic openings | — | caval (T8) (30, 5, −380), on the §2.10 IVC at the height of the sheet, in the central tendon; oesophageal (T10) (−22, −22, −415); aortic (T12) (−8, −20, −460) | — | body | low | [G Phrenic_nerve L46]; §2.9, §2.10 |
-| Liver; gallbladder fundus | `liver` | (44, 8, −440); left-lobe tip (−90, 30, −430); fundus (70, 60, −495) | (90, 68, 55), carved, ≈ 1.41 L (0.3 % of the volume within 15 mm of the skin); fundus r 15 | body | low | lens-BG (52, 8, −445), (100, 68, 55): raised 5 (hepatic flexure), moved 8 medial and narrowed so the right flank keeps a body wall |
+| Liver (main right-lobe solid; left lobe); gallbladder fundus | `liver` | main (44, 8, −440); left lobe (−45, 26, −432); left-lobe tip (−90, 30, −430), at radius 0.95 in the left lobe; fundus (70, 60, −495) | main (90, 68, 55), carved, ≈ 1.41 L on its own (0.3 % of that volume within 15 mm of the skin); left lobe (48, 32, 20), uncarved; union ≈ 1.5 L before carving; fundus r 15 | body | low | lens-BG (52, 8, −445), (100, 68, 55): raised 5 (hepatic flexure), moved 8 medial and narrowed so the right flank keeps a body wall. Left lobe [model] (`src/body/geometry.js` L460): the main solid reaches only x −46, so the tip lies outside it |
 | Spleen; hilum | `spleen` | (−108, −55, −458); hilum (−86, −40, −460) | (22, 42, 58) along rib 10 | body | low | A.2; [model] |
 | Pancreas | `pancreas` | head (26, 28, −542) r 13 → neck (2, 18, −515) → body (−12, 18, −505) → (−45, −8, −488) r 10 → tail (−80, −28, −465) r 8 | tube ≈ 145 long | body | low | lens-BG, re-routed into the duodenal C |
 | Kidneys | `kidney.R`, `kidney.L` | (62, −50, −512); (−60, −50, −497) | (30, 22, 55) | body | low | lens-BG [T] |
@@ -487,7 +487,7 @@ The graph has no nodes for the chorda tympani, the trigeminal branches or the ta
 | Cervical plexus | `plexusCervical` | C1–C4 DRG → nerve point (52, −8, −140) → lesser occipital (48, −60, −40), great auricular (76, −22, −72), transverse cervical (25, 36, −135), supraclavicular → C3, C4 sites | fine | body | low | lens-SM, re-snapped |
 | Phrenic, right; left | `phrenic.R`, `phrenic.L` | C3–C5 DRG → anterior scalene (±40, −10, −170) → inlet (±35, 0, −215); R → beside the SVC and right atrium (42, 10, −320) → beside the caval opening (40, 5, −380) → over the right dome (55, −5, −382); L → over the left ventricle (−75, 26, −339) → left dome (−60, 10, −398) | 2–3 | body | low | lens-BG, L moved out of the heart; [G Phrenic_nerve L36, L46] |
 | Intercostal T1–T11 (rule) | `intercostal.T1` … `.T11` | DRG → costal angle (80, y_ca, z_DRG − 15) → midaxillary (x_ma, −20, z_DRG − 50) → anterior end (35, y_ae, z_ant), 5 below the skin | ≈ 2 | body | low | lens-BG z_ant; [model]; [G Spinal_nerve L73] |
-| Intercostal parameters, T1 → T11 | — | y_ca −72, −98, −111, −110, −110, −110, −109, −107, −104, −101, −98; x_ma 152, 154, 153, 152, 151, 148, 144, 140, 138, 136, 134; y_ae 84, 96, 100, 102, 100, 98, 96, 94, 92, 94, 96; z_ant −250, −300, −340, −370, −379, −388, −454, −498, −541, −585, −650 | — | body | low | lens-BG points lay at the skin |
+| Intercostal parameters, T1 → T11 | — | y_ca −72, −98, −111, −110, −110, −110, −109, −107, −104, −101, −98; x_ma 152, 154, 153, 152, 151, 148, 144, 140, 138, 136, 134; y_ae 84, 96, 100, 102, 100, 98, 96, 94, 92, 94, 96; z_ant −250, −300, −340, −370, −390, −410, −453, −495, −538, −580, −651 (the §2.7 dermatome levels) | — | body | low | lens-BG points lay at the skin; z_ant follows §2.7 |
 | Subcostal T12 | `subcostal` | (26, −70, −470) → (80, −95, −485) → (131, −10, −540) → (75, 70, −715) | ≈ 2 | body | low | same; end lens-SM |
 | Femoral; saphenous | `femoral`, `saphenous` | L2–L4 DRG → psoas (42, −30, −600) → psoas–iliacus groove (62, −10, −650) → inguinal ligament (80, 55, −730) → femoral triangle (85, 52, −765) → quadriceps (94, 42, −900); saphenous (85, 52, −790) → adductor canal (70, 25, −950) → medial knee (55, −15, −1170) → (60, −45, −1450) → medial foot (80, 10, −1640) | 6–8; ≈ 3 | body | low | lens-BG, start lowered; [G Lumbar_plexus L50] |
 | Obturator | `obturator` | (35, −18, −620) → pelvic wall (55, 8, −690) → obturator canal (48, 38, −755) → (41, 26, −843) → (39, 7, −1000) → (38, 0, −1064) | ≈ 4 | body | low | lens-SM; [G Lumbar_plexus L48] |
@@ -621,7 +621,7 @@ Captures (`brain-system/raw/`):
 - [G Parasympathetic_nervous_system L52]
 - [G Pelvic_splanchnic_nerves L41]
 
-Project files: `src/anatomy.js` L1, L7, L81, L196–L199; DOPAMINE.md §2.4 (L278).
+Project files: `src/anatomy.js` L1, L7, `HULL.cerebrum` L126, `BRAINSTEM` L321–L324 (post-port lines); `src/body/geometry.js` `ORGANS` L451–L470; DOPAMINE.md §2.4 (L278).
 
 ---
 
@@ -649,7 +649,7 @@ Everything outside the cortex and cerebellum holds ≈ 0.69 × 10⁹ neurons (DO
 | Thalamic nuclei | ≥ 30 per side | nuclei | H | high | [G Thalamus L50] |
 | LGN volume; neurons | 90–160; ≈ 1–2 × 10⁶ per side | mm³; neurons | H | medium; low | Andrews, Halpern & Purves 1997 [unverified]; [T] |
 | Amygdaloid nuclei | 13 | nuclei | H | medium | [G Amygdala L56] |
-| Basal ganglia relative counts | GPe > GPi ≈ STN ≈ SNc, each ≈ 10⁵ per side | neurons | H | low | Hardman et al. 2002 [unverified] |
+| Basal ganglia relative counts | GPe > GPi ≈ STN ≈ SNr (the non-dopaminergic SN); GPi, STN and SNr of order 10⁵ per side, GPe several-fold higher; SNc ≈ 4 × 10⁵ pigmented neurons per side | neurons | H | low | Hardman et al. 2002 (abstract, PMID 11920704: GPe holds more neurons than GPi, STN and the non-dopaminergic SN, which are similar to one another) [unverified]; GPe and SNc values [recalled] (Pakkenberg et al. 1991), low until the tables are read; the HUD keeps the §3.19 order-of-magnitude note |
 | Nucleus basalis cholinergic neurons, ChAT⁺; VAChT⁺ | ≈ 210,000; ≈ 174,000 per hemisphere | neurons | H | medium | Gilmor et al. 1999 [unverified] |
 | LC pigmented neurons (adult men); soma volume | 22,000–51,000 per LC; 31,000–60,000 | neurons; µm³ | H | medium | [G Locus_coeruleus L48]; German et al. 1988 [unverified] |
 | Dorsal raphe, all neurons (Nissl); serotonergic (PH8⁺) | 235,000 ± 15,000; 165,000 ± 34,000 | neurons | H | medium | Baker et al. 1990 [unverified]; Baker et al. 1991a [unverified] |
@@ -1161,7 +1161,7 @@ Orgasm scenario: with all networks on, `response.js` drives the dopamine model e
 
 **Raw captures:** `brain-system/raw/` stems and lines as cited inline, located with `graphify query`, `path` and `explain`.
 
-**Project files:** `research/DOPAMINE.md` §2.2–§2.4, §5, §6.3, §6.5, §7.3, §7.4; `src/anatomy.js` L12, L160, L196; `src/brain.js` L184–L193; `src/shaders.js` L30, L63, L122.
+**Project files:** `research/DOPAMINE.md` §2.2–§2.4, §5, §6.3, §6.5, §7.3, §7.4; `src/anatomy.js` `REGION_IDS` L17–L41, `BRAINSTEM` L321–L324; `src/brain.js` L184–L193; `src/shaders.js` L30, L63, L122.
 
 ---
 
@@ -1324,7 +1324,7 @@ The Group A capture lists α-motor fibres at 80–120 m/s [G Group_A_nerve_fiber
 | Spinothalamic tract, C-related | 2.2 | m/s | H | low | Qiu et al. 2001 (2.2 ± 0.6, 11 healthy men) (abstract) |
 | Spinothalamic tract, other laser estimate (not used) | ≈ 21 | m/s | H | low | Cruccu et al. 2000 (mean 21, n = 15) (abstract) |
 | Corticospinal, model (bulk of fast fibres) | 60 | m/s | H | low | [model] |
-| Corticospinal, Betz-cell axons (≈ 5 % of tract cells) | > 70 | m/s | H | medium | [G Corticospinal_tract L38] |
+| Corticospinal, Betz-cell axons (≈ 3 % of CST axons, §6.8) | > 70 | m/s | H | medium | [G Corticospinal_tract L38] |
 | Optic nerve and tract | 8 | m/s | — | low | [model] |
 | LC axons; bulbospinal autonomic premotor axons | 0.5; 3 | m/s | R; C | low | [T] |
 | Other CNS default | 20 | m/s | — | low | [model] |
@@ -1421,7 +1421,7 @@ The filter form is fixed here, and τA, kA and u50 for each receptor are fixed i
 - RA1 (τA 30 ms): 124 Hz bursts at onset and offset that fall to 13 Hz within 100 ms.
 - RA2 (τA 5 ms): onset and offset transients only.
 
-The semicircular canals use H(s) = T₁T₂·s / ((1 + T₁s)(1 + T₂s)) on head angular velocity. Between 0.1 and 10 Hz this acts as a first-order high-pass followed by central velocity storage. The capture's T₂ ≈ 20 s [G Vestibular_system L137] mixes the two stages. A.8 #15 sets the split (afferent ≈ 5 s, storage ≈ 15 s), and §5 owns the values.
+The semicircular canals use H(s) = T₁T₂·s / ((1 + T₁s)(1 + T₂s)) on head angular velocity. With T₂ ≈ 5 s and T₁ ≈ 5 ms the corners are ≈ 0.03 Hz and ≈ 32 Hz, so between 0.1 and 10 Hz the gain is flat (|H| 0.95 at 0.1 Hz, ≈ 1.0 at 1 Hz, 0.99 at 10 Hz) and the output tracks head velocity, as §5.9 states. The high-pass behaviour appears below ≈ 0.05 Hz and in step responses, and central velocity storage extends the perceived and VOR time constant to ≈ 15 s. The capture's T₂ ≈ 20 s [G Vestibular_system L137] mixes the two stages. A.8 #15 sets the split (afferent ≈ 5 s, storage ≈ 15 s), and §5 owns the values.
 
 ### 4.8. Gain control and neuromodulatory gain
 
@@ -1547,7 +1547,7 @@ t_k = t_rec (§5) + Σ_edges d_e (§4.4) + Σ_relays τ_i·ln(a_i,fin / (a_i,fin
 | `achillesTendon` → `cord.S1.vh` → `gastrocSoleus` | 676 + 201 Ia65; 201 + 676 α50 | 1 | 32.8 | 33.2 | 30–36 (§6) | within | pass |
 | `cochlea` → `cochNuc` → `pnc` → `n7m` → `orbicularisOculi` (startle blink) | 25 VIII-afferent 20; 20 + 15 cns20; 120 facial-motor 50 (all [model]) | 3 | 8.4 | 25.2 (26.2 with t_rec 1 ms, §5) | 20–40 (§6) | within | pass |
 | `indexTip` Aδ → `cord.C7.dh` → `thalVMpo` → `insPost`/`s2` | 919 + 24 Aδ15; 171 STT10; 50 cns20 | 3 | 84.3 | 85.5 | laser-evoked onset (§5) | — | pending §5 t_rec |
-| `indexTip` C → same chain (second pain) | 919 + 24 C1.0; 171 STT2.2; 50 cns20 | 3 | 1,025 | 1,026 | C-LEP N2 ≤ 704 ± 179 ms (hand dorsum, §5.5), compared at the dispersed leading edge (mean − 1σ_t, §4.4) | leading edge ≈ 0.74 s (σ_t 0.28 s) | pass via dispersion |
+| `indexTip` C → same chain (second pain) | 919 + 24 C1.0; 171 STT2.2; 50 cns20 | 3 | 1,025 | 1,026 | C-LEP N2 704 ± 179 ms (a peak, hand dorsum, §5.5), compared at the dispersed leading edge (mean − 1σ_t, §4.4) | leading edge ≈ 0.74 s (σ_t 0.28 s); the chain starts ≈ 110 mm distal of the target's hand-dorsum site (≈ 830 mm of peripheral path there), and the N2 mean implies C CV ≈ 1.3–1.6 m/s, the upper part of the 0.5–2.0 class range, against the 1.0 m/s default | marginal: the EV arrival exceeds the N2 mean by ≈ 1.8 SD and the pass leans on a −1σ_t shift that no other row uses. Optionally raise `C` to 1.2 m/s (class range unchanged) and re-run this chain |
 | Sural at ankle Aδ → `cord.S1.dh` → 2 interneurons → `hamstrings` (biceps femoris; RIII) | 860 + 201 Aδ15 (860 [model]); 201 + 350 α50 (350 [model]) | 3 | 84.8 | 87.3 | RIII onset 90–130 (§6) | −6 % | marginal |
 | `indexTip` Aδ → `cord.C7.dh` → 2 interneurons → `biceps` (withdrawal) | 919 + 24 Aδ15; 392 α55 | 3 | 73.0 | 75.4 | EMG onset 250–350 from contact, which includes t_rec 224 ms at 55 °C (§6.11, §11.9) | EV + t_rec = 297 ms | pass |
 | `carotidSinus` (A) → `ntsVisc` → `nAmbVagal` → `cardiacPlexus` ganglion → `saNode` | 104 baroA15; 10 cns20; 279 B8; 10 Cpost1.0 (SA node → `nAmbVagal` 289) | 3 | 54.1 | 60.9 | vagal dead time (§7) | effector ≈ 0.25 of 0.3 s | consistent |
@@ -1761,7 +1761,7 @@ Natural stimuli add transduction delays that electrical stimuli and clicks lack.
 | Cochlear transduction incl. travelling wave, click | ≈ 1 | ms | H | medium | [T] (fits ABR I, §5.3) |
 | Vestibular hair-cell transduction | < 1 | ms | — | low | [T] |
 | Mechanoreceptor step or tap; spindle Ia tendon tap | ≈ 1 | ms | — | low | [model] |
-| Contact heat to nociceptor threshold | (I0 − T_skin) / ramp + ≈ 30–50 diffusion | ms | — | low | [model] |
+| Contact heat to nociceptor threshold | ramp stimuli: (θ_c − T_skin) / ramp + d²/(2α) ≈ 110 diffusion lag at the default terminal depth d 150 µm (α 1 × 10⁻⁷ m²/s, §6.10); contact steps use the §11.9 erfc model instead (224 at 55 °C) | ms | — | low | [model]; §6.10 depth, §11.9 |
 | Tastant: diffusion and transduction | 50–200 | ms | — | low | [model] |
 | Visceral mechanoreceptors | < 10 | ms | — | low | [model] |
 
@@ -1821,7 +1821,7 @@ A vision stimulus is never drawn as a screen flash (§13; A.9).
 
 ### 5.3. Hearing
 
-The ear canal amplifies 3–12 kHz [G Auditory_system L80], and the ossicles raise sound pressure (gain in the table below) [G Auditory_system L35]. The basilar membrane separates frequencies by place: the stiff base is tuned high and the apex low [G Auditory_system L39]. Inner hair cells provide almost all afferent output. Outer hair cells are the electromotile amplifier, and the medial olivocochlear bundle sets their gain [G Cochlea L83] (§5.12). Auditory-nerve spontaneous-rate classes have staggered thresholds (range fractionation, §5.1). Phase locking carries timing up to a few kHz.
+The ear canal resonates at about 2.5–3.5 kHz, giving ≈ +10–15 dB over ≈ 2–5 kHz (quarter-wave resonance of a ≈ 25 mm canal ≈ 3.4 kHz); the pinna and concha add direction-dependent gain up to ≈ 12 kHz [T]. The capture's "3–12 kHz" amplification [G Auditory_system L80] is not adopted (§5.17). The ossicles raise sound pressure (gain in the table below) [G Auditory_system L35]. The basilar membrane separates frequencies by place: the stiff base is tuned high and the apex low [G Auditory_system L39]. Inner hair cells provide almost all afferent output. Outer hair cells are the electromotile amplifier, and the medial olivocochlear bundle sets their gain [G Cochlea L83] (§5.12). Auditory-nerve spontaneous-rate classes have staggered thresholds (range fractionation, §5.1). Phase locking carries timing up to a few kHz.
 
 The relay is `cochNuc` → `soc` → lateral lemniscus → `ic` → `mgn` → `a1`:
 - **Cochlear nuclei.** Bushy cells feed the olivary nuclei, stellate cells code spectral peaks and octopus cells code timing [G Auditory_system L45]. Most fibres cross in the trapezoid body [G Auditory_system L43].
@@ -1917,7 +1917,7 @@ Arrival targets: the median nerve is stimulated electrically at the wrist and th
 | Tibial N22, lumbar dorsal horn (`cord.S1.dh`) | 21–23 | ms | H | medium | [T] |
 | Tibial P30, cervicomedullary (`gracile`) | ≈ 30 | ms | H | low | [T] |
 | Tibial P37, foot area (`s1.foot`) | 37–40 | ms | H | medium | [T] |
-| `s2` response peak | 60–100 | ms | H | low | Hari et al. 1984 [recalled]; [T] |
+| `s2` response peak | 90–125 | ms | H | medium | Hari et al. 1984, *Electroencephalogr Clin Neurophysiol* 57:254–263 (abstract: SI deflections at 30–80 and 150–180 ms, SII at 90–125 ms) |
 
 With the §2.14 geometry, wrist N20 is 18.7 ms (EV; 19.4 ms NF) and fingertip → S1 22.3 ms (EV; 23.1 ms NF) (§4.11), both mid-range. The tibial N22 and P30 pass with the below-knee Aβ velocity, and the P37 peak is an upper bound that the model arrival precedes (§4.11). CT timing follows the C fibre class (§4).
 
@@ -2059,7 +2059,7 @@ Outputs:
 Taste buds sit in the fungiform, foliate and circumvallate papillae and on the palate and throat [G Taste L27]. Transduction (mouse data):
 - **Type II cells** (sweet, umami, bitter) release ATP through CALHM1 (Taruno et al. 2013, Ms).
 - **Type III cells** transduce sour through OTOP1 and release 5-HT (Tu et al. 2018, Ms).
-- **Low salt** acts through ENaC (Chandrashekar et al. 2006, Ms).
+- **Low salt** acts through ENaC (Chandrashekar et al. 2010, *Nature* 464:297–301, taste-cell-specific ENaC-α knockout, Ms).
 
 Innervation [T]:
 - Anterior two-thirds of the tongue (fungiform): `cn7.special` (chorda tympani, geniculate ganglion).
@@ -2337,6 +2337,10 @@ Capture statements not adopted, for the §1 corrections table:
 - [G Sensory_nervous_system L57]: retinal ganglion cells in the adrenal medulla. Disregarded; the ipRGC share is kept.
 - [G Taste L27]: hundreds of taste buds per papilla. This holds for circumvallate papillae only [T].
 - [G Insular_cortex L81]: the anterior insula is primary gustatory cortex. Adopted instead: dorsal mid-insula and frontal operculum (§5.8).
+- [G Auditory_system L80]: the ear canal amplifies 3–12 kHz. Adopted instead: canal resonance ≈ 2.5–3.5 kHz (+10–15 dB over ≈ 2–5 kHz), with pinna and concha gain to ≈ 12 kHz (§5.3).
+- [G Dermatome_anatomy L68]: the T1 key point is "just distal to the medial epicondyle". Adopted instead: the ISNCSCI wording, just **proximal** to the medial epicondyle of the humerus (§6.6).
+- [G Corticospinal_tract L38]: Betz cells are ≈ 5 % of the cells projecting to the cord. Adopted instead: ≈ 3 % of CST axons, from the document's own counts (§6.8).
+- [G Central_pattern_generator L53]: the swallowing generator is the hypoglossal nucleus. Adopted instead: a medullary reticular network, dorsal (NTS) and ventral (nucleus ambiguus) groups, with the hypoglossal nucleus as an output nucleus (§6.13).
 
 ### 5.18. Open questions
 
@@ -2359,7 +2363,7 @@ Capture statements not adopted, for the §1 corrections table:
 
 ### 5.19. Sources
 
-Peer-reviewed literature, all [recalled] unless tagged otherwise; species are given in the text: Basbaum & Fields 1984; Beckstead, Morse & Norgren 1980; Benson, Spencer & Stott 1986; Bentin et al. 1996; Blumenthal et al. 2005; Cain 1977; Caterina et al. 1997, 1999; Chandrashekar et al. 2006; Collings 1974; Craig 2002, 2009; Craig et al. 2000; Curcio et al. 1990; Dalton 2000; Darian-Smith et al. 1979 (cited in G Thermoreceptor L58); Di Russo et al. 2002; Dodt & Zotterman 1952; Eickhoff et al. 2006; Fernández & Goldberg 1971; Fields et al. 1983; Gamlin et al. 2007; Goldberg & Fernández 1971; Goodale & Milner 1992; Grabherr et al. 2008 (scope checked); Graham 1975; Greenwood 1990; Hall & McCloskey 1983; Hari et al. 1984; Hecht, Haig & Chase 1937; Hecht, Shlaer & Pirenne 1942; Hensel 1973; Horton & Hoyt 1991; Jankovski, Plaghki & Mouraux 2013, *Pain* 154:1578–1587 (abstract); Jesteadt, Wier & Green 1977; Johansson & Vallbo 1979 [unverified]; Johnson 1980; Kobal & Hummel 1988; Kobayakawa et al. 1996, *Neurosci Lett* 212:155–158 (abstract); Kobayakawa et al. 1999 [unverified]; Lammel et al. 2011 (via DOPAMINE.md); Liberman 1978; Liégeois-Chauvel et al. 1994; Loewenstein & Mendelson 1965; Löken et al. 2009 [unverified]; Malnic, Godfrey & Buck 2004; Maresh et al. 2008 [unverified]; McKemy, Neuhausser & Julius 2002; Melzack & Wall 1965; Mendell 1966; Meredith & Stein 1983; Meredith, Nemitz & Stein 1987; Nakamura & Morrison 2008; Namer et al. 2008; Näätänen et al. 2007; Olausson et al. 2002 [unverified]; Park & Blanke 2019; Peier et al. 2002; Penfield & Boldrey 1937; Perry, Oehler & Cowey 1984; Price et al. 1977; Raphan, Matsuo & Cohen 1979; Rauschecker & Tian 2000; Rolke et al. 2006 (identity checked); Ross et al. 2010; Schmelz et al. 1997; Schmidt et al. 1995; Schmolesky et al. 1998 ([unverified] for LGN and V4); Schultz 1998 (via DOPAMINE.md); Stein & Meredith 1993; Steiner 1973; Story et al. 2003; Sun & Chen 2007; Swerdlow, Geyer & Braff 2001; Taruno et al. 2013; Todd 2010; Treede et al. 1995; Tu et al. 2018; Ungerleider & Mishkin 1982; Vallbo & Johansson 1984; Vallbo, Olausson & Wessberg 1999; Veldhuizen et al. 2011; Verrillo 1963; Weinstein 1968; Westerman & Smith 1984; Yarnitsky & Ochoa 1991; zu Eulenburg et al. 2012.
+Peer-reviewed literature, all [recalled] unless tagged otherwise; species are given in the text: Basbaum & Fields 1984; Beckstead, Morse & Norgren 1980; Benson, Spencer & Stott 1986; Bentin et al. 1996; Blumenthal et al. 2005; Cain 1977; Caterina et al. 1997, 1999; Chandrashekar et al. 2010; Collings 1974; Craig 2002, 2009; Craig et al. 2000; Curcio et al. 1990; Dalton 2000; Darian-Smith et al. 1979 (cited in G Thermoreceptor L58); Di Russo et al. 2002; Dodt & Zotterman 1952; Eickhoff et al. 2006; Fernández & Goldberg 1971; Fields et al. 1983; Gamlin et al. 2007; Goldberg & Fernández 1971; Goodale & Milner 1992; Grabherr et al. 2008 (scope checked); Graham 1975; Greenwood 1990; Hall & McCloskey 1983; Hari et al. 1984 (abstract); Hecht, Haig & Chase 1937; Hecht, Shlaer & Pirenne 1942; Hensel 1973; Horton & Hoyt 1991; Jankovski, Plaghki & Mouraux 2013, *Pain* 154:1578–1587 (abstract); Jesteadt, Wier & Green 1977; Johansson & Vallbo 1979 [unverified]; Johnson 1980; Kobal & Hummel 1988; Kobayakawa et al. 1996, *Neurosci Lett* 212:155–158 (abstract); Kobayakawa et al. 1999 [unverified]; Lammel et al. 2011 (via DOPAMINE.md); Liberman 1978; Liégeois-Chauvel et al. 1994; Loewenstein & Mendelson 1965; Löken et al. 2009 [unverified]; Malnic, Godfrey & Buck 2004; Maresh et al. 2008 [unverified]; McKemy, Neuhausser & Julius 2002; Melzack & Wall 1965; Mendell 1966; Meredith & Stein 1983; Meredith, Nemitz & Stein 1987; Nakamura & Morrison 2008; Namer et al. 2008; Näätänen et al. 2007; Olausson et al. 2002 [unverified]; Park & Blanke 2019; Peier et al. 2002; Penfield & Boldrey 1937; Perry, Oehler & Cowey 1984; Price et al. 1977; Raphan, Matsuo & Cohen 1979; Rauschecker & Tian 2000; Rolke et al. 2006 (identity checked); Ross et al. 2010; Schmelz et al. 1997; Schmidt et al. 1995; Schmolesky et al. 1998 ([unverified] for LGN and V4); Schultz 1998 (via DOPAMINE.md); Stein & Meredith 1993; Steiner 1973; Story et al. 2003; Sun & Chen 2007; Swerdlow, Geyer & Braff 2001; Taruno et al. 2013; Todd 2010; Treede et al. 1995; Tu et al. 2018; Ungerleider & Mishkin 1982; Vallbo & Johansson 1984; Vallbo, Olausson & Wessberg 1999; Veldhuizen et al. 2011; Verrillo 1963; Weinstein 1968; Westerman & Smith 1984; Yarnitsky & Ochoa 1991; zu Eulenburg et al. 2012.
 
 Textbook knowledge [T]: clinical SEP, ABR, MLR, N1/P2, VEP and LEP norms; sensory thresholds; hair-cell counts; Weber fractions; transduction mechanisms.
 
@@ -2576,12 +2580,12 @@ A skin click snaps to a site (§13). The site resolves to a segment and DRG, a p
 | `dermatome.C3` / `C4` | supraclavicular fossa / acromioclavicular joint | supraclavicular (cervical plexus) | medium |
 | `dermatome.C5` | radial side of the antecubital fossa | upper-arm lateral cutaneous branches (radial) or musculocutaneous; variable | low |
 | `dermatome.C6` / `C7` / `C8` | dorsal proximal phalanx of thumb / middle finger / little finger | superficial radial / superficial radial / dorsal branch of the ulnar | medium / low / medium |
-| `dermatome.T1` | medial antecubital fossa, distal to the medial epicondyle | medial cutaneous nerve of the forearm | medium |
+| `dermatome.T1` | medial (ulnar) side of the antecubital fossa, just **proximal** to the medial epicondyle of the humerus (ISNCSCI; the capture's "distal" is not adopted, §5.17) | medial cutaneous nerve of the forearm | medium |
 | `dermatome.T2` | apex of the axilla | intercostobrachial | medium |
 | `dermatome.T3`–`T11` | midclavicular line at defined levels (T4 nipples, T6 xiphoid, T10 umbilicus) | `intercostal.Tn` anterior cutaneous branches | medium |
 | `dermatome.T12` | midclavicular line at the midpoint of the inguinal ligament | `subcostal` / iliohypogastric | medium |
 | `dermatome.L1` | midway between the T12 and L2 points | ilioinguinal / femoral branch of the genitofemoral | low |
-| `dermatome.L2` / `L3` | mid-anterior thigh / medial femoral epicondyle | `femoral` anterior cutaneous | medium |
+| `dermatome.L2` / `L3` | mid-anterior thigh / medial femoral condyle above the knee (ISNCSCI) | `femoral` anterior cutaneous | medium |
 | `dermatome.L4` / `L5` | medial malleolus / dorsum of foot at the third MTP joint | `saphenous` / superficial `commonFibular` | medium |
 | `dermatome.S1` / `S2` / `S3` | lateral calcaneus / popliteal fossa / ischial tuberosity (posterior view) | `sural` / posterior femoral cutaneous / inferior cluneal | medium |
 
@@ -2669,7 +2673,7 @@ In primates some CST neurons contact hand motor neurons directly (Lemon 2008 [re
 | Anterior CST share (crosses segmentally) | ≈ 10 | % | H | medium | [G Corticospinal_tract L40] |
 | Connections crossing in the medulla (alternative estimate) | 75–80 | % | H | low | [G Corticospinal_tract L48] |
 | Model split: crossed lateral / uncrossed lateral / anterior | 87 / 3 / 10 | % | — | low | [model] from [G Corticospinal_tract L40] |
-| Betz-cell share of CST neurons | ≈ 5 | % | H | medium | [G Corticospinal_tract L38] |
+| Betz-cell share of CST axons | ≈ 3 (34,000 of ≈ 1.05 × 10⁶; the two adjacent rows) | % | H | low | computed from Lassek 1940 [unverified]; the capture's ≈ 5 % of cells projecting to the cord [G Corticospinal_tract L38] is not adopted (§5.17) |
 | Betz cells per hemisphere | ≈ 3.4 × 10⁴ | cells | H | low | Lassek 1940 [unverified] |
 | Fastest CST conduction (Betz axons) | > 70 | m/s | H | medium | [G Corticospinal_tract L38] (model CV → §4) |
 | CST myelination mostly complete | ≈ 2 | y | H | medium | [G Corticospinal_tract L30] |
@@ -2825,8 +2829,10 @@ Latencies run from stimulus or tap to EMG onset unless stated otherwise. With th
 | Acoustic startle threshold | > 80 | dB SPL | H | medium | [G Startle_response L43] |
 | Model startle probability | logistic, midpoint 90, scale 4.55 (10 % at 80, 90 % at 100) | dB SPL | — | low | [model] (A.6 marker ≈ 90) |
 | Startle EMG: masseter / orbicularis oculi | ≈ 14 / 20–40 | ms | H | medium | [G Startle_response L39] |
-| Startle onset: head / neck / shoulder | 60–120 / 75–121 / 100–121 | ms | H | medium | [G Startle_response L39] |
-| Startle onset: arms / legs | 125–195 / 145–395 | ms | H | medium | [G Startle_response L39] |
+| Startle latency, head / neck / shoulder (measure not stated in the capture, probably movement onset from high-speed film) | 60–120 / 75–121 / 100–121 | ms | H | low | [G Startle_response L39], which cites no primary source |
+| Startle latency, arms / legs (same measure) | 125–195 / 145–395 | ms | H | low | same |
+| Startle recruitment order (EMG) | orbicularis oculi at blink-reflex latency; sternocleidomastoid first of the generalised response; more caudal muscles progressively later; intrinsic hand muscles very long | — | H | medium | Brown et al. 1991, *Brain* 114:1891–1902 (abstract) |
+| Model recruitment delays (EMG onset), neck / shoulder / arm / leg | 68 / 85 / 115 / 150, plus reticulospinal conduction (§4) | ms | — | low | [model]; these sit in the lower half of each band above, and the simulated joint-angle onsets (elbow ≈ 199, knee ≈ 252 ms) lie above the arm and leg bands, which is expected if the bands are movement latencies |
 | Primary startle circuit, tone → hindleg EMG | 8 (< 10) | ms | R | medium | Davis et al. 1982; [G Startle_response L47] |
 | Long-latency stretch reflex, wrist/hand: M1 / M2 / M3 | 25–30 / 50–60 / 70–100 | ms | H | medium | [T]; Lee & Tatton 1975 [recalled]; Matthews 1991 [recalled] |
 | Plantar response (flexor normal; Babinski extensor) | sign only, no latency target | — | H | medium | [T] |
@@ -2913,7 +2919,7 @@ The same rule covers the C2 and C4 SCI presets (§6.15), where the assumption st
 
 The locomotor CPG is a labelled region, "locomotor CPG (inferred in humans)": a half-centre pair of flexor and extensor pools [G Central_pattern_generator L39]. The V0–V3 interneuron classes come from mouse and zebrafish genetics [G Central_pattern_generator L55]. No core scenario drives the locomotor CPG.
 
-The swallowing pattern generator lies in the medulla at the hypoglossal nucleus [G Central_pattern_generator L53]. Its oropharyngeal output (`nAmbMotor`, `n12`, `motV`, `n7m`) is somatic. §8 owns the oesophageal phase.
+The swallowing pattern generator is a medullary reticular network: a dorsal group in and around the NTS (`ntsGust`, `ntsVisc`) and a ventral group near the nucleus ambiguus (Jean 2001, *Physiol Rev* 81:929–969 [recalled]; textbook anatomy [T]). The capture's placement of the generator at the hypoglossal nucleus [G Central_pattern_generator L53] is not adopted (§5.17): that nucleus is a motor nucleus and receives the output. Its oropharyngeal output (`nAmbMotor`, `n12`, `motV`, `n7m`) is somatic. §8 owns the oesophageal phase.
 
 Shivering is driven centrally from the preoptic area via the dorsomedial hypothalamus and `rpa` to α motor neurons through bulbospinal paths. `shiver` (0–1) adds tonic drive to `emg` of `trapezius`, `erectorSpinae`, `deltoid`, `rectusAbdominis` and `quadriceps` [model]. §7 owns thresholds and heat-production gain, and §10 owns the fever set point. Shivering is shown as muscle glow without limb motion (A.8 #22). With `somatic` off there is no shivering, and fever relies on vasoconstriction and BAT (A.5).
 
@@ -2923,7 +2929,7 @@ The switch ramps `g.somatic` over 1.0 s of tH (A.5). Every edge whose `nets` hol
 
 - `portDC`, `portSTT` and `portTrig` go silent. Spinocerebellar input also enters at `portDC` unless §3 adds a port (§6.17).
 - Efference at `portCST`, `portRS` and `portCranMotor` is drawn as efference-only packets.
-- In brain-only mode the cord below the junction, including `n11` and `phrenicNuc`, is not simulated, so XI has no brain-only form and its commands end at `portCranMotor` (A.2 boundary rule). `spV`, drawn to z −70, lies wholly above the junction and is computed. The upper-cord part of the `BRAINSTEM` tube is drawn as today (A.2; `src/anatomy.js` L196). The cranial motor nuclei, `pnc` and the motor cortex compute central forms only.
+- In brain-only mode the cord below the junction, including `n11` and `phrenicNuc`, is not simulated, so XI has no brain-only form and its commands end at `portCranMotor` (A.2 boundary rule). `spV`, drawn to z −70, lies wholly above the junction and is computed. The upper-cord part of the `BRAINSTEM` tube is drawn as today (A.2; `BRAINSTEM`, `src/anatomy.js` L321–L324). The cranial motor nuclei, `pnc` and the motor cortex compute central forms only.
 
 | Function | All networks on | Somatic off | Autonomic off | Brain only |
 |---|---|---|---|---|
@@ -2990,14 +2996,14 @@ Level consequences follow [T] (ISNCSCI), H, medium; phrenic levels follow [G Phr
 | Central cord (cervical presets) | grey matter with \|ξ\| < 0.5 plus the anterior white commissure over lesion ± 1 segment; inner `cstLat` (\|ξ\| 0.50–0.68) at gain 0.3 [model] | arms weaker than legs; cape-like pain and temperature loss; sacral sparing | low (relies on contested lamination) | [T] |
 | Anterior cord | all η > −0.4 over 2 segments | motor, pain and temperature loss below; dorsal-column modalities spared | medium | [T] |
 
-| Phase | Time after injury | Picture | Tendon gain | Cutaneous / flexor gain | Babinski |
-|---|---|---|---|---|---|
-| 1 | 0–1 d | areflexia or hyporeflexia; flaccid | 0 | 0–0.1 | absent (delayed plantar response possible) |
-| 2 | 1–3 d | initial reflex return, cutaneous first | 0–0.2 | 0.3 | may appear |
-| 3 | 1–4 wk | initial hyperreflexia | 1.2 | 1.0 | present |
-| 4 | 1–12 mo | hyperreflexia, spasticity, clonus, clasp-knife | 2.5 | 1.5 | present |
+| Phase | Time after injury | Picture | Tendon gain | Cutaneous / flexor gain | Babinski | §6.11 HUD grade (gain × the 1.1 wake-alert factor) |
+|---|---|---|---|---|---|---|
+| 1 | 0–1 d | areflexia or hyporeflexia; flaccid | 0 | 0–0.1 | absent (delayed plantar response possible) | 0 |
+| 2 | 1–3 d | initial reflex return, cutaneous first | 0–0.2 | 0.3 | may appear | 0–1+ |
+| 3 | 1–4 wk | initial hyperreflexia | 1.8 | 1.2 | present | 3+ (1.98) |
+| 4 | 1–12 mo | hyperreflexia, spasticity, clonus, clasp-knife | 2.5 | 1.5 | present | 4+ with clonus (2.75) |
 
-Phase windows and descriptions follow Ditunno et al. 2004 (H, medium). Gains are [model] (—, low).
+Phase windows and descriptions follow Ditunno et al. 2004 (H, medium). Gains are [model] (—, low). The phase-3 tendon gain is set so that the displayed grade is the hyperreflexia the phase describes: the earlier 1.2 gave 1.32 after the state factor, which the §6.11 table grades 2+ (normal brisk).
 
 Named-nerve section is offered for:
 
@@ -3117,7 +3123,7 @@ Raw captures [G], folder `brain-system/raw/`:
 - Spinal_cord_injury (L35, L39, L57, L73, L74, L76); Spinothalamic_tract (L69); Dorsal_column_E2_80_93medial_lemniscus_pa (L48).
 - Central_pattern_generator (L39, L53, L55); Cranial_nerves (L40, L42, L52); Vagus_nerve (L42); Sensory_neuron (L61).
 
-Model checks, not sources: `C:\Users\User\AppData\Local\Temp\claude\C--Users-User-projects-galaxy\641a402d-336b-4b93-bc5d-2e26265edfd2\scratchpad\research-somatic-motor\checks-s6.mjs`. Graph path and explain outputs are in the same folder (`paths1.out`, `paths2.out`). Code references: `src/anatomy.js` L196 (`BRAINSTEM`) and `src/brain.js` L240 (`spinal` region).
+Model checks, not sources: `C:\Users\User\AppData\Local\Temp\claude\C--Users-User-projects-galaxy\641a402d-336b-4b93-bc5d-2e26265edfd2\scratchpad\research-somatic-motor\checks-s6.mjs`. Graph path and explain outputs are in the same folder (`paths1.out`, `paths2.out`). Code references: `src/anatomy.js` L321–L324 (`BRAINSTEM`) and `src/brain.js` L240 (`spinal` region).
 
 ---
 
@@ -3194,12 +3200,12 @@ The graph confirms three chains: the baroreflex (Baroreceptor → Solitary nucle
 
 ### 7.5. Resting state, heart rate and haemodynamics
 
-Without nervous input the SA node fires near 100 bpm. Resting HR is lower because vagal tone predominates. Vagal withdrawal alone lifts HR to about that value; higher rates need sympathetic or circulating catecholamine drive [G Heart_rate L68, L76]. The model uses a multiplicative law (Rosenblueth & Simeone 1934, D), which reproduces accentuated antagonism (Levy 1971, D):
+Without nervous input the SA node fires near 100 bpm (IHR, 101 at 30 y in the table below). Resting HR is lower because vagal tone predominates. Vagal withdrawal alone (atropine) gives ≈ 110 bpm, above the intrinsic rate, because resting sympathetic tone is still present (101 × (1 + 0.851 × 0.105) = 110, the §7.11 atropine row); higher rates need added sympathetic or circulating catecholamine drive [G Heart_rate L68, L76]. The model uses a multiplicative law (Rosenblueth & Simeone 1934, D), which reproduces accentuated antagonism (Levy 1971, D):
 
 `hr = IHR(age) · f_T(tCore) · (1 + k_s · s̃) / (1 + k_v · ṽ)`, `hp = 60 / hr`.
 
 - ṽ is `tone.vagCard` after its dead time and first-order lag.
-- s̃ is `tone.symCard` after its dead time and an asymmetric lag (τ_on rising, τ_off falling), plus the β1 action of plasma adrenaline: s̃_eff = s̃ + k_adr · (adrenaline/adrenaline_basal − 1) · g.autonomic · g.neuroendocrine (§9 basal; §11.13).
+- s̃ is `tone.symCard` after its dead time and an asymmetric lag (τ_on rising, τ_off falling), plus the β1 action of plasma adrenaline: s̃_eff = s̃ + k_adr · (adrenaline/adrenaline_basal − 1) · g.neuroendocrine (§9 basal; §11.13). The receptor effect of a blood-borne hormone carries only its own network (§11.3 rule 3): a denervated target still responds to circulating adrenaline, and is in fact hypersensitive to it. `g.autonomic` gates the **release** edge instead (§9.6, §11.11), so switching the autonomic network off still removes the adrenaline response, but over the pool's own decay (t½ ≈ 2.5 min) rather than within the 1 s gain ramp.
 - f_T = 1 + k_T · (tCore − 37) is the SA-node temperature factor. §10.6 owns k_T; the whole-body fever-tachycardia slope is a §10.9 check, not a driver. With autonomic off f_T acts on IHR alone (A.5), so HR still rises with core temperature.
 - The haemodynamic channels map to tones as s̃_R = mean(`tone.symMus`, `tone.symSpl`), s̃_ven = `tone.symSpl` and s̃_c = `tone.symCard`, each after its own dead time and lag (table below).
 
@@ -3257,6 +3263,7 @@ MSNA is emitted as bursts gated by the cardiac cycle. A burst follows a diastoli
 | `f_max`, all channels | 10 | spikes/s | — | low | [model] display scale |
 | Single vasoconstrictor unit at rest | ≈ 0.5 | spikes/s | H | low | Macefield et al. 1994 [recalled] |
 | MSNA burst incidence, young adult | ≈ 20–40 per 100 heartbeats (rises with age) | bursts | H | low | [T] |
+| Stress offset onto `fSymAdr` (§7.4 offsets) | 0.185 | tone per unit `u_stress` | — | low | [model] stage-4 calibration, src/sim/autonomic.js (`stress.symAdr`). With the endocrine module `tone.symAdr`/rest then peaks near ×4.1 (§9.4 drive), so the adrenaline pool reproduces the §9.10 and §12.11 input profile (×4.12 at 14 min, ≈ 181 pg/mL from 44): a model target and a high-end stressor excursion. The SAM channel is gated by `autonomic ∧ neuroendocrine` |
 
 Latency budget. Each dead time is split into two parts: conduction (packets on `EV` at §4 velocities over §2 lengths) and a local residue. A packet therefore arrives when its effect starts [model split]:
 
@@ -3339,6 +3346,7 @@ Model:
 | Carotid-only maximal gain, HR / MAP | ≈ −0.3 / ≈ −0.2 to −0.3 | bpm/mmHg; mmHg/mmHg | H | low | Potts et al. 1993 [unverified] |
 | Model: vagal BRS; carotid ±5 mmHg peak ΔHR / ΔMAP | 15.8 ms/mmHg; −0.27 / −0.22 | — | — | low | model check |
 | Baroreceptor afferent display scale | 2.5–48 | spikes/s | D | low | Ursino 1998 [recalled] |
+| SCI spinal tone ρ below a complete lesion (fraction of rest tone) by §6.15 phase 1 / 2 / 3 / 4: cardiac, muscle, splanchnic and the other channels; skin channels (vasoconstrictor, sudomotor) | 0.02 / 0.05 / 0.10 / 0.15; 0.04 / 0.10 / 0.20 / 0.30 | — | — | low | [model] stage-4 calibration, src/sim/autonomic.js (`spinalRest`), revised at stage 6 from 0.1 / 0.2 / 0.4 / 0.5 for every channel. ρ is the spinal and intrinsic vascular-tone fraction, not resting sympathetic firing (low or absent below a complete lesion on microneurography); the phase windows are borrowed from Ditunno et al. 2004 for timing only (SCI rule below) |
 
 Cardiopulmonary reflexes. Atrial stretch raises HR (Bainbridge) [G Heart_rate L86]. Unloading of low-pressure receptors constricts forearm vessels without HR change (Zoller et al. 1972 [recalled]). This is modelled as an `fSymMus` term proportional to the fall of `P_post` (not in the model check). Bezold–Jarisch is not modelled.
 
@@ -3381,7 +3389,8 @@ A mild novel stimulus gives an orienting deceleration of a few bpm (Graham & Cli
 
 Spinal cord injury rule (preset §6):
 - Bulbospinal drive to IML segments below the lesion is zero.
-- Segmental sympathetic reflexes below the lesion remain, scaled by the §6 spinal-shock phase (depressed early, exaggerated late; Ditunno et al. 2004).
+- Resting sympathetic tone below a complete cervical or high thoracic lesion is small: direct microneurography finds essentially no spontaneous muscle sympathetic activity below the lesion, and what remains is reflexly evoked and sparse. The model therefore keeps ≤ 0.15 of normal resting tone for the muscle and splanchnic channels and up to ≈ 0.3 for the skin channel, which laser-Doppler work suggests is less depressed (Stjernberg, Blumberg & Wallin 1986, *Brain* 109:695; Wallin et al. 2014; Bernjak et al. 2011; review *Front Physiol* 2012;3:215 — all [secondary, unverified], H).
+- Segmental sympathetic **reflexes** below the lesion remain and carry the whole late-phase change: the §6 spinal-shock phase scales reflex gain (depressed early, exaggerated late; Ditunno et al. 2004), not resting tone. The dysreflexia rule below and the not-yet-built SCI dysreflexia module read that gain. The recalled "roughly a third to a half of resting activity" (Mathias & Frankel) is a **plasma noradrenaline** figure, which has non-neural sources, and is not a nerve-activity target [recalled].
 - Cervical lesions lose all supraspinal cardiac sympathetic drive, which leaves vagal tone unopposed.
 - At or above T6, a stimulus below the lesion (`bladderFill`, `colorectalDistension`, noxious input) triggers a splanchnic surge. SBP rises ≥ +20 mmHg above baseline, with baroreflex bradycardia through the intact vagus (autonomic dysreflexia, V19; Krassioukov et al. 2009).
 
@@ -3443,7 +3452,7 @@ One preset at a time (A.5; semantics §11).
 | Preset | Edges removed | Expected result | Source |
 |---|---|---|---|
 | Heart transplant | cardiac efferents and afferents | HR = IHR(donor age) · f_T plus plasma catecholamines with β1 supersensitivity (adrenaline effect × 2 [model]); RSA and baroreflex HR ≈ 0; exercise chronotropy delayed by minutes; late reinnervation not modelled | Bengel et al. 2001; [T] |
-| Atropine | all muscarinic effects | HR ≈ 110; pupils dilated and unreactive; dry mouth; anhidrosis; no RSA | [T] |
+| Atropine (systemic, vagal-blockade dose ≈ 0.02–0.04 mg/kg) | all muscarinic effects | HR ≈ 110 (§7.5); pupil +1–2 mm with a sluggish but present light reflex; dry mouth; anhidrosis; no RSA. Topical (eye-drop) atropine, which gives a 7–8 mm fixed pupil, is a different exposure and is not offered | [T] |
 | Truncal vagotomy | subdiaphragmatic `cn10`: `fVagGut`, abdominal afferents, vagal limb of the inflammatory reflex (§10) | heart unaffected; less acid, impaired emptying, no vagal satiety (§8); option: highly selective (fundus and body) | [G Vagotomy L39, L40] |
 | T2–T3 sympathectomy | chain at T2–T3, chosen side | no palmar sweating or hand vasoconstriction; compensatory trunk sweating; stellate option adds Horner signs (miosis with dilation lag, mild ptosis, facial anhidrosis) | [G Sympathectomy L32]; signs [T] |
 | Pure autonomic failure | sympathetic gains × 0.1; `fVagCard` × 0.3; sudomotor × 0.1 | OH with near-fixed HR (ΔHR/ΔSBP < 0.5), postprandial hypotension, anhidrosis; supine-hypertension option; low supine noradrenaline (§9) | Freeman 2008; Norcliffe-Kaufmann et al. 2018; [G Dysautonomia L33] |
@@ -3547,7 +3556,7 @@ Inputs and tolerances are §12's.
   - There is no 0.1 Hz baroreflex resonance, so RSA is largest at 6 breaths/min only because the breaths are deeper.
   - A stronger vasomotor gain or a second-order sympathetic stage may fix these.
 - w_cs, channel gains, resting tones and `f_max` are calibrated, not measured. Human cardiac sympathetic and vagal firing rates are unknown.
-- The pupil law (2.63, 1.2), the denervated 5.0 mm, atropine mydriasis (≈ 5.3 mm in the model against 7–8 mm clinically) and age effects need fitting to pupillometry data.
+- The pupil law (2.63, 1.2), the denervated 5.0 mm and age effects need fitting to pupillometry data. The model's atropine mydriasis (≈ 5.3 mm) is now compared with the systemic vagal-blockade dose (+1–2 mm over the resting diameter, §7.11), not with the 7–8 mm fixed pupil of topical atropine; a source for the systemic figure is still wanted.
 - Thermal thresholds differ between studies (interthreshold 0.2 °C in Lopez et al. 1994, 0.7 °C in Komatsu et al. 2005). BAT heat output, shivering gain and ambient defaults are model choices.
 - Deafferented commands with autonomic off: either show the rising `rvlm` command or hold NTS input at rest to avoid a stress-like tint. Decision needed with §11 and §13.
 - The 50 ms `loudSound` may evoke a weaker defence response than longer stimuli. The size of postprandial hyperaemia (§8) decides whether V18 emerges.
@@ -3734,7 +3743,8 @@ Solids empty after a lag while the antrum grinds them into particles of ≈ 1–
 | Trituration k₁; emptying k₂ | A/40; A·G/12 | min⁻¹ | — | low | [model] tuned to Tougas et al. 2000 |
 | A | g.enteric·(0.5 + 0.5·g.autonomic·min(v_n, 1.5))·(1 − 0.4·S)·m_sick (§10) | — | — | low | [model]; Minami & McCallum 1984 |
 | r_set: mixed meal; nutrient liquid | min(2.0, 1.2·(E₀/255 kcal)^0.5); 2.0 | kcal/min | —; H | low; medium | [model]; Brener, Hendrix & McHugh 1983 [unverified] |
-| Pyloric brake | G = G_pyl/(1 + B·(r̃/r_set)⁴), B = 0.5·g.neuroendocrine + 0.3·g.autonomic + 0.2·g.enteric, r̃ low-passed with τ 3 min; G_pyl 1 (enteric on), 0.05 (off) | — | — | low | [model] |
+| Pyloric brake | G = G_pyl/(1 + `brakeGain`·B·(r̃/r_set)⁴), `brakeGain` 8, B = 0.5·g.neuroendocrine + 0.3·g.autonomic + 0.2·g.enteric (= 1 with all networks on), r̃ low-passed with τ 3 min; G_pyl 1 (enteric on), 0.05 (off). Steady delivery is then ≈ 1.0 × r_set | — | — | low | [model] re-tuned to Tougas et al. 2000 and the §8.13 rows |
+| Why `brakeGain` > 1 | The bare (r̃/r_set)⁴ form halves G at 0.5·r_set, which is too soft against an unbraked load of ≈ 10–18 kcal/min at peak: with `brakeGain` 1 steady delivery overshoots r_set by 7–36 % (2.50 kcal/min on the 600 kcal mixed meal), the stomach clears in 3.3 h instead of 4–6 h, and 2 h retention on the 255 kcal solid meal is 25 %, outside the 30–60 % §8.18 window. `brakeGain` 8 moves the half-conductance point to ≈ r_set: 1.90 kcal/min, 4.6 h, retention 74 / 46 / 3 %, and it stays inside all three windows for A 0.9–1.25. Gains of 4–8 all pass; 16 reaches the §8.13 rate but puts 4 h retention at the 10–15 % edge | — | — | low | editor re-run of the §8.15 equations (model check, not a source) |
 | Water t½ without accommodation; meal volume | ≈ 8 min; 1.2 mL/kcal | — | — | low | [model] |
 | Small intestine: fed and fasting velocity; dispersion; τ_abs | 1.25, 0.25 cm/min; 1.0 cm²/min; 45 min | — | — | low | [model] tuned to Sarosiek et al. 2010 |
 | Ileal brake | velocity − 35 % × g.neuroendocrine while distal nutrient is present | — | — | low | [model] |
@@ -3772,7 +3782,7 @@ Every route below was traced with `graphify path`. The graph's edges are textual
 | Vagal afferent share: all fibres; at the diaphragm; model | 80–90 %; ≈ 90 % (≈ 9 : 1); 0.8 (0.75–0.9) | — | H; C; — | medium; low; medium | [G Vagus_nerve L48]; Agostoni et al. 1957 [recalled]; [model] |
 | Abdominal vagal axons | predominantly unmyelinated | — | R | medium | Prechtl & Powley 1990 [recalled] |
 | Spinal entry: oesophagus; stomach; small intestine; proximal colon; distal colon; rectum | T1–T6; T6–T9; T9–T11; T10–T12; L1–L2 (plus S2–S4); S2–S4 | segment | H | low | [T]; referral → §6 |
-| Visceral share of spinal primary afferents | ≈ 1.5–2.5 | % | C | low | Jänig & Morrison 1986 [recalled] |
+| Visceral share of DRG neurons: in the segments of entry (T9–L2, S2–S4); averaged over all segments | ≤ 10; ≈ 2–3 | % | C | low | Cervero et al. 1984 and Jänig & Morrison 1986 as summarised in reviews [secondary, unverified] |
 
 Vagal endings come in three types:
 - intraganglionic laminar endings (IGLEs) in the myenteric ganglia sense tension (Zagorodnyuk & Brookes 2000, GP; Berthoud & Powley 1992, R);
@@ -3866,9 +3876,9 @@ For the `meal` scenario (inputs §12, all networks on), the expected gut readout
 
 | Quantity (`meal` model output) | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|
-| Linear `emptyRate` (r_set at 600 kcal) | ≈ 1.8 | kcal/min | — | low | [model] (§8.8) |
-| Chyme head at the caecum (target 4.0–5.9 h, §8.8) | ≈ 4.4 | h | — | low | [model] |
-| Stomach below 15 kcal; MMC return | ≈ 6 (expected 4–6 [T]); ≈ 6–7 | h | — | low | [model] |
+| Mean `emptyRate` over 60–180 min (r_set 1.84 at 600 kcal, §8.8) | ≈ 1.9 (≈ 1.0 × r_set) | kcal/min | — | low | [model] (§8.8, `brakeGain` 8) |
+| Chyme head at the caecum | ≈ 4.4 from meal start, pre-retune; to be re-run with `brakeGain` 8, which delays gastric exit | h | — | low | [model]. Target: the §8.8 capsule figure 4.0–5.9 h is small-bowel transit measured **from gastric exit**, so from meal start the head is expected at the gastric lag (≈ 0.5 h) plus that transit, ≈ 4.5–6.5 h. Capsule transit also includes waiting for phase III, so it is an indirect target for a nutrient front; a breath-test nutrient-front target would be better |
+| Stomach below 15 kcal; MMC return | ≈ 4.6 (expected 4–6 [T]); ≈ 5–6 | h | — | low | [model] (`brakeGain` 8) |
 | `satiety`; `hunger` by meal end | > 0.7; < 0.2 | 0–1 | — | low | [model] (§8.14) |
 
 ### 8.14. Gut–brain routes and central integration
@@ -3936,7 +3946,7 @@ colon:   d colon[k]/dt = in_k − κ_k·colon[k]/τ_c;  HAPC as seeded Poisson e
 | Motility index | net aboral small-intestinal transit velocity, % of intact fed value | % | — | low | [model] |
 | GI striding | 1 s strides when every `ipan[i]` < 0.05 and no sphincter command or MMC window is active | — | — | low | [model]; §11 decides |
 | Field cost, 250 cells; at kh 900 with striding | ≈ 11 µs per evaluation (Node); ≈ 0.17 ms/frame at 60 fps | — | — | high; medium | prototype; computed |
-| Prototype intact: solids 1 / 2 / 4 h; marker 5 % in colon, 50 % in colon, 50 % expelled | 67 / 32 / 0 %; 4.5, 6.8, 36.5 h | — | — | low | `gut_proto.mjs` (model output) |
+| Prototype intact: solids 1 / 2 / 4 h; marker 5 % in colon, 50 % in colon, 50 % expelled | 74 / 46 / 3 %; 4.5, 6.8, 36.5 h (marker rows pre-retune, to be re-run) | — | — | low | `gut_proto.mjs`, solids recomputed at `brakeGain` 8 (§8.8); the earlier 67 / 32 / 0 % came from a softer brake than the one written in §8.8 |
 | Prototype vagus off: water at 30 min (intact 25 %), solids; enteric off; neuroendocrine off (solids, earlier set point) | 8 %, 76 / 47 / 8 %; no emptying or transit; 59 / 19 / 0 % | — | — | low | `gut_proto.mjs` |
 
 The module reads the §7 channels, plasma adrenaline (small β2 inhibition, [model], low), `sickness.*` (§10), food cues, `arousalState` and swallow commands. Its outputs go to the ports and readers listed in the §11 coupling table. The display uploads float textures of f(s), λ(s), `gutX` and `gutC`.
@@ -4009,7 +4019,7 @@ The manual panel offers three gut modes (A.6); §5 owns their ranges and thresho
 | 4 | Fasting, 50 cycles | median period 110 ± 15 min; phase III 5–10 min; duodenal front 3.5–5.5 cm/min | §8.6 |
 | 5 | Enteric off; autonomic off; neuroendocrine off | Enteric off: emptying < 5 % of intact at 4 h, sphincters closed, slow waves present. Autonomic off: small-bowel MMC present, antral-origin fraction < 0.2, no cephalic phase, water t½ shorter, 4 h solid retention higher. Neuroendocrine off: hormones basal, 1 h solid retention lower. | §8.16 |
 | 6 | `tone.fSymGut` step, 30 s | antral `gutC` amplitude falls by 40 % or more within 10 s | §8.5 |
-| 7 | Duodenal lipid 30 kcal | first vagal packet at `ntsVisc` ≤ 1.5 s; `cck` peak at 10–30 min | §8.14; §8.10 |
+| 7 | Duodenal lipid 30 kcal | first sustained rise of `vagChem` above its resting rate ≥ 20 s after the lipid reaches s 55–80, time to peak 60–120 s (§8.14: 72.7 ± 20.9 s for EEC stimulation, 92.8 s for 300 mM sucrose); `cck` peak at 10–30 min. The ≤ 1.5 s packet latency is kept only as the §8.9 conduction check for a packet already in flight: `vagChem` fires at 2 Hz at fasting rest, so a "first packet" inside 1.5 s is true whatever the stimulus and would invite the sub-second whole-animal reading §8.20 warns against | §8.14; §8.10 |
 | 8 | `meal` | §8.13 readouts inside their windows | §8.13 |
 | 9 | Colorectal distension 50 mL | IAS relaxes with enteric on, whatever the autonomic state; not with enteric off | §8.7 |
 | 10 | Display | no per-cycle rendering above the §13 limit for kh 0.005–3,600 | §13 |
@@ -4146,8 +4156,8 @@ The MR term is near saturation at basal and is absorbed into the normalisation; 
 | Adrenaline → ACTH gain e_E (§9.3 positive limb) | 0.2 | per unit of the adrenaline ratio | — | low | [model] |
 | Circadian gain a_C; awakening gain a_CAR | 0.6; 1.0 | — | — | low | [model] |
 | `k_CRH` removal | 0.1732 | 1/min (t½ ≈ 4.0 min, arithmetic) | H | low | Andersen, Vinther & Ottesen 2013 via arXiv:2311.04570 Table 2 [secondary, unverified] |
-| `k_ACTH` removal | 0.0315 | 1/min (t½ ≈ 22 min, arithmetic) | H | low | as above [secondary, unverified] |
-| `k_C` plasma cortisol removal | 0.0105 | 1/min (t½ ≈ 66 min, arithmetic) | H | low | as above [secondary, unverified]; consistent with a 60–90 min plasma t½ [T] |
+| `k_ACTH` removal | 0.0315 (calibration target 0.046–0.069) | 1/min (t½ ≈ 22 min, arithmetic; target t½ 10–15 min) | H | low | as above [secondary, unverified]. The 22 min is probably a mis-assignment: deconvolution in healthy men gives ACTH t½ 15 ± 1.2 and 17 ± 0.6 min, and the same insulin study reports ACTH 17, β-endorphin 22 and cortisol 65 min, so the tabulation's pair (22, 66) matches cortisol exactly and matches β-endorphin's value for ACTH. Shortening it is one half of the §9.10 timing calibration and needs the Hopf threshold re-run |
+| `k_C` plasma cortisol removal | 0.0105 | 1/min (t½ ≈ 66 min, arithmetic) | H | low | as above [secondary, unverified]; **well sourced**: deconvolution in healthy men gives cortisol t½ 65 ± 5.3 min, inside the 60–90 min plasma range [T]. This row is therefore not the free parameter the timing fix may change |
 | `k_S` fast feedback-signal clearance | 0.069 (t½ ≈ 10 min) | 1/min | — | low | [model], chosen so the pulse period matches §9.5 |
 | `τ_adrenal` transport + biosynthesis delay | 10 (9.4–15) | min | R (model parameter) | low | Walker, Terry & Lightman 2010 [unverified, via Walker et al. 2012]; delays used in a rat model, not a measured human quantity |
 | ACTH latency after CRH challenge | 10 (significant, p < 0.005) | min | R | high | Walker et al. 2012 |
@@ -4241,8 +4251,8 @@ Vasopressin has two roles the model must keep separate or it will double-count. 
 | AVP plasma protein binding | 1 | % | H | high | [G Vasopressin L45] |
 | Oxytocin elimination t½ | 1–6 (i.v.) | min | H | high | [G Oxytocin L48] |
 | Oxytocin plasma protein binding | 30 | % | H | high | [G Oxytocin L46] |
-| AVP osmotic threshold | ≈ 280 | mOsm/kg | H | low | Robertson, Shelton & Athar 1976 [secondary, unverified] |
-| AVP–osmolality relation | pAVP ≈ 0.63 · (Posm − 284) | pg/mL | H | low | Baylis & Robertson [secondary, unverified] |
+| AVP osmotic threshold | ≈ 280–284 (fit-dependent: 280 in the review tabulation, 284 as the intercept of the line below) | mOsm/kg | H | low | Robertson, Shelton & Athar 1976; Schrier & Goldberg 1980 [secondary, unverified] |
+| AVP–osmolality relation | pAVP ≈ 0.63 · (Posm − 284), a linear approximation; pooled data are better described by an exponential | pg/mL | H | low | Baylis & Robertson, normal subjects (r = +0.80) [secondary, unverified] |
 | AVP baroreceptor recruitment | steep rise only for large (≈ ≥ 10 %) falls in volume or pressure | — | H | low | [T] (§9.11) |
 | `raas` activation / de-activation τ | 2 / 15 | min | — | low | [model], from component kinetics [T] |
 | Renin / angiotensin II / aldosterone t½ | ≈ 15 / ≈ 1 / ≈ 20 | min | H | low | [T] |
@@ -4273,7 +4283,7 @@ Blood-borne peptides do not reach brain tissue anywhere. Interleukins and signal
 | Lung (pulmonary capillary) → carotid body transit, the peripheral chemoreflex dead time (§7.9) | ≈ 5 (4–8) | s | H | low | [T] (circulation-time tests: arm-to-tongue ≈ 9–16 s minus arm-to-lung ≈ 4–8 s) |
 | One complete circulation at rest | ≈ 60 | s | H | low | [T] |
 
-The GABA-A rows matter beyond pharmacology: they are the one documented route by which this slow network can modulate the fast simulation rather than only slow set points, and the biphasic shape means the sign of that modulation changes between resting and stress concentrations. The coupling is implemented as a small, labelled gain on inhibitory synaptic strength in §4's terms, off by default.
+The GABA-A rows matter beyond pharmacology: they are the one documented route by which this slow network can modulate the fast simulation rather than only slow set points. In vitro, cortisol modulates GABA-A biphasically (potentiation at 1–10 pM, inhibition at 10–1,000 nM), but physiological **free** cortisol is ≈ 5–50 nM (total 100–500 nM, of which 5–10 % is free; the §9.9 basal row gives 12 µg/dL ≈ 330 nM total), so it lies in the inhibitory range both at rest and under stress. The optional gain is therefore negative-only and grows with cortisol; the picomolar potentiation is not reachable in vivo and the sign does not flip. The coupling is implemented as a small, labelled gain on inhibitory synaptic strength in §4's terms, off by default [R, in vitro; low].
 
 Transport delays are short compared with the kinetics of §9.4 and are included only so that the `pituitaryAnt` → `adrenalCortex` edge reads as a long edge down the body (§13). The envelope's shape is set by `τ_adrenal`, `k_S` and `k_C`, never by transport. Reusing the project's existing diffuse-modulator machinery for hormone fields is the right call rather than writing a second system — the dopamine model is already specified as a diffuse, volume-transmitted modulator (DOPAMINE.md §3.4, §3.5) — with two changes: the timescale is two to three orders of magnitude slower, and entry is restricted to the windows above.
 
@@ -4329,12 +4339,16 @@ The model column is the §9.4 defaults (n 6, e_E 0.2, G_s 6, τ_adrenal 10 min) 
 | `neuroendocrine` off | all hormone pools at basal, tagged; no RAAS rescue; §10 cytokines higher | qualitative | — | §12 | — | — |
 | Orgasm scenario, all networks on | traces identical to the legacy path of the same commit (B.13); DOPAMINE.md §9.6 after the §9.8 port | regression | — | §11, §12 | — | — |
 
-The three timing failures share one cause: the displayed plasma pool clears with t½ ≈ 66 min (`k_C`), so any CRH-driven transient peaks ≈ 60–75 min after its drive. A free/total cortisol split, or a sourced faster effective clearance, is the open calibration question (§9.11; §12.22).
+The timing failures come from the **delay chain**, not from `k_C` alone. Peak time ≈ `τ_adrenal` + the `S` lag (1/`k_S`) + the ACTH lag, and with the current constants `S` itself already peaks at 40 min, the upper edge of the 21–40 min target; a first-order pool cannot peak before its input. A `k_C` sweep bears this out: at t½ 66 / 35 / 17 / 9 min the cortisol peak sits at 73 / 67 / 59 / 53 min, so even a nine-minute pool leaves the peak 13 min late, and the floor of that sweep is ≈ 40 min. Speeding `k_C` also makes the 41–60 min recovery row *worse*, because the amplitude grows: above ×1.2 until 182 min at t½ 66 min, but until 235 min at 17 min and 393 min at 9 min. And "a sourced faster effective clearance" is not available — the deconvolution value is 65 ± 5.3 min (§9.4), i.e. the current `k_C` is the well-sourced constant.
+
+The open calibration is therefore the chain: ACTH t½ ≈ 10–15 min (`k_ACTH` 0.046–0.069/min; the deconvolution value in healthy men is ≈ 15 min), a human adrenal lag of 3–5 min (the 10 min is a rat model parameter, §9.4), `k_S` ≥ 0.14/min, and a plasma pool kept at the sourced t½ 60–90 min but fed by a faster secretion term. A check run with `τ_adrenal` 5 min, `k_S` 0.14, `k_ACTH` 0.07 and `k_C` 0.03 peaks at 35–37 min and is back below ×1.2 by 89 min; `τ_adrenal` 3 min with `k_S` 0.2 gives 27–30 min. §12.11's Variant E reaches 37.2 min by the same route. The Hopf threshold (§9.4) must be re-run after any of these changes, and a free/total split alone will not fix the timing.
+
+The awakening row is a different failure. It is an **amplitude** failure, not a delay-chain failure: the proposed faster chain still gives only ≈ +10 % at ≈ 71 min against the +50–75 % target, so `a_CAR` and the GR feedback gain are what that row calibrates (§9.11; §12.22).
 
 ### 9.11. Open questions
 
 - The fast feedback signal `S` and its clearance `k_S` = 0.069/min are a model choice forced by the stability check of §9.4: with the plasma pool as the feedback variable the threshold period is ≈ 100 min, not the observed 65–75 min. With feedback at both sites and K at basal, pulses need n ≥ 5; the default n = 6 departs from the tabulated 4. Either a sourced free-cortisol or adrenal-output time constant is needed, or the delay model of Walker, Terry & Lightman 2010 must be ported in its own variables rather than reconstructed.
-- The defaults fail the human stressor timing, the post-stressor recovery and the awakening rise (§9.10), all through the slow plasma pool; and constant strong drive never reaches the rat "saturated plateau", because the equations have no secretion ceiling. A saturating ACTH or cortisol secretion term and a free/total split are the candidate fixes.
+- The defaults fail the human stressor timing and the post-stressor recovery through the **delay chain** (`τ_adrenal`, `k_S`, `k_ACTH`), not through the plasma pool, whose clearance is the best-sourced constant in the block (§9.10); the awakening rise fails on amplitude instead (`a_CAR`, GR gain). Constant strong drive never reaches the rat "saturated plateau", because the equations have no secretion ceiling. A faster delay chain, a saturating ACTH or cortisol secretion term and a free/total split are the candidate fixes, and each needs the Hopf threshold re-run.
 - `τ_adrenal` should be cross-checked against human ACTH → cortisol cross-correlation lags before its confidence is raised, and the first two §9.10 latency rows should be re-sourced from human TSST plasma ACTH and cortisol time courses.
 - e_E, G_s, a_C and a_CAR are [model] values without calibration data.
 - The human-fitted parameter block (saturation constants, Hill coefficients 4/3/3, feedback gains 0.160 / 0.5 / 0.304, five fitted stimulation rates) comes from a secondary review tabulation whose unit column is internally inconsistent, and I could not extract that table's text to verify it. Decide: keep as low-confidence defaults, or obtain Andersen, Vinther & Ottesen 2013 and the Caruso source and verify before the values enter the code.
@@ -4438,7 +4452,7 @@ dlps/dt   = −lps / τ_LPS                                   (lps = dose at t0,
 dmac/dt   = (lps(t − δ_tx) − mac) / τ_mac                  (macrophage activation; tissue, runs in body mode)
 dtnf/dt   = (a_TNF · mac · brake_C · brake_V − tnf) / τ_TNF
 dil6/dt   = (a_IL6 · tnf · brake_C² − il6) / τ_IL6
-dil10/dt  = (a_IL10 · tnf · (1 + c_10 · max(0, cortisolRel − 1)) − il10) / τ_IL10   (type 2; not braked by ACh)
+dil10/dt  = (a_IL10 · tnf(t − δ_IL10) · (1 + c_10 · max(0, cortisolRel − 1)) − il10) / τ_IL10   (type 2; not braked by ACh)
 dpge2/dt  = (g.neuroimmune · il6 − pge2) / τ_PGE
 brake_C   = 1 / (1 + b_C · max(0, cortisolRel − 1) · g.neuroendocrine · g.neuroimmune)   (Th1/Th2 scalar, §10.5)
 vagAI     = g.autonomic · g.neuroimmune · pge2/(pge2 + K_V) · (1 + 0.1 · g.enteric) + vns   (vns: slider 0–1, §10.4)
@@ -4449,12 +4463,15 @@ tSet      = 37 + min(4.5, ΔT_max · pge2 / (pge2 + K_P))    (§10.6; the 4.5 ca
 | Quantity | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|
 | τ_LPS; transcription delay δ_tx; τ_mac | 600; 2,100; 900 | s | — | low | [model] |
-| τ_TNF; τ_IL6; τ_IL10; τ_PGE | 1,500; 4,800; 3,600; 2,700 | s | — | low | [model]; τ_IL10 set for the 3 h IL-10 peak, not run in the prototype |
-| a_TNF; a_IL6; a_IL10; c_10 | 14; 2.2; 1.0; 1.0 | model units | — | low | [model]; a_IL10 and c_10 not run in the prototype |
+| τ_TNF; τ_IL6; τ_IL10; τ_PGE | 1,500; 4,800; 3,600; 2,700 | s | — | low | [model] |
+| IL-10 input delay δ_IL10 (extra transcription and secretion delay) | 4,000–5,000 | s | — | low | [model]. A first-order low-pass of `tnf` **cannot** put the IL-10 peak at 3 h: the peak time of such a filter is gain-independent, so `a_IL10` and `c_10` cannot move it, and τ_IL10 alone gives 1.72 h at 3,600 s, 1.84 h at 5,400 s, 1.94 h at 7,200 s and only 2.60 h at 43,200 s, while flattening the trace. The cortisol term is impotent too, because `tnf` has decayed to ≈ 0.5 % of peak by the time `cortisolRel` peaks at ≈ 3.3 h. An input delay fixes it: δ_IL10 4,000 s gives a peak at 2.83 h and 5,000 s gives 3.10 h, inside the §10.9 target of 3 ± 1 h. Record the simulated peak rather than asserting 3 h |
+| a_TNF; a_IL6; a_IL10; c_10 | 14; 2.2; 1.0; 1.0 | model units | — | low | [model]; a_IL10, c_10 and δ_IL10 are still not run in the prototype (§10.10) |
 | b_C (glucocorticoid brake gain) | 1.5 | per unit of the cortisol ratio above basal | — | low | [model] |
 | K_V (vagal immune afferent half-activation) | 0.4 | PGE2 units | — | low | [model] |
 
 The chain is feed-forward from a decaying source, so it stays bounded with both brakes removed (§10.9). The prototype ran this block with the earlier single-pool HPA kernel and an additive HR law; §12.12 records which numbers depend on that.
+
+Unbraked, with unit gain, the peaks of this block fall at TNF 1.10 h, IL-6 1.80 h, PGE2 2.55 h and IL-10 1.72 h. The TNF figure sits below its 1.5–2 h target (§10.9) and survives only on the ± 0.5 h tolerance, and because `brake_C` grows with the later cortisol rise the brakes move that peak *earlier*, not later: τ_TNF and τ_mac must therefore be raised together with any brake tuning (τ_TNF 3,000 s with τ_mac 2,400 s gives 1.53 h). a_TNF, τ_mac and the brakes cannot be tuned independently.
 
 Cytokines also depolarise sensory neurons directly, which means the infection scenario can legitimately drive the same nociceptive pathway as a manual pain stimulus (§5) rather than needing a separate "malaise" channel. Three convergence mechanisms are named: IL-1β binding the neural receptor IL-1R produces an electrical impulse that creates the sensation of pain; invading bacteria may simultaneously activate inflammasomes and depolarise sensory neurons through hemolysins, which create pores causing potassium efflux and calcium influx; and ATP released from damaged cells binds P2X7 on macrophages and P2X3 on nociceptors together, coupling an action potential to inflammasome activation, with coupled neuropeptide release (substance P, serotonin) amplifying inflammation [G Neuroimmune_system L53, L55, L57, L59] (mouse and in vitro; medium confidence).
 
@@ -4484,13 +4501,14 @@ A reflex whose afferent arc and splenic cholinergic endpoint are established; th
 
 The efferent arc has a clean molecular endpoint, which gives the model a single cut point. The molecular basis of cytokine-inhibiting signals requires acetylcholine and the α7 nicotinic receptor expressed on cytokine-producing cells; the release of acetylcholine in the spleen suppresses the production of TNF and other cytokines that cause damaging inflammation; signalling in the efferent arc, termed the cholinergic anti-inflammatory pathway, provides a regulatory check on the innate immune response to invasion and injury; and the action potentials arising in the vagus are transmitted to the spleen, where a subset of specialised T cells is activated to secrete acetylcholine [G Inflammatory_reflex L31]. The relay is neural down to the splenic nerve and cellular inside the spleen — the graph carries exactly that chain (`Spleen` → `Acetylcholine-Synthesizing T Cells` → `Acetylcholine` → `Tumor Necrosis Factor (TNF)`).
 
-Drawn route, marked **contested** in the HUD per A.8 decision 16: `dmv` → `cn10.para` → `coeliac` → `splenicNerve` → `splenicTcells` (ChAT⁺) → α7nAChR on `macrophages`. The contest is specific and worth stating accurately, because the HUD label depends on it: electrophysiology in anaesthetised rats found no effect of vagal efferent stimulation on splenic nerve activity, nor on 15 single splenic-projecting neurons recorded in the suprarenal ganglion, the authors concluding that vagal efferent neurons in the rat neither synapse with splenic sympathetic neurons nor drive their ongoing activity (Bratton et al. 2012, *Exp Physiol* 97:1180–1185, R). A later study reported that vagotomy did not change activity in either nerve. The dispute is about the synaptic link from vagus to splenic sympathetic neurons, not about the splenic cholinergic endpoint, which is independently established — and both versions sit under `autonomic ∧ neuroimmune`, so no switch behaviour depends on which is right.
+Drawn route, marked **contested** in the HUD per A.8 decision 16: `dmv` → `cn10.para` → `coeliac` → `splenicNerve` → `splenicTcells` (ChAT⁺) → α7nAChR on `macrophages`. The contest is specific and worth stating accurately, because the HUD label depends on it: electrophysiology in anaesthetised rats found no effect of vagal efferent stimulation on splenic nerve activity, nor on 15 single splenic-projecting neurons recorded in the suprarenal ganglion, the authors concluding that vagal efferent neurons in the rat neither synapse with splenic sympathetic neurons nor drive their ongoing activity (Bratton et al. 2012, *Exp Physiol* 97:1180–1185, R). A later study reported that vagotomy did not change activity in either nerve. The dispute covers **both** the vagus-to-splenic-sympathetic synapse **and** the identity and site of the efferent endpoint: critical reviews conclude that the anti-inflammatory effect of vagal stimulation depends on noradrenaline-containing splenic terminals, that α7-containing nicotinic receptors are essential but their critical location is uncertain and is more likely on splenic sympathetic nerve terminals than on macrophages, that ACh-synthesising T lymphocytes are a non-neural link, and — explicitly — that this pathway is not the efferent arm of the inflammatory reflex response to endotoxaemia (Martelli, McKinley & McAllen 2014, *Auton Neurosci* 182:65–69, R; McAllen et al. 2015, *Arthritis Res Ther*, which rates the evidence inconclusive and implicates an alternative sympathetic pathway). α7-independent vagal effects have been reported in knockout mice (Vida et al., via Komegae et al. 2018), and Simon et al. 2023 (*Front Neurosci*) attributes the effect mainly to noradrenaline at β2-adrenergic receptors on splenic macrophages and finds CD4⁺ T cells dispensable after antibody depletion, a direct challenge to the ChAT⁺ T-cell relay. The in-vivo endpoint and the relay are therefore contested, not established; the in-vitro ACh effect on human macrophages is a separate, solid cell-culture fact. Both versions sit under `autonomic ∧ neuroimmune`, so no switch behaviour depends on which is right, and the HUD's **contested** label is correct for the whole route.
 
 | Element | Detail | Species | Conf. | Source |
 |---|---|---|---|---|
 | Afferent arc | sensory arc activated by cytokines | R, Ms | high | [G Inflammatory_reflex L25]; Tracey 2002 |
-| Efferent endpoint | ACh at α7nAChR on cytokine-producing cells | Ms | high | [G Inflammatory_reflex L31]; Borovikova et al. 2000 |
-| Splenic relay | ACh-synthesising T cells | Ms | high | Rosas-Ballina et al. 2011 |
+| Efferent endpoint (in vivo) | ACh at α7nAChR on cytokine-producing cells; the receptor's critical location is contested (splenic sympathetic terminals rather than macrophages) | Ms | medium | [G Inflammatory_reflex L31]; Borovikova et al. 2000; contested by Martelli, McKinley & McAllen 2014 and McAllen et al. 2015 |
+| Splenic relay | ACh-synthesising T cells; proposed as a non-neural link, and reported dispensable after CD4⁺ depletion | Ms | medium | Rosas-Ballina et al. 2011; contested by Martelli, McKinley & McAllen 2014 and Simon et al. 2023 |
+| Alternative efferent account | noradrenaline from splenic sympathetic terminals acting at β2-adrenergic receptors on splenic macrophages | R, Ms | medium | Martelli, McKinley & McAllen 2014; McAllen et al. 2015; Simon et al. 2023 |
 | Splenic nerve necessity | required for cholinergic anti-inflammatory control of TNF in endotoxaemia | Ms | high | Rosas-Ballina et al. 2008 [G Inflammatory_reflex L50] |
 | Vagus → splenic sympathetic link | no synaptic connection found; ongoing activity not driven | R | high (for the negative result) | Bratton et al. 2012 |
 | ACh effect in vitro | reduces TNF and other proinflammatory cytokine release from endotoxin-stimulated human macrophages; does **not** reduce IL-10 | H (cells) | high | Borovikova et al. 2000 |
@@ -4593,7 +4611,7 @@ Interventions remove nodes or edges; switches remove systems (A.8 decision 4). B
 | Truncal vagotomy | `cn10` trunk including the coeliac/hepatic branch | double-sided: the fast afferent route is lost, so fever onset, sickness behaviour and HPA activation are **delayed to the slow humoral route** rather than abolished (and at a low challenge, strongly blunted); the efferent brake is lost, so TNF runs higher and longer | medium | [G Sickness_behavior L55]; Romanovsky et al. 1997, R; Rosas-Ballina et al. 2008, 2011 |
 | VNS (slider) | — (adds drive) | drives the efferent arc directly; TNF falls, IL-10 unchanged | medium | Borovikova et al. 2000; Koopman et al. 2016 |
 
-Vagotomy's granularity matters and the capture defines it. A plain vagotomy eliminates afferent and parasympathetic innervation of the stomach and the left side of the transverse colon; truncal vagotomy includes division of the main trunk and denervation of the pylorus, requires a pyloric drainage procedure, and also denervates the liver, biliary tree, pancreas, and small and large bowel; highly selective (proximal gastric) vagotomy denervates only the fundus and body of the stomach, preserves the antrum and pylorus, needs no drainage procedure, and does not denervate the liver, biliary tree, pancreas or bowel [G Vagotomy L31, L39, L40]. The intervention therefore exposes at least truncal — which loses the coeliac route to the splenic nerve, so the inflammatory reflex fails — and selective, which does not. The gut consequences belong to §8; what this section reads is the §10.4 route.
+Vagotomy's granularity matters and the capture defines it. A plain vagotomy eliminates afferent and parasympathetic innervation of the stomach (and, by the capture's wording, of "the left side of the transverse colon"; the model's vagal territory ends at the Cannon–Böhm point, so the distal third is sacral and unaffected — §8.2, §8.19); truncal vagotomy includes division of the main trunk and denervation of the pylorus, requires a pyloric drainage procedure, and also denervates the liver, biliary tree, pancreas, and small and large bowel; highly selective (proximal gastric) vagotomy denervates only the fundus and body of the stomach, preserves the antrum and pylorus, needs no drainage procedure, and does not denervate the liver, biliary tree, pancreas or bowel [G Vagotomy L31, L39, L40]. The intervention therefore exposes at least truncal — which loses the coeliac route to the splenic nerve, so the inflammatory reflex fails — and selective, which does not. The gut consequences belong to §8; what this section reads is the §10.4 route.
 
 With the `neuroimmune` switch off, both directions stop: immune → brain (vagal immune afferent, CVO and humoral route, endothelial PGE2 → `mnpo`, cytokine → PVN) and brain → immune (inflammatory reflex, sympathetic lymphoid action, glucocorticoid action on immune cells). `tSet` stays flat at 37.0 and there is no sickness behaviour. The peripheral innate response at the challenge site continues, because it is `tissue` and not a neural network (A.8 decision 9). Consequences: cytokines highest and most prolonged, both brakes lost; no fever and therefore no fever tachycardia; no HPA activation by infection. Cross-network cases from A.5 that this section is responsible for:
 
@@ -4634,7 +4652,7 @@ Photosensitivity (A.9, user decision 9): the cytokine cascade and the shivering 
 ### 10.10. Open questions
 
 - No source read here gives a numeric latency for the slow humoral route through the circumventricular organs and choroid plexus, only that it is slow relative to the vagal route. The two-wave structure of the infection scenario depends on this delay; it is currently a model choice labelled "illustrative" in the HUD and needs a literature value.
-- The §10.2 kinetic constants and the §10.6 set-point and PGE2 command gains are [model] fits from the prototype; the IL-10 terms were not run, and the cytokine pools need the stated display scaling before their absolute values can be checked against Copeland et al. 2005.
+- The §10.2 kinetic constants and the §10.6 set-point and PGE2 command gains are [model] fits from the prototype; the cytokine pools need the stated display scaling before their absolute values can be checked against Copeland et al. 2005. **The IL-10 terms (a_IL10, c_10 and the new δ_IL10) are still unrun**, and that is where the error corrected in §10.2 came from: τ_IL10 had been labelled as "set for the 3 h peak" without a simulation, which no first-order low-pass of `tnf` can deliver. Run them before the constants are trusted.
 - No source read here gives a latency or a loop gain for the inflammatory reflex itself. The reflex is drawn with the §4 machinery but its timing is unparameterised, so its brake currently acts as a first-order gain with a model time constant rather than a measured one.
 - The ICU fever-tachycardia slopes (7.24 bpm/°C men, 9.46 bpm/°C women) came from a search summary whose primary citation was not confirmed; the row is [secondary, unverified] and either needs the primary paper or should be dropped in favour of Karjalainen & Viitasalo 1986 alone.
 - The 2 ng/kg composite time course is assembled from several cohorts (Copeland et al. 2005; Calvano & Coyle 2012; Dillingh et al. 2014). No single study read here reports TNF, IL-6, temperature, heart rate and cortisol on one time base, and Copeland et al. is internally inconsistent on TNF's return to baseline. A single-cohort trace would tighten the §10.9 tolerances considerably.
@@ -4642,7 +4660,7 @@ Photosensitivity (A.9, user decision 9): the cytokine cascade and the shivering 
 - The cortisol response to endotoxin is recorded only as "roughly doubled" with no peak time, so the infection scenario's HPA limb currently inherits §9's stressor kinetics rather than infection-specific ones.
 - The set-point rise of +1.0 to +2.5 °C for a general moderate infection remains inferred from the threshold and ceiling rows. The 2 ng/kg endotoxin figure is now sourced, but the general-infection band is not, and it is the one the manual (non-scenario) fever control uses.
 - Whether the sympathetic lymphoid brake should have its own weight or be folded into the cholinergic term is undecided. The splenic nerve carries both in the drawing, and no source read here separates their contributions to TNF suppression in a form the model could weight.
-- The contested vagal–splenic link (A.8 decision 16) is handled by making the switch behaviour independent of it, but the HUD still has to say something. Decide the exact wording: "contested route" with both citations, or a selector between the two circuit versions.
+- The contested vagal–splenic link (A.8 decision 16) is handled by making the switch behaviour independent of it, but the HUD still has to say something. Decide the exact wording: "contested route" with both citations, or a selector between the two circuit versions. §10.4 now states the contest as covering the endpoint and the relay as well as the synapse, so the wording must not claim an "independently established" cholinergic endpoint.
 - The conditional-association and insular-recall demonstrations (§10.3, §10.7) are animal findings. Confirm that they ship as an optional, explicitly labelled overlay rather than as part of the default infection scenario.
 - Microglia and astrocytes are the implied substrate of the parenchymal cytokine pool but have no nodes. Decide whether a glial field is worth rendering in the brain during an infection, or whether the pool stays invisible and only its effects are shown.
 
@@ -4717,7 +4735,12 @@ The model is one deterministic multi-rate kernel. It integrates human time `tH` 
 ### 11.3. Ownership model and edge `nets`
 
 1. Every node has exactly one owner: a sub-network id from A.3.1 (`som.aff`, `ans.symp`, `ne.hpa`, …), or `cns`, `special` or `tissue`.
-2. Every edge carries `nets`, the set of networks it needs. This is a 5-bit mask: somatic 1, autonomic 2, enteric 4, neuroendocrine 8, neuroimmune 16. An edge runs only when `bodyMode = 'body'` and every listed network is on. Its gain is g_e = Π g.k over `nets` (§11.13). Edges of `cns` and `special` have `nets = []`. `tissue` edges also have `nets = []` but run only in whole-body mode.
+2. Every edge carries `nets`, the set of networks it needs: somatic 1, autonomic 2, enteric 4, neuroendocrine 8, neuroimmune 16. The run predicate has **three** cases, not two, because `nets = []` alone cannot distinguish an always-on CNS edge from a body-only tissue edge:
+   - an edge with a non-empty `nets` runs only when `bodyMode = 'body'` **and** every listed `g.k > 0`;
+   - an edge with the **body flag** — a `tissue` edge, or any edge with a body-side endpoint — runs only when `bodyMode = 'body'`;
+   - every remaining edge (`cns`, `special`) always runs, in brain-only mode included, which is what keeps the CNS and the §11.9 special-sense injection alive there.
+
+   Its gain is g_e = [bodyOn, if the edge has the body flag or any `nets`] · Π g.k over `nets` (§11.13). Whether the body flag is carried as a sixth mask bit beside the five network bits or derived from endpoint ownership is an implementation choice; the prototype uses a bit.
 3. An axon edge belongs to the network of the neuron that owns the axon: the receptor's network for an afferent, the soma's network for an efferent. A humoral edge belongs to the network whose distant action it carries. An edge whose effect needs two systems lists both (AND, §11.11).
 4. Cranial nerves are split by functional component (A.8 #6). Visceral afferents, including baro- and chemoreceptors, are autonomic (A.8 #7). The respiratory rhythm is CNS, while phrenic and intercostal output is somatic (A.8 #8). Special senses are always on (A.8 #5).
 5. Intracerebral tracts have `nets = []`. Bulbospinal premotor axons are autonomic, and corticospinal and reticulospinal tracts in the cord are somatic (A.3.1).
@@ -4751,7 +4774,7 @@ The knowledge graph links these chains directly only where the table says so. Th
 |---|---|
 | `id` | Stable integer; the order breaks event ties |
 | `from, to, kind, fibre` | A.3.2 edge kinds and fibre classes |
-| `nets` | Bitmask, AND semantics (§11.3) |
+| `nets` | Bitmask, AND semantics (§11.3), beside the body flag and the intervention-cut flag (§11.12) |
 | `path`, `len` | Polyline id and u-range (u = 0 at the CNS end, A.2). `len` in mm is computed from the polyline at load and never entered by hand |
 | `v`, `nSyn`, `delay` | Velocity from A.9 / §4; delay (s) = len_mm / v_mps / 1,000 + nSyn · 0.0006 + (target is a muscle ? 0.0012 : 0), i.e. t_syn 0.6 ms and NMJ delay 0.7 + EMG spread 0.5 ms (Table 4.3a) |
 | `w`, `sign`, `transmitter` | Rate coupling of NF edges; defaults Table 4.8e, signs §3.15 |
@@ -4767,8 +4790,8 @@ The prototype (`s11/graph.mjs`) builds the graph one id at a time from A.3.3. It
 | Itemised count: edges | 2,217 (tract 1,484, axon 665, blood 56, volume 11, portal 1) | count | — | medium | prototype |
 | NF rate units; NF ring edges | 637; 2,036 | count | — | medium | prototype |
 | Brain-internal edge density | 3.3 per brain node | edges/node | — | low | [model], after the brain-systems lens (≈ 350–400 edges for ≈ 110 nodes) |
-| Edges by `nets` | ungated 1,141; somatic 703; autonomic 277; enteric 34; neuroendocrine 33; autonomic∧enteric 12; neuroimmune 7; autonomic∧neuroimmune 6; autonomic∧neuroendocrine 2; autonomic∧enteric∧neuroimmune 1; neuroendocrine∧neuroimmune 1 | count | — | medium | prototype |
-| Edges cut by each switch | somatic 703 (31.7 %); autonomic 298 (13.4 %); enteric 47 (2.1 %); neuroendocrine 36 (1.6 %); neuroimmune 15 (0.7 %); master 1,116 (50.3 %) | count | — | medium | prototype |
+| Edges by `nets` | `nets = []` and always on (`cns`, `special`) 1,101; `nets = []` but body-only (`tissue`) 40; somatic 703; autonomic 277; enteric 34; neuroendocrine 33; autonomic∧enteric 12; neuroimmune 7; autonomic∧neuroimmune 6; autonomic∧neuroendocrine 2; autonomic∧enteric∧neuroimmune 1; neuroendocrine∧neuroimmune 1 | count | — | medium | prototype |
+| Edges cut by each switch | somatic 703 (31.7 %); autonomic 298 (13.4 %); enteric 47 (2.1 %); neuroendocrine 36 (1.6 %); neuroimmune 15 (0.7 %); master 1,116 = the 1,076 network-gated edges plus the 40 body-only ones (50.3 %) | count | — | medium | prototype |
 | Dynamic skin-site receptor nodes | ≤ 64, created per stimulus | count | — | medium | [model] |
 
 Three groups take the count above the planning figure: the per-segment cord tracts (310 edges), the bilateral cortical sub-sites and the bilateral brainstem list (93 nodes). The CPU figures in §11.17 were measured at the itemised size.
@@ -4799,7 +4822,7 @@ Ports are the brain-side boundary nodes (A.3.3). §3 places them and owns the nu
 |---|---|---|---|---|
 | EV | exact | Binary heap ordered by (t, edgeId, seq) | — | Packets (§11.8) |
 | NF | 0.5 ms | Exponential Euler, r ← F + (r − F)·e^(−h/τ). Only the active set is updated (§11.17). Inputs read from history with linear interpolation of fractional delays | When no node is awake and no wake is pending, the layer jumps to the next 1-s boundary of `tH`. Quasi-static stride: when max \|Δx\| over 1 s < 10⁻³ and no packets are queued, awake nodes are set to r = F(x) and the layer strides 1 s. It never jumps past a known event, a packet arrival or an active gain ramp | Brain, cord, receptors, ganglia, muscle activation |
-| CV | 10 ms | Exponential relaxation; dead times as rings sized in seconds. RSA, the OU drive noise and MSNA bursts are seeded analytic overlays of `tH` added at readout (§7.8, §7.14), not states | Coarse 1-s steps after ≥ 10 s of quiescence of the deterministic core (overlays excluded), judged on 1-s boundary values. Only while NF is quiet and no packets are queued | Heart, vessels, baroreflex, respiration, pupil, SCR, modulator pools |
+| CV | 10 ms | Exponential relaxation; dead times as rings sized in seconds. RSA, the OU drive noise and MSNA bursts are seeded analytic overlays of `tH` added at readout (§7.8, §7.14), not states | Coarse 1-s steps after ≥ 10 s of quiescence of the deterministic core (overlays excluded), judged on 1-s boundary values. Only while NF is quiet, no packets are queued, and no gain ramp or pending event lies inside the stride — the same retargeting rule as NF, because a 1-s coarse step across a 1-s gain ramp would apply the whole switch change at one boundary and change the autonomic-off transient (the 108 bpm peak depends on a 0.5-s vagal decay, §11.10) | Heart, vessels, baroreflex, respiration, pupil, SCR, modulator pools |
 | GI | 100 ms | Analytic slow-wave phase in `tH`; reflex kernels; transit at 1 s | Jumps to the next 1-s boundary when the gut is empty and no meal input is active (§8) | Enteric layer |
 | EN | 1 s | Exponential relaxation; adrenal delay ring | — | Hormones, RAAS, AVP, thermoregulation |
 | IM | 10 s | Exponential relaxation; transcription delay ring | — | LPS, cytokines, PGE2, `tSet` |
@@ -4829,7 +4852,7 @@ Ordering and determinism rules:
 | CV quiescence | \|Δhr\| < 0.02 bpm/s and \|Δmap\| < 0.02 mmHg/s on 1-s boundaries of the deterministic core (RSA, OU noise and MSNA overlays excluded), for ≥ 10 s | — | — | low | [model] |
 | Coarse-mode simplifications | Dead times collapsed to the current command; the overlays continue analytically | — | — | medium | [model] |
 | NF rest settling at load | 3 s of `tH` with full update, cached | s | — | medium | [model] |
-| RNG | `mulberry32`, one stream per layer | — | — | high | `src/anatomy.js` L30 |
+| RNG | `mulberry32`, one stream per layer | — | — | high | `src/anatomy.js` L74 |
 
 ### 11.7. Clock
 
@@ -4843,9 +4866,9 @@ Ordering and determinism rules:
 | Packet target | clamp(min transit / 2.5 s, 0.005, 1), over leading packets (§11.8) on extracerebral edges ≥ 50 mm | — | — | medium | A.4, refined here |
 | Contact heat pending | 0.02 | — | — | medium | [model] |
 | Cardiac and electrodermal target | 1 when the breath-averaged `hr` changes by > 3 bpm per 10 s, the breath-averaged \|dMAP/dt\| > 0.15 mmHg/s, the nociceptive command > 0.02, or an evoked (not spontaneous) SCR is active | — | — | low | [model]; on raw values the rule fired in 96 % of CV steps at rest |
-| Endocrine target | 60 when \|acthRel − 1\| or \|cortisolRel − 1\| > 0.03 (ratios to basal, §11.13) | — | — | low | [model] |
+| Endocrine target | 60 while any neuroendocrine pool is away from **its current steady-state target**: gap = max over `crhRel`, `acthRel`, `S`, `cortisolRel` and the adrenaline pool of \|x − target\| / max(x, target, 0.1), and the vote applies while gap > 0.08. The target includes the circadian drive and any clamp, so it is not 1. A steady state votes nothing, including the saturated one reached after a gland is removed | — | — | low | [model]. Measuring the distance to 1 instead would hold the clock at ×60 at rest, because the §9.4 circadian envelope (a_C 0.6) puts the resting pools several per cent from basal — `cortisolRel` 0.944 and `acthRel` 0.945 at the default 10:00 start, 1.015 two hours later — and would hold it there for good after adrenalectomy or hypophysectomy, where ACTH saturates. The 0.08 threshold leaves room for the lag of a pool tracking the envelope (τ · dx/dt, up to ≈ 5 %), which 0.03 would not |
 | Immune target | 900 when cytokines are present or \|tCore − tSet\| > 0.05 °C | — | — | low | [model] |
-| Anticipation | Descent starts when tOnset − tH ≤ H_desc = Δt·Σ_{j=1..J} max(k₁, k·10^(−jΔt)), J = ⌈log₁₀(k/k₁)/Δt⌉. Headless form: (k − k₁)/ln 10 | s (human) | — | high | this section |
+| Anticipation | Descent starts when tOnset − tH ≤ H_desc = Δt·Σ_{j=1..J} max(k₁, k·10^(−jΔt)), J = ⌈log₁₀(k/k₁)/Δt⌉. Δt is the **screen** frame time in seconds, with the slew of 1 decade per screen second folded into the exponent; the clock evaluates it with the current frame's dt (clamped at 0.1 s, and 1/60 s before the first frame). Headless form: (k − k₁)/ln 10 | s (human) | — | high | this section |
 | Approach of a manual click | log₁₀(k₀/k₁) screen s, plus ≤ 1 frame when H_desc is used | s | — | high | this section |
 | Scheduled stimuli | Pull `kh` down in advance when < 2.5 screen s ahead | s | — | high | A.4 |
 | CPU budget per frame (kernel incl. NF) | ≤ 1 desktop; ≤ 2 low tier | ms | — | medium | A.7; enforced by time slicing |
@@ -4853,9 +4876,9 @@ Ordering and determinism rules:
 
 **Refinements to the A.4 packet rule.** In the prototype, two kinds of packet held `kh` at its 0.005 floor. Sustained 20-per-s trains on long edges did so, and so did intracerebral packets, whose transit is 2–10 ms. As a result, 200 screen s advanced only 26.9 human s. Counting only leading packets (§11.8) on extracerebral edges lets the same session advance 116.7 human s, while each volley front still travels for ≥ 2.5 screen s (§11.17). Brain packets are still drawn at the `kh` in force.
 
-**Anticipation.** The analytic formula overestimates the human time a stepwise descent takes, by 1.9 % at 60 fps, 11 % at 10 fps and 0.5 % at 240 fps. The descent therefore reaches k₁ early, and the clock then waits up to 0.5 s at 60 fps or 0.9 s at 30 fps (§11.17). The stepwise sum H_desc removes this wait. The descent target, once triggered, is held until the episode's hold window ends. Without that hold the target would flicker between k₁ and the preset.
+**Anticipation.** The analytic formula overestimates the human time a stepwise descent takes, by 1.9 % at 60 fps, 11 % at 10 fps and 0.5 % at 240 fps. The descent therefore reaches k₁ early, and the clock then waits (H_analytic − H_desc)/k₁ screen s. Because the relative overestimate is the same at every start, that wait grows with k₀: ≈ 0.4 s from ×1 at 60 fps (0.8 s at 30 fps), but ≈ 25 s from ×60, ≈ 373 s from ×900 and ≈ 1,490 s from ×3,600 (≈ 2,962 s at 30 fps). This is why the stepwise sum H_desc is used rather than the closed form. Because the clock re-solves the descent every frame, frame-time jitter cannot make the descent late: H_desc is an upper bound of the stepwise sum for any frame time, and the per-frame feedback removes the early-arrival wait, so `kh` reaches k₁ at tOnset. The logged tOnset is the one computed from the clicking frame's H_desc. The descent target, once triggered, is held until the episode's hold window ends. Without that hold the target would flicker between k₁ and the preset.
 
-**CPU budget.** Each frame the clock proposes `kh` and h = dtS·kh; `kernel.advance(h, budgetMs)` stops at a step boundary once the frame's budget is spent and returns the `tH` reached; the clock commits that `tH` as the truth (`commit(tReached)`). The effective `kh` for that frame is therefore lower, while step sizes and the trajectory stay unchanged. Everything else that advances in `tH` (the orgasm adapter excepted, §11.14) advances to the committed time. A per-frame governor based on work units could not prevent spikes during a 0.3-s cascade, because the slew limit is slower (§11.17). Time slicing is therefore the enforcement mechanism, and Appendix B implements it (B.4, B.6).
+**CPU budget.** Each frame the clock proposes `kh` and h = dtS·kh; `kernel.advance(h, budgetMs)` stops at a step boundary once the frame's budget is spent and returns the `tH` reached; the clock commits that `tH` as the truth (`commit(tReached)`). The effective `kh` for that frame is therefore lower, while step sizes and the trajectory stay unchanged. **While a scenario delegate holds the clock, `commit` is a no-op**: the delegate owns the `tH` axis (§11.14, B.6 step 5), so `commit` leaves `tH` at the adapter's time and the kernel lags behind it and carries the backlog, rather than the kernel's reached time becoming the truth. Everything else that advances in `tH` advances to the committed time. A per-frame governor based on work units could not prevent spikes during a 0.3-s cascade, because the slew limit is slower (§11.17). Time slicing is therefore the enforcement mechanism, and Appendix B implements it (B.4, B.6).
 
 ### 11.8. Packets
 
@@ -4880,7 +4903,7 @@ Packets are records `{t, edgeId, seq, tEmit, amp, lead}`. The display position i
 2. **Site resolution.** The click ray hits the skin (sphere-traced body SDF, §13) or, for interoception, an organ volume. It snaps to a site in a 10-mm hash grid that stores the dermatome, nerve, segment, DRG, polyline and length (§2). Up to 64 site-receptor nodes are created on demand, with edges per fibre class (§11.4).
 3. **Receptor recruitment.** Every receptor class whose threshold the physical stimulus exceeds is driven, whatever sense was picked. §5 owns the forms, thresholds and τA.
 4. **Contact heat.** For contact heat the receptor temperature is T_rec(t) = T_skin + (T_c − T_skin)·erfc(d / (2√(α(t − t₀)))). Transduction starts when T_rec ≥ θ_heat (§5).
-5. **Episode.** The click opens an episode. The clock computes the approach (§11.7) and fixes `tOnset` = tH_now + H_desc(kh_now, k₁), the stepwise descent sum, with k₁ the A.4 target of the first packet edge of the picked site; `tOnset` is logged. The descent then starts at the click and reaches k₁ at onset with no wait.
+5. **Episode.** The click opens an episode. The clock computes the approach (§11.7) and fixes `tOnset` = tH_now + H_desc(kh_now, k₁), the stepwise descent sum, with k₁ the A.4 target of the first packet edge of the picked site; `tOnset` is logged. The descent then starts at the click and reaches k₁ at onset with no wait. That holds under frame-time jitter only because the clock re-solves the descent every frame against the logged `tOnset` (§11.7); with H_desc computed once from a constant frame time it would not.
 6. **Downstream.** Packets (§11.8), NF relays, segmental reflexes and other-network outputs follow §5–§10. §12 owns the default behaviour per sense, and §4/§5 own repetition and habituation.
 
 | Quantity | Value | Unit | Species | Conf. | Source |
@@ -4897,29 +4920,31 @@ In brain-only mode, body sites are disabled. Vision, hearing, smell, taste and b
 
 Rules (expanding A.5):
 
-1. **Gains.** For each network, g.k(tH) is piecewise linear with slope ±1 per second of `tH`, starting at the toggle time and clamped to 0–1. Every layer evaluates it at its own step time, so ramps do not depend on the grid. All g are 0 in brain-only mode. An efferent gain acts at the effector, after the dead time: tone ← relax(tone, g(t) · command(t − D), τ), so a command already in transit is cut when the nerve is cut. The display ghost follows g(tH), rate-limited to the §13.15 fade (A.5; §13.10).
+1. **Gains.** For each network, g.k(tH) is piecewise linear with slope ±1 per second of `tH`, starting at the toggle time and clamped to 0–1. Every layer evaluates it at its own step time, so ramps do not depend on the grid. All g are 0 in brain-only mode, so the master transition is a step in g, not a 1-s ramp; the display fades at the §13.15 rate instead. An efferent gain acts at the effector, after the dead time: tone ← relax(tone, g(t) · command(t − D), τ), so a command already in transit is cut when the nerve is cut. D has two parts and only the first justifies that choice: a conduction part (≈ 0.1 s, legitimately gated before the delay) and, for the 2-s sympathetic dead time (A.8 #14), a mostly neuro-effector and second-messenger part that follows transmitter release. Cutting the nerve stops release at once, but transmitter already released keeps acting for that latency, so gating after D removes a lag the body would keep. The model gates after D for simplicity [model]; the alternative (splitting D into D_cond and D_eff) changes HR at 1 s by ≈ 6 bpm (table below). The display ghost follows g(tH), rate-limited to the §13.15 fade (A.5; §13.10).
 2. **Off-state targets.** Neural channels relax by their own kinetics toward zero tone (denervation). Hormones relax toward basal and are clamped there (replacement). Intrinsic tissue behaviour continues: the SA node at IHR (§7), ICC slow waves (§8), myogenic tone and the peripheral innate immune response (§10).
 3. **Commands.** Brain nodes always compute their commands. When the gain is 0 these appear as efference-only packets (§11.8) and as tints (§13).
 4. **Packets.** Packets on edges whose gain reaches 0 are dropped at delivery (§11.8).
-5. **Master switch.** `'brain'` freezes and hides every body layer and clamps body inputs to the brain at basal values (A.5). Vitals show "—". On return to `'body'`, body state is restored from a resting-state cache for the current switch set. The cache is computed headless over 300 s of `tH`, lazily at first use (§11.17). Restarting from default initial values is not enough: the prototype then shows HR 74.4 bpm and SBP 109 mmHg 5 s after restoring.
+5. **Master switch.** `'brain'` freezes and hides every body layer and clamps body inputs to the brain at basal values (A.5). Vitals show "—". `tH`, the CR layer and every CNS layer keep running (A.5 Master row), so the SCN and the arousal state machine are unaffected. Freezing and resetting are not in conflict: nothing integrates while the body is hidden, and on return to `'body'` the body is **re-initialised from the resting-state cache**, so a scenario interrupted by brain-only mode (a fever in progress, say) is not resumed. The cache key is `(switch set, age, posture, fed, time of day at return)` — the same key in §12.1 and in B.4's `settle(init)`. None of those may be dropped: a supine rest cannot be restored for an upright body, and the resting HPA pools depend on the time of day (the §9.4 circadian envelope, a_C 0.6, puts `cortisolRel` at 0.944 at 10:00 and 1.015 two hours later). Restarting from default initial values is not enough: the prototype then shows HR 74.4 bpm and SBP 109 mmHg 5 s after restoring.
+6. **Building the cache.** The slow layers (EN, IM and the GI fasting state) are set to their **analytic** rest for the key's time of day, with the circadian phase held fixed; only NF and CV are settled by integration, over 300 s of `tH`, lazily at first use (§11.17). Integrating 300 s from default values cannot reach a circadian rest that differs from basal by a few per cent, because the cortisol pool has t½ ≈ 66 min (§9.4): starting from 1 toward 0.944 it reaches only ≈ 0.984. A "change < ε over 60 s" criterion is likewise too weak for pools with τ ≥ 30 min, which is why the slow layers are set rather than settled. This cache supersedes the per-scenario warm-ups recorded in §12.1.
 
 | Switch off | Gains → 0 on | Off-state targets | Emergent behaviour in the kernel | HUD tag |
 |---|---|---|---|---|
 | Master | All body edges and layers | Body frozen; brain inputs clamped (cortisol, tCore, PaCO₂, PaO₂ at A.5 values) | NTS visceral drive 0; somatic and visceral thalamic relays silent; preBötC fictive; RVLM, DMV, PVN and EW commands efference only | "—" |
 | Somatic | `som.*` edges, somatic cord tracts, cranial GSE/SVE | `emg`, `force`, `shiver` → 0 | No skin, pain, temperature or proprioceptive input reaches the cord. Standing becomes a passive tilt. Fever relies on vasoconstriction and BAT. Startle reduces to autonomic signs | EMG 0; "ventilation maintained" |
 | Autonomic | `ans.*` edges (pre- and postganglionic, visceral afferents, bulbospinal) | Tones `v`, `s` → 0; pupil → denervated diameter (§7); SCR, salivation, BAT → 0 | HR → IHR(age) with the direct temperature effect (§7). Baroreflex and peripheral chemoreflex open. RAAS keeps its renal share. No RSA, cephalic phase, vagal satiety or inflammatory reflex | HR "intrinsic" |
-| Enteric | `ens.*` edges | Reflex kernels, MMC, tonic inhibition → 0 | Slow waves persist. Sphincters close. Gastric emptying stops. Gut branch of the inflammatory reflex lost | motility ≈ 0 |
+| Enteric | `ens.*` edges | Reflex kernels, MMC, tonic inhibition → 0 | Slow waves persist. Sphincters close. Gastric emptying falls to the 5 % floor of §8.8 (G_pyl 0.05), an extreme-case model of ENS loss (pylorospasm and achalasia-like), not a claim about any one disease [model]. Gut branch of the inflammatory reflex lost | motility ≈ 0 |
 | Neuroendocrine | Portal, pituitary, adrenal, AVP, RAAS and distant gut-hormone edges | Hormones → basal (clamp) | No cortisol or adrenaline surge, RAAS rescue or cortisol brake. Orgasm scenario: prolactin and oxytocin clamped | "basal" |
 | Neuroimmune | All immune ↔ nervous edges | `pge2` brain signal and `vagAI` → 0; `tSet` at baseline (§7) | Cytokines higher and longer; no fever, fever tachycardia, sickness behaviour or infection-driven HPA activation | `tSet` flat |
 
 | Quantity | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|
-| Gain ramp duration | 1.0 | s of `tH` | — | high | A.5 |
+| Gain ramp duration | 1.0 | s of `tH` | — | high | A.5. The ramp is in `tH` by design, so its screen length varies with `kh`: 200 screen s at the ×1/100 reflex floor and 0.28 ms at ×3,600. At `kh` < 1 the display shows the ghost at the §13.15 `t_fade` rate (≥ 0.8 s of `tS`) while the physical ramp continues underneath, and the HUD marks the toggle with a transient tag (§13.14); at `kh` ≫ 1 the toggle is effectively a step |
+| Resting-state cache, slow layers | analytic, not integrated (rule 6) | — | — | medium | [model] |
 | Ramp in the prototype (somatic off at 2.1 s) | g = 1.00 at 2.1 s, 0.50 at 2.6 s, 0.00 at 3.1 s; 3 of 283 packets dropped | — | — | high | prototype `s11/run.mjs` |
-| Autonomic off from rest, HR | 68 → ≈ 89 at 1 s, ≈ 108 at 3 s (peak), 101 by 30–60 s | bpm | — | low | §7.5–§7.8 equations with the gate after the dead time (`verify-math-simulation/cv.mjs`); gate before the dead time: ≈ 83 at 1 s, 109 at 3 s |
-| Autonomic off from rest, SBP | 115 → 111 at 3 s → 92 by 60 s, falling throughout (gate before the dead time: ≤ 118 at 2–3 s) | mmHg | — | low | same |
+| Autonomic off from rest, HR | 68 → ≈ 86 at 1 s, ≈ 108 at 3 s (peak), 101.5 at 30 s, 101.0 at 60 s | bpm | — | low | §7.5–§7.8 equations with the gate after the dead time (`verify-math-simulation/cv.mjs`; re-run on the implemented CV layer); gate before the dead time: ≈ 83 at 1 s, 109 at 3 s |
+| Autonomic off from rest, SBP | 115 → 111 at 3 s → 93 at 30 s → 92 by 60 s, falling throughout that first minute, then flat at 91.8 from ≈ 120 s (gate before the dead time: ≤ 118 at 2–3 s) | mmHg | — | low | same |
 | Autonomic back on | HR 60–76, SBP 99–121 over 60 s while the loop re-engages | bpm, mmHg | — | low | prototype `research-simulation-model/toggle.mjs` (earlier kernel; to be re-run on the §7 equations) |
-| Resting-state cache window | 300 | s of `tH` per switch set | — | medium | [model] |
+| Resting-state cache window (NF and CV only) | 300 | s of `tH` per cache key | — | medium | [model]; the CV layer is flat well inside it (SBP 92.07 at 60 s, 91.81 at 120 s and at 300 s) |
 
 The brief HR overshoot to ≈ 108 bpm when autonomic is switched off comes from the vagal/sympathetic timing difference of A.8 #14: vagal tone decays with τ 0.5 s, while sympathetic tone keeps acting through its 2-s dead time and τ_off 10 s. It is consistent with "own kinetics" (A.5) and is physiologically expected for an instantaneous cut. There is no hypertensive transient: §7.5 makes output depend on venous return (co ∝ hr^0.25), so MAP falls as the sympathetic tones decay. The Vitals rows carry the tag "switch transient (model)" while |dMAP/dt| > 0.5 mmHg/s after a toggle (§13.14). The earlier prototype's 151 mmHg came from a CO ∝ HR law that §7 does not use.
 
@@ -4943,14 +4968,14 @@ The brief HR overshoot to ≈ 108 bpm when autonomic is switched off comes from 
 
 ### 11.12. Interventions
 
-Interventions follow A.5. Only one preset is active at a time, and presets are kept separate from the switches. Each preset removes specific nodes or edges, or fixes a channel, and the rest of the model responds. The content belongs to each owner.
+Interventions follow A.5. Only one preset is active at a time, and presets are kept separate from the switches. Each preset removes specific nodes or edges, or fixes a channel, and the rest of the model responds. The content belongs to each owner. An edge removed by a preset carries its own **cut flag**, separate from the `nets` mask and the body flag of §11.3, so a preset can be lifted without recomputing the masks.
 
 | Intervention (owner) | Kernel action |
 |---|---|
 | Spinal cord injury, level × type × phase (§6) | Remove tract edges that cross the lesion segment in the (ξ, η) map. Scale segmental reflex gains by phase. A lesion at or above T6 activates the dysreflexia rule (§7) |
 | Named nerve section with day slider (§6) | Remove the nerve's edges; target `force` → 0; follow the §6 denervation timeline |
 | Dorsal rhizotomy (§6) | Remove the afferent root edges of the chosen segments |
-| Heart transplant (§7) | Cardiac `v` and `s` fixed at 0; adrenaline still acts (blood edge) |
+| Heart transplant (§7) | Cardiac `v` and `s` fixed at 0; adrenaline still acts (blood edge, gated by neuroendocrine only, §11.13) |
 | Atropine (§7) | Muscarinic effect of `v` fixed at 0 (heart, pupil sphincter, glands) |
 | Truncal vagotomy (§7) | Remove abdominal `cn10` edges (DMV gastric efferent, abdominal vagal afferents, coeliac branch); cardiac vagus intact [G Vagotomy L39] |
 | T2–T3 sympathectomy, stellate option (§7) | Remove hand sudomotor and vasomotor edges; the stellate option also removes the cervical (Horner) channels |
@@ -4970,7 +4995,7 @@ Interventions follow A.5. Only one preset is active at a time, and presets are k
 | CV `s` | sympathetic gut tone | GI antral strength | autonomic |
 | GI meal load, duodenal delivery | splanchnic load; `cck`, `glp1`, `pyy` | CV `tpr`; brain (`areaPostrema`, `arcuate`) | tissue; neuroendocrine (distant action) |
 | GI vagal afferents | `vagMech`, `vagChem` | NF `ntsVisc`, insula | autonomic |
-| EN `adrenaline` | β effect | CV `s_eff` | autonomic ∧ neuroendocrine |
+| EN `adrenaline` | β effect | CV `s_eff` | neuroendocrine (the humoral edge carries its own network, §11.3 rule 3; release is separately gated by autonomic) |
 | EN `cortisol` | GR/MR feedback; glucocorticoid brake | EN feedback; IM brakes; brain (crosses the BBB, §9) | neuroendocrine; ∧ neuroimmune for the brake |
 | EN `tCore` | temperature | CV `hr` (direct SA effect); IM | tissue |
 | IM `pge2`, cytokines | central immune signal | EN `tSet`, CRH drive; CV commands; NF sickness gains (§10) | neuroimmune (+ neuroendocrine for cortisol output) |
@@ -4980,16 +5005,16 @@ Interventions follow A.5. Only one preset is active at a time, and presets are k
 Each layer's equations take the switch gains in the following form. The functions and constants belong to §6–§10. Kernel hormone states are ratios to basal (`acthRel`, `cortisolRel`, `adrenalineRel`, …; basal 1), and §9.9 gives the display units.
 
 ```
-g_e            = Π_{k ∈ nets(e)} g.k(tH)                                   (1 for nets = [])
+g_e            = [bodyOn if e has the body flag or any nets] · Π_{k ∈ nets(e)} g.k(tH)   (1 for a cns/special edge; see the three-case predicate, §11.3 rule 2)
 NF input       x_i = I_i^ext + Σ_e w_e · g_e · a_src(e)(t − d_e),   a = r / rmax (dimensionless; §4.13; w, I_ext Table 4.8e)
 Autonomic tone tone ← relax(tone, g.autonomic(t) · command(t − D), τ)       command always computed; gate after the dead time (§11.10)
-Adrenal β      s_eff = s + k_adr · (adrenalineRel − 1) · g.autonomic · g.neuroendocrine   (k_adr §7.5)
+Adrenal β      s_eff = s + k_adr · (adrenalineRel − 1) · g.neuroendocrine   (k_adr §7.5; release gated by autonomic, §9.6)
 Hormone h      h ← relax(h, g.neuroendocrine · h_cmd + (1 − g.neuroendocrine), τ_h)   h, h_cmd as ratios, basal = 1
 Brakes         brake_C uses g.neuroendocrine · g.neuroimmune; brake_V uses g.autonomic · g.neuroimmune (+ g.enteric, gut branch); forms §10.2
 Set point      tSet = baseline (§7) + g.neuroimmune · ΔtSet(pge2) (§10.2, §10.6)
 SA node        hr ∝ IHR · f_T(tCore), f_T = 1 + k_T · (tCore − 37) (k_T §10.6; law §7.5)
 Pupil          pupilD = g.autonomic · D_reflex + (1 − g.autonomic) · D_denervated (§7)
-Gut            antral ∝ g.enteric · (a + b · g.autonomic); pyloric conductance ∝ g.enteric (§8)
+Gut            antral ∝ g.enteric · (a + b · g.autonomic); pyloric G_pyl = max(g.enteric, 0.05), colonic κ × max(g.enteric, 0.05) — one 5 % floor, as §8.8 and §8.13 define it (§8)
 Ventilation    somatic off or brain only: PaCO₂, PaO₂ clamped (A.9)
 ```
 
@@ -5001,14 +5026,14 @@ With all networks on, every trace equals the reference recorded by the legacy pa
 |---|---|
 | Integration step | Runs the body of the `update()` substep loop (`src/response.js` L342–L347, extracted as `advanceHuman(h, S)`, B.5): `_integrate(h, S)`, then the `phaseTh`, `aboveTheta` and `stimOffH` updates, then `_transitions()`, then the `onStep` hook (`src/main.js` L90). `_transitions` reads all three counters, and without them the plateau never ignites |
 | Grid, before the port | h = dt·kh in substeps of ≤ 0.5 s, the demo script and the `noClimax` exit in screen time, as today; frame-rate dependent (table below) |
-| Grid, after the port | Fixed 0.05-s `tH` grid (DOPAMINE.md §9.3, ≤ 0.05 s in fast phases), which removes frame-rate dependence; the demo script runs in `tH`; the dopamine substeps keep DOPAMINE.md §6.8 |
+| Grid, after the port | A **step cap** of 0.05 s of `tH`, not a fixed grid (DOPAMINE.md §9.3): fast phases need ≤ 0.05 s, and a larger step is allowed only where DOPAMINE.md §6.8 permits it. This removes frame-rate dependence; the demo script runs in `tH`; the dopamine substeps keep DOPAMINE.md §6.8. The cap bounds the adapter's work per frame: at the recovery delegate's `kh` up to 4,320 and 60 fps a frame covers 72 human s, i.e. ≤ 1,440 response steps and ≤ 3,600 dopamine 0.02-s substeps, which is why B.9 carries a measured adapter cost line of its own — the adapter sits outside the 1 ms kernel budget |
 | RNG | `Math.random` (`src/response.js` L189–L217) is replaced by the adapter's seeded stream (§11.6) in both stages, and the reference is recorded with that stream |
 | Clock | `kh` comes from the scenario's own clock (the legacy `LogRamp` and `CLOCK` table, L83–L88; after the port the DOPAMINE.md §9.3 clock) through a clock delegate in `src/clock.js`. Its phase changes depend on model state (ignition needs `aboveTheta` ≥ 0.5 s with Aeff ≥ θ, L298; the recovery `kh` = max(60, remaining/20) is set at entry, L145), so it is not a `clockKeys` list (§12.2). The delegate follows the scenario clock verbatim and is exempt from the A.4 slew and range: the 1 → 20 ramp in 1 s (1.30 decades/s), the 60 → recovery ramp (up to 1.85 decades/s), recovery values above 3,600 with long refractory settings, and the instant switch into ONSET or `inevitability`. Source order: user lock › scenario delegate › scenario keyframes › adaptive (A.4) |
 | CPU budget | An overrun never changes the delegate's `kh`. The adapter advances first, because the CV layer reads its commands; the kernel then advances within its budget and carries the remainder into the next frame. If the backlog exceeds one frame, the kernel exceeds its budget for that frame rather than fall further behind (§11.7; B.6) |
 | Vitals, all networks on | Pass-through: `hr`, `rr`, `sbp` ← `sys`, `dbp` ← `dia` from `vitals()` (L354). The CV layer is slaved to these values, so the regression is exact by construction (A.8 #21; §7.13 V21) |
 | Command record (switched modes only) | `{ tH, cmdSym, cmdVag, cmdSacral, apnoea, omega }`, written by the adapter at each substep and read by the CV layer zero-order hold by `tH` (B.6): `tH` (s); `cmdSym` (0–1) = h = clamp(0.3·Ah + 0.7·sigma), the drive of `vitals()`, added as an offset to `tone.symCard`, `tone.symMus` and `tone.symSpl`; `cmdVag` (0–1) = h, subtracted from `tone.vagCard`; `cmdSacral` (0–1) = G, the `fSacral` tone; `apnoea` (bool) = the `vitals()` breath-hold flag, the central apnoea command of §7.9; `omega` (0–1) = Omega, used only for the pelvic markers. §7 owns the offset gains (§7.15) |
 | Autonomic off | `hr` = IHR(age) · f_T (§7), tagged "intrinsic". BP at the autonomic-off rest state. The pelvic parasympathetic channel G has no peripheral effect. Central A, D and dopamine unchanged |
-| Somatic off | Central arousal path only, with no rhythmic pudendal output stream. A vagal, cord-bypassing visceral afferent route has been proposed from fMRI in five women with spinal cord injury at or above T10 (Komisaruk et al. 2004, H, low); it would belong to `autonomic` and is not modelled |
+| Somatic off | Central arousal path only, with no rhythmic pudendal output stream. A vagal, cord-bypassing visceral afferent route has been proposed from fMRI in five women with spinal cord injury at or above T10 — four complete, one incomplete, three of the five reaching the end point — reporting NTS activation (Komisaruk et al. 2004, *Brain Res* 1024:77, H, low); it would belong to `autonomic` and is not modelled |
 | Neuroendocrine off | Prolactin and oxytocin clamped at basal; the TIDA short loop in `dopamine.js` is frozen (DOPAMINE.md §5) |
 | Brain only | `response.js` central variables and the dopamine layer only; κ coupling to peripheral vasocongestion removed; vitals "—" |
 | Display | Static neutral figure. Once the DOPAMINE.md rule-7 amendment (§11.18) is confirmed by the user (§13.18), the pelvic streams carry schematic, non-rhythmic activity markers (rate and speed not to scale; §13.9, §13.14; A.8 #21); until then they keep their resting display |
@@ -5023,11 +5048,11 @@ With all networks on, every trace equals the reference recorded by the legacy pa
 
 ### 11.15. Rendering hand-off: state texture
 
-Per-region state currently reaches the GPU as vec4 uniform arrays, each with `REGION_COUNT` entries (`src/anatomy.js` L12–L19): `uRegion` and `uTint` in the neuron shader (`src/shaders.js` L30, L63) and `uDA` in the dopamine shader (L122). They are uploaded at `src/renderer.js` L104, L131 and L139.
+Per-region state currently reaches the GPU as vec4 uniform arrays, each with `REGION_COUNT` entries (`src/anatomy.js` L48, over the `REGION_IDS` list at L17–L41): `uRegion` and `uTint` in the neuron shader (`src/shaders.js` L30, L63) and `uDA` in the dopamine shader (L122). They are uploaded at `src/renderer.js` L104, L131 and L139.
 
 | Quantity | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|
-| Current `REGION_COUNT` | 33 | regions | — | high | `src/anatomy.js` L12–L19 |
+| Current `REGION_COUNT` | 33 | regions | — | high | `LEGACY_REGION_COUNT`, `src/anatomy.js` L49 (the original build, indices 0–32) |
 | Guaranteed vertex uniform vectors (WebGL2) | 256 | vec4 | — | high | Khronos GLSL ES 3.00 specification |
 | Regions after the §3 additions | 122 (33 + 89, §3.15); 123 with the DOPAMINE.md §7.3 A14 region | regions | — | high | §3.15; B.3 |
 | Uniform need per program at R = 122 (24 + 2R neuron shader; 67 + 2R dopamine shader) | ≈ 268; ≈ 311 | vec4 | — | high | B.3 |
@@ -5036,7 +5061,7 @@ Both programs exceed the guaranteed 256 vectors, so per-region state moves to da
 
 - **Sided brain state.** The kernel's brain graph has one node per side (`thalVPL.R`, `thalVPL.L`; §11.3, §11.4), so brain columns are indexed column = 2·r + s, with s = 0 for x ≥ 0 and for midline regions and s = 1 for x < 0 (244 of 256 columns used). The cortical `area` attribute stores 2·area + s (≤ 92; 255 = none). `statetex.compose` copies the unsided dopamine channels into both columns of a region, so the orgasm regression is unchanged. A unilateral stimulus therefore lights only the hemisphere whose nodes respond.
 - **Rest normalisation.** The brain activity channel carries the rest-normalised value of §13.7, 1 at rest, so the brain-only image is unchanged.
-- **Textures (B.7).** `uState` (brain): rows region state (the current `uRegion`), tint (`uTint`), `uDA`, path history (`uPathHist`, ≥ 52 texels for the 13 pathways after DOPAMINE.md §7.6 adds slMFB) and sided cortical areas. `uBodyState`: one texel per body graph node (≥ 1,024: 740 nodes, the dynamic skin sites and 20 % margin) with activity, network ghost factor (following g, §13.10) and a display flag. `uEdgeAct`: one texel per edge, 4,096 for ≥ 2,660 edges (§11.4 design size + 20 %).
+- **Textures (B.7).** `uState` (brain): rows region state (the current `uRegion`), tint (`uTint`), `uDA`, path history (`uPathHist`, ≥ 52 texels for the 13 pathways after DOPAMINE.md §7.6 adds slMFB) and sided cortical areas. `uBodyState`: one texel per body graph node (≥ 1,024: 740 nodes, the dynamic skin sites and 20 % margin) with activity, network ghost factor (following g, §13.10) and a display flag. `uEdgeAct`: one texel per edge, 4,096 for ≥ 2,660 edges (the §11.4 itemised size 2,217 + 20 %; the rounder planning figure 2,200 + 20 % would be 2,640).
 - **Packets.** One capacity of 256 visible records per frame with the §13.4 per-tier pool, sorted by path and indexed per path (B.7); the kernel's own heap stays ≤ 32 in the prototype (§11.17).
 
 ### 11.16. Files, interfaces and tests
@@ -5102,7 +5127,6 @@ The rest figures with CV striding rely on the deterministic-core quiescence rule
 ### 11.19. Open questions
 
 - Graph size: the itemised count (740 nodes, 2,217 edges) exceeds A.7's planning figure (≈ 500, ≈ 1,500). The options are to merge cortical sub-sites into per-side area nodes, to carry one tract bundle per enlargement instead of per segment, or to revise A.7.
-- The A.4 packet rule needs its wording amended to count only leading packets on extracerebral edges (§11.7). Without the amendment, sustained trains and brain packets hold `kh` at 0.005.
 - The 50-ms emission interval is the top of A.7's 20–50 ms range. A shorter interval would break the cap of ≤ 20 per s per edge. Is any display case worth an exception?
 - The orgasm delegate is exempt from the A.4 slew and range (§11.14). If that exemption is unwanted, the refractory slider would have to be capped at 20 h (so recovery `kh` ≤ 3,600) and the DOPAMINE.md timeline regenerated with slewed ramps.
 - Switching autonomic off gives a brief HR overshoot to ≈ 108 bpm and no pressor transient (§11.10). Keep it as kinetics with the "switch transient (model)" tag (proposed), or ramp both tones together during this switch?
@@ -5111,7 +5135,8 @@ The rest figures with CV striding rely on the deterministic-core quiescence rule
 - The §11.17 CPU figures must be measured again with the full §7 CV layer, the overlays, the breath-averaged cardiac target and the NF quasi-static stride, and reported at ×900 and ×3,600 against the 1-ms budget.
 - Time slicing overshoots the 1-ms budget by up to 1.06 ms with checks every 16 iterations. Should the check be tighter, or should 2 ms be accepted as the desktop worst case?
 - The prototype brain graph was random, at the lens's edge density, and it sustained activity after stimuli. The §3 graph needs inhibition and a rest criterion that let activity decay. The active-set fraction (13 %) and the CPU figures must be measured again on it.
-- Each switch set's resting-state cache costs 80 ms, computed lazily. Should it be computed in an idle callback or a Web Worker to avoid a frame hitch?
+- Each cache key's resting-state cache costs 80 ms, computed lazily. Should it be computed in an idle callback or a Web Worker to avoid a frame hitch? Adding the time of day to the key (§11.10 rule 5) widens the key space, which is the reason the slow layers are set analytically rather than integrated per return time.
+- There is no pairwise **composition** test. A.5 says switch outcomes are read multiplicatively, but several rules are not edge masks (the hormone clamp h = g·h_cmd + (1 − g), the pupil mix, the antral g.enteric·(a + b·g.autonomic)), so the pairs are not covered by the single-switch matrix of §12.14. Add a composition class that asserts, for the 10 pairs, that each pair outcome equals the pairwise product of the single outcomes wherever the matrix defines both, and that lists the vacuous consequences (autonomic + neuroendocrine reproduces autonomic alone at rest: HR 101.0, SBP 91.8 at 300 s).
 - Mobile CPU cost is unmeasured.
 - The kernel constants used by the prototypes are provisional. §7–§10 must supply values, and the headless tests must be re-baselined.
 
@@ -5163,7 +5188,7 @@ Project files:
 - `brain-system/src/main.js` L90, L166–L235
 - `brain-system/src/shaders.js` L30, L63, L122
 - `brain-system/src/renderer.js` L104, L131, L139
-- `brain-system/src/anatomy.js` L12–L19, L30, L160–L202
+- `brain-system/src/anatomy.js` `REGION_IDS` L17–L41, `mulberry32` L74, `NUCLEI` L273, `BRAINSTEM` L321–L324
 - `brain-system/src/performance.js` L8
 - `brain-system/research/DOPAMINE.md` §5, §6.8, §6.9, §9.3, §9.6, §9.7, §10 rule 7
 
@@ -5185,7 +5210,7 @@ This section defines the scripted scenarios of Brain System, how manual stimuli 
 | Convention | Rule |
 |---|---|
 | Time origin | tH = 0 at stimulus onset: start of contact, sound onset, light onset, tap, start of the stand ramp, start of the cephalic phase, stressor onset, or bolus. Times in tables are tH from onset unless marked "screen" (tS). |
-| Initial state | Every play starts from the resting steady state of the active switch set (§11 resting-state cache). The prototype approximates this with a rest warm-up of 300 s of tH (1,800 s for `meal`, 600 s for `stressor` and `infection`). |
+| Initial state | Every play starts from the resting steady state for the §11.10 cache key `(switch set, age, posture, fed, time of day)`. That cache supersedes the prototype's rest warm-up of 300 s of tH (1,800 s for `meal`, 600 s for `stressor` and `infection`), which were prototype approximations and are not a second definition: slow pools with τ ≥ 30 min are set analytically rather than integrated (§11.10 rule 6). |
 | Paired control | HR changes after brief stimuli are differences from a paired run without the stimulus, so RSA cancels out. |
 | Averaging | Stand-test BP and HR are 3-s moving means. Hormones are ratios to basal (×), converted to units by §9. Cytokines are in normalised units (§10). |
 | Node paths | Ids follow A.3.3 and edge gates follow A.5. "→" is an axonal or synaptic step; "(blood)" marks a humoral step. |
@@ -5252,7 +5277,7 @@ At 55 °C, transduction takes ≈ 0.2 s at the default depth, so withdrawal, fir
 
 | `id` | Keyframes (tH window → `kh`) | Pre-roll | Screen length (prototype) |
 |---|---|---|---|
-| `hotObject` | approach from 1 to 0.02 by onset; 0–0.40 s → 0.02; 0.40–1.2 s → 0.35; 1.2–30 s → 1 | 3 s at ×1 | 56.4 s (×0.02 from 4.3 s, ×0.35 from 24.3 s, ×1 from 27.4 s) |
+| `hotObject` | approach from 1 to 0.02 by onset; 0–0.40 s → 0.02; 0.40–1.2 s → 0.3; 1.2–30 s → 1 | 3 s at ×1 | 56.4 s (×0.02 from 4.3 s, ×0.3 from 24.3 s, ×1 from 27.4 s; screen length to be re-run at ×0.3) |
 | `loudSound` | approach to 0.005; 0–0.06 s → 0.005; 0.06–0.5 s → 0.1; 0.5–15 s → 1; 15–90 s → 5 | 3 s | 52.6 s |
 | `brightLight` | approach to 0.005; 0–0.04 s → 0.005; 0.04–0.12 s → 0.02; 0.12–2.5 s → 0.2; 2.5–15 s → 1 | 3 s | 42.5 s |
 | `kneeJerk` | approach to 0.005; 0–0.04 s → 0.005; 0.04–0.5 s → 0.05; 0.5–3 s → 1 | 3 s | 26.0 s |
@@ -5264,7 +5289,7 @@ At 55 °C, transduction takes ≈ 0.2 s at the default depth, so withdrawal, fir
 
 Screen lengths are computed on a 600-Hz screen grid with the A.4 slew (≤ 1 decade per screen s) and anticipation of falling keyframes: species —, high confidence (arithmetic). The keyframes are [model]. They follow four rules:
 
-- Every packet on an edge ≥ 50 mm stays ≥ 2.5 screen s in flight wherever possible (A.4). The palm → `drg.C7` Aδ packet (52.7 ms) takes 2.6 screen s at ×0.02, and the C packet (0.79 s) takes 2.3 screen s at ×0.35.
+- Every packet on an edge ≥ 50 mm stays ≥ 2.5 screen s in flight wherever possible (A.4). The palm → `drg.C7` Aδ packet (52.7 ms) takes 2.6 screen s at ×0.02. The C packet's transit is 0.81 s (1,036.8 − 224.0 ms, §12.5) and it is emitted at 224 ms, inside the first (×0.02) window, so it spends its first 0.18 human s there (8.8 screen s) and the remaining 0.64 s at the second keyframe: ≈ 10.6 screen s in all. Taken alone the second window would give 0.81/0.35 = 2.3 screen s, below the 2.5 s rule, so that keyframe is ×0.3 rather than ×0.35 (2.7 screen s for the whole transit on its own); the A.4 target for a 0.81 s transit is clamp(0.81/2.5, …) = 0.32.
 - The heartbeat is shown at its real rate only while kh ≤ 1. Above that it is rate-coded, and gut slow waves switch to envelope mode at the `meal` keyframes (A.9, §8, §13).
 - Keyframes never change step sizes (A.4).
 - No scenario exceeds ≈ 90 screen s apart from `orgasm`, whose clock DOPAMINE.md owns.
@@ -5354,7 +5379,7 @@ The values are the §7.5–§7.8 equations: §7.8's own model check where it sta
 | 180 s | 104/76, HR 82 (§7.8) | 104/76, HR 82.1 | 71/50 (−21/−15 from supine; MAP ≈ 57) (§7.8 SBP) | §7 steady state; OH criterion |
 | 180 s, neuroendocrine also off | — | — | not computed: the RAAS → conductance term is not yet defined (§7.15) | §9 RAAS |
 
-The autonomic-off upright MAP of ≈ 57 mmHg at heart level (≈ 39 mmHg at the carotid after the 17.9-mmHg offset, §7.8; ≈ 32 mmHg at the 13.9-s nadir) is below the cerebral autoregulation range. The model shows it as a hypotension readout tagged "syncopal range — not a viable steady state", and the HUD states that consciousness and cerebral perfusion are not simulated (§13.14). Its depth is set by the uncalibrated k_R and 40 % non-neural share (§7.15). With neuroendocrine, enteric or neuroimmune off alone, the stand is unchanged within the earlier prototype's resolution (≤ 0.2 mmHg, ≤ 0.2 bpm).
+The autonomic-off upright MAP of ≈ 57 mmHg at heart level (≈ 39 mmHg at the carotid after the 17.9-mmHg offset, §7.8; ≈ 30 mmHg at the 13.9-s nadir, from the supine autonomic-off MAP of (92 + 2·65)/3 = 74.0 less the 26.5-mmHg nadir, then less the offset) is below the cerebral autoregulation range. The model shows it as a hypotension readout tagged "syncopal range — not a viable steady state", and the HUD states that consciousness and cerebral perfusion are not simulated (§13.14). Its depth is set by the uncalibrated k_R and 40 % non-neural share (§7.15). The three claims that the stand is unchanged with neuroendocrine, enteric or neuroimmune off alone rest on the earlier prototype that this section withdraws (≤ 0.2 mmHg, ≤ 0.2 bpm resolution), and the neuroendocrine case also removes AVP and RAAS, so it needs the §7 equations: those cells are marked "to be re-run on §7" in §12.14 until then.
 
 ### 12.10. Eating a meal (`meal`)
 
@@ -5453,7 +5478,7 @@ Prototype outcomes. "=" means within ±1 % of all networks on. Stressor values u
 | `loudSound` | central form (§12.15) | no blink or limb startle (efference only); SCR 1.46 s, pupil 4.80 mm, HR = | blink 24.7 ms =; no SCR; pupils fixed at 5.0 mm; HR flat at 101.0 | = | = | = |
 | `brightLight` | central form, no pupil | = | no light reflex, pupils fixed at 5.0 mm; central = | = | = | = |
 | `kneeJerk` | unavailable | no EMG, movement or S1 arrival | = | = | = | = |
-| `standUp` | unavailable | passive tilt: SBP nadir −10.7 at 20.5 s, HR +14.8 at 20.5 s; 180 s = (§7 equations, §12.9) | supine 92/65; SBP nadir 58 at ≈ 14 s; 71/50 at 180 s, syncopal range (§12.9); HR flat | = | = | = |
+| `standUp` | unavailable | passive tilt: SBP nadir −10.7 at 20.5 s, HR +14.8 at 20.5 s; 180 s = (§7 equations, §12.9) | supine 92/65; SBP nadir 58 at ≈ 14 s; 71/50 at 180 s, syncopal range (§12.9); HR flat | to be re-run on §7 | to be re-run on §7 (it removes AVP and RAAS, so the §7.15 RAAS conductance term must be defined first, §12.9) | to be re-run on §7 |
 | `meal` | unavailable | gastric phases =; ingestion shown as efference only, food delivered to the stomach by assumption [model] | retention 81/64/31 %; no cephalic phase; SBP −16.6 at 30 min, plateau −18.6; HR flat | retention 100 %; sphincters closed; no CCK rise; cephalic insulin only | retention 75/53/15 % (no hormonal brake); no insulin action; SBP −4.0 | = |
 | `stressor` | central form | = | HR flat at 101.0; no adrenaline; ACTH and cortisol = (×2.21 at 37 min) | = | no adrenaline, ACTH or cortisol rise; HR +10.3 at 1.3 min | = |
 | `infection` | unavailable | fever slower and smaller (no shivering): +1.15 °C at 4.06 h; HR +23.1 | TNF AUC +14 %, IL-6 AUC +12 %; fever +1.25 °C at 3.96 h; HR 101.0 + 9.5 (SA-node temperature only) | ≈ = (TNF AUC +1 %) | IL-6 AUC +15 %; cortisol flat; fever +1.41 °C at 3.52 h; HR +21.7 | TNF AUC +15 %, IL-6 AUC +31 %; no fever, HR rise or cortisol rise |
@@ -5573,10 +5598,10 @@ Tolerances are this section's acceptance bands for the implementation, not physi
 | 25 | rest | Cardiac vagal BRS | ≈ 15.7 ms/mmHg (§7) | H | ±5 | 15.8 (§7.8, analytic) | pass (calibrated) |
 | 26 | rest | Mayer-wave band | ≈ 0.1 Hz (§7) | H | ±0.03 Hz | no resonance: the closed-loop MAP spectrum is monotone (§4.12, §7.15) | fail |
 | 27 | rest | RSA amplitude | 5–15 bpm (§7) | H | inside range | 9.4 bpm at 14 breaths/min (§7.8); kept in coarse CV mode by the analytic overlay (§11.6) | pass |
-| 28 | `meal` (255-kcal test meal) | Gastric retention 1/2/4 h | §8 ranges | H | inside ranges | 60/26/0.5 % | fail at 2 h |
+| 28 | `meal` (255-kcal test meal) | Gastric retention 1/2/4 h | §8 ranges (37–90 / 30–60 / 0–10 %) | H | inside ranges | 60/26/0.5 % with the former unscaled pyloric brake; to be re-run with `brakeGain` 8, which the §8.15 equations put at 74/46/3 % | fail at 2 h before the retune; expected to pass after it |
 | 29 | `meal` | CCK rise and peak | §8 | H | ±5 min | 50 % at 9.7 min, 90 % at 27.2 min | pass |
-| 30 | `meal`, autonomic off | Postprandial SBP fall | ≥ 20 mmHg within 30–60 min (§7) | H | — | −16.6 at 30 min, −18.5 at 60 min (aut + NE off: −21.0) | fail (borderline) |
-| 31 | `meal`, enteric off | Emptying stops, sphincters closed | A.5 | — | retention ≥ 99 % at 4 h | 100 % | pass |
+| 30 | `meal`, autonomic off | Postprandial SBP fall | ≥ 20 mmHg within 30–60 min (§7) | H | — | −16.6 at 30 min, −18.6 at 60 min (aut + NE off: −21.0; that cell needs the §7.15 RAAS term, as the stand does, §12.9) | fail (borderline) |
+| 31 | `meal`, enteric off | Emptying falls to the §8.8 5 % floor, sphincters closed | A.5 | — | retention ≥ 95 % at 4 h | 100 % | pass |
 | 32 | `stressor` | Cortisol peak | ×2–3 at 20–40 min (§9) | H | ±10 min | §9.4 ×1.48 at 73 min; earlier kernel ×1.46 at 67 min; variant E ×2.21 at 37 min | fail (§9.4, earlier defaults); pass (E) |
 | 33 | `stressor` | Cortisol recovery | ≈ 60–90 min after onset (§9) | H | ±15 min | §9.4 182; earlier kernel 128; E 88 | fail (§9.4, earlier defaults); pass (E) |
 | 34 | `stressor` | ACTH up by 10 min, peak near stressor end | §9 | H | peak ±5 min of 15 min | §9.4 ×2.34 at 10 min, peak 17.4 min; earlier kernel ×1.82, peak 20.8 min; E ×3.35, peak 16.7 min | pass (§9.4, E); fail (earlier defaults) |
@@ -5587,7 +5612,7 @@ Tolerances are this section's acceptance bands for the implementation, not physi
 | 39 | `infection`, neuroendocrine off | Cytokines higher (glucocorticoid brake lost) | direction (§10) | Ms | direction | IL-6 AUC +15 % | pass |
 | 40 | `infection`, autonomic off | TNF higher (inflammatory reflex lost) | direction (§10) | R | direction | TNF AUC +14 % | pass |
 | 41 | `infection`, neuroimmune off | No fever, cytokines higher | A.5 | — | ΔtSet = 0 | 0; IL-6 AUC +31 % | pass |
-| 42 | all | Determinism across frame rates | §11 | — | max \|Δ\| = 0 | 0 at 23.7, 30, 60, 144 fps (adaptive) and 60 fps fixed vs a 1-kHz reference; 240 samples × 8 states | pass |
+| 42 | all | Determinism across frame rates | §11 | — | max \|Δ\| = 0 | 0 at the §11.16 set (10, 23.7, 30, 60, 144, 240 fps, adaptive) and 60 fps fixed vs a 1-kHz reference; 999 samples × 11 states | pass |
 | 43 | `orgasm` | Regression R1–R3 | §12.13; DOPAMINE.md §9.6 after the §9.8 port | — | exact against the legacy path of the same commit (R1); R3 after the port | R1 assertable now; the 10.9-s gap to DOPAMINE.md §9.6 is the expected pre-port difference (§12.13) | open (R3 until Phase 0a) |
 | 44 | Repeat, non-habituating readouts | Stretch reflex, ABR, light reflex | unchanged [T] | H | ±5 % per trial | no habituation implemented | pass (trivially) |
 | 45 | Repeat `loudSound` ×5 | Blink and SCR amplitude | monotone decline [T] (§4, §6, §7) | H | trial 5 < trial 1 | not run; implementable with the §4.9 trace and §5.12 constants (g_hab 0.54 at trial 5) | open |
@@ -5603,8 +5628,9 @@ Tolerances are this section's acceptance bands for the implementation, not physi
 
 The §11 headless harness runs:
 
-- each core scenario under the seven switch sets of §12.14 (63 runs), asserting the matrix cells and rows 3–41 and 47–52;
+- each core scenario under the seven switch sets of §12.14 (63 cells, of which the five brain-only "unavailable" ones are skipped: 58 runs), asserting the matrix cells and rows 3–41 and 47–52;
 - all 32 switch sets reaching a bounded steady state (A.5 composition);
+- a **composition** class: for each of the 10 switch pairs, the pair outcome equals the pairwise product of the two single-switch outcomes wherever §12.14 defines both, with the vacuous consequences listed. The matrix is single-switch only, and several switch rules are not edge masks (the hormone clamp, the pupil mix, the antral g.enteric·(a + b·g.autonomic)), so "read multiplicatively" (A.5) is an assertion to test, not an identity. Autonomic + neuroendocrine, autonomic + neuroimmune and enteric + autonomic are the pairs with the most non-mask rules;
 - the optional scenarios;
 - one manual stimulus per sense with its episode clock;
 - the repetition rows 44–46;
@@ -5614,11 +5640,11 @@ On this workstation the prototype needs 12 s for the fast scenarios and 17 s for
 
 ### 12.22. Open questions
 
-- HPA calibration (§9). The §9.4 equations and the earlier kernel's defaults fail rows 32–33 (late cortisol peak and slow recovery, both from the slow plasma pool), while variant E passes them. A free/total cortisol split may reconcile the two. The §9.4 default (n = 6) now pulses at baseline, so the "pulsatile" regime is visible in ACTH, but strong drive gives no saturated plateau (§9.10).
-- Startle limb latencies (§6). Conduction explains only 13–39 ms of the 75–395 ms targets, so §6 must supply central recruitment delays per target.
+- HPA calibration (§9). The §9.4 equations and the earlier kernel's defaults fail rows 32–33 (late cortisol peak and slow recovery), while variant E passes them — and variant E's route is exactly the one §9.10 now names: a shorter ACTH t½ and a shorter adrenal lag, i.e. the **delay chain**, not the plasma pool, whose clearance is the best-sourced constant in the block. A free/total cortisol split alone will not reconcile them. The §9.4 default (n = 6) now pulses at baseline, so the "pulsatile" regime is visible in ACTH, but strong drive gives no saturated plateau (§9.10).
+- Startle limb latencies (§6). Conduction explains only 13–39 ms of the 75–395 ms bands, and §6.11 now supplies the [model] recruitment delays (neck 68, shoulder 85, arm 115, leg 150 ms). The bands themselves are capture figures with no primary source and are probably movement, not EMG, latencies, so the comparison is indicative only.
 - Defence response (§7). The second acceleration was injected and the intervening deceleration is missing. §7 must provide the command and its windows.
 - Baroreflex (§7). On the §7 equations BRS passes (15.8 ms/mmHg) but the stand HR peak is +36 bpm (row 19) and there is no Mayer resonance (row 26). A second-order vascular stage (Windkessel, τ ≈ 1.5 s) tuned to K/K_c 0.5–0.7 at 0.08–0.12 Hz would address the resonance (§4.12, §7.15). §7 must fix the 30:15 criterion; the §7 equations give 1.088 with no undershoot.
-- Gastric emptying (§8). The lumped core empties the 255-kcal test meal too fast at 2 h. The 600-kcal splanchnic load still lowers SBP by 3 mmHg at 6 h.
+- Gastric emptying (§8). The 2 h retention failure was the unscaled pyloric brake, now re-tuned with `brakeGain` 8 (§8.8); rows 28 and the §8.13 outputs must be re-run on the kernel to confirm. The 600-kcal splanchnic load still lowers SBP by 3 mmHg at 6 h.
 - Postprandial hypotension with autonomic off reaches −18.6 mmHg. It depends on the [model] renin sympathetic share and the splanchnic gain (§7, §9).
 - Endotoxin HR peaks 0.8 h before core temperature (§10). Is a delayed central sickness drive wanted?
 - Orgasm regression. The current code's deterministic ignition (62.6 s / 10.43 min) differs from DOPAMINE.md §9.6 (51.7 s / 8.61 min) because §9.6 describes the ported model. Phase 0a (B.15) applies the DOPAMINE.md §9.8 port and records the references again; regenerating §9.6 from the post-port code instead is optional and needs approval. DOPAMINE.md values are not changed here.
@@ -5821,13 +5847,13 @@ All body colours come from the project's Planck × CIE pipeline (`src/color.js` 
 
 | Role | CCT (K), Duv | sRGB | OKLCH L / C / h | Red ratio | Nearest role (ΔE2000, Y 0.35) | Species | Conf. | Source |
 |---|---|---|---|---|---|---|---|---|
-| Afferent packets, every network ("toward the brain"); somatic swatch | 13,000, 0 | #bccdff | 0.853 / 0.072 / 270 | 0.237 | neuroimmune 10.9 | — | low | [model]; computed |
-| Somatic efferent packets | 6,000, 0 | #fff4f1 | 0.974 / 0.013 / 35 (near-neutral) | 0.360 | neuroendocrine 12.3 | — | low | [model]; computed |
+| Afferent packets, every network ("toward the brain"); somatic swatch | 13,000, 0 | #bccdff | 0.853 / 0.072 / 270 | 0.237 | neuroimmune 11.2 | — | low | [model]; computed |
+| Somatic efferent packets | 6,000, 0 | #fff4f1 | 0.974 / 0.013 / 35 (near-neutral) | 0.360 | parasympathetic 12.2 | — | low | [model]; computed |
 | Sympathetic | 10,000, −0.020 | #e0c3ff | 0.862 / 0.087 / 306 | 0.324 | neuroendocrine 11.1 | — | low | [model]; computed |
-| Parasympathetic, incl. vagus | 6,000, +0.0125 | #f2ffe5 | 0.984 / 0.037 / 128 | 0.334 | enteric 11.6 | — | low | [model]; computed |
+| Parasympathetic, incl. vagus | 6,000, +0.0125 | #f2ffe5 | 0.984 / 0.037 / 128 | 0.334 | enteric 11.5 | — | low | [model]; computed |
 | Enteric | 8,500, +0.020 | #c7feff | 0.960 / 0.055 / 198 | 0.223 | neuroimmune 10.9 | — | low | [model]; computed |
 | Neuroendocrine (blood haze, gland glow) | 5,500, −0.0175 | #ffd2e6 | 0.908 / 0.056 / 350 | 0.411 | sympathetic 11.1 | — | low | [model]; computed |
-| Neuroimmune (speckle) | 13,000, +0.015 | #a5dcff | 0.869 / 0.074 / 237 | 0.181 | afferent 10.9 | — | low | [model]; computed |
+| Neuroimmune (speckle) | 13,000, +0.015 | #a5dcff | 0.869 / 0.074 / 237 | 0.181 | enteric 10.9 | — | low | [model]; computed |
 | Structural (skin, organs, bone, muscle, cord, resting somatic streams) | 7,500, 0 | #ebecff | 0.949 / 0.025 / 282 | 0.310 | — | — | low | [model]; computed |
 | Chyme marker | 6,000, 0 | #fff4f1 | as somatic efferent | 0.360 | — | — | low | [model] |
 | Brain neuron stars (unchanged) | 7,000–9,500, 0 | #f4f2ff – #d1dcff | — | 0.32–0.27 | — | — | high | DOPAMINE.md §8.2 |
@@ -5835,7 +5861,7 @@ All body colours come from the project's Planck × CIE pipeline (`src/color.js` 
 
 | Check | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|
-| Minimum pairwise ΔE2000, seven coloured roles, Y 0.6 / 0.35 / 0.15 | 11.1 / 10.9 / 8.9 | ΔE2000 | — | high | computed (`s13final.mjs`) |
+| Minimum pairwise ΔE2000, seven coloured roles, Y 0.6 / 0.35 / 0.15 | 11.4 / 10.9 / 8.9 (the Y 0.6 minimum is afferent–neuroimmune, the other two enteric–neuroimmune) | ΔE2000 | — | high | computed (`s13final.mjs`), re-checked against an independent CIEDE2000 implementation validated on the Sharma test pair (2.0425) |
 | Same under simulated dichromacy, Y 0.35: protan / deutan / tritan | 1.0 (afferent/sympathetic) / 0.1 (sympathetic/neuroimmune) / 3.4 (enteric/neuroimmune) | ΔE2000 | — | low | computed with Machado, Oliveira & Fernandes 2009 matrices |
 | Every body colour against dopamine amber | ≥ 24.9 | ΔE2000 | — | high | computed |
 | Resting streams (network tint mixed 0.4 into the structural neutral) against structural | 6.3–7.8 | ΔE2000 | — | high | computed |
@@ -5929,7 +5955,7 @@ A packet is the drawn form of one population volley on one edge (`EV`, §11). It
 | Profile along the fibre | symmetric Gaussian, no tail; σ 12 (fine nerves) to 20 (trunks) | mm | — | low | [model] |
 | Peak gain | +60 % of the resting stream flux at a full volley, × tanh(volley size) | — | — | low | [model] |
 | Class factors (gain; σ) | Aα, Aβ, Ia, Ib, II 1.0; Aδ, Aγ 0.8; B 0.7; C, Cpost, CT, Cmi and visceral C 0.6 with σ × 1.5 | — | — | low | [model] |
-| Discrete-packet limit | ≤ 3 per s `tS` past any point of a bundle and per limiter window; otherwise shimmer | 1/s | H | medium | W3C 2023; §13.15 |
+| Discrete-packet limit | ≤ 2 per s `tS` past any point of a bundle and per limiter window; otherwise shimmer | 1/s | H | medium | W3C 2023 (whose ceiling is 3); §13.15. Each packet is a ≥ 10 % luminance pulse, i.e. a flash, so a cap of 3 would sit exactly on the Harding hazard onset that §13.15 says is never reached, and the §13.17 flash analysis fails at a third flash. The cap is therefore 2, safe by construction rather than by the limiter |
 | Shimmer | stream flux × (1 + 0.6·ā), ā = edge activity low-passed with τ ≥ 0.3 s; per-star twinkle ±10 % at 0.2–2 Hz, desynchronised | — | — | low | [model]; DOPAMINE.md §10 rule 3 |
 | Relay arrival glow (DRG, nucleus, thalamus, cortical patch) | ≤ +40 % flux; rise ≥ 50 ms only for glows below 1 % of the flash area, otherwise the regional low-pass (τ ≥ 0.3 s) governs the rise; decay τ ≥ 0.3 s; ≤ 2 Hz per point | — | — | low | [model] |
 | Efference-only packets (A.5) | 50 % gain, desaturated; fade over the last 30 mm or 0.4 s `tS`, whichever is longer; a port marker of 6 neutral points remains | mm, s | — | low | [model] |
@@ -6033,7 +6059,7 @@ A click is unprojected to a ray in mm and sphere-traced against the §13.2 field
 | Retinal stimulus glow | ramped over ≥ 300 ms `tS`, confined to the eye cluster | ms | — | low | [model] |
 | Touch target of any site marker | ≥ 24 × 24 | CSS px | H | high | W3C 2023 (SC 2.5.8) |
 | Never pickable | S4–S5 perianal band [G Dermatome_anatomy L88]; perineal region; pelvic-floor field | — | H | high | A.1 |
-| `dermatome.S3` (ischial tuberosity [G Dermatome_anatomy L87]) | pickable only while \|yaw − π\| < π/2 | — | — | high | A.1; [model] |
+| `dermatome.S3` (ischial tuberosity [G Dermatome_anatomy L87]) | pickable only while \|wrap(yaw − π)\| < π/2, wrapping to (−π, π] — equivalently cos(yaw) < 0, a posterior view. Without the wrap the rule fails for unwrapped yaw: a camera behind the figure at yaw −3.0 rad gives \|−3.0 − π\| ≈ 6.1 > π/2. The rule is evaluated on the camera yaw whatever the pitch. `dermatome.S4`, `.S5`, the perineal region and the pelvic-floor field have no pick sample at all, from any view | — | — | high | A.1; [model] |
 | Brain-only mode | body picking disabled; chips Eye, Ear, Nose, Tongue, Head offer vision, hearing, smell, taste and balance (side L / R / both) | — | — | high | A.5, A.6 |
 
 The keyboard site list is a fully keyboard-operable alternative to clicking (arrow keys move, Enter applies, Escape clears). The Side control mirrors bilateral entries. Each entry gives the same readout as a click.
@@ -6049,7 +6075,7 @@ The keyboard site list is a fully keyboard-operable alternative to clicking (arr
 
 ### 13.13. HUD dropdowns, labels and controls
 
-Every dropdown is collapsible. Its head shows the title, at most one short status chip (for example the FPS badge or the "rat-calibrated" pill, `index.html` L39, L127) and the chevron; never a subtitle line, tagline or one-line summary (user decision 7). Open states are remembered per dropdown, as now (`src/ui.js` L76–L79). The existing vitals dropdown titled "Body" (`index.html` L94, store key `vitals`) is renamed **Vitals** and keeps its key. The new **Body** dropdown takes the key `body`. Default at first load: whole body, all networks on, the Upper body view, no scenario playing, all dropdowns collapsed (A.7).
+Every dropdown is collapsible. Its head shows the title, at most one short status chip (for example the FPS badge or the "rat-calibrated" pill, `index.html` L39, L127) and the chevron; never a subtitle line, tagline or one-line summary (user decision 7). Open states are remembered per dropdown, as now (`src/ui.js` L76–L79). The existing vitals dropdown titled "Body" (`index.html` L94, store key `vitals`) is renamed **Vitals** and keeps its key. The new **Body** dropdown takes the key `body`. Default at first load: whole body, all networks on, the orgasm scenario playing in demo mode on the Dopamine system view (`?scenario=none`: the Upper body view, no scenario), all dropdowns collapsed (A.7).
 
 | Dropdown (order) | Contents and exact labels | Brain-only mode |
 |---|---|---|
@@ -6118,7 +6144,7 @@ These limits apply in screen time `tS` to the composited frame. Everything drawn
 
 | Quantity | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|
-| Flash rate | ceiling ≤ 3 general or red flashes in any 1 s (A.9; user decision 9); the limiter triggers before a window would register a third flash (sixth opposing transition) in any 1 s, so displayed flash rates stay below 3 Hz, the hazard onset of Harding et al. 2005 (≥ 3 Hz) | 1/s | H | high | W3C 2023 (SC 2.3.1); Harding et al. 2005 [unverified: abstract read] |
+| Flash rate | WCAG ceiling ≤ 3 general or red flashes in any 1 s; **display target ≤ 2** (A.9; user decision 9). The limiter triggers before a window would register a third flash (sixth opposing transition) in any 1 s, so displayed flash rates stay below 3 Hz, the hazard onset of Harding et al. 2005 (≥ 3 Hz), and every per-source cap (packets, §13.8) is set at 2 so no single source needs the limiter to stay inside it | 1/s | H | high | W3C 2023 (SC 2.3.1, which permits up to three flashes); Harding et al. 2005 [unverified: abstract read] |
 | General flash | a pair of opposing changes of ≥ 10 % of maximum relative luminance, with the darker state < 0.80 | — | H | high | W3C 2023; DOPAMINE.md §10 rule 1 |
 | Red flash | a transition to or from R/(R+G+B) ≥ 0.8 with a chromaticity change > 0.2 in CIE 1976 UCS (linear RGB) | — | H | high | W3C 2023; DOPAMINE.md §10 rule 4 |
 | Flash area | 0.006 sr = 25.1 % of a 10° field (0.0239 sr) | sr | H | high | W3C 2023; computed |
@@ -6128,7 +6154,7 @@ These limits apply in screen time `tS` to the composited frame. Everything drawn
 | Regional low-pass (sources ≥ 1 % of the flash area) | τ ≥ 0.3 (passes 17 % of a 3 Hz and 8.8 % of a 6 Hz modulation) | s | — | high | computed; A.9 |
 | Global (frame-mean) low-pass | τ ≥ 0.5 | s | — | low | A.9 |
 | Large-area slew | any region larger than the flash area changes by ≤ 10 % of maximum per ⅓ s | — | H | medium | DOPAMINE.md §10 rule 2 |
-| Packets; single points | ≤ 3 per s past any bundle point and per window; ≤ 2 Hz per point | 1/s, Hz | — | low | DOPAMINE.md §10 rule 3 |
+| Packets; single points | ≤ 2 per s past any bundle point and per window (§13.8); ≤ 2 Hz per point | 1/s, Hz | — | low | DOPAMINE.md §10 rule 3; tightened from 3 so that the packet stream cannot itself reach the flash ceiling |
 | Toggle and overlay fade | t_fade = max(0.8 s, ΔL_max ÷ 0.3 s⁻¹), ΔL_max = largest regional change as a fraction of maximum; ghost at 8 % flux | s | — | low | A.5; A.9; [model] |
 | Heartbeat | ≤ 8 % of maximum; per beat only at `kh` ≤ 1 and `hr` ≤ 150 bpm | — | — | low | §13.9; A.9 |
 | Vasoconstriction dimming | ≤ 15 %, τ ≥ 2 s | — | — | low | A.9 |
@@ -6136,11 +6162,12 @@ These limits apply in screen time `tS` to the composited frame. Everything drawn
 | Red ratio, body colours / modulator tints | maximum 0.411 / 0.46 | — | — | high | computed (§13.5, §13.6) |
 | Periodic structures (ribs, intercostal streams, dermatome bands) | ≤ 5 light–dark pairs over the whole pattern, static or changing (DOPAMINE.md §10 rule 5); otherwise irregular, jittered and ≤ 30 % Michelson; never a regular grating of 1–8 cycles/deg | pairs | H | medium | DOPAMINE.md §10 rule 5; Harding et al. 2005 [unverified: abstract read]; Fisher et al. 2026 [unverified] |
 | Stripe contrast | ≤ 30 % Michelson, irregular and jittered | — | — | low | [model]; DOPAMINE.md §10 rule 5 |
-| Rib and intercostal period, Whole body / Upper body | 13.1 px ≈ 3.0 cycles/deg / 33.8 px ≈ 1.2 cycles/deg; a rib cage has ≈ 12 pairs at any scale | — | — | high | computed (24 mm spacing, 60 cm; 39.6 CSS px per degree) |
+| Rib and intercostal period, Whole body / Upper body | 13.1 px ≈ 3.0 cycles/deg / 33.8 px ≈ 1.2 cycles/deg at 60 cm; a rib cage has ≈ 12 pairs at any scale | — | — | high | computed (24 mm spacing, 60 cm; 39.6 CSS px per degree) |
+| CSS px per degree by viewing distance (D · tan 1° · 3.7795) | 39.6 at 60 cm; 49.5 at 75 cm; 52.8 at 80 cm; 59.4 at 90 cm | CSS px/deg | H | high | computed. The spatial-frequency hazard grows with distance, so a period stated for one distance has no margin |
 | Limiter cells | ≤ 4 CSS px (≈ 0.1°); each cell accumulates the projected area of the sources whose own luminance change is ≥ 10 % of maximum (darker state < 0.80) or that make a red transition, with a 1-s transition history | CSS px, s | — | low | [model] |
 | Limiter windows | the 10° window (341 × 256 CSS px), sliding by one cell | CSS px | — | low | W3C 2023; [model] |
 
-Pattern rules. Ribs are drawn as irregular, non-periodic hints only, never as a regular grating of 1–8 cycles/deg: their period must stay ≥ 40 CSS px (≥ 1.7 px/mm for the 24-mm spacing), which only the Thorax, Abdomen and Head and neck views reach, and the skeleton is off by default. Intercostal streams and dermatome bands are jittered and kept at ≤ 30 % contrast, and they are never lit in phase, so a mass volley never lights every intercostal at once. The intestine is a non-periodic random-walk tube, never regular parallel loops (§2.9).
+Pattern rules. Ribs are drawn as irregular, non-periodic hints only, never as a regular grating of 1–8 cycles/deg. The period rule is stated for a **range** of viewing distances, not for one: it must stay ≥ 60 CSS px (≥ 2.5 px/mm for the 24-mm spacing), which keeps the pattern at ≤ 0.66 cycles/deg at 60 cm and ≤ 0.99 at 90 cm, outside the provocative band over the whole 50–90 cm desktop range. A 40-px period would be 0.99 cycles/deg at exactly 60 cm and 1.24 at 75 cm, i.e. inside the band, so it is not used. Of the presets only Thorax and Head and neck reach 60 px; Abdomen (2.227 px/mm × 24 mm = 53 px) does not, and ribs there stay in the jittered, non-periodic form. The skeleton is off by default. Intercostal streams and dermatome bands are jittered and kept at ≤ 30 % contrast, and they are never lit in phase, so a mass volley never lights every intercostal at once. The intestine is a non-periodic random-walk tube, never regular parallel loops (§2.9).
 
 Limiter. Every frame, each light source adds its projected area and its own luminance transition to the cells it covers. A window registers a flash when the cells with concurrent opposing transitions cover > 25 % of it (> 21,824 CSS px²), so widespread low-contrast flicker on scattered stars is counted even when the window mean changes little. When a window would register a third flash within 1 s, or the large-area slew limit would be broken, a gain is applied to the sources in that window, the most recent first, and the window is forced into shimmer. The large-area slew limit applies to any connected set of cells larger than the flash area. The cost does not depend on point counts. The rhythm rule (§13.9) removes periodic sources before they reach the limiter. A view change is user-initiated: it is exempt from the large-area slew limit but counts as one transition, and view changes are limited to one per t_fade (§13.11).
 
@@ -6272,7 +6299,7 @@ Model checks (not sources): `C:\Users\User\AppData\Local\Temp\claude\C--Users-Us
 
 **B** Bahney & von Bartheld 2018 (H §6); Baker et al. 1990 and 1991, two papers (H §3, dorsal and median raphe); Baker et al. 2019 (H §8, gut motility); Bandler & Shipley 1994 (§3); Barnes 1986 (§7); Basbaum & Fields 1984 (§5); Bastos et al. 2015 (Mk §3); Bayliss & Starling 1899 (D §8); Beckstead, Morse & Norgren 1980 (Mk §3); Bellville et al. 1979 (H §7) [recalled]; Benarroch 1993 (§7); Benedek & Kaernbach 2011 (H §7); Bengel et al. 2001 (H §7); Benson et al. 1986 (H §5); Bergamin & Kardon 2003 (H §5, §7); Berger, Saul & Cohen 1989 (D §3, §4, §7); Berthoud & Powley 1992 (R §8); Bertini, Bianchi & Ghezzi 1988 (Ms §10); Blakemore, Wolpert & Frith 1998 (H §4); Blumenthal et al. 2005 (H §5); Bluthé et al. 1994 (R §10); Borbély 1982 (§3); Borovikova et al. 2000 (R §10); Borst & Karemaker 1983 (H §4, §7); Borst et al. 1982 (H §7); Boyd & Kalu 1979 (C §4) [secondary]; Boynton et al. 1996 (H §3); Braddom & Johnson 1974 (H §6); Bragard, Chen & Plaghki 1996 (H §4); Bratton et al. 2012 (R §10; A.8 #16); Bravo et al. 2011 (Ms §8); Bremer 1935 (C §1; A.8 #5) [unverified]; Brener, Hendrix & McHugh 1983 (H §8); Brett, Johnsrude & Owen 2002 (§2); Brodoehl, Witte & Klingner 2016 (H §2); Brookes 2001 (GP §8) [recalled].
 
-**C** Campbell, Gooden & Horowitz 1975 (H §7); Carandini & Heeger 2012 (§4); Caterina et al. 1997, 1999 (R §5); Cavanagh & Komi 1979 (H §4, §11); Chandrashekar et al. 2006 (§5); Chaudhry & Cornblath 1992 (H §6); Cole & Sedgwick 1992 (H §6); Colebatch & Halmagyi 1992 (H §5); Copeland et al. 2005 (H §10, §12); Craig 2002, 2009 (§3, §5, §7, §8); Cruccu et al. 2008 (H §3, §5); Cryer 1980 (H §7); Cummings et al. 1987 (H §8, colonic fermentation); Cummings et al. 2001 (H §8, ghrelin); Curcio et al. 1990; Curcio & Allen 1990 (H §5); Cypess et al. 2009 (H §7); Czeisler et al. 1999 (H §3).
+**C** Campbell, Gooden & Horowitz 1975 (H §7); Carandini & Heeger 2012 (§4); Caterina et al. 1997, 1999 (R §5); Cavanagh & Komi 1979 (H §4, §11); Chandrashekar et al. 2010 (Ms §5); Chaudhry & Cornblath 1992 (H §6); Cole & Sedgwick 1992 (H §6); Colebatch & Halmagyi 1992 (H §5); Copeland et al. 2005 (H §10, §12); Craig 2002, 2009 (§3, §5, §7, §8); Cruccu et al. 2008 (H §3, §5); Cryer 1980 (H §7); Cummings et al. 1987 (H §8, colonic fermentation); Cummings et al. 2001 (H §8, ghrelin); Curcio et al. 1990; Curcio & Allen 1990 (H §5); Cypess et al. 2009 (H §7); Czeisler et al. 1999 (H §3).
 
 **D** Daan, Beersma & Borbély 1984 (H §3); Dalton 2000 (H §5); Dampney 1994 (§7); Dantzer et al. 2008 (§10); Davis et al. 1982 (R §1, §5, §6); Davis & Whalen 2001 (§3); de Boer, Karemaker & Strackee 1987 (H §4); Deacon et al. 1995 (H §8); Del Negro, Funk & Feldman 2018 (§3); DeLong 1971 (Mk §3); Destexhe, Rudolph & Paré 2003 (§4); Di Russo et al. 2002 (H §5); Diamant & Bortoff 1969 (D §8); Dickerson & Kemeny 2004 (H §4, §9, §11); Dimitrijevic, Gerasimenko & Pinter 1998 (H §6); Dimitrova et al. 2002 (H §3); Dinning et al. 2014 (H §8); Ditunno et al. 2004 (H §6, §7); Dodgson 2004 (H §2); Drillis & Contini 1966 (H §2; A.2) [secondary]; DuBois & DuBois 1916 (H §2); Dumoulin et al. 2000 (H §3, §5).
 
@@ -6316,7 +6343,7 @@ Model checks (not sources): `C:\Users\User\AppData\Local\Temp\claude\C--Users-Us
 
 - **Textbooks and monographs:** Gray's Anatomy (1918 edition); Kandel et al., *Principles of Neural Science*; Moore, *Clinically Oriented Anatomy*; Winter, *Biomechanics and Motor Control of Human Movement*; Kendall, McCreary & Provance, *Muscles: Testing and Function*; Furness 2006, *The Enteric Nervous System*; Mathias & Bannister, *Autonomic Failure*; Stevens 1975, *Psychophysics*; Stein & Meredith 1993 (multisensory integration, C); Eckberg & Sleight 1992 (human baroreflexes); Harding & Jeavons 1994 (photosensitive epilepsy); Loewenfeld (the pupil; edition not checked); Dawson, Schell & Filion 2007 (chapter, *Handbook of Psychophysiology*).
 - **Atlases:** Naidich et al. 2009 (Duvernoy's atlas of the human brain stem and cerebellum); Paxinos & Huang 1995 (human brainstem).
-- **Standards and guidelines:** W3C WCAG 2.1 and 2.2, Success Criteria 2.3.1 and 2.3.2, and ITC/Ofcom guidance on flashing images and regular patterns (both as in DOPAMINE.md §11.4); ASIA ISNCSCI and ISAFSCI standards (via Krassioukov et al. 2009); Semmes–Weinstein monofilament norms; Gordon et al. 2014, ANSUR II anthropometric survey (technical report; numbers not verified in its tables). Guideline papers already listed in §14.2: Abell et al. 2008, Blumenthal et al. 2005, Cruccu et al. 2008, Freeman et al. 2011, Kahrilas et al. 2015, Odom et al. 2016, Rao et al. 2002, Rossini et al. 2015.
+- **Standards and guidelines:** W3C WCAG 2.2 (SC 2.3.1, whose text is unchanged from 2.1; SC 2.3.2; SC 2.5.8, which exists only in 2.2), and ITC/Ofcom guidance on flashing images and regular patterns (both as in DOPAMINE.md §11.4); ASIA ISNCSCI and ISAFSCI standards (via Krassioukov et al. 2009); Semmes–Weinstein monofilament norms; Gordon et al. 2014, ANSUR II anthropometric survey (technical report; numbers not verified in its tables). Guideline papers already listed in §14.2: Abell et al. 2008, Blumenthal et al. 2005, Cruccu et al. 2008, Freeman et al. 2011, Kahrilas et al. 2015, Odom et al. 2016, Rao et al. 2002, Rossini et al. 2015.
 
 ### 14.5. Sources identified by venue or without a year
 
@@ -6373,7 +6400,7 @@ This appendix is binding for every section of `brain-system/research/ANALYSIS.md
 | Evidence tags | **Author Year** for peer-reviewed work ("A & B Year"; three or more authors "A et al. Year"). **[T]** for textbook knowledge, which lowers confidence by one step. **[G file Lx]** for a raw capture: file stem without the `en_wikipedia_org_api_rest_v1_page_html_` prefix, folder `brain-system/raw/` unless prefixed (e.g. [G Oxytocin L73]). **[model]** for a design or calibration choice of this project. Modifiers: **[recalled]** (value from memory, not checked against the original), **[secondary]** (taken from a secondary tabulation, e.g. "Andersen et al. 2013 via arXiv:2311.04570") and **[unverified]** (full text not read). A value tagged [recalled] or [secondary] is at most low confidence unless an independent source agrees. Never invent a citation: if unsure, write [T] and lower the confidence. |
 | Species tags | **H** human, **Mk** macaque, **SM** squirrel monkey, **R** rat, **Ms** mouse, **C** cat, **D** dog, **GP** guinea pig, **Gb** gerbil, **Sq** squid, **—** model choice. Every quantity carries a species tag. |
 | Confidence | **high** (replicated direct measurement), **medium** (one line of evidence or indirect), **low** (estimate, extrapolation, design choice or contested). These are the DOPAMINE.md definitions. |
-| Notation | En dash for ranges (18–23), "≈" for approximate, Unicode minus "−" in numbers, "× 10ⁿ" for powers, comma thousands (86,000). Code identifiers and file paths in backticks. Cross-references: "§7.4" within ANALYSIS.md, "DOPAMINE.md §6.4", "`src/anatomy.js` L196". |
+| Notation | En dash for ranges (18–23), "≈" for approximate, Unicode minus "−" in numbers, "× 10ⁿ" for powers, comma thousands (86,000). Code identifiers and file paths in backticks. Cross-references: "§7.4" within ANALYSIS.md, "DOPAMINE.md §6.4", "`src/anatomy.js` L321". |
 | Units | SI with mm, ms, s, min, h, mmHg, bpm, °C, dB SPL, cd/m², µS, pg/mL, µg/dL, pM. The kernel uses seconds for time, mm for length and m/s for velocity. Because m/s = mm/ms, delay in ms = L_mm / v_mps. |
 | Content rules | No genital structures. Pelvic anatomy appears only as schematic nerves and plexuses, bladder, rectum and an unlabelled pelvic-floor field. The pudendal nerve ends at the perineal midline. The S4–S5 perianal band, perineal sites and the pelvic-floor field are never pickable from any view; `dermatome.S3` is pickable only from posterior views (§13.12). The orgasm scenario is described only clinically and by reference to DOPAMINE.md. |
 | Open questions | Every section ends with `### N.last. Open questions` (bullets), listing unverified values and decisions that need data. |
@@ -6485,8 +6512,8 @@ Ids are camelCase ASCII. A sided instance is `id.R` / `id.L`; midline nodes have
 | `kh` | Clock rate in human s per screen s (the `response.js` convention). Range **0.005–3,600**. HUD shows `t 23.0 ms  ×1/100` (×1/n when kh < 1, ×n when kh > 1). |
 | Presets | `reflex` ×1/100 · `pain` ×1/10 · `autonomic` ×1 · `gut` ×10 · `endocrine` ×60 · `immune` ×900 · `circadian` ×3,600 |
 | Owner | One clock (`src/clock.js`) owns kh. Sources, in priority order: user lock › scenario delegate (the orgasm scenario's own clock, §11.14) › scenario keyframes › adaptive rule. Slew ≤ 1 decade per screen s in log space (a LogRamp; log-time playback emerges from this). While the orgasm delegate holds the clock, kh follows that clock verbatim, including ramps steeper than 1 decade per s, the instant switch into ONSET or `inevitability` and recovery values above 3,600 (§11.14). |
-| Adaptive rule (manual stimuli) | Each click opens an **episode**. Before onset, an approach phase of log₁₀(k₀/k₁) screen s (≈ 1.7 s from ×1 to ×0.02) lowers kh; tOnset = tH_now + H_desc(kh_now, k₁) (§11.7, §11.9). Target = minimum over active layers: packets in flight on edges ≥ 50 mm give clamp(transit / 2.5 s, 0.005, 1); breath-averaged cardiac or evoked skin-conductance transients give 1 (§11.7); HPA active gives 60; immune active gives 900. Scheduled stimuli less than 2.5 screen s ahead pull kh down in advance. |
-| Invariants | Velocities are never rescaled per fibre class. Step sizes never depend on kh. If the CPU budget is exceeded, the kernel stops at a step boundary and the clock commits the time reached (time slicing, §11.7), which lowers the effective kh; the step size never changes. |
+| Adaptive rule (manual stimuli) | Each click opens an **episode**. Before onset, an approach phase of log₁₀(k₀/k₁) screen s (≈ 1.7 s from ×1 to ×0.02) lowers kh; tOnset = tH_now + H_desc(kh_now, k₁) (§11.7, §11.9). Target = minimum over active layers: **leading** packets (§11.8) in flight on **extracerebral** edges ≥ 50 mm give clamp(min transit / 2.5 s, 0.005, 1) — counting sustained trains and intracerebral packets as well holds kh at its 0.005 floor, so that 200 screen s advance only 26.9 human s instead of 116.7 (§11.7); breath-averaged cardiac or evoked skin-conductance transients give 1 (§11.7); any neuroendocrine pool away from its current target gives 60 (§11.7); immune active gives 900. Scheduled stimuli less than 2.5 screen s ahead pull kh down in advance. |
+| Invariants | Velocities are never rescaled per fibre class. Step sizes never depend on kh. If the CPU budget is exceeded, the kernel stops at a step boundary and the clock commits the time reached (time slicing, §11.7), which lowers the effective kh; the step size never changes. While a scenario delegate holds the clock, `commit` is a no-op and the kernel lags the delegate's tH, carrying the backlog (§11.7, §11.14, B.6). |
 
 Kernel layers (owner §11; fixed grids, deterministic, seeded `mulberry32` per layer):
 
@@ -6503,25 +6530,25 @@ Kernel layers (owner §11; fixed grids, deterministic, seeded `mulberry32` per l
 ### A.5 Network switch semantics
 
 Rules common to all switches:
-- Each edge carries `nets` (a set). It runs only if `bodyMode = 'body'` and **all** listed networks are on. `cns` and `special` edges have `nets = []`.
-- Switching ramps `g.<net>` between 0 and 1 over 1.0 s of tH; efferent gains act at the effector, after the dead time (§11.10). The display ghost follows g.<net>(tH), rate-limited so that it never changes faster than the §13.15 fade t_fade (≥ 0.8 s tS); a network is drawn fully off only when g = 0. Ghost = 8 % flux, fully desaturated.
+- Each edge carries `nets` (a set). The predicate has three cases (§11.3 rule 2): an edge with a non-empty `nets` runs only if `bodyMode = 'body'` and **all** listed networks are on; an edge carrying the **body flag** (a `tissue` edge, or any edge with a body-side endpoint) runs only in whole-body mode; every remaining edge — `cns` and `special`, which have `nets = []` — always runs, so the CNS and the special-sense injection keep working in brain-only mode. Reading the first case as if it applied to `nets = []` as well would stop the whole CNS in brain-only mode, contradicting the Master row below.
+- Switching ramps `g.<net>` between 0 and 1 over 1.0 s of tH (the master switch is a step, since all g are 0 in brain-only mode); efferent gains act at the effector, after the dead time (§11.10, which records the conduction/effector split that choice simplifies). The display ghost follows g.<net>(tH), rate-limited so that it never changes faster than the §13.15 fade t_fade (≥ 0.8 s tS); a network is drawn fully off only when g = 0. Ghost = 8 % flux, fully desaturated.
 - "Off" removes drive. States relax by their own kinetics to the off-state: intrinsic behaviour for neural targets (denervation), basal values for blood hormones (replacement, never zero).
 - Brain nodes always keep computing their commands, shown as tints and as "efference only" packets that fade at the port.
 - In-flight packets on cut edges fade out.
-- The master switch freezes and hides the body. Body states reset to the resting steady state when the body is switched back on.
+- The master switch freezes and hides the body: nothing integrates while it is hidden, so a scenario interrupted by brain-only mode is not resumed. Body states reset to the resting steady state when the body is switched back on, taken from the §11.10 cache keyed by `(switch set, age, posture, fed, time of day at return)`.
 - Brain-systems toggles in the HUD are display overlays only; brain simulation is never switched.
-- Switch sets compose by the edge mask alone: with several networks off, every edge listing any of them stops, and the per-network consequence rows of this table, §5–§10 and §12.14 are read multiplicatively. A row's consequence may become vacuous under composition (for example, "shivering absent" adds nothing once `tSet` is flat, and "the splenic branch is unaffected" holds only while `autonomic` is on). §12.14 lists single-switch outcomes; multi-switch outcomes are derived, not tabulated, and the headless tests assert that all 32 switch sets reach a bounded steady state (§11.16; §12.21).
+- Switch sets compose by the edge mask alone: with several networks off, every edge listing any of them stops, and the per-network consequence rows of this table, §5–§10 and §12.14 are read multiplicatively. Several switch rules are not edge masks, however (the hormone clamp h = g·h_cmd + (1 − g), the pupil mix, the antral g.enteric·(a + b·g.autonomic)), so the multiplicative reading is a property the §12.21 composition tests must assert for the 10 pairs, not an identity. A row's consequence may become vacuous under composition (for example, "shivering absent" adds nothing once `tSet` is flat, and "the splenic branch is unaffected" holds only while `autonomic` is on). §12.14 lists single-switch outcomes; multi-switch outcomes are derived, not tabulated, and the headless tests assert that all 32 switch sets reach a bounded steady state (§11.16; §12.21).
 
 | Switch off | What turns off | What keeps running autonomously | What compensates or emerges | Readouts |
 |---|---|---|---|---|
 | **Master → Brain only** | Every body node and edge: cord below z −72, PNS, ganglia, organs, blood, immune tissue. All non-special afferent ports go silent. All efferent ports end as efference only. | All CNS: rate graph, arousal state machine, SCN, preBötC (fictive), RVLM tonic drive, PVN/pituitary commands, modulators, dopamine model. Special senses are injected at the first central station (retina/optic nerve start, `olfBulb`, `cochNuc`, `vestNuc`, `ntsGust`); sense organs are not drawn. | None. Blood-borne inputs to the brain are clamped at basal (life-support assumption: cortisol basal, tCore 37.0, paco2 40, pao2 95). NTS baseline drive falls; somatic and visceral thalamic relays receive nothing. | Body vitals "—" |
 | **Somatic** | Spinal and trigeminal GSA afferents; α and γ motor neurons; cranial GSE/SVE motor (eye movements, jaw, face incl. blink and stapedius, pharynx and larynx, XI, XII); phrenic and intercostal output; somatic cord tracts and spinal CPG. All somatic reflexes. | Special senses; preBötC rhythm; motor commands in M1, PnC and others (efference only); autonomic, enteric, endocrine and immune networks. | Ventilation maintained at the central rhythm with clamped gases (model assumption). Central RSA persists [model]. No shivering, so fever relies on vasoconstriction and BAT. Standing up becomes a passive tilt. Startle reduces to autonomic signs. Body-surface touch, pain, temperature and proprioception produce no central or autonomic response at all. | EMG/force 0; "ventilation maintained (model assumption)" |
-| **Autonomic** | All sympathetic and parasympathetic preganglionic and postganglionic outflow (incl. adrenal medulla drive); all visceral afferents, so baroreflex and peripheral chemoreflex loops open and interoception stimuli produce nothing central. | SA node at IHR(age) (§7), still temperature-sensitive; myogenic vascular tone; ENS (peristalsis, local reflexes, small-bowel MMC uncoordinated with the stomach); HPA through blood; central CO₂ chemoreception (RTN is CNS), which alone regulates ventilation and holds resting PaCO₂ within ±2 mmHg of 40 (§7.9; HUD "central chemoreflex only"); respiratory rhythm. | Pupils fixed at the denervated diameter, no light reflex. RAAS (renal, nerve-independent) partly restores BP over minutes. Orthostatic and postprandial hypotension; on standing it is severe, with upright MAP in the syncopal range (§12.9); the model does not simulate loss of consciousness. No SCR, salivation, lacrimation, RSA, BAT, cephalic phase, vagal satiety or inflammatory reflex, so TNF is higher. | HR flat at intrinsic, tagged "intrinsic" |
-| **Enteric** | Myenteric and submucosal neurons: peristaltic reflex, MMC, secretomotor reflexes, tonic inhibition, rectoanal inhibitory reflex. | ICC slow waves (non-neural) with weak non-propagated contractions; enteroendocrine release; extrinsic nerves (vagal motor effective only on striated oesophagus; vagal mechanosensitivity ×0.5). | Sphincters closed (LES, pylorus, ileocaecal valve, IAS). Gastric emptying ≈ 0 and transit stalls (achalasia/Hirschsprung analogues, shown quietly). Gut branch of the inflammatory reflex fails. | Motility index ≈ 0 |
+| **Autonomic** | All sympathetic and parasympathetic preganglionic and postganglionic outflow (incl. adrenal medulla drive); all visceral afferents, so baroreflex and peripheral chemoreflex loops open and interoception stimuli produce nothing central. | SA node at IHR(age) (§7), still temperature-sensitive; myogenic vascular tone; ENS (peristalsis, local reflexes, small-bowel MMC uncoordinated with the stomach); HPA through blood; central CO₂ chemoreception (RTN is CNS), which alone regulates ventilation and holds resting PaCO₂ within ±2 mmHg of 40 (§7.9; HUD "central chemoreflex only"); respiratory rhythm. | Pupils fixed at the denervated diameter, no light reflex. RAAS keeps only its **non-neural** renin share (≈ 40 %: macula densa and renal baroreceptor, §7.15); the sympathetic ≈ 60 % goes with the autonomic switch, and that remaining share partly restores BP over minutes. Orthostatic and postprandial hypotension; on standing it is severe, with upright MAP in the syncopal range (§12.9); the model does not simulate loss of consciousness. No SCR, salivation, lacrimation, RSA, BAT, cephalic phase, vagal satiety or inflammatory reflex, so TNF is higher. | HR flat at intrinsic, tagged "intrinsic" |
+| **Enteric** | Myenteric and submucosal neurons: peristaltic reflex, MMC, secretomotor reflexes, tonic inhibition, rectoanal inhibitory reflex. | ICC slow waves (non-neural) with weak non-propagated contractions; enteroendocrine release; extrinsic nerves (vagal motor effective only on striated oesophagus; vagal mechanosensitivity ×0.5). | Sphincters closed (LES, pylorus, ileocaecal valve, IAS). Gastric emptying falls to the §8.8 5 % floor and transit stalls — an extreme-case model of ENS loss, pylorospasm and achalasia-like, by design [model]; Hirschsprung disease is segmental distal aganglionosis and is not the analogue (the stomach is not aganglionic in it), so no single disease is claimed. Shown quietly. Gut branch of the inflammatory reflex fails. | Motility index ≈ 0 |
 | **Neuroendocrine** | Portal transport, pituitary release to blood, posterior pituitary release, adrenal cortical and medullary hormone action, RAAS/AVP pressor actions, distant actions of gut hormones, HPT/HPG scalars. | Hypothalamic neurosecretory neurons compute commands (tints); all neural networks; paracrine actions within the gut wall. | Blood hormones relax to basal and are clamped there. No cortisol or adrenaline surge. No RAAS rescue. No cortisol brake on cytokines. Orgasm scenario: prolactin and oxytocin clamped, TIDA loop frozen. | Hormones tagged "basal" |
 | **Neuroimmune** | Immune → brain (vagal immune afferent, CVO/humoral route, endothelial PGE2 → `mnpo`, cytokine → PVN). Brain → immune (inflammatory reflex, sympathetic lymphoid action, glucocorticoid action on immune cells). Fever shift; sickness behaviour. | Peripheral innate response at the challenge site (`tissue`); tSet stays 37.0. | Cytokines higher and more prolonged (both brakes lost). No fever, no fever tachycardia, no sickness behaviour. HPA not activated by infection. | Cytokines shown; tSet flat |
 
-Cross-network AND edges (an edge needs every listed network): adrenal adrenaline `autonomic ∧ neuroendocrine`; inflammatory-reflex efferent and vagal immune sensing `autonomic ∧ neuroimmune`; cortisol on immune cells `neuroendocrine ∧ neuroimmune`; cytokine → PVN `neuroimmune` (its hormonal output also needs `neuroendocrine`); vagal motor to gut smooth muscle and secretion `autonomic ∧ enteric`; gut branch of the inflammatory reflex `autonomic ∧ enteric ∧ neuroimmune`; baroreceptor-driven AVP `autonomic ∧ neuroendocrine`; cephalic phase `special ∧ autonomic` (insulin action also needs `neuroendocrine`); fever effectors: vasoconstriction and BAT `autonomic`, shivering `somatic`, set point `neuroimmune`; pupillary light reflex `special ∧ autonomic`; startle motor `special ∧ somatic`; startle autonomic signs `special ∧ autonomic`.
+Cross-network AND edges (an edge needs every listed network): adrenal adrenaline **release** `autonomic ∧ neuroendocrine` (its β1 **receptor effect** on the heart is `neuroendocrine` alone, because a denervated target still responds to circulating adrenaline, §7.5, §11.13); inflammatory-reflex efferent and vagal immune sensing `autonomic ∧ neuroimmune`; cortisol on immune cells `neuroendocrine ∧ neuroimmune`; cytokine → PVN `neuroimmune` (its hormonal output also needs `neuroendocrine`); vagal motor to gut smooth muscle and secretion `autonomic ∧ enteric`; gut branch of the inflammatory reflex `autonomic ∧ enteric ∧ neuroimmune`; baroreceptor-driven AVP `autonomic ∧ neuroendocrine`; cephalic phase `special ∧ autonomic` (insulin action also needs `neuroendocrine`); fever effectors: vasoconstriction and BAT `autonomic`, shivering `somatic`, set point `neuroimmune`; pupillary light reflex `special ∧ autonomic`; startle motor `special ∧ somatic`; startle autonomic signs `special ∧ autonomic`.
 
 Interventions (owner §11 for semantics; one preset at a time; each removes specific nodes or edges and lets the rest respond; separate from switches): §6 spinal cord injury (level C2/C4/C6/T1/T6/T10/L2/S2 × complete/Brown-Séquard/central/anterior × phase), named peripheral nerve section with day slider, dorsal rhizotomy. §7 heart transplant, atropine, truncal vagotomy, T2–T3 sympathectomy (stellate option), pure autonomic failure. §9 adrenalectomy, hypophysectomy. §10 splenic denervation, vagus nerve stimulation (slider).
 
@@ -6567,7 +6594,7 @@ Lens sources: brain-systems → §3; signal-processing → §4; sensory → §5;
 | 13 | Rendering, visual design, HUD, performance and safety | Body SDF and skin sampling (Lund–Browder); non-explicit mannequin; organs, nerves, cord, faint skeleton, enteric mesh; flux ratios; depth attenuation; brain dominance and LOD; point budgets; palette (CCT/Duv tints, afferent/efferent, network swatches, modulator tints with pairwise ΔE2000 ≥ 10, ≤ 4 at once); packet and shimmer display; organ-response display; limb motion; camera presets and limits; picking and site snapping; HUD dropdowns and labels; disclosures (1 star ≈ N, enlarged for legibility, estimates); photosensitivity limiter; reduced motion and keyboard sites; lazy body generation | All visual numbers; point budgets (body 32.5k / 63k / 104k / 158k per tier; new brain nuclei a separate buffer of 4.5–5.3 % on top of the neuron budget, ≥ 120 stars each at high tier, ≥ 40 at low); colours; packet σ and gain; fades; camera values; photosensitivity numbers; HUD labels | §2, §3, §11, §12; DOPAMINE.md §8, §10; `performance.js` |
 | 14 | Sources | Written by the §1 writer: peer-reviewed (alphabetical, only as cited; no invented details), textbooks, [secondary] tabulations, [G] captures by folder and stem. Scratch prototypes are model checks, not sources. | — | All sections |
 
-HUD dropdowns (owner §13; titles only): **Body** (master and five switches, greyed but remembered in brain-only mode), **Interventions**, **Stimulus**, **Scenarios**, **Time**, **Brain systems** (overlays only), **Vitals** (the existing vitals panel renamed and extended), **Live** (incl. event log), **Dopamine**, **Modulators** (legend incl. NE, ACh, HA, OX tints), **Views**, **Performance**, **Settings**. Default at first load: whole body, all networks on, "Upper body" view, no scenario playing.
+HUD dropdowns (owner §13; titles only): **Body** (master and five switches, greyed but remembered in brain-only mode), **Interventions**, **Stimulus**, **Scenarios**, **Time**, **Brain systems** (overlays only), **Vitals** (the existing vitals panel renamed and extended), **Live** (incl. event log), **Dopamine**, **Modulators** (legend incl. NE, ACh, HA, OX tints), **Views**, **Performance**, **Settings**. Default at first load: whole body, all networks on, the orgasm scenario playing in demo mode on the "Dopamine system" view (user decision, 5 November 2026; `?scenario=none` opens at rest on the "Upper body" view).
 
 ### A.8 Decisions on disputed points
 
@@ -6581,7 +6608,7 @@ HUD dropdowns (owner §13; titles only): **Body** (master and five switches, gre
 | 6 | Cranial nerves are switched by functional component: GSE/SVE/GSA somatic, GVE/GVA autonomic, SSA/SVA special. §6 still describes all twelve. | Honours the user's grouping while keeping each switch physiologically coherent. |
 | 7 | Visceral afferents (incl. baro- and chemoreceptors) belong to autonomic. | Agreement across lenses. Interoception therefore requires autonomic. |
 | 8 | Respiration: rhythm is CNS; phrenic and intercostal output is somatic; peripheral chemoreceptor afferents are autonomic; RTN is CNS. Somatic off or brain only means "ventilation maintained (model assumption)". | Avoids simulated hypoxia propagating into every network. |
-| 9 | Off means denervation for nerves and basal replacement for hormones; the peripheral immune tissue response continues. | Zero cortisol would be an adrenal crisis. The immune response is tissue, not a neural network. |
+| 9 | Off means denervation for nerves and basal replacement for hormones; the peripheral immune tissue response continues. With autonomic off the adrenal medullary drive is held at basal by that same replacement convention, so plasma adrenaline stays at basal rather than falling. This is a display convention, not physiology: real cord-section patients show roughly 90 % lower resting adrenaline (0.005 against 0.06 ng/mL in quadriplegics [secondary, unverified]). The adrenalectomy and hypophysectomy presets (§11.12) likewise assume glucocorticoid replacement, for the same reason. | Zero cortisol would be an adrenal crisis. The immune response is tissue, not a neural network. |
 | 10 | Brain-only vitals show "—"; internal values are clamped at basal. | Displayed numbers would imply a body. |
 | 11 | Autonomic-off HR = IHR = 118.1 − 0.57 · age (Jose & Collison 1970, H), ≈ 101 bpm at the default age of 30. | Physiologically correct; tagged "intrinsic" so the rise is not read as activation. |
 | 12 | Baseline HR 68, BP 115/75, MAP 88, rr 14 (`response.js`). | Keeps the orgasm calibration. The simulation lens's MAP 93 is recalibrated. |
@@ -6611,7 +6638,7 @@ HUD dropdowns (owner §13; titles only): **Body** (master and five switches, gre
 | Resulting checks with these defaults | N20 (wrist) 18.6 ms; fingertip → S1 22.3 ms; patellar 22.5 ms; Achilles 32.1 ms (EV, §4.11; targets §5, §6.11). §4.11 gives the values on the §2.14 lengths (18.7, 22.3, 23.1, 32.8 ms) | §4 |
 | Pupil | Baseline 4.0 mm; autonomic off 5.0 mm fixed | §7 |
 | Blood gases when ventilation is maintained | PaCO₂ 40, PaO₂ 95 mmHg | §6, §7 |
-| Photosensitivity | ≤ 3 flashes or packets per s per region (tS); regional low-pass τ ≥ 0.3 s; global τ ≥ 0.5 s; any region larger than the flash area (0.006 sr, ≤ 21,824 CSS px², §13.15) changes by ≤ 10 % of maximum relative luminance per ⅓ s; toggle fade t_fade ≥ 0.8 s (§13.15); heartbeat ≤ 8 % luminance at real rate only when kh ≤ 1 and HR ≤ 150, otherwise rate-coded; vasoconstriction dimming ≤ 15 % with τ ≥ 2 s | §13 |
+| Photosensitivity | flash ceiling ≤ 3 per s per region (tS, the WCAG limit) with a display target of ≤ 2, and every per-source cap set at 2: ≤ 2 packets per s past any bundle point and per limiter window (§13.8); regional low-pass τ ≥ 0.3 s; global τ ≥ 0.5 s; any region larger than the flash area (0.006 sr, ≤ 21,824 CSS px², §13.15) changes by ≤ 10 % of maximum relative luminance per ⅓ s; toggle fade t_fade ≥ 0.8 s (§13.15); heartbeat ≤ 8 % luminance at real rate only when kh ≤ 1 and HR ≤ 150, otherwise rate-coded; vasoconstriction dimming ≤ 15 % with τ ≥ 2 s | §13 |
 
 ### A.10 Working rules for writers
 
@@ -6661,7 +6688,7 @@ Cross-references to §2–§13 are given at section level, because the subsectio
 | `src/main.js` | Entry point, single animation loop | `tick(now)` L166–232. Frame dt clamped at 0.1 s (L167). `model.update(sdt)` advances human time and returns kh (L174). `dopamine.updateVisuals` runs in screen time (L176). `model.onStep` hands every human substep to the dopamine layer (L90). Three views at camera distance 3.0–3.6 units (L45–50); `maxDistance: 7` (L86). The climax dims the HUD and stops auto-orbit, keyed on the phase id `inevitability` (L179–182). HUD refresh every 0.12 s (L208–231); the clock line reads "1 s = …" (L218). `window.__brain` test hook (L160). Generation tier = detected tier + 1 (L66); manual upgrades regenerate the brain (L125–139). |
 | `src/response.js` | Sexual-response driver of the dopamine layer | `CLOCK` per phase (L83–86) and `LogRamp` (L88–100). `_enter` switches to ×1 instantly at `inevitability` (L146–147). `update(dt)` takes ceil(human/0.5) substeps per frame (L335–352). The demo script advances in **screen** time (`_demoStimulus`, L173). `Math.random` at L189, L198, L201, L202 and L217, so runs are not reproducible. `vitals()` is algebraic: HR 68 rising to 125 (field) or 175 (lab) (L354–365). DOPAMINE.md §9.8 lists the pending port. |
 | `src/dopamine.js` | Dopamine layer (DOPAMINE.md §6) | `region`, `tint` and `da` arrays of `REGION_COUNT` × 4, plus `pathHist` (L93–96). `step` substeps at 0.02 s of human time (L189–190). `_activity` overwrites the activity channel every frame from imaging targets that equal 1 at rest (L335–365). Modulator tints on `R.pituitary`, `R.raphe`, `R.rmtg`/`R.vta` and `R.pag`/`R.arcuate` (L82–87). No random numbers of its own. |
-| `src/anatomy.js` | Procedural MNI brain | `MM = 0.01` (L7). 33 `REGION_IDS` (L12–17). `mulberry32` (L30). `NUCLEI` (L160–184). `BRAINSTEM` tube ends at (0, −46, −88) (L196–199). 12 `PATHWAYS` (L203). `spline` (L251). |
+| `src/anatomy.js` | Procedural MNI brain | `MM = 0.01` (L7). `REGION_IDS` (L17–L41) with `REGION_COUNT` (L48) and `LEGACY_REGION_COUNT` = 33 for the original build (L49). `mulberry32` (L74). `HULL` (L125). `NUCLEI` (L273). `DA_GROUPS` (L308). `BRAINSTEM` tube ends at (0, −46, −88) (L321–L324). `PATHWAYS` (L335). `TERMINALS` (L368). `spline` (L386). All post-port lines (DOPAMINE.md §7.3). |
 | `src/brain.js` | Point generation | 12-float record (L12). `SHARES` (L140). `generateBrain` (L144) draws everything from one seeded stream and shuffles at the end (L254), so any structure inserted into it moves every later point. Insula shell (L184–193). |
 | `src/shaders.js` | GLSL ES 3.00 | `uRegion[33]` (L30), `uTint[33]` (L63), `uDA[33]` (L122), `uPathHist[48]` (12 pathways × 16 samples; L6, L123). `tissuePath` assumes a brain-only envelope (L33–49). |
 | `src/renderer.js` | HDR pipeline | Additive `ONE, ONE` blending (L117–118). Each tier draws a prefix of each shuffled range with compensating flux gain (L49–63). Per-region uploads at L104, L131, L139–140. |
@@ -6677,7 +6704,7 @@ Uniform budget of the current shaders, counting one slot per uniform in the wors
 |---|---|---|---|---|---|
 | Neuron vertex shader | ≈ 24 + 2·R | vec4 slots | — | medium | [model] count of `shaders.js` L21–31, L55–63 |
 | Dopamine vertex shader | ≈ 67 + 2·R | vec4 slots | — | medium | [model] count of `shaders.js` L21–31, L118–124 |
-| R today / after A.3.3 | 33 / 122 | regions | — | high | `anatomy.js` L12–17; A.3.3 (89 new ids: 6 split, 13 thalamic, 9 basal-forebrain and limbic, 14 hypothalamic and CVO, 47 brainstem) |
+| R today / after A.3.3 | 33 / 122 | regions | — | high | `LEGACY_REGION_COUNT`, `anatomy.js` L49; A.3.3 (89 new ids: 6 split, 13 thalamic, 9 basal-forebrain and limbic, 14 hypothalamic and CVO, 47 brainstem) |
 | Slots at R = 122 (neuron / dopamine) | ≈ 268 / ≈ 311 | vec4 slots | — | medium | [model] arithmetic |
 | R at which the dopamine shader passes 256 slots | ≈ 94 | regions | — | medium | [model] arithmetic; limit B.7 |
 
@@ -6738,7 +6765,8 @@ export class Kernel {
   setBodyMode(mode); setNet(id, on); setIntervention(preset /* or null */); setPosture(p); setArousalState(s);
   setExternalCommands(src);   // ZOH reader of OrgasmAdapter command records (B.13)
   schedule(stimulus);         // A.6 record, tOnset in tH
-  settle(init);               // resting steady state for {posture, timeOfDay, fed}, cached per key
+  settle(init);               // resting steady state for the §11.10 key {switch set, age, posture, fed, timeOfDay},
+                              // cached per key; slow layers set analytically, NF and CV settled over 300 s of tH
   advance(h, budgetMs);       // human seconds; fixed grids, state-driven striding (A.4); stops at a step
                               // boundary when budgetMs is spent; -> tReached (human s), §11.7
   snapshot(); restore(s);     // seeking (§12.2): snapshots every 10 % of a scenario span
@@ -6760,7 +6788,11 @@ export class OrgasmAdapter {
   constructor(response, dopamine);
   start({ mode, profile, tref, hypothesis, seed = 1 }); stop();
   clock(dtS);                 // scenario clock step -> kh (the SimClock delegate; legacy LogRamp before the port)
-  advance(dtS, t0H, h);       // update() substep body: S from the demo script (screen dt before the port, tH after) or the level, then advanceHuman(h, S)
+  advance(dtS, t0H, h, source);  // update() substep body: S from the demo script (screen dt before the port, tH
+                              // after) or the level, then advanceHuman(h, S).
+                              // -> { tReachedH, khEnd }: the clock owns tH and kh, so it must be given both back.
+                              // A frame that enters ONSET runs its remainder at the new kh, so tReachedH is not
+                              // t0H + h and khEnd is not the kh the frame started with (B.13; DOPAMINE.md §9.3)
   commands;                   // ring of command records { tH, cmdSym, cmdVag, cmdSacral, apnoea, omega } per substep (fields §11.14); read only in switched modes
   climax;                     // true in 'inevitability', 'orgasm' and, after the port, 'onset'
   active;
@@ -6789,7 +6821,7 @@ export function pick(ray, { sense, bodyMode, yaw }); // -> { site, point, normal
 
 | File | Change | Preserved behaviour (test, B.14) |
 |---|---|---|
-| `src/main.js` | (1) Replace `model.update(sdt)` (L174) with `const p = clock.propose(sdt); if (adapter.active) adapter.advance(sdt, p.t0H, p.h); const tR = kernel.advance(p.h, budgetMs); const s = clock.commit(tR);` (B.6). `dopamine.updateVisuals(sdt, response, s.kh)` (L176) stays. (2) Move the `onStep` wiring (L90) into the adapter. (3) Add `statetex.compose/upload`, `PhotoLimiter.scale` and the body render parameters. (4) Extend `VIEWS` and `VIEW_ORDER` with the body views (camera values §13), keeping the keys `whole`, `cutaway`, `dopamine`. (5) Camera `maxDistance` and far plane from §13. (6) Gate climax dimming (L179–182) on `adapter.active && adapter.climax`. (7) Replace the clock line (L218) with `clock.label()` and extend the HUD payload (B.10). (8) URL parameters `body` (0/1), `nets` (comma list of networks on), `scenario`, `seed`, `time` (preset name or locked kh); `view` and `quality` stay. (9) Generate the body after the first brain frame (B.9). (10) Expose `kernel`, `clock`, `scenarios`, `stimuli`, `adapter`, `safety` on `window.__brain`. (11) Body flux keys in `tune` (values §13). | `?body=0&scenario=orgasm&view=whole` reproduces the post-port brain image, the dopamine traces and the camera apart from the §3 additions; Vitals read "—" in brain-only mode (A.8 #10); a `view` URL parameter overrides the fly-to on scenario selection (geometry and orgasm-regression tests). |
+| `src/main.js` | (1) Replace `model.update(sdt)` (L174) with `const p = clock.propose(sdt); if (adapter.active) adapter.advance(sdt, p.t0H, p.h); const tR = kernel.advance(p.h, budgetMs); const s = clock.commit(tR);` (B.6). `dopamine.updateVisuals(sdt, response, s.kh)` (L176) stays. (2) Move the `onStep` wiring (L90) into the adapter. (3) Add `statetex.compose/upload`, `PhotoLimiter.scale` and the body render parameters. (4) Extend `VIEWS` and `VIEW_ORDER` with the body views (camera values §13), keeping the keys `whole`, `cutaway`, `dopamine`. (5) Camera `maxDistance` and far plane from §13. (6) Gate climax dimming (L179–182) on `adapter.active && adapter.climax`. (7) Replace the clock line (L218) with `clock.label()` and extend the HUD payload (B.10). (8) URL parameters `body` (0/1), `nets` (comma list of networks on), `scenario`, `seed`, `time` (preset name or locked kh); `view` and `quality` stay. (9) Generate the body after the first brain frame (B.9). (10) Expose `kernel`, `clock`, `scenarios`, `stimuli`, `adapter`, `safety` on `window.__brain`. (11) Body flux keys in `tune` (values §13). | `?body=0&scenario=orgasm&view=whole` reproduces the post-port brain image and the camera apart from the §3 additions, and runs the §11.14 central form (κ coupling removed, so its dopamine traces differ from the legacy path; user decision, 4 November 2026); with every network on in whole-body mode the traces equal the legacy path (A.8 #21); Vitals read "—" in brain-only mode (A.8 #10); a `view` URL parameter overrides the fly-to on scenario selection (geometry and orgasm-regression tests). |
 | `src/anatomy.js` | Phase 0a applies the DOPAMINE.md §7.3 changes (NUCLEI radii and positions, thalamus rotation, DA_GROUPS shares, A8, the A13 move, the A14 and `medianEminence`/`pituitaryGland` region ids, the first `BRAINSTEM` point, voids). Then append the new ids after the last post-port id, so earlier indices stay. Aliases `R.gpe = R.pallidum`, `R.dr = R.raphe`, `R.pituitaryAnt = R.pituitaryGland`. New exports, contents from §3 and §11: `NUCLEI_V2`, `RELABEL` (split rules of A.3.3 and any further §3 relabels), `PARENT` (region whose dopamine channels a new id inherits), `AREAS`, `BRAIN_TRACTS`, `PORTS`. | After Phase 0a, `NUCLEI`, `DA_GROUPS`, `BRAINSTEM`, `PATHWAYS`, `TERMINALS` unchanged; `DopamineModel` indices stay valid. |
 | `src/brain.js` | Phase 0a applies the DOPAMINE.md §9.8 construction details and the §7.3 insula ribbon; after that `generateBrain` is untouched. New: `applyRelabel(brain)` rewrites only the region float (a2.x) of relabelled stars; `generateBrainExtra({ neurons }, seed = 1849)` builds a separate buffer with `NUCLEI_V2`, the `gpe`/`gpi` ellipsoids, `rmg`/`rpa`/`rob`, tectal bumps, CVLM, LGN and MGN (§3) in floor-stratified order (B.8); `areaIds(brain)` returns a `Uint8Array` holding 2·area + side (255 = none; §11.15). | Positions and flux of the post-port buffer bit-identical per tier. |
 | `src/renderer.js` | Replace the per-region uploads (L104, L131, L139–140) with the `uState` texture. Add a VAO for the extra brain buffer (neuron program), the area attribute at location 3, and a body VAO and program drawn once per tissue-class range, with per-class gains normalised to a reference tier as in L56–60. `setTier` and `pointCount` include extra and body counts. New `replaceBody`, `setBodyFade`, and an optional luminance monitor (async readback of the smallest bloom level behind `?safetyMonitor=1`). | Same shading for brain-only inputs. |
@@ -6812,9 +6844,9 @@ export function pick(ray, { sense, bodyMode, yaw }); // -> { site, point, normal
 
 1. **Timing.** Clamp dt at 0.1 s (unchanged); `resize()`; `quality.sample(dt, gpuMs)`. Paused frames pass dt = 0 to the clock.
 2. **Clock proposal.** `clock.propose(dt)` returns `{ t0H, h, kh }`. Source priority follows A.4; while the orgasm scenario holds the clock, the delegate returns the scenario's kh verbatim (B.13).
-3. **Orgasm adapter.** If active, `adapter.advance(dt, t0H, h)` runs the substep body over [t0H, t0H + h] and appends one command record per substep. It runs before the kernel, because the CV layer reads its commands. Otherwise both models stay dormant (B.13).
+3. **Orgasm adapter.** If active, `adapter.advance(dt, t0H, h, source)` runs the substep body from t0H and appends one command record per substep, returning `{ tReachedH, khEnd }`. It normally covers [t0H, t0H + h], but a frame that enters ONSET runs its remainder at the new kh, so it may cover less (B.13). It runs before the kernel, because the CV layer reads its commands. Otherwise both models stay dormant (B.13).
 4. **Kernel.** `tR = kernel.advance(h, budgetMs)` steps the EV queue and the NF, CV, GI, EN, IM and CR layers on their fixed grids and stops at a step boundary when the budget (§11.7) is spent. In switched modes the CV layer reads adapter command records zero-order-hold at each CV step (latest record with tH ≤ t); with all networks on, the vitals pass through from `vitals()` (§11.14). Stimuli and scenario inputs are evaluated at grid times in tH.
-5. **Clock commit.** `clock.commit(tR)` makes the reached time the truth, so a CPU overrun lowers the effective kh for the frame (§11.7). While the orgasm delegate holds the clock, the delegate's kh is never changed: the kernel lags the adapter by the unfinished remainder, which it carries into the next frame, and when that backlog would exceed one frame the kernel exceeds its budget instead of falling further behind.
+5. **Clock commit.** `clock.commit(tR)` makes the reached time the truth, so a CPU overrun lowers the effective kh for the frame (§11.7). While the orgasm delegate holds the clock, **`commit` is a no-op**: `tH` stays at the adapter's `tReachedH` and the delegate's kh stays at its `khEnd`, which the clock takes from step 3. The delegate's kh is never changed by an overrun; the kernel lags the adapter by the unfinished remainder, which it carries into the next frame, and when that backlog would exceed one frame the kernel exceeds its budget instead of falling further behind.
 6. **Screen-time filters.** `dopamine.updateVisuals(dt, response, kh)` (unchanged) and `brainnet.updateVisuals(dt, kh)`.
 7. **State textures.** `statetex.compose()` then `upload()`.
 8. **Photosensitivity limiter.** `PhotoLimiter.scale()` receives each change source (packets, organ glows, network fades, lanterns) with its projected area and its own luminance transition and returns amplitude factors (per-cell rule §13.15).
@@ -6896,13 +6928,15 @@ How the budgets are drawn:
 | Episode end (manual stimulus) | no packets in flight and every transient within 5 % of baseline | — | — | low | [model] |
 | Prototype kernel cost at kh = 3,600 | 0.62 | ms per 60-fps frame | — | medium | model check (prototype `results.txt`) |
 | Seek cost per human hour / per 8 h at that cost (rest) | ≈ 37 / ≈ 300 | ms | — | low | [model] arithmetic |
-| Seek cost on the active `infection` course (§11.17: 0.87–1.71 ms per 15 human s at ×900) | ≈ 0.21–0.41 s per human hour; ≈ 1.6–3.1 s over the 0.5–8 h span, at most one 10 % snapshot interval (≤ 0.75 h, ≤ 0.3 s) per seek | — | — | low | [model] arithmetic |
+| Seek cost on the active `infection` course (§11.17: 0.87–1.71 ms per 15 human s at ×900) | ≈ 0.21–0.41 s per human hour; ≈ 1.6–3.1 s over the 8 h span, at most one 10 % snapshot interval (≤ 0.8 h, ≤ 0.33 s) per seek | — | — | low | [model] arithmetic (10 % of the §12.2 `infection` span of 8 h) |
 | Legacy dopamine substeps per 60-fps frame at kh = 900 | 750 | substeps | — | high | [model] arithmetic from the 0.02-s substep |
+| Adapter substeps per 60-fps frame after the port, at kh = 900 / 3,600 / 4,320 (the recovery delegate's ceiling) | response (0.05-s cap) 300 / 1,200 / 1,440; dopamine (0.02 s) 750 / 3,000 / 3,600 | substeps | — | high | [model] arithmetic from the §11.14 step cap |
+| Adapter CPU cost per 60-fps frame at kh = 900 / 3,600 / 4,320 | to be measured (`budget.test.mjs`); the adapter sits **outside** the ≤ 1 ms kernel budget, so this row is the only bound on its cost | ms per frame | — | — | §11.14 |
 | Human time passed in a 1-s log ramp from ×10 to ×1 | ≈ 3.9 | s (tH) | — | high | [model] arithmetic: 9 / ln 10 |
 
 Seeking from the nearest snapshot is affordable even on the active course, spread over ≤ 8 ms slices. The production graph is larger (§11); `budget.test.mjs` reports the real figure. `orgasm` has no seek (§12.2).
 
-At load the brain is generated and rendered first. The body follows in slices and fades in; the app opens with whole body, all networks on, the "Upper body" view and no scenario playing (A.7). `?body=0` starts in brain-only mode and defers body generation until the master switch first turns on.
+At load the brain is generated and rendered first. The body follows in slices and fades in; the app opens with whole body, all networks on and the orgasm scenario playing in demo mode on the "Dopamine system" view (A.7); `?scenario=none` opens at rest on the "Upper body" view. `?body=0` starts in brain-only mode and defers body generation until the master switch first turns on.
 
 ### B.10. HUD dropdowns, fields and controls
 
@@ -6993,7 +7027,7 @@ Default sites, routes and returned responses per sense are §12's.
 
 **Coupling.** With all networks on, the vitals pass through from `vitals()` (`response.js` L354–365), exactly (§11.14; A.8 #21; §7.13 V21). Only with a network switched off do the adapter's command records (fields §11.14) drive the CV layer, so the switches act on the vitals; in brain-only mode they read "—" (A.8 #10).
 
-**Clock.** While the scenario is active and no user lock is set, `clock.delegate(adapter.clock)` makes kh equal to the scenario clock's value of the same frame (the legacy `LogRamp` before the port, the DOPAMINE.md §9.3 clock after it), and h = dt·kh is computed exactly as `response.js` does. This keeps the instant switch at ignition (L146–147; the instant switch into ONSET after the port, DOPAMINE.md §9.3), which a slew-limited ramp could not reproduce: ignition depends on state, so it cannot be anticipated, and a ramp from ×10 to ×1 would pass more human time (B.9) than the whole reflex phase lasts. The delegate is exempt from the A.4 slew and range (A.4; §11.14). A CPU overrun never changes the delegate's kh; the kernel carries the remainder (B.6). A user lock replaces the delegate; traces then differ from the legacy path, as expected.
+**Clock.** While the scenario is active and no user lock is set, `clock.delegate(adapter.clock)` makes kh equal to the scenario clock's value of the same frame (the legacy `LogRamp` before the port, the DOPAMINE.md §9.3 clock after it), and h = dt·kh is computed exactly as `response.js` does — **except in a frame that enters ONSET**, where the remainder of the frame runs at the new kh (DOPAMINE.md §9.3), so the frame covers less than dt·kh and `advance` reports the `tReachedH` and `khEnd` it actually reached (B.4, B.6 step 5). This keeps the instant switch at ignition (L146–147; the instant switch into ONSET after the port, DOPAMINE.md §9.3), which a slew-limited ramp could not reproduce: ignition depends on state, so it cannot be anticipated, and a ramp from ×10 to ×1 would pass more human time (B.9) than the whole reflex phase lasts. The delegate is exempt from the A.4 slew and range (A.4; §11.14). A CPU overrun never changes the delegate's kh; the kernel carries the remainder (B.6). A user lock replaces the delegate; traces then differ from the legacy path, as expected.
 
 **Regression.** The harness (B.14) runs the legacy path and the adapter path of the same commit with the same seeded stream and compares every state variable at every human substep, and the vitals for exact identity with `vitals()` with all networks on; switched modes follow §12.14. Before the DOPAMINE.md §9.8 port the comparison uses the same frame-time sequence, because the legacy response model sizes its substeps from kh and runs the demo script in screen time, so the scenario stays frame-rate dependent and is excluded from the cross-frame-rate determinism test. Phase 0a (B.15) applies the port first, which adds the 0.05-s grid and input interpolation (DOPAMINE.md §6.8); the golden traces are recorded again then, and the DOPAMINE.md §6.9, §9.6 and §9.7 targets apply from that point.
 
@@ -7010,7 +7044,7 @@ Run from `brain-system/` with `node --test` (default discovery of `**/*.test.mjs
 | `switches.test.mjs` | every A.5 row on a probe stimulus, every cross-network AND edge | A.5 outcomes; §12 switch-off matrix | 4–8 |
 | `scenarios.test.mjs` | all §12 checkpoints | §12 tolerances | 2–8 |
 | `geometry.test.mjs` | post-port neuron buffer per tier (seed 1848) bit-identical; uniform-slot count < 256 per program; body path lengths vs §2.14 (A.9 within 10 %); no ray from any §13.11 view or 1,000 random camera poses returns S4–S5, perineal or pelvic-floor sites, and `dermatome.S3` only from posterior views; no body points of excluded structures in the pelvic box (A.1); brainstem tube and pairwise nucleus checks of §3.16 | exact; A.9 tolerance | 0a, 1, 3 |
-| `safety.test.mjs` | per-cell luminance in screen time for every frame of every §12 scenario, the startle volley, all switch toggles and view changes, at 10, 30, 60 and 144 fps and `kh` ∈ {preset, 0.005, 3,600} | the §13.15 per-cell area rule never exceeded (≤ 2 flashes per 1-s window); A.9 and §13 limits | 3 onward |
+| `safety.test.mjs` | per-cell luminance in screen time for every frame of every §12 scenario, the startle volley, all switch toggles and view changes, at 10, 30, 60 and 144 fps (a subset of the §11.16 frame-rate set) and `kh` ∈ {preset, 0.005, 3,600} | the §13.15 per-cell area rule never exceeded (≤ 2 flashes per 1-s window); A.9 and §13 limits | 3 onward |
 | `budget.test.mjs` | kernel ms per frame at each A.4 preset | reported against the §11 budget; not gating | 2 onward |
 | `hud-static.test.mjs` | parses `index.html`: each `.drop-head` holds one `.drop-title`, at most one short chip (`.pill` or `.badge`) and `.chev`; nothing between `.drop-h` and `.drop-body`; titles match A.7; no Cyrillic or Uzbek-specific characters (ʻ, ʼ) in project text files | exact | 2 onward |
 | Browser smoke check (preview) | `?scenario=hotObject&seed=1&quality=low`; `?body=0&scenario=orgasm` | no console errors; `window.__brain.kernel` advances | each phase |

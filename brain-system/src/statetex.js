@@ -18,7 +18,8 @@
 // paths, gut }` (Float32Array, 4 values per texel in the layout above) and `kernel.packets(out)`
 // records { pathId, uHead, sigmaU, gain, fibre, dir }, where pathId is the body buffer's path id. The
 // kernel's own pathId is a graph path name (graph.paths), so main.js maps its packets onto the body
-// buffer's geometry paths first (wiring.js PacketMap) and passes them as `packets`.
+// buffer's geometry paths first (src/wiring.js PacketMap: geometry.js PATHS index, body u, σu in body
+// u, gain, direction from the body u trend, `scale` from the PhotoLimiter) and passes them as `packets`.
 
 import * as A from './anatomy.js';
 import { createDataTexture, updateDataTexture, deleteDataTexture } from './gl-utils.js';

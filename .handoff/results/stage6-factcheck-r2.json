@@ -1,0 +1,1067 @@
+{
+ "missing": [],
+ "confirmed": [
+  {
+   "lens": "anatomy-render-safety",
+   "section": "§2.8 (heart, liver) and A.2 anchors",
+   "line": 373,
+   "claim": "Heart `heart` (−22, 15, −352) half-axes (52, 45, 55) with apex (−85, 55, −390); ventricles (−35, 25, −372) half (40, 35, 40); liver (44, 8, −440) half (90, 68, 55), \"≈ 1.41 L\", left-lobe tip (−90, 30, −430)",
+   "fix": "Add rows for the extra primitives: `heart` apex lobe c (−62, 40, −377) half (26, 20, 14), clipped at z −392; `liver` left lobe c (−45, 26, −432) half (48, 32, 20). Then state the liver volume as the union, ≈ 1.5 L, or keep 1.41 L for the right lobe only. Add \"the apex and left-lobe tip are the extreme points of the union\".",
+   "reason": "The document is wrong as stated, but the heart half of the fix needs a variant. I reproduced every number against ANALYSIS.md L373 and L379. The apex (−85, 55, −390) sits at normalised radius 1.654 in the heart ellipsoid and 1.581 in the ventricles, 22 mm from the nearest point of their clipped union. The left-lobe tip (−90, 30, −430) sits at radius 1.534 in the liver ellipsoid, 47 mm from it, because the liver only reaches x = −46. 1.41 L is exactly the uncarved main ellipsoid (4/3·π·90·68·55 = 1.410 L; a grid count gives 1.411 L), so the 'carved, ≈ 1.41 L' label does not describe the drawn liver. The L373 note 'above the z −392 clipping plane' shows the apex was meant to lie on the solid. §12 (L5745) fills stars only inside the §2.8 volumes, so an implementer following the table draws no apex and no left lobe. geometry.js L453 and L460 do add two undocumented [model] ellipsoids, as the issue says. Liver part of the fix is correct: the code's left lobe c (−45, 26, −432) half (48, 32, 20) contains the tip (radius 0.951), and the union is about 1.49 L uncarved, so '≈ 1.5 L' is right. Heart part of the fix is wrong as written: the code's apex lobe c (−62, 40, −377) half (26, 20, 14) only points toward the apex (its code comment says 'toward'). The apex sits at radius 1.486 in that lobe and still 9.3 mm outside the three-solid union. So the proposed sentence 'the apex and left-lobe tip are the extreme points of the union' would be false for the heart. Use either of two variants. (a) Document an apex lobe that actually reaches the apex, e.g. c (−70, 46, −385) half (24, 16, 10), clipped at z −392: the apex then sits at radius 0.98, and 31 % of the lobe overlaps the heart and ventricles, so it stays joined to them (I did not check it against the chest wall or the left lung). (b) Keep the code lobe and move the apex anchor onto the drawn surface, about (−80, 50, −384). In both cases add the liver left-lobe row and state the volume as ≈ 1.5 L for the union, or 1.41 L for the main (right-lobe) ellipsoid only. Check scripts: C:\\Users\\User\\AppData\\Local\\Temp\\claude\\C--Users-User--claude-spares-spare-7RIe5m\\bbf7f24a-a450-4563-b7aa-b8bcef60bc6e\\scratchpad\\stage6\\refute-anat\\chk.mjs and v2.mjs."
+  },
+  {
+   "lens": "physiology-visceral",
+   "section": "§9.10 / §9.11 / §9.4",
+   "line": 4332,
+   "claim": "The three timing failures share one cause: the displayed plasma pool clears with t½ ≈ 66 min (k_C), so any CRH-driven transient peaks ≈ 60–75 min after its drive. A free/total cortisol split, or a sourced faster effective clearance, is the open calibration question.",
+   "fix": "Replace L4332 with: 'The three timing failures come from the delay chain, not from k_C alone. Peak time ≈ τ_adrenal + the S lag (1/k_S) + the ACTH lag, and the S peak already sits at 40 min with the current constants. With k_C at t½ 9 min the cortisol peak is still at 53 min. Open calibration: ACTH t½ ≈ 10–15 min (k_ACTH 0.05–0.07/min; the deconvolution value in healthy men is ≈ 15 min), a human adrenal lag of 3–5 min (the 10 min is a rat model parameter), k_S ≥ 0.14/min, and a plasma cortisol pool kept at t½ 60–90 min but fed by a faster secretion term. A check run (τ 5 min, k_S 0.14, k_ACTH 0.07, k_C 0.03) peaks at 37 min. The Hopf threshold (§9.4) must be re-run after any change. The free/total split alone will not fix the timing.' Also mark the plasma-versus-saliva distinction in the §9.10 target: plasma cortisol peaks at about stressor end, salivary ≈ 10 min later.",
+   "reason": "Could not refute; confirmed by independent re-implementation of the §9.4 ODE (scratchpad .../stage6/refute-visceral/hpa.py), which reproduces the document's own model column almost exactly (ACTH x3.54 at 17.4 min vs doc x3.57/17.4; cortisol x1.47 at 72.6 min vs x1.48/73; x1.410 at 56 min vs x1.41; first >x1.1 at 31.4 min vs 31; last >x1.2 at 181 min vs 182; CAR +6.0% at 66.2 min vs +6%/66). (1) L4332's single-cause attribution is wrong: S peaks at 39.6 min and a first-order pool cannot peak before its input, so only 33 of the 72.6 min belong to k_C and 39.6 min sit upstream. k_C sweep (t1/2 66/35/17/9/4/1 min) gives cortisol peaks at 72.6/66.3/58.7/52.4/46.2/41.1 min - the checker's 73/67/59/53 reproduced exactly - so the floor is ~40 min, the extreme edge of the 21-40 min target. (2) The proposed fix direction is actively wrong for one of the three rows: speeding k_C makes the 41-60 min recovery row WORSE (above x1.2 until 181 min at t1/2 66, but 235 min at t1/2 17 and 393 min at t1/2 9, because the amplitude grows), and it leaves the CAR at +18.8% vs the +50-75% target. (3) 'A sourced faster effective clearance' is unobtainable: deconvolution in healthy men gives cortisol t1/2 65 +/- 5.3 min, i.e. the document's k_C is the well-sourced value. (4) The ACTH row is independently wrong: deconvolution gives ACTH 15 +/- 1.2 and 17 +/- 0.6 min, and the same insulin study reports ACTH 17, beta-endorphin 22, cortisol 65 min - the document's pair (ACTH 22, cortisol 66) matches cortisol exactly and matches beta-endorphin's value for ACTH, so its secondary tabulation almost certainly mis-assigned the 22 min. The document also contradicts itself: §12.11's Variant E reaches a 37.2 min cortisol peak precisely by shortening ACTH t1/2 to 10 min and the adrenal delay to 3 min, and L4152 already calls tau_adrenal 10 min a rat model parameter. I verified the checker's check run: tau 5 / k_S 0.14 / k_ACTH 0.07 / k_C 0.03 gives a peak at 35.3 min (they said 37) and back below x1.2 at 88.6 min; tau 3 / k_S 0.2 set gives 27.4 min (they said 30). VARIANT TO STATE: adopt the replacement text but (a) drop the final sentence about plasma-versus-saliva - 'plasma cortisol peaks at about stressor end' is not supported by the cited Wikipedia/lab pages and Dickerson & Kemeny's 21-40 min is measured from onset across 208 studies; (b) keep k_C at the sourced t1/2 60-90 min (65 min deconvolution), which also removes the internal clash with the fix's own 'check run' value of k_C 0.03; (c) add that the CAR row is an amplitude failure (a_CAR versus the GR feedback gain), not a delay-chain failure, since the proposed chain still gives only +9.7% at 71 min."
+  },
+  {
+   "lens": "physiology-visceral",
+   "section": "§8.8 / §8.13 / §8.20",
+   "line": 3737,
+   "claim": "Pyloric brake G = G_pyl/(1 + B·(r̃/r_set)⁴), B = 0.5·g.neuroendocrine + 0.3·g.autonomic + 0.2·g.enteric (= 1 with all networks on); `emptyRate` (r_set at 600 kcal) ≈ 1.8 kcal/min (§8.13); r_set ∝ √E₀.",
+   "fix": "Change the formula to G = G_pyl/(1 + 16·B·(r̃/r_set)⁴), or write brakeGain = 16 into the table and the test. Add: 'steady delivery ≈ 0.96–1.0 × r_set; r_set = min(2.0, 1.2·(E₀/255)^0.5) kcal/min (≈ 1.8 at 600 kcal)'. Keep the 4 h retention test with a note that it sits at the 10 % edge, and re-tune k₁ or k₂ slightly so it moves inside the window. Update §8.15 prototype numbers (67/32/0 %) and L4030 to say the formula was brought to the §8.13 value.",
+   "reason": "Could not refute; confirmed by independent re-implementation of the §8.15/§8.8 gastric equations (scratchpad .../stage6/refute-visceral/gast.py), which reproduces the checker's 255 kcal retention figures exactly (x1: 63/25/0 %; x4: 71/40/1 %; x16: 77/52/10 %). With B = 1 as written (L3737 itself says B = 1 with all networks on), the 600 kcal/35 % liquid meal delivers 2.50 kcal/min over 60-180 min (1.36 x r_set = 1.84) and the stomach falls below 15 kcal at 3.3 h, against §8.13's claimed emptyRate ~1.8 kcal/min and ~6 h (expected 4-6 h) - a 2x discrepancy in emptying time that cannot be read away. Independently, the 255 kcal solid meal returns 25 % retention at 2 h against the 30-60 % Tougas window, so the written formula fails §8.18 test 1, a 'high' confidence target, and does not match §8.15's own recorded prototype output of 67/32/0. I tried hard to rescue the formula and could not: routing the liquid through G instead of G_pyl gives 2.66 kcal/min and 3.9 h; t1/2_liq 8 min gives 2.74 kcal/min and 3.7 h; an A sweep (0.9-1.25) gives 2.3-2.6 kcal/min and 2.9-3.4 h and 20-28 % at 2 h; a 10-20 min ingestion ramp only lifts 2 h retention to 28-30 %, still at or below the window edge. So the document is internally inconsistent as stated and the fix direction (stiffen the brake) is right. VARIANT TO STATE: the specific factor 16 is not the robust choice. My sweep shows gains of x2-x8 pass all three Tougas windows for every plausible A, whereas x16 passes only at A = 1.0 and overshoots the 4 h <=10 % edge at A <= 0.9 (12 %) and on the mixed meal (15 %). Conversely only x16 reaches §8.13's 1.8 kcal/min (I get 1.70) and ~5.1 h. The gain alone therefore cannot satisfy both §8.13's two rows and the 4 h Tougas edge, so write brakeGain ~4-8 (equivalently: define the brake's half-conductance point at r_set rather than at 0.5 x r_set, which is what the bare (r/r_set)^4 form implies) and move §8.13's 1.8 kcal/min / ~6 h row to the value the retuned model actually produces, rather than asserting steady delivery of 0.96-1.0 x r_set. Also note the fix's instruction to 'add' r_set = min(2.0, 1.2*(E0/255)^0.5) is redundant - that row is already at §8.8 L3736."
+  },
+  {
+   "lens": "physiology-visceral",
+   "section": "§10.4 / §10.1",
+   "line": 4487,
+   "claim": "The dispute is about the synaptic link from vagus to splenic sympathetic neurons, not about the splenic cholinergic endpoint, which is independently established. Table: Efferent endpoint (ACh at α7nAChR on cytokine-producing cells), Ms, high; Splenic relay (ACh-synthesising T cells), Ms, high.",
+   "fix": "Replace the sentence with: 'The dispute covers the vagus-to-splenic-sympathetic synapse and the identity and site of the endpoint (α7 on macrophages versus on splenic sympathetic terminals; ChAT⁺ T cells as a non-neural link). Both are mouse or rat data.' Lower the 'Efferent endpoint' and 'Splenic relay' rows to medium and add the Martelli 2014 and McAllen 2015 rows. Keep the switch behaviour (autonomic ∧ neuroimmune) unchanged.",
+   "reason": "Could not refute; the cited critical-review literature contradicts L4487's positive claim. Martelli, McKinley & McAllen 2014 (Auton Neurosci 182:65-69) concludes that the anti-inflammatory effect of vagal stimulation depends on noradrenaline-containing terminals in the spleen; that alpha7-containing nicotinic receptors are essential but their critical location is uncertain and is suggested to be on splenic sympathetic nerve terminals rather than on macrophages; that ACh-synthesising T lymphocytes are a non-neural link; and explicitly that the pathway 'is not the efferent arm of the inflammatory reflex response to endotoxaemia'. McAllen et al. 2015 (Arthritis Res Ther) calls the evidence inconclusive and implicates an alternative sympathetic pathway. So the dispute demonstrably covers the endpoint as well as the vagus-to-splenic-sympathetic synapse, and 'not about the splenic cholinergic endpoint, which is independently established' is wrong as stated, as are the 'high' confidence ratings on the 'Efferent endpoint' and 'Splenic relay' rows in a document whose whole method is confidence grading. This is not a style preference: the §10.10 open question asks exactly for this wording to be decided, and the switch behaviour is unchanged either way, as the fix says. VARIANT TO STATE: amend the replacement sentence's 'Both are mouse or rat data' - the in-vitro endpoint evidence includes human macrophages (the document's own 'ACh effect in vitro | H (cells) | high' row is a cell-culture fact and can stay high); the overstatement is specifically about the in-vivo endpoint and the relay, which are the rows to drop to medium. Also add Simon et al. 2023 (Front Neurosci), which attributes the pathway mainly to noradrenaline at beta2-adrenergic receptors on splenic macrophages and reports CD4+ T cells dispensable after antibody depletion - a direct further challenge to the Rosas-Ballina 2011 ChAT+ T-cell relay row, stronger than the Vida et al. citation offered."
+  },
+  {
+   "lens": "physiology-visceral",
+   "section": "§10.2",
+   "line": 4452,
+   "claim": "τ_TNF; τ_IL6; τ_IL10; τ_PGE = 1,500; 4,800; 3,600; 2,700 s; τ_IL10 set for the 3 h IL-10 peak, not run in the prototype.",
+   "fix": "Replace the note with: 'IL-10 needs an input delay or a second stage. With δ_IL10 ≈ 4,000 s (the extra transcription and secretion delay for IL-10) the peak lands at about 3 h; check by simulation. Not run in the prototype.' Add δ_IL10 to the constants table. Also note that unbraked TNF peaks at ≈ 1.1 h (target 1.5–2 h), so the brakes and a_TNF/τ_mac must be tuned together.",
+   "reason": "Could not refute; confirmed by independent re-implementation of the §10.2 kinetic block (scratchpad .../stage6/refute-visceral/cyt.py), which reproduces the prototype's ordering and the checker's figures: TNF peak 1.10 h (checker 1.10; §12.12 prototype 1.06), IL-6 1.80 h (1.80; prototype 1.66), PGE2 2.55 h (2.55), IL-10 1.72 h at tau_IL10 = 3,600 s (1.71), and 1.76 h with the x1.88-at-3.28 h cortisol multiplier (1.77). The §10.2 note 'tau_IL10 set for the 3 h IL-10 peak' is therefore false: 1.72-1.76 h misses the §10.9 target of 3 +/- 1 h, which needs >= 2 h. Peak time of a first-order low-pass is gain-independent, so a_IL10 and c_10 cannot rescue it, and tau_IL10 alone cannot either - my sweep gives 1.84 h at 5,400 s, 1.94 h at 7,200 s, 2.08 h at 10,800 s and only 2.60 h even at 43,200 s (12 h), while flattening the trace. The cortisol term is impotent because tnf decays with tau_TNF = 1,500 s and is ~0.5 % of peak by the time cortisolRel peaks at 3.28 h. The proposed fix is right and I verified it: an input delay delta_IL10 = 4,000 s puts the peak at 2.83 h (5,000 s gives 3.10 h), inside 3 +/- 1 h. The subsidiary note is also right in direction: unbraked TNF peaks at 1.10 h against a 1.5-2 h target, surviving only on the +/- 0.5 h tolerance, and since brake_C grows with the later cortisol rise the brakes shift that peak earlier, not later - so tau_mac/tau_TNF must grow as well (tau_TNF 3,000 s with tau_mac 2,400 s gives 1.53 h). VARIANT TO STATE: write delta_IL10 as 4,000-5,000 s and record the simulated peak rather than asserting 'about 3 h', and say in §10.10 that the IL-10 terms remain unrun, since the whole error arose from an unchecked constant."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "§11.7",
+   "line": 4846,
+   "claim": "Endocrine target: 60 when |acthRel − 1| or |cortisolRel − 1| > 0.03 (ratios to basal, §11.13)",
+   "fix": "Replace with: 'Endocrine target 60 while |acthRel − acthTarget| or |cortisolRel − cortisolTarget| or the adrenaline pool gap exceeds 0.03 (distance to the current steady-state target incl. circadian drive and clamp, not to 1); a steady state, including the saturated one after gland removal, votes nothing.' Keep the immune rule as is.",
+   "reason": "Confirmed. §9.4 gives a circadian envelope with a_C = 0.6 (L4137, L4147), so the resting HPA pools sit away from 1 for most of the day; the current code rests at cortisolRel 0.944 and acthRel 0.945 at the 10:00 start, rising to 1.015 two hours later. The §11.7 rule |x − 1| > 0.03 (L4846) therefore keeps the clock at ×60 at rest. After adrenalectomy or hypophysectomy ACTH saturates (endocrine.js header L27-29), which would hold ×60 permanently. The code instead votes on the distance to the current target (endocrine.js L409-413, L442-446). Use the fix with one change: measure the gap to the current relaxation target relative to max(x, target, 0.1), over CRH, ACTH, S, cortisol and adrenaline, with the code's threshold 0.08 (PARAMS.activeEps, L96-100) rather than 0.03. Per the code comment, a pool tracking the circadian envelope, or the open-loop axis after a gland is removed, lags its target by up to about 5 %, so 0.03 could fire at rest. Add that a steady state, including the saturated one after a gland is removed, votes nothing. The immune rule is unchanged."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "A.5 / §11.3",
+   "line": 6506,
+   "claim": "A.5: 'It runs only if bodyMode = 'body' and all listed networks are on. cns and special edges have nets = [].' §11.3.2: '5-bit mask ... tissue edges also have nets = [] but run only in whole-body mode'",
+   "fix": "State the predicate: 'an edge with a non-empty nets runs only when bodyMode = body and every listed g.k > 0; an edge with the body flag (tissue, or any edge with a body-side endpoint) runs only in body mode; the remaining edges (cns, special) always run.' Make the mask 6 bits (5 networks + body flag), mention the cut flag in §11.12, and split the 'ungated' count into always-on and body-only.",
+   "reason": "Confirmed as a wording defect in the binding contract. Read literally, A.5 L6506 ('runs only if bodyMode = body and all listed networks are on') and §11.3 rule 2 (L4720) stop every edge with nets = [], including cns and special edges, in brain-only mode. That contradicts the A.5 Master row (all CNS keeps running) and the special-sense injection in §11.9. §11.3 rule 2 also says tissue edges with nets = [] run only in whole-body mode, while §11.13 gives g_e = 1 for nets = [] (L4983), so tissue edges would run in brain-only mode. The code has the three-way rule (graph.js L146, L325; kernel.js gate() L392-397). Fix variant: state the three-way predicate in A.5 and §11.3, and add the body factor to the g_e formula: g_e = [bodyOn if the edge has a body endpoint or any nets] × Π g.k. Whether the body flag is a sixth bit or derived from endpoint ownership is an implementation choice, so a '6-bit mask' is optional. Splitting the 'ungated 1,141' count is optional too; the master count 1,116 minus the 1,076 network-gated edges implies 40 body-only plus 1,101 always-on."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "§11.10 / A.5",
+   "line": 4904,
+   "claim": "Master switch 'freezes and hides every body layer ... On return to 'body', body state is restored from a resting-state cache for the current switch set' (A.5 L6511: 'freezes and hides the body. Body states reset ...')",
+   "fix": "Rewrite rule 5: 'Brain only discards the body state (it is not preserved). The master transition is a step in g (no 1-s ramp); the display fades per §13.15. tH, CR and all CNS layers continue. On return the body is loaded from the resting-state cache keyed by (switch set, age, posture, timeOfDay at return).' Align B.4 settle() and A.5 with this key.",
+   "reason": "Only partly confirmed. The headline is a misreading: freezing (no integration while hidden) and resetting to rest on return fit together, and A.5 L6511 says exactly that. Gap 1 is already settled by 'All g are 0 in brain-only mode' (§11.10 rule 1), which implies a step. Gap 3 is already stated: the A.5 Master row says all CNS keeps running, including the SCN and the arousal state machine. What holds is the cache key. §11.10 rule 5 and §12.1 L5188 key the rest state by switch set only. B.4 L6741 keys settle() by {posture, timeOfDay, fed} with no switch set. Neither is complete: a supine rest cannot be restored for an upright body, and the HPA rest depends on time of day (a_C 0.6). Fix variant: use one key, (switch set, age, posture, fed, time of day), in §11.10, §12.1 and B.4. If caching per return time costs too much, set the slow EN pools analytically at the return time. Optionally say the master step in g is instantaneous and the display fades per §13.15. The rest of the proposed rewording is cosmetic."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "§11.10 / §12.1",
+   "line": 4922,
+   "claim": "Resting-state cache window 300 s of tH per switch set; §12.1: 'rest warm-up of 300 s of tH (1,800 s for meal, 600 s for stressor and infection)'",
+   "fix": "Define the cache as 'integrated until the CV, GI, EN and IM layers each change by less than eps over 60 s, or the analytic steady state with the circadian phase fixed at timeOfDay'. State that circadian drift is excluded from the criterion. Drop the per-scenario 600/1,800-s warm-ups or explain them as prototype-only. Change 'falling throughout' to 'plateau by 60-120 s'.",
+   "reason": "Only narrowly confirmed. Several sub-points fail. 'Falling throughout' is correct for the 0-60 s span the row covers: SBP goes 114.7, 110.6 (3 s), 99.8 (10 s), 93.2 (30 s), 92.1 (60 s), then stays flat at 91.8. Keep it, optionally adding 'flat at 91.8 from about 120 s'. §12.1 already labels the 600 and 1,800-s warm-ups as prototype approximations. The neuroendocrine-off evidence (cortisolRel 0.953 at 300 s) is a toggle transient, not a cache build: started from basal, a neuroendocrine-off cache is already at its clamp of 1. What holds: integrating 300 s of tH from default values cannot bring the HPA pools (cortisol τ ≥ 30 min, §9.4 t½ 66 min) to a circadian rest that differs from 1 by several per cent; from 1 toward 0.944 the pool reaches only about 0.984. §12.1's longer prototype warm-ups show the same thing. The code avoids this with analytic rests (endocrine.js settle() L343-361; only autonomic sets a 300-s settle). Fix variant for §11.10 rule 5: slow layers (EN, IM, the GI fasting state) start at their analytic rest for the current time of day with the circadian phase held fixed, and the 300 s of tH settles NF and CV. In §12.1, say the cache supersedes the prototype warm-ups. A 'change < eps over 60 s' criterion alone is too weak for pools with τ ≥ 30 min."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "§11.13 / §11.12",
+   "line": 4986,
+   "claim": "Adrenal β: s_eff = s + k_adr · (adrenalineRel − 1) · g.autonomic · g.neuroendocrine; heart transplant: 'adrenaline still acts (blood edge)'",
+   "fix": "Use s_eff = s + k_adr·(adrenalineRel − 1)·g.neuroendocrine. Keep g.autonomic only on the release edge (h_cmd). Add to A.8 #9: 'with autonomic off the adrenal drive is held at basal by the replacement convention; real cord-section patients show about 90 % lower resting adrenaline [secondary]'.",
+   "reason": "Confirmed, though the heart-transplant 'contradiction' is not literal: in that preset g.autonomic stays 1, so adrenaline still acts. The real defect is that §11.13 L4986 and §7.5 L3202 gate a blood-borne β1 action by g.autonomic. That conflicts with §11.3 rule 3 ('a humoral edge belongs to the network whose distant action it carries') and with physiology: denervated targets still respond to circulating adrenaline, and tetraplegic patients are hypersensitive to it. Release is already gated by autonomic (endocrine.js L397: cmdA = 1 + gA·(cmd − 1)), so the extra factor only acts during transients. It is observable there: switching autonomic off mid-stressor removes the β effect within the 1-s ramp, while plasma adrenaline decays with t½ 2.5 min. Use s_eff = s + k_adr·(adrenalineRel − 1)·g.neuroendocrine in both §7.5 and §11.13. Change the §11.13 coupling row 'EN adrenaline → CV s_eff' to neuroendocrine, and in §11.11 keep the AND only on the release part of the chain. The A.8 #9 note is supported: resting adrenaline 0.005 against 0.06 ng/mL in quadriplegics (PubMed 504551), about 90 % lower."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "§11.7 / §11.9",
+   "line": 4848,
+   "claim": "'H_desc = Δt·Σ_{j=1..J} max(k₁, k·10^(−jΔt))' ... 'The descent then starts at the click and reaches k₁ at onset with no wait'; 'the clock then waits up to 0.5 s at 60 fps or 0.9 s at 30 fps'",
+   "fix": "Define Δt = the click frame's dtS (clamp 0.1 s). Add: 'the clock re-solves the descent each frame so that kh reaches k₁ at tOnset despite jitter; the logged tOnset is the click's H_desc'. Replace the 0.5 s / 0.9 s bound by 'about (H_analytic − H_desc)/k₁, 0.4 s at k₀ = 1 and 60 fps, which is why the stepwise sum is used'.",
+   "reason": "Confirmed. Δt in the H_desc formula (§11.7 L4848) is undefined; from the fps figures it is the screen frame time, with the slew of 1 decade/s folded in. The wait bound in L4856, 'up to 0.5 s at 60 fps or 0.9 s at 30 fps', holds only for a descent from ×1: the wait is (H_analytic − H_desc)/k₁, which is 0.40 s at 60 fps and 0.81 s at 30 fps. It grows with k₀, because the relative overestimate (about 1.9 % at 60 fps) is the same for every start. Recomputed: about 25 s from ×60, 373 s from ×900 and 1,490 s from ×3,600 at 60 fps (2,962 s at 30 fps). The stated bound therefore badly understates why the stepwise sum is needed. The 'no wait' claim (§11.9 L4883) also assumes a constant frame time; the code re-solves the descent every frame (clock.js _descentStep L149-170). Fix variant: define Δt as the screen frame time, using the click frame's dt (the code falls back to 1/60 s before the first frame; dt is clamped at 0.1 s). Replace the bound with the formula, giving 0.4 s from ×1 and about 1,490 s from ×3,600 at 60 fps. Add that the clock re-solves the descent each frame so jitter does not delay onset, and that tOnset is logged from the click's H_desc."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "§11.7 / B.4 / B.13",
+   "line": 4858,
+   "claim": "'the clock commits the tH the kernel reached' (commit(tReachedH) 'the kernel's reached time is the truth'); B.13: 'h = dt·kh is computed exactly as response.js does'; B.4 adapter.advance(dtS, t0H, h)",
+   "fix": "B.4: `advance(dtS, t0H, h, source) → { tReachedH, khEnd }`. §11.7 and B.6: 'commit is a no-op while the delegate holds the clock; the kernel then follows the adapter's tH axis and carries the backlog'. B.13: 'h = dt·kh except in a frame that enters ONSET (rest of the frame at the ONSET clock)'.",
+   "reason": "Partly confirmed. The claim that the code does the opposite of the spec is overstated. §11.7 excepts the adapter, and the §11.14 CPU row (L5007), B.6 step 5 (L6817) and B.13 already say the delegate's kh is never changed and the kernel lags and carries the backlog. That is what clock.js commit() does when it ignores the call under the delegate (L222-224). Saying explicitly that commit leaves tH at the adapter's time is only a clarification. The real gap is after the port. DOPAMINE.md §9.3 L1828 and §9.1 L1783 say that on a transition into ONSET the rest of the frame runs at the new k_h. A frame that enters ONSET therefore covers less than dt·kh, which contradicts B.13 'h = dt·kh' (L6996) and B.6 step 3 'over [t0H, t0H + h]'. The B.4 signature advance(dtS, t0H, h) has no return value, so the clock, as sole owner of tH and kh, cannot take the adapter's reached tH or end kh. The code adds this through settleDelegate (clock.js L210-220; runtime.js frame L121). Fix as proposed: B.4 advance(...) returns { tReachedH, khEnd }; B.6 and §11.7 say commit is a no-op while the delegate holds the clock and the clock takes the adapter's tH and kh; B.13 reads h = dt·kh except in a frame that enters ONSET."
+  }
+ ],
+ "rejected": [
+  {
+   "lens": "physiology-neural",
+   "section": "§6.10 (also §5.5, §12.3, §12.5)",
+   "claim": "At the default terminal depth of 150 µm, heat from a 55 °C contact on 32 °C skin reaches the nociceptor threshold after 224 ms (§11.9); EMG onset therefore falls ≈ 290 ms after contact (the Aδ volley sets the reflex).",
+   "reason": "I reproduced the arithmetic: at 150 µm and 55 °C from 32 °C, θ 43/45/46/53 give 224/340/429/9,434 ms. My scratch script is C:\\Users\\User\\AppData\\Local\\Temp\\claude\\C--Users-User--claude-spares-spare-7RIe5m\\bbf7f24a-a450-4563-b7aa-b8bcef60bc6e\\scratchpad\\stage6\\refute-physneural0\\ch.py. The physiological premise is wrong, though. The §5.5 I0 values (AMH II ≈ 46, AMH I > 53, C 41–49, QST 43–47) are surface stimulus temperatures. §11.9's θ_heat is the temperature at the terminal. Tillman et al. 1995 (J Physiol 485:753) used the same diffusion approach and found that the temperature at the receptor (mean depth 150 µm, stepped stimuli) is far lower than the surface temperature at threshold: about 40.2 °C for C mechano-heat nociceptors. Treede et al. 1995 give type II AMH a median surface threshold of 46 °C, but a mean response latency of 120 ms to a 53 °C laser step. With the document's own model (α 1e-7, d 150 µm, monkey base 38 °C), a terminal threshold of 43 °C reproduces that 120 ms exactly. A terminal threshold of 46 °C predicts 290 ms, which the data rule out (scratch lat.py in the same folder). So the document's single θ 43 °C at the terminal is consistent with the Aδ evidence, and the 250–350 ms EMG target does not rest on a mismatch. Fix (a) would move the reflex to ≈ 0.49 s by putting surface thresholds at the receptor depth. Its core sentence, 'Transduction starts when T_rec reaches the class threshold θ_c … AMH II 46 °C, AMH I 53 °C', would add that same error. The alternative of a 100 µm default depth contradicts §6.10's argument from thick glabrous skin. Option (b) is not wrong, but its rationale ('I0 values scale intensity only') misses the real distinction. The improvement actually worth making is wording only: state in §11.9/§12.3 that θ_heat is a terminal-level threshold, different from the surface I0 values in §5.5, and cite the Treede 1995 latency and Tillman 1995 for it, instead of 'heat threshold 43 °C per §5'. A separate point, not raised by this issue: Treede 1995 found only type I AMHs in monkey glabrous skin. That puts in question §5.5's 'type II carries first pain to heat' when applied to the palm, although Iannetti et al. 2006 report Aδ heat responses from human glabrous skin."
+  },
+  {
+   "lens": "integration-switches",
+   "section": "§11.11 / §11.13 / A.5",
+   "claim": "Cortisol on immune cells: neuroendocrine ∧ neuroimmune; brake_C uses g.neuroendocrine · g.neuroimmune; neuroimmune off: 'glucocorticoid action on immune cells' off",
+   "reason": "Refuted. brake_C = 1/(1 + b_C·max(0, cortisolRel − 1)·g.ne·g.ni) (L4443) acts only on cortisol above basal, so there is no basal glucocorticoid restraint for the neuroimmune gate to remove. A product of gates cannot double count. With neuroimmune off, the cytokine → PVN edge is cut, cortisol does not rise, and brake_C ≈ 1 with or without the g.ni factor. The +31 % IL-6 AUC is therefore the loss of both brakes (vagal and cortisol), as the A.5 Neuroimmune row states, not an artefact of the extra factor. Putting glucocorticoid action on immune cells inside the neuroimmune network is a documented design decision: the A.5 Neuroimmune row lists it, and A.8 #3 names the cortisol brake as an AND gate. The proposed fix is wrong: braking only the cytokine-driven cortisol increment would remove the brake from stress-driven cortisol, which does suppress cytokine responses."
+  }
+ ],
+ "minorCount": 47,
+ "calibrations": [
+  {
+   "module": "stimuli",
+   "param": "contact-heat thresholds: cold θ 45 °C, warm θ 33.5 °C",
+   "verdict": "keep",
+   "rationale": "Both follow the doc. 45 °C is the paradoxical cold-fibre discharge threshold (§5.6; Dodt & Zotterman 1952, cat) and 33.5 °C is skin baseline 32 °C plus 1.5 °C, the middle of the +1–2 °C warm detection threshold (Rolke et al. 2006 [recalled]). On the §11.9 erfc model at 55 °C and 150 µm they give 340 ms and 33 ms. The only fault is the uneven treatment of the Aδ nociceptors, which still use 43 °C instead of AMH II 46 °C or AMH I 53 °C (issue 1, §6.10).",
+   "suggested": "Own the values in §5.6 and in a new per-class θ table in §11.9: cold 45, warm 33.5, C polymodal 43, AMH II 46, AMH I 53 °C. Put the 55 °C onset times (340 / 33 / 224 / 429 / 9,434 ms) next to the §12.3 sensitivity table.",
+   "lens": "physiology-neural"
+  },
+  {
+   "module": "somatic",
+   "param": "startle recruitment delays: neck 68, shoulder 85, arm 115, leg 150 ms",
+   "verdict": "document",
+   "rationale": "These are [model] central delays added to the reticulospinal conduction. The simulated EMG onsets (5 % of peak) are SCM 87.5, trapezius 89, deltoid 109.5, biceps 140, quadriceps 195 ms. All fall inside the §6.11 bands (neck 75–121, shoulder 100–121, arm 125–195, leg 145–395 ms). The ordering matches Brown et al. 1991 (SCM first, caudal later). The bands have no primary source and may be movement (film) latencies, not EMG (issue 4). The leg onset sits in the lower half of a very wide band, and the elbow joint movement (199 ms) just exceeds the arm band.",
+   "suggested": "Own the four delays in §6.11 (and §12.6) as 'recruitment delay after pnc activation, s: 0.068 / 0.085 / 0.115 / 0.150 [model]'. Add the simulated EMG onsets (88 / 110 / 140 / 195 ms) as the acceptance values, and cite Brown et al. 1991 for the recruitment order.",
+   "lens": "physiology-neural"
+  },
+  {
+   "module": "autonomic",
+   "param": "spinalRest ρ by SCI phase [0.1, 0.2, 0.4, 0.5]",
+   "verdict": "document",
+   "rationale": "Ditunno et al. 2004 define four phases of reflex return (areflexia, initial return, hyperreflexia, spasticity). They do not describe resting sympathetic tone, so tying ρ to those windows is a modelling choice. The 'one third to a half of rest tone' justification rests on plasma noradrenaline, a spillover measure. Microneurography shows resting sympathetic traffic below a complete cord lesion is low or absent and mostly reflex-driven (Wallin & Stjernberg 1984; Stjernberg, Blumberg & Wallin 1986 [secondary summaries only]). Chronic vascular tone recovers through receptor supersensitivity and intrinsic tone. ρ should be a vascular-tone surrogate, not firing.",
+   "suggested": "Own ρ in §7.8 with a cross-reference from §6.15. State 'ρ = spinal and intrinsic vascular tone fraction, not resting sympathetic firing (low or absent below a complete lesion on microneurography); phase windows borrowed from Ditunno et al. 2004 for timing only', [model], low. Keep the numeric values.",
+   "lens": "physiology-neural"
+  },
+  {
+   "module": "autonomic",
+   "param": "bulbospinal η 0.20",
+   "verdict": "document",
+   "rationale": "I could not locate an η parameter in src/sim/autonomic.js (only the bulbospinal segment map and spinalRest). No physiological judgement is possible.",
+   "suggested": "Name the file and constant that carry η 0.20 and its owning section in the Stage-4 calibration list before the next round.",
+   "lens": "physiology-neural"
+  },
+  {
+   "module": "autonomic",
+   "param": "defence.vag 0.08 → 0.12",
+   "verdict": "keep",
+   "suggested": "0.12, with the full offset-gain table in §7.8",
+   "rationale": "A paired hotObject HR rise of about +6.9 bpm lies in the [T, low] window of +5–15 bpm, so the value is acceptable. §7.15 admits the offset gains are not tabulated. Add a 'defence and orienting offsets' table (vag 0.12, sym 0.05, skin 0.05) to §7.8 with [model] tags and the calibration target (§12.20 row 12), so the value is reproducible from the document.",
+   "lens": "physiology-visceral"
+  },
+  {
+   "module": "autonomic",
+   "param": "stress.symAdr 0.30 → 0.185",
+   "verdict": "document",
+   "suggested": "0.185 in §7.6 (fSymAdr row) and in §9.4 (drive and ratio ×4.1)",
+   "rationale": "The value is a coupling artefact: it makes the loaded autonomic module reproduce the ×4.12 input profile of §9.10. An adrenaline rise of ×4 (≈ 181 pg/mL from 44) is inside the §9.10 window of 100–400 pg/mL, but it is at the top of what laboratory psychosocial stress usually produces (about ×1.5–3 in reported studies; not verified here). Record that the figure is a model target, and that the stressor's adrenaline excursion is a high-end case. Also note that the SAM channel is gated by autonomic ∧ neuroendocrine.",
+   "lens": "physiology-visceral"
+  },
+  {
+   "module": "autonomic",
+   "param": "bulbospinal η 0.20",
+   "verdict": "document",
+   "suggested": "owner §6.3 (cord cross-section map)",
+   "rationale": "I found no η among the physiological parameters of autonomic.js. In the document η is the cross-section coordinate of the §6.3 (ξ, η) map, used to decide which tract edges a lesion cuts. If 0.20 is the bulbospinal tract position, it is a geometry value, not a physiological one, and belongs to §6.3 with the other tract coordinates. If it is a gain, §7 must say so. Please confirm which it is.",
+   "lens": "physiology-visceral"
+  },
+  {
+   "module": "autonomic",
+   "param": "spinalRest ρ by SCI phase [0, 0.1, 0.2, 0.4, 0.5]",
+   "verdict": "change",
+   "suggested": "[0, 0.02, 0.05, 0.10, 0.15] for muscle, splanchnic and cardiac channels; skin channels up to 0.3 at phase 4",
+   "rationale": "Direct recordings in complete cervical or high thoracic lesions show almost no spontaneous muscle sympathetic activity below the lesion. The remaining activity is reflex-driven and sparse, though skin vasomotor activity may be higher. The 'third to a half' comment fits plasma noradrenaline, which has other sources. The late-phase exaggeration should come from reflex gain (the dysreflexia surge), not from resting tone. Owner section §7.8, with §6 for the phase index.",
+   "lens": "physiology-visceral"
+  },
+  {
+   "module": "enteric",
+   "param": "brakeGain 4 → 16 (≈ 1.77 kcal/min against §8.13 1.8)",
+   "verdict": "change",
+   "suggested": "G = G_pyl/(1 + 16·B·(r̃/r_set)⁴); §8.8 owns the value",
+   "rationale": "The §8.13 value of 1.8 kcal/min is right. The B formula as written (multiplier 1) lets delivery overshoot r_set by about 50 % (≈ 2.7–2.9 kcal/min), finishes a 600 kcal meal in 3.7 h and fails the 2 h Tougas window (25 % retained against 30–60 %). A multiplier of 16 gives 1.81 kcal/min, 6.05 h, and 77/52/10 % retention at 1/2/4 h. Put 16 into the §8.8 formula and treat B's weights (0.5/0.3/0.2) as the share of the brake that each network supplies. The 4 h retention then sits at the 10 % edge, which needs a small k₁/k₂ re-tune.",
+   "lens": "physiology-visceral"
+  },
+  {
+   "module": "endocrine",
+   "param": "clock vote uses relative distance to target (en.gap), threshold 0.08",
+   "verdict": "document",
+   "suggested": "§9.8 (clock presets) and §11, with the variable it applies to",
+   "rationale": "0.08 is above the ≈ 7 % ultradian ripple of the displayed cortisol pool (n = 6, max/min 1.07), so a resting pulsatile pool does not hold the clock at ×60. It is well below the ripple of ACTH (×2.4) and S (×1.7). The rule must therefore be stated for the displayed pools (cortisol, adrenaline, AVP), never for ACTH or S. If §9.4 is re-tuned so the cortisol pool pulses by more than 8 %, the threshold must move with it. Record that dependence.",
+   "lens": "physiology-visceral"
+  },
+  {
+   "module": "stimuli",
+   "param": "contact-heat thresholds: cold receptors 45 °C, warm receptors 33.5 °C",
+   "verdict": "keep",
+   "suggested": "owner §5.6 (thermoreceptors)",
+   "rationale": "The 45 °C value is the paradoxical discharge of cold fibres (Dodt & Zotterman 1952, cat), already in §5.6. 33.5 °C for warm receptors is just above the 32 °C contact baseline and consistent with warmth detection thresholds of about 1 °C. Document both in §5.6 with their species tags and say they are model recruitment thresholds, not psychophysical thresholds. Outside my lens, so not checked beyond this.",
+   "lens": "physiology-visceral"
+  },
+  {
+   "module": "somatic",
+   "param": "startle recruitment delays: neck 68, shoulder 85, arm 115, leg 150 ms",
+   "verdict": "document",
+   "suggested": "owner §6 (startle row)",
+   "rationale": "The order matches the brainstem-to-caudal progression of the auditory startle (Brown et al. 1991; sternocleidomastoid first, caudal and distal muscles later). Neck at 68 ms is a little later than the roughly 55 ms sternocleidomastoid onset in a related free-fall study (54 ms). The leg value of 150 ms is plausible but posture-dependent (tibialis anterior is about 40 ms earlier when standing than sitting). Tag the four values [model, low], cite Brown 1991, and state the posture. Outside my lens, so not checked beyond this.",
+   "lens": "physiology-visceral"
+  }
+ ],
+ "edit": {
+  "changes": [
+   {
+    "section": "§2.1",
+    "what": "Scalp-vertex source: stale anatomy.js line for the cerebrum hull replaced with the post-port line and the symbol name",
+    "before": "cerebrum top z 76 (`src/anatomy.js` L81)",
+    "after": "cerebrum top z 76 (`HULL.cerebrum`, `src/anatomy.js` L126 post-port)",
+    "numeric": false
+   },
+   {
+    "section": "§2.1",
+    "what": "BRAINSTEM tube source line corrected (verified against the post-port file)",
+    "before": "`src/anatomy.js` L196–L199",
+    "after": "`BRAINSTEM`, `src/anatomy.js` L321–L324 post-port",
+    "numeric": false
+   },
+   {
+    "section": "§2.5",
+    "what": "Enlargements: the capture's vertebral levels were being read as segments for the cervical row and the lumbar segments were invented; both ranges restated as segments with the drawn z span",
+    "before": "cervical: segments C4–T1, z −114 to −172 … lumbar: segments L1–S2, z −404 to −479",
+    "after": "cervical: segments C5–T1, z −129 to −172 … lumbosacral: segments L2–S3, z −416 to −484 (the capture gives vertebrae C4–T1 and T10–L1)",
+    "numeric": true
+   },
+   {
+    "section": "§2.6",
+    "what": "Added `lm.xiphoidTip` so the \"xiphoid level\" is defined once, and labelled the existing landmark as the xiphisternal joint",
+    "before": "`.xiphoid` … (0, 92, −388)",
+    "after": "`.xiphoid` (0, 92, −388) = the xiphisternal joint; `.xiphoidTip` (0, 92, −410), ≈ 22 below it",
+    "numeric": true
+   },
+   {
+    "section": "§2.7",
+    "what": "C3 moved onto the midclavicular line, as the capture and ISNCSCI define it (it lay 35 mm medial, at the medial fossa)",
+    "before": "C3 (supraclavicular fossa) (60, 50, −215)",
+    "after": "C3 (supraclavicular fossa at the midclavicular line) (95, 20, −222), site radius 10, over the clavicle midpoint (97.5, 20, −223.5)",
+    "numeric": true
+   },
+   {
+    "section": "§2.7",
+    "what": "T5 and T6 re-levelled: T6 now at the xiphoid tip (it had been 22 mm above the level T7–T9 are derived from), T5 at the T4–T6 midpoint",
+    "before": "T5 (95, 86, −379); T6 (95, 84, −388), xiphisternal level",
+    "after": "T5 (95, 86, −390); T6 (95, 84, −410), level with `lm.xiphoidTip`",
+    "numeric": true
+   },
+   {
+    "section": "§2.7",
+    "what": "T7–T9 recomputed as quarter points of xiphoid tip (−410) → umbilicus (−580)",
+    "before": "−454, −498, −541",
+    "after": "−453, −495, −538",
+    "numeric": true
+   },
+   {
+    "section": "§2.7",
+    "what": "T10 set to the umbilicus level it is defined by, and T11 to the true midpoint of umbilicus and inguinal ligament",
+    "before": "T10 −585; T11 −654",
+    "after": "T10 −580; T11 −651",
+    "numeric": true
+   },
+   {
+    "section": "§2.7",
+    "what": "T12 depth note corrected and the ligament midpoint stated",
+    "before": "the ligament lies ≈ 30 deeper",
+    "after": "the ligament midpoint (≈ (71.5, 55, −722)) lies ≈ 40 deeper",
+    "numeric": true
+   },
+   {
+    "section": "§2.7",
+    "what": "L3 key point renamed to the ISNCSCI site",
+    "before": "L3 (medial femoral epicondyle)",
+    "after": "L3 (medial femoral condyle, above the knee)",
+    "numeric": false
+   },
+   {
+    "section": "§2.8",
+    "what": "Preamble: added the rule that the heart and liver are unions of several ellipsoids and that a stated apex or tip must be tested against the union, not the main solid",
+    "after": "Two organs are unions of more than one ellipsoid … A stated apex or tip point is the extreme point of the union",
+    "numeric": false
+   },
+   {
+    "section": "§2.8",
+    "what": "Heart: the apex anchor lay at normalised radius 1.65, outside every heart solid; the code's undocumented apex lobe is now documented and the anchor moved onto the drawn surface",
+    "before": "apex (−85, 55, −390); half (52, 45, 55); (40, 35, 40)",
+    "after": "apex lobe c (−62, 40, −377) half (26, 20, 14); apex point (−80, 50, −384) at radius 0.99 on that lobe; all three clipped below z −392",
+    "numeric": true
+   },
+   {
+    "section": "§2.8",
+    "what": "Liver: added the code's left-lobe ellipsoid (the main solid reaches only x −46, so the stated tip was 47 mm outside it) and split the volume into main and union",
+    "before": "left-lobe tip (−90, 30, −430); (90, 68, 55), carved, ≈ 1.41 L",
+    "after": "left lobe c (−45, 26, −432) half (48, 32, 20); tip at radius 0.95; main ≈ 1.41 L, union ≈ 1.5 L before carving",
+    "numeric": true
+   },
+   {
+    "section": "§2.12",
+    "what": "Intercostal `z_ant` list brought into line with the corrected §2.7 dermatome levels",
+    "before": "−250, −300, −340, −370, −379, −388, −454, −498, −541, −585, −650",
+    "after": "−250, −300, −340, −370, −390, −410, −453, −495, −538, −580, −651",
+    "numeric": true
+   },
+   {
+    "section": "§2.17",
+    "what": "Project-files line: stale anatomy.js lines replaced by symbols plus post-port lines; the geometry.js ORGANS table added as the source of the organ primitives",
+    "before": "`src/anatomy.js` L1, L7, L81, L196–L199",
+    "after": "`src/anatomy.js` L1, L7, `HULL.cerebrum` L126, `BRAINSTEM` L321–L324; `src/body/geometry.js` `ORGANS` L451–L470",
+    "numeric": false
+   },
+   {
+    "section": "§3.2",
+    "what": "Basal-ganglia counts: Hardman et al. counted the non-dopaminergic SN, and the row gave all four nuclei the same ≈ 10⁵ while calling GPe larger",
+    "before": "GPe > GPi ≈ STN ≈ SNc, each ≈ 10⁵ per side",
+    "after": "GPe > GPi ≈ STN ≈ SNr; GPi, STN, SNr of order 10⁵ per side, GPe several-fold higher; SNc ≈ 4 × 10⁵ pigmented neurons per side",
+    "numeric": true
+   },
+   {
+    "section": "§3.20, §11.6, §11.15, §11.20, B.2, B.3",
+    "what": "Remaining stale `src/anatomy.js` line references updated to the verified post-port lines or cited by symbol; the 33-region figure attributed to `LEGACY_REGION_COUNT` rather than to a line range that now holds 125 ids",
+    "before": "L12–17 / L30 / L160–184 / L196–199 / L203 / L251",
+    "after": "`REGION_IDS` L17–L41, `REGION_COUNT` L48, `LEGACY_REGION_COUNT` L49, `mulberry32` L74, `HULL` L125, `NUCLEI` L273, `DA_GROUPS` L308, `BRAINSTEM` L321–L324, `PATHWAYS` L335, `TERMINALS` L368, `spline` L386",
+    "numeric": false
+   },
+   {
+    "section": "§4.7",
+    "what": "Semicircular-canal transfer function: with T₂ ≈ 5 s and T₁ ≈ 5 ms the 0.1–10 Hz band is flat, not high-pass",
+    "before": "Between 0.1 and 10 Hz this acts as a first-order high-pass followed by central velocity storage",
+    "after": "corners ≈ 0.03 Hz and ≈ 32 Hz, so the gain is flat (0.95 / 1.0 / 0.99 at 0.1 / 1 / 10 Hz) and the output tracks head velocity; the high-pass appears below ≈ 0.05 Hz and in step responses",
+    "numeric": false
+   },
+   {
+    "section": "Table 4.11",
+    "what": "C-fibre LEP row: verdict downgraded, the target restated as a peak at a hand-dorsum site, and the implied C velocity stated",
+    "before": "C-LEP N2 ≤ 704 ± 179 ms … pass via dispersion",
+    "after": "C-LEP N2 704 ± 179 ms (a peak) … marginal: EV exceeds the N2 mean by ≈ 1.8 SD, the target implies C CV ≈ 1.3–1.6 m/s against the 1.0 m/s default",
+    "numeric": false
+   },
+   {
+    "section": "§5.1",
+    "what": "Contact-heat diffusion lag was inconsistent with the 150 µm terminal depth used everywhere else",
+    "before": "(I0 − T_skin) / ramp + ≈ 30–50 diffusion",
+    "after": "(θ_c − T_skin)/ramp + d²/(2α) ≈ 110 at d 150 µm; contact steps use the §11.9 erfc model (224 ms at 55 °C)",
+    "numeric": true
+   },
+   {
+    "section": "§5.3",
+    "what": "Ear-canal gain replaced with the resonance figures; the capture's range added to the not-adopted list",
+    "before": "The ear canal amplifies 3–12 kHz",
+    "after": "resonates at ≈ 2.5–3.5 kHz, +10–15 dB over ≈ 2–5 kHz; pinna and concha to ≈ 12 kHz",
+    "numeric": true
+   },
+   {
+    "section": "§5.4",
+    "what": "SII peak latency corrected from the Hari et al. 1984 abstract; confidence raised",
+    "before": "`s2` response peak 60–100 ms, low, [recalled]",
+    "after": "90–125 ms, medium, Hari et al. 1984 abstract",
+    "numeric": true
+   },
+   {
+    "section": "§5.8, §5.19, §14",
+    "what": "ENaC low-salt result re-attributed from the 2006 review to the 2010 paper, in all three places",
+    "before": "Chandrashekar et al. 2006",
+    "after": "Chandrashekar et al. 2010, Nature 464:297–301",
+    "numeric": false
+   },
+   {
+    "section": "§5.17",
+    "what": "Five capture statements added to the not-adopted list (ear canal 3–12 kHz; T1 \"distal\"; Betz 5 %; swallowing CPG at the hypoglossal nucleus)",
+    "numeric": false
+   },
+   {
+    "section": "§6.6",
+    "what": "ISNCSCI key points corrected where the capture's wording had been copied",
+    "before": "T1 medial antecubital fossa, distal to the medial epicondyle; L3 medial femoral epicondyle",
+    "after": "T1 just **proximal** to the medial epicondyle of the humerus; L3 medial femoral condyle above the knee",
+    "numeric": false
+   },
+   {
+    "section": "§6.8, §4.4",
+    "what": "Betz-cell share made consistent with the document's own counts (34,000 of ≈ 1.05 × 10⁶)",
+    "before": "≈ 5 % of CST neurons, medium",
+    "after": "≈ 3 % of CST axons, low; the capture's 5 % not adopted",
+    "numeric": true
+   },
+   {
+    "section": "§6.11",
+    "what": "Startle latency rows relabelled as latencies of an unstated measure with no primary source and dropped to low confidence; Brown et al. 1991 added for the EMG recruitment order; the model's recruitment delays documented (verified against somatic.js PARAMS.startle.recruit)",
+    "before": "Startle onset: head / neck / shoulder 60–120 / 75–121 / 100–121 ms, medium",
+    "after": "same bands at low confidence, plus a recruitment-order row and a [model] row: neck 68, shoulder 85, arm 115, leg 150 ms",
+    "numeric": true
+   },
+   {
+    "section": "§6.13",
+    "what": "Swallowing pattern generator relocated from the capture's motor nucleus to the medullary reticular network",
+    "before": "lies in the medulla at the hypoglossal nucleus",
+    "after": "a dorsal group in and around the NTS and a ventral group near the nucleus ambiguus; the hypoglossal nucleus receives the output",
+    "numeric": false
+   },
+   {
+    "section": "§6.15",
+    "what": "SCI phase 3 gains raised so the displayed §6.11 grade is the hyperreflexia the phase describes, and a HUD-grade column added",
+    "before": "phase 3 tendon 1.2, cutaneous/flexor 1.0",
+    "after": "phase 3 tendon 1.8, cutaneous/flexor 1.2 (grade 3+ at 1.98 after the 1.1 state factor)",
+    "numeric": true
+   },
+   {
+    "section": "§7.5",
+    "what": "Vagal-withdrawal sentence reconciled with the atropine row and IHR",
+    "before": "Vagal withdrawal alone lifts HR to about that value",
+    "after": "Vagal withdrawal alone (atropine) gives ≈ 110 bpm, above the intrinsic 101, because resting sympathetic tone is still present",
+    "numeric": false
+   },
+   {
+    "section": "§7.5",
+    "what": "The β1 receptor effect of plasma adrenaline no longer gated by `g.autonomic`: a blood-borne action carries only its own network and denervated targets stay responsive",
+    "before": "s̃_eff = s̃ + k_adr · (…) · g.autonomic · g.neuroendocrine",
+    "after": "s̃_eff = s̃ + k_adr · (…) · g.neuroendocrine, with `g.autonomic` on the release edge only",
+    "numeric": true
+   },
+   {
+    "section": "§7.8",
+    "what": "Resting sympathetic tone below a complete lesion lowered to the microneurography picture, and the late-phase change assigned to reflex gain; the recalled Mathias & Frankel figure tagged as plasma noradrenaline",
+    "before": "Segmental sympathetic reflexes below the lesion remain, scaled by the spinal-shock phase (depressed early, exaggerated late)",
+    "after": "resting tone ≤ 0.15 of normal for muscle and splanchnic channels, up to ≈ 0.3 for skin; the phase scales reflex gain, not resting tone",
+    "numeric": true
+   },
+   {
+    "section": "§7.11",
+    "what": "Atropine preset split into systemic and topical exposure, so the model's mydriasis is fitted to the vagal-blockade dose",
+    "before": "HR ≈ 110; pupils dilated and unreactive",
+    "after": "HR ≈ 110; pupil +1–2 mm with a sluggish but present light reflex; topical atropine (7–8 mm, fixed) not offered",
+    "numeric": true
+   },
+   {
+    "section": "§7.15",
+    "what": "Open question re-aimed at the systemic figure",
+    "before": "atropine mydriasis (≈ 5.3 mm in the model against 7–8 mm clinically)",
+    "after": "compared with the systemic vagal-blockade dose (+1–2 mm), not with the topical 7–8 mm fixed pupil",
+    "numeric": false
+   },
+   {
+    "section": "§8.8",
+    "what": "Pyloric brake given an explicit gain, so r_set is actually the regulated rate; a rationale row records the sweep (gains 4–8 pass every Tougas window for A 0.9–1.25; 1 overshoots and 16 sits at the 4 h edge)",
+    "before": "G = G_pyl/(1 + B·(r̃/r_set)⁴)",
+    "after": "G = G_pyl/(1 + `brakeGain`·B·(r̃/r_set)⁴), `brakeGain` 8; steady delivery ≈ 1.0 × r_set",
+    "numeric": true
+   },
+   {
+    "section": "§8.9",
+    "what": "Visceral afferent share restated with its denominator and segments",
+    "before": "≈ 1.5–2.5 % of spinal primary afferents",
+    "after": "≤ 10 % of DRG neurons in the segments of entry (T9–L2, S2–S4), ≈ 2–3 % averaged over all segments",
+    "numeric": true
+   },
+   {
+    "section": "§8.13",
+    "what": "`emptyRate` row updated to the re-tuned brake and labelled as a mean over a window",
+    "before": "Linear `emptyRate` ≈ 1.8 kcal/min",
+    "after": "Mean `emptyRate` over 60–180 min ≈ 1.9 kcal/min (≈ 1.0 × r_set)",
+    "numeric": true
+   },
+   {
+    "section": "§8.13",
+    "what": "Chyme-head row: the capsule target is measured from gastric exit, the model output from meal start, so the two clocks were mixed",
+    "before": "Chyme head at the caecum (target 4.0–5.9 h) ≈ 4.4 h",
+    "after": "target restated as ≈ 4.5–6.5 h from meal start (0.5 h gastric lag plus 4.0–5.9 h transit); the 4.4 h value marked pre-retune",
+    "numeric": true
+   },
+   {
+    "section": "§8.13",
+    "what": "Emptying time brought to the value the re-tuned brake produces",
+    "before": "Stomach below 15 kcal ≈ 6 h; MMC return ≈ 6–7 h",
+    "after": "≈ 4.6 h; MMC return ≈ 5–6 h",
+    "numeric": true
+   },
+   {
+    "section": "§8.15",
+    "what": "Prototype solid-retention figures recomputed at `brakeGain` 8 (the recorded values matched a softer brake than the one §8.8 wrote)",
+    "before": "67 / 32 / 0 %",
+    "after": "74 / 46 / 3 %",
+    "numeric": true
+   },
+   {
+    "section": "§8.18",
+    "what": "Test 7 rewritten: `vagChem` fires at 2 Hz at rest, so a \"first packet ≤ 1.5 s\" was true whatever the stimulus",
+    "before": "first vagal packet at `ntsVisc` ≤ 1.5 s",
+    "after": "first sustained rise of `vagChem` ≥ 20 s after the lipid reaches s 55–80, time to peak 60–120 s; the ≤ 1.5 s figure kept only as the §8.9 conduction check",
+    "numeric": true
+   },
+   {
+    "section": "§10.8",
+    "what": "Vagotomy territory aligned with §8.2 and §8.19 (the capture's \"left side of the transverse colon\" contradicted the Cannon–Böhm point)",
+    "before": "eliminates … innervation of the stomach and the left side of the transverse colon",
+    "after": "the stomach (and, by the capture's wording, part of the transverse colon; the model's vagal territory ends at the Cannon–Böhm point)",
+    "numeric": false
+   },
+   {
+    "section": "§9.4",
+    "what": "`k_ACTH` row annotated: the 22 min t½ matches β-endorphin in the same source, while deconvolution gives ACTH 15–17 min; a calibration target added without moving the default (the Hopf threshold must be re-run first)",
+    "before": "`k_ACTH` 0.0315 (t½ ≈ 22 min)",
+    "after": "0.0315 with calibration target 0.046–0.069 (t½ 10–15 min), and the mis-assignment explained",
+    "numeric": true
+   },
+   {
+    "section": "§9.4",
+    "what": "`k_C` row marked as the well-sourced constant (deconvolution 65 ± 5.3 min), so it is not the free parameter the timing fix may change",
+    "numeric": false
+   },
+   {
+    "section": "§9.7",
+    "what": "AVP threshold rows reconciled (two different fits had given 280 and 284) and the linear form flagged as an approximation",
+    "before": "osmotic threshold ≈ 280; pAVP ≈ 0.63·(Posm − 284)",
+    "after": "threshold ≈ 280–284 (fit-dependent); the 0.63·(Posm − 284) line marked a linear approximation of data better fitted by an exponential",
+    "numeric": true
+   },
+   {
+    "section": "§9.8",
+    "what": "Cortisol/GABA-A claim corrected: physiological free cortisol (≈ 5–50 nM) lies in the inhibitory range at rest and under stress, so the sign never flips",
+    "before": "the biphasic shape means the sign of that modulation changes between resting and stress concentrations",
+    "after": "free cortisol ≈ 5–50 nM lies in the inhibitory range throughout; the optional gain is negative-only and the pM potentiation is unreachable in vivo [R, in vitro; low]",
+    "numeric": true
+   },
+   {
+    "section": "§9.10",
+    "what": "The single-cause diagnosis replaced: S already peaks at 40 min, a first-order pool cannot peak before its input, the k_C sweep (t½ 66/35/17/9 min → 73/67/59/53 min) leaves the peak late, speeding k_C makes the recovery row worse, and no faster clearance is sourceable; the open calibration is now the delay chain, and the awakening row is identified as an amplitude failure",
+    "before": "The three timing failures share one cause: the displayed plasma pool clears with t½ ≈ 66 min (k_C) … A free/total cortisol split, or a sourced faster effective clearance, is the open calibration question",
+    "after": "delay-chain diagnosis with the sweep, a calibration list (k_ACTH 0.046–0.069, τ_adrenal 3–5 min, k_S ≥ 0.14, pool kept at t½ 60–90 min), the 35–37 min check run, and the CAR row separated as an amplitude failure",
+    "numeric": true
+   },
+   {
+    "section": "§9.11",
+    "what": "Open-question bullet aligned with the delay-chain diagnosis",
+    "before": "all through the slow plasma pool",
+    "after": "through the delay chain (τ_adrenal, k_S, k_ACTH), not the plasma pool; the awakening rise fails on amplitude",
+    "numeric": false
+   },
+   {
+    "section": "§10.2",
+    "what": "IL-10 cannot peak at 3 h as a first-order low-pass of tnf (it peaks at 1.72 h, and τ_IL10 alone reaches only 2.60 h at 12 h); an input delay added to the equation and a constants row records the simulated peaks",
+    "before": "dil10/dt = (a_IL10 · tnf · (…) − il10)/τ_IL10; τ_IL10 set for the 3 h IL-10 peak",
+    "after": "dil10/dt uses tnf(t − δ_IL10); δ_IL10 4,000–5,000 s gives a peak at 2.83–3.10 h, inside the §10.9 target",
+    "numeric": true
+   },
+   {
+    "section": "§10.2",
+    "what": "Added the unbraked peak times and the coupling they imply: TNF peaks at 1.10 h against a 1.5–2 h target and the brakes move it earlier, so τ_TNF and τ_mac must rise with any brake tuning",
+    "after": "TNF 1.10 h, IL-6 1.80 h, PGE2 2.55 h, IL-10 1.72 h unbraked; τ_TNF 3,000 s with τ_mac 2,400 s gives 1.53 h",
+    "numeric": true
+   },
+   {
+    "section": "§10.4",
+    "what": "Overstated certainty removed: critical reviews place the α7 receptor on splenic sympathetic terminals rather than macrophages, call the ChAT⁺ T cell a non-neural link, and deny this is the efferent arm of the endotoxaemia reflex",
+    "before": "The dispute is about the synaptic link from vagus to splenic sympathetic neurons, not about the splenic cholinergic endpoint, which is independently established",
+    "after": "The dispute covers both the synapse and the identity and site of the endpoint, with Martelli 2014, McAllen 2015, Komegae 2018 and Simon 2023 cited; the in-vitro human-macrophage fact kept separate",
+    "numeric": false
+   },
+   {
+    "section": "§10.4",
+    "what": "Confidence of the two contested rows lowered and the rival account tabulated",
+    "before": "Efferent endpoint | Ms | high; Splenic relay | Ms | high",
+    "after": "both medium, with the contest noted, plus an \"Alternative efferent account\" row (noradrenaline at β2 on splenic macrophages)",
+    "numeric": false
+   },
+   {
+    "section": "§10.10",
+    "what": "Open questions: the IL-10 terms flagged as still unrun (the source of the corrected constant), and the HUD-wording bullet told not to claim an established endpoint",
+    "numeric": false
+   },
+   {
+    "section": "§11.3",
+    "what": "Edge run predicate given its three real cases; read literally the old two-case rule stopped every cns/special edge in brain-only mode, contradicting A.5 and the §11.9 special-sense injection",
+    "before": "An edge runs only when bodyMode = 'body' and every listed network is on … `tissue` edges also have nets = [] but run only in whole-body mode",
+    "after": "non-empty nets → body mode and all g.k > 0; body flag → body mode; everything else always runs. g_e gains the body factor",
+    "numeric": false
+   },
+   {
+    "section": "§11.4",
+    "what": "The \"ungated\" count split, since the master switch does gate 40 of those edges",
+    "before": "ungated 1,141 … master 1,116 (50.3 %)",
+    "after": "always on 1,101; body-only 40; master 1,116 = 1,076 network-gated + 40 body-only",
+    "numeric": true
+   },
+   {
+    "section": "§11.4",
+    "what": "`nets` field description notes the body flag and the intervention-cut flag",
+    "numeric": false
+   },
+   {
+    "section": "§11.6",
+    "what": "CV coarse striding also blocked by an active gain ramp or pending event, as NF already was",
+    "before": "Only while NF is quiet and no packets are queued",
+    "after": "and no gain ramp or pending event inside the stride — the same retargeting rule as NF",
+    "numeric": false
+   },
+   {
+    "section": "§11.7",
+    "what": "Endocrine clock vote measured against each pool's current steady-state target instead of 1; the old rule fired at rest (circadian cortisolRel 0.944 at 10:00) and would hold ×60 for good after gland removal",
+    "before": "60 when |acthRel − 1| or |cortisolRel − 1| > 0.03",
+    "after": "60 while gap > 0.08, gap = max over crhRel, acthRel, S, cortisolRel and adrenaline of |x − target| / max(x, target, 0.1); a steady state votes nothing",
+    "numeric": true
+   },
+   {
+    "section": "§11.7",
+    "what": "Δt in the H_desc anticipation formula was undefined",
+    "after": "Δt is the screen frame time, taken from the current frame's dt (clamp 0.1 s, 1/60 s before the first frame), with the 1 decade/s slew folded into the exponent",
+    "numeric": true
+   },
+   {
+    "section": "§11.7",
+    "what": "Early-arrival wait bound replaced: it is (H_analytic − H_desc)/k₁ and grows with k₀, which is the real reason the stepwise sum is used; the per-frame re-solve stated",
+    "before": "the clock then waits up to 0.5 s at 60 fps or 0.9 s at 30 fps",
+    "after": "≈ 0.4 s from ×1, ≈ 25 s from ×60, ≈ 373 s from ×900 and ≈ 1,490 s from ×3,600 at 60 fps",
+    "numeric": true
+   },
+   {
+    "section": "§11.7",
+    "what": "Stated that `commit` is a no-op while a scenario delegate holds the clock, so the delegate owns tH and the kernel carries the backlog",
+    "numeric": false
+   },
+   {
+    "section": "§11.9",
+    "what": "The \"no wait\" claim qualified: it holds under jitter only because the clock re-solves the descent each frame",
+    "numeric": false
+   },
+   {
+    "section": "§11.10",
+    "what": "Rule 1: master transition identified as a step (all g are 0 in brain-only mode), and the dead time's conduction/effector split recorded as the simplification gating after D makes",
+    "after": "D has a conduction part (gated before) and an effector part (not gated); the model gates after D [model]; the alternative changes HR at 1 s by ≈ 6 bpm",
+    "numeric": false
+   },
+   {
+    "section": "§11.10",
+    "what": "Rule 5 rewritten: freeze and reset reconciled explicitly, and the resting-state cache key completed (it had been switch set alone, while B.4 used posture/timeOfDay/fed)",
+    "before": "body state is restored from a resting-state cache for the current switch set",
+    "after": "cache key (switch set, age, posture, fed, time of day at return), the same key in §12.1 and B.4",
+    "numeric": false
+   },
+   {
+    "section": "§11.10",
+    "what": "New rule 6: 300 s of tH cannot settle pools with t½ ≈ 66 min to a circadian rest, so the slow layers are set analytically and only NF and CV are integrated",
+    "after": "EN, IM and the GI fasting state set analytically with the circadian phase fixed; 300 s settles NF and CV; a \"change < ε over 60 s\" criterion is too weak for τ ≥ 30 min",
+    "numeric": true
+   },
+   {
+    "section": "§11.10",
+    "what": "Autonomic-off HR transient corrected against the implemented CV layer",
+    "before": "68 → ≈ 89 at 1 s, ≈ 108 at 3 s, 101 by 30–60 s",
+    "after": "68 → ≈ 86 at 1 s, ≈ 108 at 3 s, 101.5 at 30 s, 101.0 at 60 s",
+    "numeric": true
+   },
+   {
+    "section": "§11.10",
+    "what": "Autonomic-off SBP row given its 30 s value and the plateau",
+    "before": "115 → 111 at 3 s → 92 by 60 s, falling throughout",
+    "after": "… → 93 at 30 s → 92 by 60 s, falling throughout that first minute, then flat at 91.8 from ≈ 120 s",
+    "numeric": true
+   },
+   {
+    "section": "§11.10",
+    "what": "Gain-ramp row: the ramp is in tH by design, so it is 200 screen s at ×1/100 and 0.28 ms at ×3,600; the display falls back to the t_fade ghost",
+    "numeric": false
+   },
+   {
+    "section": "§11.10",
+    "what": "Resting-state cache window scoped to the layers it actually settles",
+    "before": "Resting-state cache window 300 s of tH per switch set",
+    "after": "300 s of tH per cache key, NF and CV only",
+    "numeric": false
+   },
+   {
+    "section": "§11.10",
+    "what": "Enteric-off row: \"emptying stops\" replaced by the §8.8 5 % floor and labelled an extreme-case model",
+    "before": "Gastric emptying stops",
+    "after": "falls to the 5 % floor of §8.8 (G_pyl 0.05), an extreme-case model of ENS loss, not a claim about one disease",
+    "numeric": true
+   },
+   {
+    "section": "§11.12",
+    "what": "Intervention-cut flag stated as separate from the nets mask and body flag; the heart-transplant row notes adrenaline is gated by neuroendocrine alone",
+    "numeric": false
+   },
+   {
+    "section": "§11.13",
+    "what": "Coupling row and pseudocode for the adrenal β effect regated to neuroendocrine only (the humoral edge carries its own network, §11.3 rule 3)",
+    "before": "EN adrenaline → CV s_eff | autonomic ∧ neuroendocrine; s_eff = s + k_adr·(adrenalineRel − 1)·g.autonomic·g.neuroendocrine",
+    "after": "neuroendocrine, release separately gated by autonomic; s_eff = s + k_adr·(adrenalineRel − 1)·g.neuroendocrine",
+    "numeric": true
+   },
+   {
+    "section": "§11.13",
+    "what": "Gut conductance line given one 5 % floor, resolving the clash with §8.8 (pyloric conductance had been ∝ g.enteric, i.e. exactly 0, while §8 kept a 0.05 floor)",
+    "before": "pyloric conductance ∝ g.enteric",
+    "after": "G_pyl = max(g.enteric, 0.05), colonic κ × max(g.enteric, 0.05)",
+    "numeric": true
+   },
+   {
+    "section": "§11.14",
+    "what": "\"Fixed grid\" and \"≤ 0.05 s in fast phases\" reconciled, with the per-frame step counts that justify a separate adapter CPU budget",
+    "before": "Fixed 0.05-s tH grid (DOPAMINE.md §9.3, ≤ 0.05 s in fast phases)",
+    "after": "a step cap of 0.05 s of tH, not a fixed grid; at kh 4,320 and 60 fps a frame is ≤ 1,440 response and ≤ 3,600 dopamine substeps",
+    "numeric": false
+   },
+   {
+    "section": "§11.14",
+    "what": "Komisaruk et al. 2004 row given the lesion completeness the abstract reports",
+    "before": "fMRI in five women with spinal cord injury at or above T10",
+    "after": "five women, four complete and one incomplete, three of the five reaching the end point; Brain Res 1024:77",
+    "numeric": false
+   },
+   {
+    "section": "§11.15",
+    "what": "The 2,660 edge-texture figure attributed to the itemised count rather than to the \"design size\"",
+    "before": "≥ 2,660 edges (§11.4 design size + 20 %)",
+    "after": "the §11.4 itemised size 2,217 + 20 % (the planning figure 2,200 + 20 % would be 2,640)",
+    "numeric": false
+   },
+   {
+    "section": "§11.19",
+    "what": "Removed the open bullet asking for the A.4 packet-rule amendment, now applied in A.4; cache-cost bullet updated; a composition-test bullet added, since several switch rules are not edge masks",
+    "numeric": false
+   },
+   {
+    "section": "§12.1",
+    "what": "Initial state keyed to the §11.10 cache and the prototype warm-ups marked as superseded rather than as a second definition",
+    "before": "the prototype approximates this with a rest warm-up of 300 s of tH (1,800 s for meal, 600 s for stressor and infection)",
+    "after": "the cache supersedes those warm-ups; slow pools with τ ≥ 30 min are set analytically",
+    "numeric": false
+   },
+   {
+    "section": "§12.4",
+    "what": "hotObject second keyframe and the C-packet arithmetic corrected: the transit is 0.81 s, the packet is emitted inside the first window, and 0.79/0.35 = 2.3 s broke the ≥ 2.5 screen s rule the same sentence states",
+    "before": "0.40–1.2 s → 0.35; the C packet (0.79 s) takes 2.3 screen s at ×0.35",
+    "after": "0.40–1.2 s → 0.3; transit 0.81 s, 0.18 s of it at ×0.02 (8.8 screen s) plus 0.64 s at the second keyframe, ≈ 10.6 screen s in all; A.4 target 0.32",
+    "numeric": true
+   },
+   {
+    "section": "§12.9",
+    "what": "Carotid nadir recomputed from the table's own values",
+    "before": "≈ 32 mmHg at the 13.9-s nadir",
+    "after": "≈ 30 mmHg (74.0 supine MAP − 26.5 nadir − 17.9 offset)",
+    "numeric": true
+   },
+   {
+    "section": "§12.9",
+    "what": "The three \"stand unchanged\" claims marked as resting on the withdrawn prototype, with the neuroendocrine case needing the §7 equations",
+    "numeric": false
+   },
+   {
+    "section": "§12.14",
+    "what": "standUp cells for enteric, neuroendocrine and neuroimmune off no longer asserted from the withdrawn kernel",
+    "before": "= | = | =",
+    "after": "to be re-run on §7 (the neuroendocrine case needs the §7.15 RAAS conductance term first)",
+    "numeric": false
+   },
+   {
+    "section": "§12.20",
+    "what": "Row 28 target spelled out and the figures marked for re-run at `brakeGain` 8",
+    "before": "60/26/0.5 % | fail at 2 h",
+    "after": "target 37–90 / 30–60 / 0–10 %; 60/26/0.5 % pre-retune, 74/46/3 % on the §8.15 equations; expected to pass after the retune",
+    "numeric": true
+   },
+   {
+    "section": "§12.20",
+    "what": "Row 30 postprandial figure made consistent with the matrix and §12.22",
+    "before": "−18.5 at 60 min",
+    "after": "−18.6 at 60 min",
+    "numeric": true
+   },
+   {
+    "section": "§12.20",
+    "what": "Row 31 target lowered to match the 5 % enteric-off floor",
+    "before": "retention ≥ 99 % at 4 h",
+    "after": "retention ≥ 95 % at 4 h; \"emptying falls to the §8.8 5 % floor\"",
+    "numeric": true
+   },
+   {
+    "section": "§12.20",
+    "what": "Row 42 frame-rate set and sample count aligned with §11.16 and §11.17",
+    "before": "0 at 23.7, 30, 60, 144 fps; 240 samples × 8 states",
+    "after": "the §11.16 set (10, 23.7, 30, 60, 144, 240 fps); 999 samples × 11 states",
+    "numeric": true
+   },
+   {
+    "section": "§12.21",
+    "what": "Run count corrected for the skipped brain-only cells and a pairwise composition test class added",
+    "before": "63 runs; all 32 switch sets reaching a bounded steady state",
+    "after": "63 cells of which 5 brain-only \"unavailable\" are skipped: 58 runs; plus a composition class over the 10 switch pairs",
+    "numeric": true
+   },
+   {
+    "section": "§12.22",
+    "what": "HPA, gastric and startle bullets aligned with the corrected diagnoses in §9.10, §8.8 and §6.11",
+    "numeric": false
+   },
+   {
+    "section": "§13.5",
+    "what": "Nearest-role column recomputed with an independent CIEDE2000 implementation (validated on the Sharma test pair, 2.0425); four entries named the wrong neighbour or the wrong distance",
+    "before": "afferent → neuroimmune 10.9; somatic efferent → neuroendocrine 12.3; parasympathetic → enteric 11.6; neuroimmune → afferent 10.9",
+    "after": "afferent → neuroimmune 11.2; somatic efferent → parasympathetic 12.2; parasympathetic → enteric 11.5; neuroimmune → enteric 10.9",
+    "numeric": true
+   },
+   {
+    "section": "§13.5",
+    "what": "Minimum pairwise distance at Y 0.6 corrected and the pairs named",
+    "before": "Y 0.6 / 0.35 / 0.15 = 11.1 / 10.9 / 8.9",
+    "after": "11.4 / 10.9 / 8.9, the Y 0.6 minimum being afferent–neuroimmune",
+    "numeric": true
+   },
+   {
+    "section": "§13.8",
+    "what": "Discrete-packet cap tightened so the packet stream cannot itself sit on the Harding hazard onset that §13.15 says is never reached (and that the §13.17 test fails at)",
+    "before": "≤ 3 per s tS past any point of a bundle",
+    "after": "≤ 2 per s tS past any point of a bundle and per limiter window",
+    "numeric": true
+   },
+   {
+    "section": "§13.12",
+    "what": "S3 pick rule given the wrap it needs: the written form rejected a posterior camera at yaw −3.0 rad",
+    "before": "pickable only while |yaw − π| < π/2",
+    "after": "|wrap(yaw − π)| < π/2, wrapping to (−π, π], i.e. cos(yaw) < 0, at any pitch; S4–S5, perineal and pelvic-floor sites have no pick sample at all",
+    "numeric": false
+   },
+   {
+    "section": "§13.15",
+    "what": "Flash-rate row separates the WCAG ceiling from the display target, and notes that every per-source cap is 2",
+    "before": "ceiling ≤ 3 general or red flashes in any 1 s",
+    "after": "WCAG ceiling ≤ 3; display target ≤ 2, with per-source caps at 2",
+    "numeric": true
+   },
+   {
+    "section": "§13.15",
+    "what": "Packets row brought into line with §13.8",
+    "before": "≤ 3 per s past any bundle point and per window",
+    "after": "≤ 2 per s past any bundle point and per window",
+    "numeric": true
+   },
+   {
+    "section": "§13.15",
+    "what": "Rib-period rule restated for a range of viewing distances: 40 px is 0.99 cycles/deg at exactly 60 cm and 1.24 at 75 cm, inside the provocative band; Abdomen (53 px) no longer listed as qualifying",
+    "before": "period must stay ≥ 40 CSS px … which only the Thorax, Abdomen and Head and neck views reach",
+    "after": "≥ 60 CSS px (≤ 0.66 cycles/deg at 60 cm, ≤ 0.99 at 90 cm); only Thorax and Head and neck reach it",
+    "numeric": true
+   },
+   {
+    "section": "§13.15",
+    "what": "Added a CSS px per degree by viewing distance row (39.6 / 49.5 / 52.8 / 59.4 at 60 / 75 / 80 / 90 cm), since the hazard grows with distance",
+    "numeric": true
+   },
+   {
+    "section": "§1.10, §1.14, §13.19",
+    "what": "WCAG version made consistent; SC 2.5.8, which §13.12 uses, exists only in 2.2",
+    "before": "WCAG 2.1 Success Criterion 2.3.1 / W3C WCAG 2.1 and 2.2",
+    "after": "WCAG 2.2 — SC 2.3.1 (text unchanged from 2.1), SC 2.3.2 and SC 2.5.8 (2.2 only)",
+    "numeric": false
+   },
+   {
+    "section": "A.4",
+    "what": "Binding adaptive rule amended to the refinement §11.7 and the code already use; followed literally it pinned kh at the 0.005 floor",
+    "before": "packets in flight on edges ≥ 50 mm give clamp(transit / 2.5 s, 0.005, 1)",
+    "after": "leading packets on extracerebral edges ≥ 50 mm give clamp(min transit / 2.5 s, 0.005, 1); the endocrine vote is the distance to the current target",
+    "numeric": true
+   },
+   {
+    "section": "A.4",
+    "what": "Invariants note that commit is a no-op under a scenario delegate and the kernel carries the backlog",
+    "numeric": false
+   },
+   {
+    "section": "A.5",
+    "what": "Edge predicate given its three cases, with the misreading that would stop the CNS in brain-only mode called out",
+    "numeric": false
+   },
+   {
+    "section": "A.5",
+    "what": "Master switch: freeze and reset reconciled and the cache key stated",
+    "before": "Body states reset to the resting steady state when the body is switched back on",
+    "after": "nothing integrates while hidden, so an interrupted scenario is not resumed; reset from the §11.10 cache keyed by (switch set, age, posture, fed, time of day at return)",
+    "numeric": false
+   },
+   {
+    "section": "A.5",
+    "what": "Composition rule flagged as a property to test, since the hormone clamp, pupil mix and antral term are not edge masks",
+    "numeric": false
+   },
+   {
+    "section": "A.5",
+    "what": "RAAS survival under autonomic-off limited to its non-neural share, as §12.9 already implied",
+    "before": "RAAS (renal, nerve-independent) partly restores BP over minutes",
+    "after": "RAAS keeps only its non-neural renin share (≈ 40 %); the sympathetic ≈ 60 % goes with the autonomic switch",
+    "numeric": true
+   },
+   {
+    "section": "A.5",
+    "what": "Enteric row: the Hirschsprung analogue dropped (it is segmental distal aganglionosis; the stomach is not aganglionic in it) and emptying tied to the 5 % floor",
+    "before": "Gastric emptying ≈ 0 and transit stalls (achalasia/Hirschsprung analogues, shown quietly)",
+    "after": "falls to the §8.8 5 % floor; an extreme-case model, pylorospasm and achalasia-like, with no single disease claimed",
+    "numeric": true
+   },
+   {
+    "section": "A.5",
+    "what": "AND-edge list distinguishes adrenaline release (autonomic ∧ neuroendocrine) from its β1 receptor effect (neuroendocrine)",
+    "numeric": false
+   },
+   {
+    "section": "A.8 #9",
+    "what": "Replacement convention extended to the adrenal drive, with the real cord-section figure recorded so the convention is not mistaken for physiology, and glucocorticoid replacement stated for the gland-removal presets",
+    "after": "with autonomic off the adrenal drive is held at basal; cord-section patients show ≈ 90 % lower resting adrenaline (0.005 vs 0.06 ng/mL) [secondary, unverified]",
+    "numeric": true
+   },
+   {
+    "section": "A.9",
+    "what": "Photosensitivity line split into the WCAG ceiling and the display target, with the packet cap at 2",
+    "before": "≤ 3 flashes or packets per s per region (tS)",
+    "after": "flash ceiling ≤ 3 per s per region with a display target of ≤ 2; ≤ 2 packets per s past any bundle point and per window",
+    "numeric": true
+   },
+   {
+    "section": "B.4",
+    "what": "`settle(init)` key completed to match §11.10 and §12.1, and the settle method split into analytic slow layers and integrated NF/CV",
+    "before": "resting steady state for {posture, timeOfDay, fed}",
+    "after": "the §11.10 key {switch set, age, posture, fed, timeOfDay}",
+    "numeric": false
+   },
+   {
+    "section": "B.4",
+    "what": "Adapter `advance` given the return value the clock needs, since the clock owns tH and kh and a frame entering ONSET covers less than dt·kh",
+    "before": "advance(dtS, t0H, h);",
+    "after": "advance(dtS, t0H, h, source) → { tReachedH, khEnd }",
+    "numeric": false
+   },
+   {
+    "section": "B.6",
+    "what": "Frame-loop steps 3 and 5 updated: the adapter returns its reached tH and end kh, and commit is a no-op while the delegate holds the clock",
+    "numeric": false
+   },
+   {
+    "section": "B.9",
+    "what": "Seek snapshot interval recomputed from the actual 8 h infection span",
+    "before": "at most one 10 % snapshot interval (≤ 0.75 h, ≤ 0.3 s)",
+    "after": "≤ 0.8 h, ≤ 0.33 s",
+    "numeric": true
+   },
+   {
+    "section": "B.9",
+    "what": "Added adapter substep counts per 60-fps frame and an adapter CPU row, since the adapter sits outside the 1 ms kernel budget and nothing bounded its cost",
+    "after": "response 300/1,200/1,440 and dopamine 750/3,000/3,600 substeps at kh 900/3,600/4,320; CPU row to be measured",
+    "numeric": true
+   },
+   {
+    "section": "B.13",
+    "what": "The exactness claim qualified for the frame that enters ONSET",
+    "before": "h = dt·kh is computed exactly as response.js does",
+    "after": "… except in a frame that enters ONSET, where the remainder runs at the new kh, so advance reports the tReachedH and khEnd it reached",
+    "numeric": false
+   },
+   {
+    "section": "B.14",
+    "what": "safety.test frame rates labelled as a subset of the single §11.16 set",
+    "numeric": false
+   }
+  ],
+  "skipped": [
+   {
+    "section": "overflow",
+    "claim": "Six further items noted but not written up (T2–T3 sympathectomy omitting T1–T4 cardiac fibres; adrenalectomy/hypophysectomy replacement; brain-only respiratory output; §11.6 tie order vs A.4 heap key; §12.7 light-reflex 0.22 vs 0.23 s; B.9 0.62 ms vs §11.17 0.40–0.55 ms)",
+    "reason": "The item's own fix is \"Resolve in the next round\" and none of the six was verified or refuted. Two of them I did address where a confirmed issue already touched the same text: glucocorticoid replacement for adrenalectomy and hypophysectomy is now stated in A.8 #9, and the B.9 adapter/kernel cost rows are now labelled. The remaining four need re-runs or a §7 decision I cannot make as a checker: the sympathectomy edge list belongs to §7, the brain-only respiratory output is an unresolved design question, and the 0.22/0.23 s and 0.62/0.40–0.55 ms pairs come from different prototypes whose provenance I cannot establish from the document."
+   },
+   {
+    "section": "Note on the limit",
+    "claim": "Other items checked and found consistent (IHR, Tanaka HRmax, atropine arithmetic, Valsalva ratio, SCR and saliva ranges, Clutter and Silverberg thresholds, Komatsu, Dillingh, Karjalainen & Viitasalo, Baker, Angeli, O'Grady, Tougas, n = 6 pulse period)",
+    "reason": "The item records a clean result and states \"No change needed\"; there is nothing to apply."
+   }
+  ],
+  "sectionsEdited": [
+   "§1.10",
+   "§1.14",
+   "§2.1",
+   "§2.5",
+   "§2.6",
+   "§2.7",
+   "§2.8",
+   "§2.12",
+   "§2.17",
+   "§3.2",
+   "§3.20",
+   "Table 4.4 (CV table)",
+   "§4.7",
+   "Table 4.11",
+   "§5.1",
+   "§5.3",
+   "§5.4",
+   "§5.8",
+   "§5.17",
+   "§5.19",
+   "§6.6",
+   "§6.8",
+   "§6.11",
+   "§6.13",
+   "§6.15",
+   "§7.5",
+   "§7.8",
+   "§7.11",
+   "§7.15",
+   "§8.8",
+   "§8.9",
+   "§8.13",
+   "§8.15",
+   "§8.18",
+   "§9.4",
+   "§9.7",
+   "§9.8",
+   "§9.10",
+   "§9.11",
+   "§10.2",
+   "§10.4",
+   "§10.8",
+   "§10.10",
+   "§11.3",
+   "§11.4",
+   "§11.6",
+   "§11.7",
+   "§11.9",
+   "§11.10",
+   "§11.12",
+   "§11.13",
+   "§11.14",
+   "§11.15",
+   "§11.19",
+   "§11.20",
+   "§12.1",
+   "§12.4",
+   "§12.9",
+   "§12.14",
+   "§12.20",
+   "§12.21",
+   "§12.22",
+   "§13.5",
+   "§13.8",
+   "§13.12",
+   "§13.15",
+   "§13.19",
+   "§14",
+   "A.1",
+   "A.4",
+   "A.5",
+   "A.8",
+   "A.9",
+   "B.2",
+   "B.3",
+   "B.4",
+   "B.6",
+   "B.9",
+   "B.13",
+   "B.14"
+  ]
+ }
+}
