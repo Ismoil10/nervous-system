@@ -10,6 +10,7 @@ graphify-out/.graphify_root
 graphify-out/.graphify_build_state.json
 graphify-out/.graphify_labels.pending.json
 graphify-out/.graphify_chunk_*.json
+graphify-out/.rebuild.lock
 
 # Handoff backups (their states are commits in the history)
 .handoff/backup-*/
