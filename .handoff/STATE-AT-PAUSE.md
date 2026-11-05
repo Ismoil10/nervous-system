@@ -127,25 +127,55 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
 
 **Made on the Mac after the merge (5 November 2026):**
 
-8. **Simple HUD by default.** The 13-dropdown HUD was too much for an average user. The app now opens
-   with `src/ui-simple.js`, which keeps only what changes the scene:
-   - a story line, plus a dopamine meter in the orgasm scenario;
-   - Brain / Body and Settings, which holds the five networks and About;
-   - five views;
-   - a bottom dock with a Scenarios / Senses switch and Pause, Restart and Stop.
+8. **Simple HUD by default.** The 13-dropdown HUD was too much for an average user.
+   A first simple HUD (scenario rail, senses, views, networks; commit `34ce9ea`) was still too much:
+   the user could not tell how to start anything, and stress had no visible effect. So the default
+   is now `src/ui-simple.js`; its controls were reworked again in decision 11. It first had three controls:
+   - Calm / Stress / Dopamine;
+   - Look at Brain / Body (the camera only);
+   - Pause.
 
-   The user chose:
-   - the bottom-dock layout;
-   - the full HUD hidden behind `?advanced=1`, with none of it deleted;
-   - only the story and the dopamine meter as readouts;
-   - one-tap senses: Touch, Pinprick and Heat clicked on the skin; Sound and Light to both sides.
+   The readouts are a plain story and one meter (stress hormones or dopamine).
+   - Stress plays `stressor` and draws the stress circuit on the brain. It is display only [model]:
+     an overlay ×2.2 on the circuit and ×0.45 elsewhere, plus a blue BrainNet tint, scaled by the
+     adrenaline meter. Without it the stressor changed only hormones and the heart rate; the scene
+     stayed almost unchanged (`kernel.display` is empty and `setOrgans` is never called).
+   - Dopamine plays the orgasm demo.
+   - The full HUD stays behind `?advanced=1`, with nothing deleted.
+   - `<body>` carries no HUD class in the markup: main.js adds `hud-simple`. A browser that keeps an
+     old cached `main.js` then still shows a working full HUD instead of a dead simple one. This was
+     the likely cause of "the simulation stopped working".
 
-   A scenario or view that needs the body turns the body on, and each scenario flies to the part that
-   reacts (`SCENARIO_VIEWS`, [model]). The story uses plain stage texts (`PLAIN_STAGES`); the sourced
-   texts stay in the full HUD. ANALYSIS.md B.10 records this. Tests: `test/hud-simple.test.mjs`.
-9. **Dopamine visuals stay as specified.** After an explanation of the DOPAMINE.md §9.8 changes, the
-   user tried the two hypothesis switches before asking for anything else. An optional "expressive"
-   mode (the pre-correction flare mapping) is offered but not decided.
+   ANALYSIS.md B.10 records the design. Tests: `test/hud-simple.test.mjs`.
+9. **The pre-build dopamine wave is back in the simple HUD.** The user said the bright wave that
+   radiated from the nucleus through the brain at the dopamine peak had been there before the body
+   build and changed after it. They asked for it to start in the core dopamine system and run out
+   along the fibres. They said it was modelled on the anger wave of `anger-galaxy/`, and for this
+   task they allowed reading that project read-only ("Ha, faqat o'qish"; nothing there was changed;
+   the scope rule in CLAUDE.md otherwise stands).
+
+   The simple HUD now restores:
+   - pulse-locked climax reward;
+   - fibre flow with 0.5-s travel;
+   - no 2-s glow floor during the climax;
+   - an expanding shock-wave-style wave from the VTA (`shaders.js` `WAVE`, shared by `NEURON_VS` and
+     `DA_VS`; `renderer.setWaves`; `main.js` `updateWaves`). One slow bright shell starts at the
+     climax and a faster, weaker one with each contraction. The front widens, pushes the points it
+     crosses outward and lights the dopamine somata, fibres and release sites.
+
+   This stays under 3 shells a second, and reduced motion is respected. The full HUD (`?advanced=1`)
+   keeps the DOPAMINE.md display. The pre-build code itself is not in git (only the Windows
+   `.handoff/backup-brain-system-pre-build/` has it), so the wave is a reconstruction. Ask the user
+   whether it matches.
+10. **UI numbers and buttons.** The meter shows its percentage, the only number on screen. The
+   buttons are small, with 5–9 px corners.
+11. **Emotion and view are separate states; Quality is back.**
+   - The simple HUD has four controls: emotion (Calm / Stress / Pleasure), view (Brain / Cutaway /
+     Dopamine / Body), Quality (Auto or a fixed tier) and Pause.
+   - An emotion never moves the camera, and a view never changes the emotion.
+   - Adaptive quality (hardware start tier, then frame-time scaling of render scale and tier) was
+     already in `performance.js`, the same logic as `anger-galaxy/`. Only the manual control had
+     been missing from the simple HUD. `main.js` `setQuality` now serves both HUDs.
 
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
@@ -195,7 +225,7 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Windows, golden re-recorded | 530 | 502 | 0 | 28 |
 | After stage 5 and the fixes | 537 | 509 | 0 | 28 |
 | Mac (arm64, Node 26.4) at `0101203`, x64 golden | 537 | 505 | 4 (golden, platform bits) | 28 |
-| Mac, simple HUD added (decision 8) | 542 | 510 | 4 (golden, platform bits) | 28 |
+| Mac, simple HUD, wave, emotion/view split (decisions 8–11) | 544 | 512 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was

@@ -6940,12 +6940,44 @@ At load the brain is generated and rendered first. The body follows in slices an
 
 ### B.10. HUD dropdowns, fields and controls
 
-> **Default interface (user decision, 5 November 2026).** The app opens with a simple HUD
-> (`src/ui-simple.js`) that keeps only the controls that change the scene: a scenario rail with
-> Pause, Restart and Stop; five one-tap senses (touch, pinprick and heat placed on the skin; sound
-> and light to both sides); Brain or Body; five views; the five network switches. Its readouts are a
-> plain-language story of the current stage or of the last manual stimulus, and one dopamine meter
-> in the orgasm scenario. The full HUD specified below is unchanged and opens with `?advanced=1`.
+> **Default interface (user decisions, 5 November 2026).** The app opens with a simple HUD
+> (`src/ui-simple.js`) of four controls. The person's emotion and the way the brain is shown are
+> separate states: an emotion never moves the camera, and a view never changes the emotion.
+> - **Emotion: Calm, Stress or Pleasure.** Calm stops every scenario; Stress plays `stressor`;
+>   Pleasure plays the orgasm scenario in demo mode, without its fly-to.
+> - **View:** whole brain, cutaway, dopamine system or upper body.
+> - **Quality:** Auto (the adaptive tier of `performance.js`) or a fixed tier.
+> - **Pause.**
+>
+> Its readouts are a plain-language story of the current stage and one meter with its percentage,
+> the only number shown: stress hormones (plasma adrenaline over rest, log scale, full at ×4) or
+> accumbens dopamine.
+>
+> Stress is drawn on the brain, display only [model]:
+> - The stress circuit (amygdala, CeA, BNST, hypothalamus, PVN, LH, DMH, LC, PAG, RVLM; anterior
+>   insula, dACC, sgACC) brightens to ×2.2 through the brain-systems overlay, and the other regions
+>   dim to ×0.45. Both scale from 0.45 at the start to 1 at the meter's top.
+> - The circuit's regions take a blue tint (#5CB8FF) through the BrainNet tint channel.
+>
+> In the simple HUD the dopamine display is the one from before the whole-body build. The user asked
+> for it back, and these are display choices [model]:
+> - The climax reward is pulse-locked: the §6.10 switch is on, as it was by default before the
+>   DOPAMINE.md §9.8 port.
+> - The fibre flow uses the old 0.5-s travel (`histStep` 0.5/16 s).
+> - There is no 2-s pulse-locked floor on the glows; the 0.3-s floor stays.
+> - A dopamine wave, like an expanding shock-wave ring, runs from the VTA (`shaders.js` `WAVE`, used
+>   by `NEURON_VS` and `DA_VS`):
+>   - The climax starts one shell at 55 mm/s; each contraction starts a weaker one at 80 mm/s, scaled
+>     by the contraction's amplitude.
+>   - A shell is Gaussian, 5 mm wide plus 0.12 mm per mm of radius. It rises over 0.35 s and fades
+>     between 70 and 115 mm.
+>   - It pushes the points it crosses up to 1.6 mm outward.
+>   - It brightens neurons ×(1 + 2·w), adds amber, and lights the dopamine somata, fibres and release
+>     sites ×(1 + 4·w).
+>   - At most about 1.25 shells start per second. Reduced motion halves the climax wave and its
+>     push, and drops the others.
+>
+> The full HUD specified below is unchanged and opens with `?advanced=1`.
 
 Every dropdown keeps today's pattern: a heading button with title, optional status chip and chevron, a body hidden when closed, no subtitle, and open state saved under `brain-system.drop.<store>`. Titles and labels follow A.3 and A.7; §13 owns their wording. The left column holds data (Vitals, Live, Dopamine, Modulators); the right column holds controls (Body, Interventions, Stimulus, Scenarios, Time, Brain systems, Views, Performance, Settings). Below 760 px the right-column dropdowns become popovers, as Performance and Settings are today. New stimulus ids use the prefix `sens-`, because `stim-level` and `stim-val` belong to the orgasm slider.
 

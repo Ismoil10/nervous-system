@@ -7,7 +7,7 @@
   <title>Brain System</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="hud-simple">
+<body>
   <canvas id="scene" aria-label="Human brain drawn as neuron points, with released dopamine shown as amber glow"></canvas>
 
   <div id="loading" class="loading" role="status">
@@ -635,66 +635,35 @@
     </nav>
   </div>
 
-  <!-- Simple HUD, the default (src/ui-simple.js). The full HUD above opens with ?advanced=1. -->
+  <!-- Simple HUD, the default (src/ui-simple.js); main.js shows it by putting hud-simple on <body>.
+       The full HUD above opens with ?advanced=1. Emotion (bottom) and view (above it) are separate. -->
   <div id="shud" class="shud">
     <h1 class="sr-only">Brain System</h1>
 
     <section id="shud-story" class="shud-story" aria-live="polite" aria-label="What is happening">
       <p id="shud-scenario" class="shud-scenario" hidden></p>
-      <p id="shud-stage" class="shud-stage">At rest</p>
-      <p id="shud-text" class="shud-text">Choose a scenario below, or try a sense.</p>
-      <div id="shud-da" class="shud-da" role="meter" aria-label="Dopamine in the reward system" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
-        <span class="shud-da-label">Dopamine</span>
-        <span class="shud-da-track" aria-hidden="true"><span id="shud-da-bar" class="shud-da-bar"></span></span>
-        <span class="shud-da-ends" aria-hidden="true"><span>rest</span><span>peak</span></span>
+      <p id="shud-stage" class="shud-stage">Calm</p>
+      <p id="shud-text" class="shud-text">Brain and body at rest. Choose Stress or Dopamine below.</p>
+      <div id="shud-meter" class="shud-meter" role="meter" aria-label="Level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+        <span class="shud-meter-head"><span id="shud-meter-label"></span><span id="shud-meter-value" class="shud-meter-value">0%</span></span>
+        <span class="shud-meter-track" aria-hidden="true"><span id="shud-meter-bar" class="shud-meter-bar"></span></span>
+        <span class="shud-meter-ends" aria-hidden="true"><span id="shud-meter-low"></span><span id="shud-meter-high"></span></span>
       </div>
     </section>
 
     <div class="shud-corner">
-      <div id="shud-mode" class="shud-mode" role="group" aria-label="Show">
-        <button type="button" data-mode="brain" aria-pressed="false">Brain</button>
-        <button type="button" data-mode="body" aria-pressed="true">Body</button>
-      </div>
-      <button type="button" id="shud-gear" class="shud-icon" aria-label="Settings" aria-expanded="false" aria-controls="shud-settings" title="Settings">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+      <label class="shud-quality"><span class="sr-only">Quality</span>
+        <select id="shud-quality" title="Quality: Auto adapts to this computer"></select>
+      </label>
+      <button type="button" id="shud-pause" class="shud-icon" aria-pressed="false" aria-label="Pause" title="Pause (P)">
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
       </button>
-      <div id="shud-settings" class="shud-settings" role="dialog" aria-label="Settings" hidden>
-        <p class="shud-settings-head">Body networks</p>
-        <ul id="shud-nets" class="shud-nets"></ul>
-        <p id="shud-nets-note" class="shud-note" hidden>Switch to Body to change these.</p>
-        <button type="button" id="shud-about" class="shud-link">About this model</button>
-      </div>
     </div>
 
     <div class="shud-bottom">
       <div id="shud-views" class="shud-views" role="group" aria-label="View"></div>
-
-      <div class="shud-dock">
-        <div class="shud-dock-head">
-          <div class="shud-tabs" role="tablist" aria-label="Choose">
-            <button type="button" id="shud-tab-scn" role="tab" aria-selected="true" aria-controls="shud-rail-scn">Scenarios</button>
-            <button type="button" id="shud-tab-sense" role="tab" aria-selected="false" aria-controls="shud-rail-sense" tabindex="-1">Senses</button>
-          </div>
-          <div id="shud-hint" class="shud-hint" role="status" hidden>
-            <span id="shud-hint-text"></span>
-            <button type="button" id="shud-cancel" class="shud-link" hidden>Cancel</button>
-          </div>
-          <div class="shud-transport" role="group" aria-label="Playback">
-            <button type="button" id="shud-pause" class="shud-icon" aria-pressed="false" aria-label="Pause" title="Pause (P)">
-              <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
-              <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
-            </button>
-            <button type="button" id="shud-restart" class="shud-icon" aria-label="Restart" title="Restart" disabled>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a7 7 0 1 0 2.1-5"/><path d="M5 4v4h4"/></svg>
-            </button>
-            <button type="button" id="shud-stop" class="shud-icon" aria-label="Stop" title="Stop and return to rest" disabled>
-              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
-            </button>
-          </div>
-        </div>
-        <div id="shud-rail-scn" class="shud-rail" role="tabpanel" aria-labelledby="shud-tab-scn"></div>
-        <div id="shud-rail-sense" class="shud-rail" role="tabpanel" aria-labelledby="shud-tab-sense" hidden></div>
-      </div>
+      <div id="shud-states" class="shud-states" role="group" aria-label="Emotional state"></div>
     </div>
   </div>
 

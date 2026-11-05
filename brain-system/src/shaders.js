@@ -88,8 +88,35 @@ float tissuePath(vec3 p) {
 }
 `;
 
+// Dopamine wave (display only; user decision, 5 November 2026), like an expanding shock-wave ring:
+// shells that race outward from the VTA, widen as they go, push the points they cross slightly
+// outward and brighten them. main.js drives up to WAVE_SLOTS shells.
+// Neurons and the dopamine system (somata, fibres, release sites) share it, so the wave leaves the
+// core dopamine system along its fibres and crosses the whole brain.
+export const WAVE_SLOTS = 4;
+const WAVE = `
+uniform vec4 uWaveO;                   // origin (world units); w > 0.5 while a wave runs
+uniform vec4 uWave[${WAVE_SLOTS}];     // radius, amplitude, width, outward push (world units)
+float waveAt(inout vec3 p) {
+  if (uWaveO.w < 0.5) return 0.0;
+  vec3 d = p - uWaveO.xyz;
+  float r = length(d);
+  float b = 0.0, push = 0.0;
+  for (int k = 0; k < ${WAVE_SLOTS}; k++) {
+    vec4 W = uWave[k];
+    if (W.y <= 0.0) continue;
+    float x = (r - W.x) / W.z;
+    float g = W.y * exp(-x * x);
+    b += g;
+    push += g * W.w;
+  }
+  if (r > 1e-5) p += d * (push / r);
+  return b;
+}
+`;
+
 // --- Neurons: cool-white stars ---
-export const NEURON_VS = HEADER + COMMON + `
+export const NEURON_VS = HEADER + COMMON + WAVE + `
 layout(location = 0) in vec4 aPos;    // xyz, flux
 layout(location = 1) in vec4 aNrm;    // outward normal of shells (0 for volumes), seed
 layout(location = 2) in vec4 aMeta;   // region, dopamine innervation weight, colour tint, kind
@@ -107,6 +134,7 @@ out float vPeak;
 void main() {
   vec3 p = aPos.xyz;
   if (p.x < uCut) { ${CULL} }
+  float wv = waveAt(p);
   int r = int(aMeta.x + 0.5);
   int s = sideOf(p);
   vec4 R = regionState(r, s);
@@ -128,6 +156,8 @@ void main() {
   float tw = 1.0 + 0.10 * sin(uT * (1.3 + 2.4 * aNrm.w) + aNrm.w * 40.0);
   float flux = aPos.w * R.x * Ar.x * over * tw * facing * att * shell;
   float da = aMeta.y * R.y * uDaGain * att * mix(1.0, facing, 0.5) * shell;
+  flux *= 1.0 + 2.0 * wv;                              // dopamine wave; wv = 0 keeps the legacy terms
+  da += aPos.w * wv * att * max(shell, 0.6) * 0.9;
   vec4 vp = uView * vec4(p, 1.0);
   if (vp.z > -0.01) { ${CULL} }
   gl_Position = uProj * vp;
@@ -159,7 +189,7 @@ void main() {
 `;
 
 // --- Dopamine system: cell bodies, axon bundles, release sites ---
-export const DA_VS = HEADER + COMMON + `
+export const DA_VS = HEADER + COMMON + WAVE + `
 layout(location = 0) in vec4 aPos;    // xyz, flux
 layout(location = 1) in vec4 aA;      // axon: path, position along it, -, seed | others: -, -, -, seed
 layout(location = 2) in vec4 aMeta;   // region (target for axons), w (field distance | source region), -, kind
@@ -183,6 +213,7 @@ float pathRate(int path, float u) {
 void main() {
   vec3 p = aPos.xyz;
   if (p.x < uCut) { ${CULL} }
+  float wv = waveAt(p);
   float kind = aMeta.w;
   float seed = aA.w;
   int s = sideOf(p);
@@ -215,7 +246,7 @@ void main() {
     col = uAmber * aPos.w * R.y * (0.12 + 1.4 * spark) * inside;
     size = clamp(uPx * 2.3, 2.0, uMaxPt);
   }
-  col *= att;
+  col *= att * (1.0 + 4.0 * wv);   // the wave lights the somata, fibres and release sites it crosses
   vec4 vp = uView * vec4(p, 1.0);
   if (vp.z > -0.01 || dot(col, col) < 1e-10) { ${CULL} }
   gl_Position = uProj * vp;

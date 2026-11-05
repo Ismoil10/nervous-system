@@ -81,16 +81,28 @@ coupling of arousal to peripheral vasocongestion is removed, and the vitals read
 - **Views.** Three brain views and nine body views; Skeleton off by default.
 
 ## Controls
-The app opens with a **simple HUD** (`src/ui-simple.js`). It keeps only what changes the scene:
-- **Story** (top left): what is happening, in one plain sentence. In the orgasm scenario a single
-  dopamine meter runs from rest to peak.
-- **Brain / Body** (top right), with **Settings**: the five body networks and About.
-- **View**: Brain, Cutaway, Dopamine, Upper body, Whole body.
-- **Scenarios** (bottom): one tap plays a scenario, with Pause, Restart and Stop. A scenario that
-  needs the body turns it on, and the camera moves to the part that reacts.
-- **Senses** (bottom): Touch, Pinprick and Heat wait for a click on the skin; Sound and Light go
-  to both ears or both eyes. The story follows the signal to the brain.
-- `P` — pause · `Esc` — cancel a sense or close Settings.
+The app opens with a **simple HUD** (`src/ui-simple.js`) of four controls. The person's emotion
+and the way the brain is shown are separate: an emotion never moves the camera, and a view never
+changes the emotion.
+- **Calm · Stress · Pleasure** (bottom): the emotional state.
+  - **Calm** stops everything.
+  - **Stress** plays the acute stressor. The brain's stress circuit (amygdala, hypothalamus,
+    brainstem alarm centres, insula and cingulate) turns blue and brightens as adrenaline rises,
+    while the rest of the brain dims.
+  - **Pleasure** plays the orgasm scenario, the model's strongest dopamine release, which peaks
+    about 45 s after the start. At the climax a bright wave leaves the core dopamine system in the
+    midbrain. It runs out along the dopamine fibres and through the whole brain, widening and
+    pushing the stars it crosses outward. A smaller wave follows each contraction.
+- **View** (above the emotions): Brain, Cutaway, Dopamine system or Body.
+- **Quality** (top right): Auto adapts to the computer. It picks a starting tier from the graphics
+  hardware, then lowers the render scale or the tier when frames are slow, and raises them again
+  when there is headroom. Low, Medium, High and Ultra fix the tier. Auto names the tier it is using.
+- **Pause** (top right, or `P`). Keys `1`, `2` and `3` choose Calm, Stress and Pleasure.
+
+Top left, a short story says what is happening in plain words. Below it, one meter with its
+percentage rises from rest: stress hormones or dopamine. It is the only number on screen. After an
+update, reload with Cmd+Shift+R (Ctrl+Shift+R on Windows), so that the browser does not keep old
+scripts.
 
 Every other control — interventions, the full stimulus panel, the clock, brain systems, vitals,
 dopamine and modulator readouts, performance, and the orgasm scenario's settings and hypotheses —
@@ -186,7 +198,7 @@ HUD actions reach the kernel.
 | `src/safety.js` | Photosensitivity limiter and display-rate rules |
 | `src/color.js` | Planck and CIE colours (neurons 7,000–9,500 K, body ≥ 5,500 K, dopamine 2,300 K) |
 | `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/ui-body.js` | Quality tiers and adaptive quality, camera, full HUD (`?advanced=1`) |
-| `src/ui-simple.js` | Simple HUD (the default): story, scenarios, senses, views, Brain/Body, body networks |
+| `src/ui-simple.js` | Simple HUD (the default): emotion (Calm / Stress / Pleasure), view, quality, Pause; story and one meter |
 
 Rendering assets (HDR pipeline, bloom, star point-spread function, adaptive quality, HUD style)
 come from the Orgasm Galaxy project (removed on 2026-11-02; its response-model analysis lives on as

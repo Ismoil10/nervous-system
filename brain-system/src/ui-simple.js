@@ -1,119 +1,78 @@
 // @ts-check
-// Simple HUD: the default interface (user decision, 5 November 2026). It keeps only the controls
-// that change what the brain and body show: a scenario rail with Pause, Restart and Stop; five
-// one-tap senses; Brain or Body; four views; the five body networks. A short story of what is
-// happening and, in the orgasm scenario, one dopamine meter are the only readouts. Every other
-// control stays in the full HUD (ui.js, ui-body.js), opened with `?advanced=1`.
+// Simple HUD: the default interface (user decisions, 5 November 2026). Four controls, with the
+// person's emotional state kept apart from how the brain is shown:
+//   1. emotion: Calm, Stress or Pleasure (the primary choice; it never moves the camera);
+//   2. view: Brain, Cutaway, Dopamine system or Body (it never changes the emotion);
+//   3. quality: Auto (adaptive, from the hardware and the measured frame time) or a fixed tier;
+//   4. Pause.
+// The readouts are a short story of what is happening and one meter with its percentage (stress
+// hormones or dopamine); no other numbers.
+// Every other control stays in the full HUD (ui.js, ui-body.js), opened with `?advanced=1`.
 // Nothing here touches the DOM at import time, so the module also loads in Node tests.
 
 const clamp = (x, lo, hi) => (x < lo ? lo : x > hi ? hi : x);
 
-// Scenario rail: ids of ui-body.js SCENARIOS with short, plain labels.
-export const SIMPLE_SCENARIOS = [
-  ['hotObject', 'Hot object'], ['loudSound', 'Loud sound'], ['brightLight', 'Bright light'],
-  ['kneeJerk', 'Knee jerk'], ['standUp', 'Standing up'], ['meal', 'A meal'], ['stressor', 'Stress'],
-  ['infection', 'Infection'], ['orgasm', 'Orgasm'], ['valsalva', 'Straining'], ['coldFace', 'Cold water on the face'],
-  ['sleepSound', 'Noise during sleep'],
+// The three emotional states and the model run behind each: Calm stops every scenario; Stress plays
+// the acute psychosocial stressor (scenarios.js `stressor`); Pleasure plays the orgasm scenario in
+// demo mode, the model's strongest dopamine release (DOPAMINE.md).
+export const STATES = [
+  { id: 'calm', label: 'Calm', hint: 'At rest', scenario: null },
+  { id: 'stress', label: 'Stress', hint: 'Anxiety', scenario: 'stressor' },
+  { id: 'dopamine', label: 'Pleasure', hint: 'Dopamine', scenario: 'orgasm' },
 ];
-export const scenarioLabel = (id) => SIMPLE_SCENARIOS.find(([s]) => s === id)?.[1] ?? null;
+export const stateOf = (id) => STATES.find((s) => s.id === id) ?? null;
+export const stateForScenario = (scenarioId) => STATES.find((s) => s.scenario === scenarioId)?.id ?? 'calm';
 
-// Where the camera goes when a scenario starts, so the part that reacts is in view [model]. In
-// brain-only mode the brain-level scenarios use the whole-brain view; the orgasm scenario flies to
-// the dopamine system itself (main.js, B.13).
-export const SCENARIO_VIEWS = {
-  hotObject: 'rightArm', loudSound: 'headNeck', brightLight: 'headNeck', kneeJerk: 'rightLeg', standUp: 'wholeBody',
-  meal: 'abdomen', stressor: 'upperBody', infection: 'upperBody', valsalva: 'thorax', coldFace: 'headNeck', sleepSound: 'headNeck',
-};
-export const scenarioView = (id, bodyMode) => (id === 'orgasm' ? null : bodyMode === 'body' ? SCENARIO_VIEWS[id] ?? null : 'whole');
-
-// One-tap senses: a fixed A.6 record each (values inside the ui-body.js SENSES ranges). `pick`:
-// the user clicks the skin to place it; otherwise it goes to both eyes or both ears at once.
-export const SIMPLE_SENSES = [
-  { id: 'touch', label: 'Touch', pick: true, record: { sense: 'touch', mode: 'press', intensity: 50, unit: 'mN', durationMs: 1000 } },
-  { id: 'pain', label: 'Pinprick', pick: true, record: { sense: 'pain', mode: 'pinprick', intensity: 256, unit: 'mN', durationMs: 20 } },
-  { id: 'heat', label: 'Heat', pick: true, record: { sense: 'pain', mode: 'heat', intensity: 48, unit: '°C', durationMs: 1000 } },
-  { id: 'sound', label: 'Sound', record: { sense: 'hearing', mode: 'click', intensity: 90, unit: 'dB SPL', durationMs: 0.1, site: 'cochlea', side: 'both' } },
-  { id: 'light', label: 'Light', record: { sense: 'vision', mode: 'flash', intensity: 3, unit: 'log₁₀ cd/m²', durationMs: 10, site: 'retina', side: 'both' } },
-];
-export const senseOf = (id) => SIMPLE_SENSES.find((s) => s.id === id) ?? null;
-
-// Views: three of the brain, two of the body (ui-body.js VIEWS keys).
+// Views (ui-body.js VIEWS keys). The cutaway shows the deep stress circuit at the midline; the
+// dopamine view fades the cortex so the dopamine system and its wave stand out.
 export const SIMPLE_VIEWS = [
   { id: 'whole', label: 'Brain' }, { id: 'cutaway', label: 'Cutaway' }, { id: 'dopamine', label: 'Dopamine' },
-  { id: 'upperBody', label: 'Upper body', body: true }, { id: 'wholeBody', label: 'Whole body', body: true },
+  { id: 'upperBody', label: 'Body', body: true },
 ];
 
-// Body networks (A.3.1 ids) named by what they reach.
-export const SIMPLE_NETS = [
-  { id: 'somatic', label: 'Skin and muscle nerves', title: 'Somatic network' },
-  { id: 'autonomic', label: 'Heart, lungs and glands', title: 'Autonomic network' },
-  { id: 'enteric', label: 'Gut nerves', title: 'Enteric network' },
-  { id: 'neuroendocrine', label: 'Hormones', title: 'Neuroendocrine network' },
-  { id: 'neuroimmune', label: 'Immune signals', title: 'Neuroimmune network' },
-];
+// Quality: Auto keeps the adaptive tier of performance.js (hardware start, frame-time scaling);
+// the others fix a tier (values are TIERS indices, as in the full HUD's Quality select).
+export const QUALITY = [['auto', 'Auto'], ['0', 'Low'], ['1', 'Medium'], ['2', 'High'], ['3', 'Ultra']];
 
-// Dopamine meter: accumbens core concentration relative to its tonic baseline, on a log scale.
-// Rest (ratio 1) is empty; a fourfold rise fills the bar [model, display only].
+// The stress circuit drawn in Stress (display only, through the brain-systems overlay of
+// statetex.js): amygdala and bed nucleus, hypothalamic stress nuclei, the brainstem alarm and
+// sympathetic centres, and the cortical salience areas (ANALYSIS.md §3, §7.6, §9.4).
+export const STRESS_CIRCUIT = {
+  regions: ['amygdala', 'cea', 'bnst', 'hypothalamus', 'pvn', 'lh', 'dmh', 'lc', 'pag', 'rvlm'],
+  areas: ['insAnt', 'dacc', 'sgacc'],
+};
+// At full strength the circuit's stars are ×2.2 and the rest of the brain ×0.45, and the circuit
+// takes the stress blue (also the HUD's Stress colour), distinct from the cool-white stars and the
+// dopamine amber [model, display only].
+export const STRESS_MEMBER = 2.2;
+export const STRESS_OTHER = 0.45;
+export const STRESS_RGB = [0x5c / 255, 0xb8 / 255, 0xff / 255];
+// Overlay strength: the circuit engages at the stressor's start and grows with the hormones.
+export const STRESS_OVERLAY_FLOOR = 0.45;
+export const stressOverlay = (level) => clamp(STRESS_OVERLAY_FLOOR + (1 - STRESS_OVERLAY_FLOOR) * level, 0, 1);
+
+// Meters on a log scale [model, display only]: dopamine is the accumbens core relative to its
+// tonic baseline, full at ×4 (the climax reaches about ×3.5); stress is plasma adrenaline relative
+// to its resting value, full at ×4 (the stressor peaks near ×4.1, §12.11).
 export const DA_FULL_RATIO = 4;
-export function dopamineLevel(ratio) {
+export const STRESS_FULL_RATIO = 4;
+const logLevel = (ratio, full) => {
   const r = Number(ratio);
   if (!Number.isFinite(r) || r <= 0) return 0;
-  return clamp(Math.log2(r) / Math.log2(DA_FULL_RATIO), 0, 1);
-}
-
-// Plain names of the stations a signal passes (graph node ids of the kernel event log); a prefix
-// entry ends in '*'. Stations not listed here are skipped in the story.
-const STATIONS = {
-  portCoch: 'the inner ear', cochNuc: 'the brainstem', soc: 'the brainstem', ic: 'the midbrain', mgn: 'the thalamus',
-  a1: 'the hearing cortex', portRetina: 'the retina', lgn: 'the thalamus', sc: 'the midbrain', pt: 'the midbrain',
-  v1: 'the visual cortex', mt: 'the motion area of the cortex', amygdala: 'the amygdala', 's1*': 'the touch area of the cortex',
-  's2*': 'the touch area of the cortex', 'thal*': 'the thalamus', 'ins*': 'the insula', dacc: 'the cingulate cortex',
-  lc: 'the brainstem', pivc: 'the cortex', 'dh*': 'the spinal cord', 'cord*': 'the spinal cord',
+  return clamp(Math.log2(r) / Math.log2(full), 0, 1);
 };
-export function stationName(id) {
-  const s = String(id ?? '');
-  if (STATIONS[s]) return STATIONS[s];
-  for (const [k, v] of Object.entries(STATIONS)) if (k.endsWith('*') && s.startsWith(k.slice(0, -1))) return v;
-  return null;
-}
+export const dopamineLevel = (ratio) => logLevel(ratio, DA_FULL_RATIO);
+export const stressLevel = (ratio) => logLevel(ratio, STRESS_FULL_RATIO);
 
-// The newest arrival with a plain station name in a runtime.js event log (newest first), counting
-// only entries after `since` (an event id), as one sentence.
-export function arrivalSentence(events, since = -Infinity) {
-  if (!Array.isArray(events)) return '';
-  for (const e of events) {
-    if (!e || e.event !== 'arrival' || !(e.id > since)) continue;
-    const where = stationName(e.station);
-    if (!where) continue;
-    const ms = Number(e.tH) * 1000;
-    const t = !Number.isFinite(ms) ? '' : ms < 100 ? ` after ${ms.toFixed(1)} ms` : ms < 1000 ? ` after ${Math.round(ms)} ms` : ` after ${(ms / 1000).toFixed(1)} s`;
-    return `Reached ${where}${t}.`;
-  }
-  return '';
-}
-
-// A skin site in everyday words: the HUD label without its segment, or the body region of a
-// dermatome (A.3.3 ids such as 'dermatome.T7').
-const DERMATOME_REGION = {
-  C2: 'back of the head', C3: 'neck', C4: 'shoulder', C5: 'outer arm', C6: 'thumb side of the forearm', C7: 'middle finger',
-  C8: 'little-finger side of the hand', T1: 'inner arm', T2: 'chest', T3: 'chest', T4: 'chest', T5: 'chest', T6: 'chest',
-  T7: 'abdomen', T8: 'abdomen', T9: 'abdomen', T10: 'abdomen', T11: 'abdomen', T12: 'abdomen', L1: 'hip', L2: 'thigh',
-  L3: 'knee', L4: 'shin', L5: 'top of the foot', S1: 'outer edge of the foot', S2: 'back of the thigh',
+export const METERS = {
+  stress: { label: 'Stress hormones', low: 'rest', high: 'high' },
+  dopamine: { label: 'Dopamine', low: 'rest', high: 'peak' },
 };
-export function plainSite(id, hudLabel) {
-  if (hudLabel) {
-    const s = String(hudLabel).replace(/\s*\([^()]*\)/g, '').trim();
-    return s.charAt(0).toLowerCase() + s.slice(1);
-  }
-  const m = String(id ?? '').match(/^dermatome\.([CTLS]\d+)$/);
-  if (m && DERMATOME_REGION[m[1]]) return DERMATOME_REGION[m[1]];
-  return String(id ?? '').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\./g, ' ').toLowerCase();
-}
 
-export const REST_STORY = { scenario: '', stage: 'At rest', text: 'Choose a scenario below, or try a sense.' };
+export const CALM_STORY = { scenario: '', stage: 'Calm', text: 'Brain and body at rest. Choose Stress or Dopamine below.' };
 
-// Plain stage titles and one sentence each, for the story (the full HUD keeps the sourced texts of
-// scenarios.js and response.js PHASES). Key: `<scenario id>:<stage name>`.
+// Plain stage titles and one sentence each (the full HUD keeps the sourced texts of scenarios.js
+// and response.js PHASES). Key: `<scenario id>:<stage name>`.
 export const PLAIN_STAGES = {
   'orgasm:Baseline': ['Rest', 'The reward system is at rest.'],
   'orgasm:Excitement': ['Arousal builds', 'Dopamine begins to rise in the reward system.'],
@@ -124,41 +83,10 @@ export const PLAIN_STAGES = {
   'orgasm:Late resolution': ['Settling', 'The hormone prolactin stays raised for a while.'],
   'orgasm:Recovery': ['Recovery', 'The body returns to its resting state.'],
   'orgasm:No climax': ['No climax', 'Arousal fades without a climax.'],
-  'hotObject:Contact': ['Contact', 'The hand touches a hot object.'],
-  'hotObject:Transduction': ['Heat sensed', 'Heat sensors in the skin start firing.'],
-  'hotObject:Withdrawal reflex': ['Pull away', 'The spinal cord pulls the hand away before the brain knows.'],
-  'hotObject:First pain': ['Sharp pain', 'Fast nerve fibres bring a sharp pain to the brain.'],
-  'hotObject:Second pain': ['Burning pain', 'Slower fibres bring a dull, burning second pain.'],
-  'hotObject:Autonomic signs': ['Body reacts', 'The palm sweats a little and the heart speeds up.'],
-  'loudSound:Sound onset': ['A loud noise', 'A sudden noise reaches both ears.'],
-  'loudSound:Auditory brainstem': ['Heard', 'The brainstem picks up the sound within milliseconds.'],
-  'loudSound:Startle command': ['Startle', 'A startle reflex makes the eyes blink.'],
-  'loudSound:LC phasic burst': ['Alert', 'An alerting centre in the brainstem fires a burst.'],
-  'loudSound:Autonomic signs': ['Body reacts', 'The pupils widen, the skin sweats and the heart speeds up.'],
-  'loudSound:Recovery': ['Settling', 'Everything returns to rest.'],
-  'brightLight:Light step': ['Bright light', 'A bright light shines into the right eye.'],
-  'brightLight:Retina and optic nerve': ['Eye to brain', 'The retina turns light into signals in the optic nerve.'],
-  'brightLight:Central visual stations': ['Seen', 'Visual centres in the brain respond.'],
-  'brightLight:Light reflex': ['Pupils narrow', 'Both pupils narrow to let in less light.'],
-  'brightLight:Light off': ['Light off', 'The light goes off and the pupils widen again.'],
-  'kneeJerk:Tendon tap': ['Tap', 'A tap below the kneecap stretches the thigh muscle.'],
-  'kneeJerk:Stretch reflex': ['Reflex', 'The spinal cord answers in about 20 milliseconds, without the brain.'],
-  'kneeJerk:Knee extension': ['Kick', 'The thigh muscle contracts and the lower leg kicks.'],
-  'standUp:Stand': ['Standing up', 'The person stands up from lying down.'],
-  'standUp:Initial fall': ['Pressure dips', 'Blood pools in the legs and blood pressure dips.'],
-  'standUp:Reflex tachycardia': ['Heart speeds up', 'Pressure sensors make the heart beat faster.'],
-  'standUp:Upright steady state': ['Steady', 'Heart rate and blood pressure settle at new levels.'],
-  'meal:Cephalic phase': ['Anticipation', 'The sight and smell of food prepare the gut.'],
-  'meal:Ingestion': ['Eating', 'The meal fills the stomach.'],
-  'meal:Gastric emptying': ['Digestion', 'The stomach slowly empties into the intestine.'],
-  'meal:Insulin peak': ['Insulin', 'Insulin rises to handle the sugar from the meal.'],
-  'stressor:Stressor': ['Stress begins', 'A stressful task starts.'],
-  'stressor:Sympatho-adrenal channel': ['Adrenaline', 'Adrenaline rises within minutes.'],
-  'stressor:HPA channel': ['Stress hormones', 'The brain signals the adrenal glands, and cortisol follows.'],
-  'stressor:Recovery': ['Recovery', 'Cortisol slowly falls back after the task.'],
-  'infection:Endotoxin bolus': ['Infection', 'A bacterial toxin enters the blood.'],
-  'infection:Cytokines': ['Immune alarm', 'Immune cells release signalling molecules.'],
-  'infection:Fever': ['Fever', 'The brain raises the body temperature set point.'],
+  'stressor:Stressor': ['Stress begins', 'The alarm circuit of the brain switches on.'],
+  'stressor:Sympatho-adrenal channel': ['Adrenaline', 'Nerves tell the adrenal glands to release adrenaline. The heart speeds up.'],
+  'stressor:HPA channel': ['Cortisol', 'The hypothalamus signals the pituitary, and cortisol follows more slowly.'],
+  'stressor:Recovery': ['Recovery', 'Adrenaline and cortisol slowly fall back after the stress.'],
 };
 
 // First sentence of a sourced text, without parentheses and section marks (fallback only).
@@ -171,19 +99,17 @@ export function firstSentence(text) {
 // The story line of a playing stage: a plain title and sentence when one is known.
 export function plainStage(scenarioId, name, text) {
   const base = String(name ?? '').replace(/\s*·\s*trial.*$/, '');
-  const trial = String(name ?? '').match(/·\s*(trial.*)$/)?.[1];
   const hit = PLAIN_STAGES[`${scenarioId}:${base}`];
-  if (hit) return { stage: trial ? `${hit[0]}, ${trial}` : hit[0], text: hit[1] };
+  if (hit) return { stage: hit[0], text: hit[1] };
   return { stage: name ?? '', text: firstSentence(text) };
 }
 
 // ---- SimpleHud ---------------------------------------------------------------------------------
 //
-// Handlers: onScenario(id), onPause(), onRestart(), onStop(), onBodyMode('brain' | 'body'),
-// onView(id), onNet(id, on), onSense(id | null), onAbout().
-// update() payload: { story: { scenario, stage, text }, dopamine: number | null (0–1),
-// scenario: { id, active, progress | null } | null, unavailable: { id: reason }, bodyMode, nets,
-// view, paused, armed, hint, dimmed }.
+// Handlers: onState('calm' | 'stress' | 'dopamine'), onView(view id), onQuality('auto' | tier index),
+// onPause().
+// update() payload: { state, view, quality: { value, autoLabel }, paused, dimmed, story: { scenario, stage, text },
+// meter: { kind: 'stress' | 'dopamine', level 0–1 } | null }. The meter shows one number, its percentage.
 
 export class SimpleHud {
   /**
@@ -195,150 +121,72 @@ export class SimpleHud {
     this.h = h;
     const $ = (id) => /** @type {any} */ (doc.getElementById(id));
     this.el = {
-      root: $('shud'), scenarioName: $('shud-scenario'), stage: $('shud-stage'), text: $('shud-text'),
-      da: $('shud-da'), daBar: $('shud-da-bar'), mode: $('shud-mode'), gear: $('shud-gear'), settings: $('shud-settings'),
-      nets: $('shud-nets'), netsNote: $('shud-nets-note'), about: $('shud-about'), views: $('shud-views'),
-      tabScn: $('shud-tab-scn'), tabSense: $('shud-tab-sense'), railScn: $('shud-rail-scn'), railSense: $('shud-rail-sense'),
-      pause: $('shud-pause'), restart: $('shud-restart'), stop: $('shud-stop'), hint: $('shud-hint'), hintText: $('shud-hint-text'),
-      cancel: $('shud-cancel'),
+      root: $('shud'), scenario: $('shud-scenario'), stage: $('shud-stage'), text: $('shud-text'),
+      meter: $('shud-meter'), meterLabel: $('shud-meter-label'), meterBar: $('shud-meter-bar'), meterLow: $('shud-meter-low'),
+      meterHigh: $('shud-meter-high'), meterValue: $('shud-meter-value'), views: $('shud-views'), quality: $('shud-quality'),
+      pause: $('shud-pause'), states: $('shud-states'),
     };
-    this.s = { story: null, da: -1, scenario: null, active: false, progress: -1, bodyMode: null, view: null, paused: null,
-      armed: null, hint: null, nets: {}, unavailable: {}, dimmed: false, tab: 'scn' };
-    this.btn = { scn: new Map(), sense: new Map(), view: new Map(), net: new Map(), mode: new Map() };
+    this.s = { state: null, view: null, paused: null, dimmed: false, story: null, meterKind: null, meterLevel: -1, quality: null };
+    this.btn = { state: new Map(), view: new Map() };
     this._build();
     this._bind();
   }
 
-  _make(tag, cls, text) {
-    const n = this.doc.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
-  }
-
   _build() {
     const e = this.el;
-    for (const [id, label] of SIMPLE_SCENARIOS) {
-      const b = this._make('button', 'shud-pill', label);
+    for (const st of STATES) {
+      const b = this.doc.createElement('button');
       b.type = 'button';
-      b.dataset.id = id;
+      b.className = `shud-state is-${st.id}`;
+      b.dataset.id = st.id;
       b.setAttribute('aria-pressed', 'false');
-      const track = this._make('span', 'shud-progress');
-      track.setAttribute('aria-hidden', 'true');
-      b.append(track);
-      e.railScn.append(b);
-      this.btn.scn.set(id, b);
-    }
-    for (const s of SIMPLE_SENSES) {
-      const b = this._make('button', 'shud-pill shud-sense', s.label);
-      b.type = 'button';
-      b.dataset.id = s.id;
-      b.setAttribute('aria-pressed', 'false');
-      b.title = s.pick ? `${s.label}: then click a point on the skin` : `${s.label}: delivered to both ${s.id === 'sound' ? 'ears' : 'eyes'}`;
-      e.railSense.append(b);
-      this.btn.sense.set(s.id, b);
+      const name = this.doc.createElement('span');
+      name.className = 'shud-state-name';
+      name.textContent = st.label;
+      const hint = this.doc.createElement('span');
+      hint.className = 'shud-state-hint';
+      hint.textContent = st.hint;
+      b.append(name, hint);
+      e.states.append(b);
+      this.btn.state.set(st.id, b);
     }
     for (const v of SIMPLE_VIEWS) {
-      const b = this._make('button', 'shud-view', v.label);
+      const b = this.doc.createElement('button');
       b.type = 'button';
+      b.className = 'shud-view';
       b.dataset.id = v.id;
+      b.textContent = v.label;
       b.setAttribute('aria-pressed', 'false');
       e.views.append(b);
       this.btn.view.set(v.id, b);
     }
-    for (const n of SIMPLE_NETS) {
-      const li = this._make('li');
-      const b = this._make('button', 'shud-switch');
-      b.type = 'button';
-      b.dataset.id = n.id;
-      b.setAttribute('role', 'switch');
-      b.setAttribute('aria-checked', 'true');
-      b.title = n.title;
-      b.append(this._make('span', 'shud-switch-label', n.label));
-      const track = this._make('span', 'shud-switch-track');
-      track.setAttribute('aria-hidden', 'true');
-      b.append(track);
-      li.append(b);
-      e.nets.append(li);
-      this.btn.net.set(n.id, b);
+    for (const [value, label] of QUALITY) {
+      const o = this.doc.createElement('option');
+      o.value = value;
+      o.textContent = label;
+      e.quality.append(o);
     }
-    for (const b of e.mode.querySelectorAll('button')) this.btn.mode.set(b.dataset.mode, b);
   }
 
   _bind() {
     const e = this.el, h = this.h;
-    e.railScn.addEventListener('click', (ev) => {
-      const b = /** @type {any} */ (ev.target).closest('.shud-pill');
-      if (b && !b.disabled) h.onScenario?.(b.dataset.id);
-    });
-    e.railSense.addEventListener('click', (ev) => {
-      const b = /** @type {any} */ (ev.target).closest('.shud-pill');
-      if (!b || b.disabled) return;
-      const id = b.dataset.id;
-      h.onSense?.(this.s.armed === id ? null : id);
+    e.states.addEventListener('click', (ev) => {
+      const b = /** @type {any} */ (ev.target).closest('.shud-state');
+      if (b) h.onState?.(b.dataset.id);
     });
     e.views.addEventListener('click', (ev) => {
       const b = /** @type {any} */ (ev.target).closest('.shud-view');
       if (b) h.onView?.(b.dataset.id);
     });
-    e.nets.addEventListener('click', (ev) => {
-      const b = /** @type {any} */ (ev.target).closest('.shud-switch');
-      if (!b || b.disabled) return;
-      h.onNet?.(b.dataset.id, b.getAttribute('aria-checked') !== 'true');
-    });
-    e.mode.addEventListener('click', (ev) => {
-      const b = /** @type {any} */ (ev.target).closest('button');
-      if (b) h.onBodyMode?.(b.dataset.mode);
-    });
+    e.quality.addEventListener('change', () => h.onQuality?.(e.quality.value));
     e.pause.addEventListener('click', () => h.onPause?.());
-    e.restart.addEventListener('click', () => h.onRestart?.());
-    e.stop.addEventListener('click', () => h.onStop?.());
-    e.cancel.addEventListener('click', () => h.onSense?.(null));
-    e.about.addEventListener('click', () => { this.openSettings(false); h.onAbout?.(); });
-    e.gear.addEventListener('click', () => this.openSettings(e.settings.hidden));
-    for (const [tab, name] of [[e.tabScn, 'scn'], [e.tabSense, 'sense']]) tab.addEventListener('click', () => this.setTab(name));
-    e.tabScn.parentElement.addEventListener('keydown', (ev) => {
-      if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
-      ev.preventDefault();
-      this.setTab(this.s.tab === 'scn' ? 'sense' : 'scn');
-      (this.s.tab === 'scn' ? e.tabScn : e.tabSense).focus();
-    });
-    this.doc.addEventListener('pointerdown', (ev) => {
-      if (e.settings.hidden) return;
-      const t = /** @type {any} */ (ev.target);
-      if (!e.settings.contains(t) && !e.gear.contains(t)) this.openSettings(false);
-    });
     this.doc.defaultView?.addEventListener('keydown', (ev) => {
       if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
       const t = /** @type {any} */ (ev.target);
-      if (ev.key === 'Escape') {
-        if (!e.settings.hidden) { this.openSettings(false); e.gear.focus(); return; }
-        if (this.s.armed) h.onSense?.(null);
-        return;
-      }
-      const typing = t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName));
-      if (typing) return;
+      if (t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
       if (ev.key === 'p' || ev.key === 'P') { ev.preventDefault(); h.onPause?.(); }
+      else if (ev.key === '1' || ev.key === '2' || ev.key === '3') h.onState?.(STATES[Number(ev.key) - 1].id);
     });
-  }
-
-  setTab(name) {
-    const e = this.el, scn = name !== 'sense';
-    this.s.tab = scn ? 'scn' : 'sense';
-    e.tabScn.setAttribute('aria-selected', String(scn));
-    e.tabSense.setAttribute('aria-selected', String(!scn));
-    e.tabScn.tabIndex = scn ? 0 : -1;
-    e.tabSense.tabIndex = scn ? -1 : 0;
-    e.railScn.hidden = !scn;
-    e.railSense.hidden = scn;
-    if (scn && this.s.armed) this.h.onSense?.(null);
-  }
-
-  openSettings(open) {
-    const e = this.el;
-    e.settings.hidden = !open;
-    e.gear.setAttribute('aria-expanded', String(!!open));
-    if (open) /** @type {any} */ (e.settings.querySelector('button:not([disabled])'))?.focus();
   }
 
   setPaused(paused) {
@@ -359,94 +207,62 @@ export class SimpleHud {
 
   update(p) {
     const e = this.el, s = this.s;
-    // Story.
-    const st = p.story ?? REST_STORY;
+    if (p.state && p.state !== s.state) {
+      s.state = p.state;
+      for (const [id, b] of this.btn.state) b.setAttribute('aria-pressed', String(id === p.state));
+      e.root.dataset.state = p.state;
+    }
+    if (p.view && p.view !== s.view) {
+      s.view = p.view;
+      for (const [id, b] of this.btn.view) b.setAttribute('aria-pressed', String(id === p.view));
+    }
+    // Quality: the select shows the user's choice; Auto names the tier it is running now.
+    const q = p.quality;
+    const qKey = q ? `${q.value}|${q.autoLabel}` : null;
+    if (q && qKey !== s.quality) {
+      s.quality = qKey;
+      e.quality.value = q.value;
+      const auto = e.quality.querySelector('option[value="auto"]');
+      if (auto) auto.textContent = q.autoLabel ? `Auto (${q.autoLabel})` : 'Auto';
+    }
+    if (p.paused !== undefined) this.setPaused(!!p.paused);
+    if (p.dimmed !== undefined) this.setDimmed(!!p.dimmed);
+
+    const st = p.story ?? CALM_STORY;
     const key = `${st.scenario}|${st.stage}|${st.text}`;
     if (key !== s.story) {
       s.story = key;
-      e.scenarioName.textContent = st.scenario || '';
-      e.scenarioName.hidden = !st.scenario;
+      e.scenario.textContent = st.scenario || '';
+      e.scenario.hidden = !st.scenario;
       e.stage.textContent = st.stage || '';
       e.text.textContent = st.text || '';
       e.text.hidden = !st.text;
     }
-    // Dopamine meter (orgasm scenario only).
-    const da = p.dopamine == null ? -1 : Math.round(clamp(p.dopamine, 0, 1) * 100);
-    if (da !== s.da) {
-      s.da = da;
-      e.da.hidden = da < 0;
-      if (da >= 0) {
-        e.daBar.style.transform = `scaleX(${da / 100})`;
-        e.da.setAttribute('aria-valuenow', String(da));
-        e.da.setAttribute('aria-valuetext', da < 5 ? 'At rest' : da > 95 ? 'At peak' : `${da}% of the way to peak`);
+
+    const kind = p.meter?.kind ?? null;
+    if (kind !== s.meterKind) {
+      s.meterKind = kind;
+      s.meterLevel = -1;
+      e.meter.hidden = !kind;
+      if (kind) {
+        const m = METERS[kind];
+        e.meter.dataset.kind = kind;
+        e.meterLabel.textContent = m.label;
+        e.meterLow.textContent = m.low;
+        e.meterHigh.textContent = m.high;
+        e.meter.setAttribute('aria-label', m.label);
       }
     }
-    // Scenario rail.
-    const sc = p.scenario;
-    const id = sc?.id ?? null, active = !!sc?.active;
-    if (id !== s.scenario || active !== s.active) {
-      s.scenario = id;
-      s.active = active;
-      for (const [sid, b] of this.btn.scn) {
-        const on = sid === id && active;
-        b.setAttribute('aria-pressed', String(on));
-        b.classList.toggle('is-playing', on);
-      }
-      e.restart.disabled = !id;
-      e.stop.disabled = !active;
-    }
-    const prog = sc && active && sc.progress != null ? Math.round(clamp(sc.progress, 0, 1) * 1000) / 1000 : -1;
-    if (prog !== s.progress) {
-      s.progress = prog;
-      const b = id ? this.btn.scn.get(id) : null;
-      for (const x of this.btn.scn.values()) x.classList.toggle('has-progress', x === b && prog >= 0);
-      if (b && prog >= 0) /** @type {any} */ (b.querySelector('.shud-progress')).style.transform = `scaleX(${prog})`;
-    }
-    // Availability: networks switched off can make a scenario impossible; "Needs the body" is not a
-    // block here, because choosing such a scenario turns the body on.
-    const un = p.unavailable ?? {};
-    const unKey = JSON.stringify(un);
-    if (unKey !== s.unavailableKey) {
-      s.unavailableKey = unKey;
-      for (const [sid, b] of this.btn.scn) {
-        const why = un[sid] && un[sid] !== 'Needs the body' ? un[sid] : '';
-        b.disabled = !!why;
-        b.hidden = why === 'Not available in this build';
-        b.title = why || (un[sid] === 'Needs the body' ? 'Turns the body on and plays' : '');
+    if (kind) {
+      const lvl = Math.round(clamp(p.meter.level ?? 0, 0, 1) * 100);
+      if (lvl !== s.meterLevel) {
+        s.meterLevel = lvl;
+        e.meterBar.style.transform = `scaleX(${lvl / 100})`;
+        e.meterValue.textContent = `${lvl}%`;
+        e.meter.setAttribute('aria-valuenow', String(lvl));
+        e.meter.setAttribute('aria-valuetext', lvl < 5 ? 'At rest' : `${lvl}% of the way to ${METERS[kind].high}`);
       }
     }
-    // Brain or body.
-    if (p.bodyMode && p.bodyMode !== s.bodyMode) {
-      s.bodyMode = p.bodyMode;
-      for (const [m, b] of this.btn.mode) b.setAttribute('aria-pressed', String(m === p.bodyMode));
-      const body = p.bodyMode === 'body';
-      for (const [, b] of this.btn.net) b.disabled = !body;
-      e.netsNote.hidden = body;
-      for (const v of SIMPLE_VIEWS) if (v.body) this.btn.view.get(v.id).title = body ? '' : 'Turns the body on';
-    }
-    const netKey = JSON.stringify(p.nets ?? {});
-    if (netKey !== s.netKey) {
-      s.netKey = netKey;
-      for (const [nid, b] of this.btn.net) b.setAttribute('aria-checked', String(p.nets?.[nid] !== false));
-    }
-    if (p.view && p.view !== s.view) {
-      s.view = p.view;
-      for (const [vid, b] of this.btn.view) b.setAttribute('aria-pressed', String(vid === p.view));
-    }
-    if (p.paused !== undefined) this.setPaused(!!p.paused);
-    // Armed sense and its hint.
-    if ((p.armed ?? null) !== s.armed) {
-      s.armed = p.armed ?? null;
-      for (const [sid, b] of this.btn.sense) b.setAttribute('aria-pressed', String(sid === s.armed));
-      this.doc.body.classList.toggle('picking', !!s.armed);
-    }
-    const hint = p.hint ?? null;
-    if (hint !== s.hint) {
-      s.hint = hint;
-      e.hint.hidden = !hint;
-      e.hintText.textContent = hint || '';
-      e.cancel.hidden = !s.armed;
-    }
-    if (p.dimmed !== undefined) this.setDimmed(!!p.dimmed);
+
   }
 }

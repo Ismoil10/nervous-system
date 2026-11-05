@@ -19,13 +19,15 @@ import { createContext, GpuTimer } from './gl-utils.js';
 import { TIERS, detectTier, AdaptiveQuality } from './performance.js';
 import { generateBrain, generateBrainExtra, applyRelabel, areaIds } from './brain.js';
 import { BrainRenderer, PARAMS as RENDER } from './renderer.js';
+import { WAVE_SLOTS } from './shaders.js';
 import { OrbitCamera } from './camera.js';
 import { PRESETS } from './clock.js';
-import { CENTER, MM, AREAS } from './anatomy.js';
+import { CENTER, MM, AREAS, R as ANATOMY_R } from './anatomy.js';
 import { NEURON_COOL, NEURON_WARM, DOPAMINE_RGB, blackbodyRGB } from './color.js';
 import { Hud } from './ui.js';
-import { SCENARIOS as HUD_SCENARIOS, isBodyView, modeOf, senseById, siteById as hudSite, fractionFromTH } from './ui-body.js';
-import { SimpleHud, senseOf, scenarioLabel, scenarioView, dopamineLevel, arrivalSentence, plainStage, plainSite, REST_STORY } from './ui-simple.js';
+import { SCENARIOS as HUD_SCENARIOS, isBodyView, modeOf, senseById, siteById as hudSite } from './ui-body.js';
+import { SimpleHud, stateOf, stateForScenario, STRESS_CIRCUIT, STRESS_MEMBER, STRESS_OTHER, STRESS_RGB, stressOverlay,
+  dopamineLevel, stressLevel, plainStage, CALM_STORY } from './ui-simple.js';
 import { Runtime } from './sim/runtime.js';
 import { NET_IDS } from './sim/graph.js';
 import { SCENARIOS } from './sim/scenarios.js';
@@ -93,7 +95,18 @@ const PICK = { movePx: 6, holdMs: 600 };     // [model] a press that moves less 
 // context only, so the brain-only image stays the post-port one [model].
 const LIMIT = { packetLum: 0.25, packetPx: 5, bodyLum: 0.12, lanternLum: 0.3, brainRadiusMm: 75 };
 const HUD_SCENARIO_IDS = HUD_SCENARIOS.map((s) => s.id);
-const DEFAULT_SCENARIO = 'orgasm';   // opened when the URL names no scenario (readParams)
+const DEFAULT_SCENARIO = 'orgasm';
+// Dopamine wave (display only) [model], like an expanding shock-wave ring. Each shell's radius
+// grows at speedMm per screen second; its width grows with the radius; its strength rises over
+// `rise` s and fades out between fadeFromMm and fadeToMm; it pushes the points it crosses outward by
+// up to pushMm. At most WAVE_SLOTS shells at once.
+const WAVE = {
+  climax: { speedMm: 55, amp: 1 }, pulse: { speedMm: 80, amp: 0.5 },
+  width0Mm: 5, widthPerMm: 0.12, pushMm: 1.6, rise: 0.35, fadeFromMm: 70, fadeToMm: 115, slots: WAVE_SLOTS,
+};
+// Pre-build dopamine display restored in the simple HUD: fibre-flow cadence (0.5/16 s per sample,
+// 0.5-s travel) and the climax glow filter without the 2-s pulse-locked floor.
+const CLASSIC_DA = { histStep: 0.5 / 16, tauVisLocked: 0.3 };   // opened when the URL names no scenario (readParams)
 const UNDRAWN_TOGGLES = { receptors: 'Touch receptors are not drawn in this build', labels: 'Labels are not drawn in this build' };
 
 // URL parameters (B.5 item 8).
@@ -211,8 +224,9 @@ async function start() {
   let bodyGen = null, bodyData = null, bodyTier = -1;
   let picking = false, limbMotion = true, lastPath = null;
   const overlayOn = {};
-  // Simple HUD state: the armed one-tap sense, the story of the last manual stimulus, a short notice.
-  let simple = null, armedSense = null, manualStory = null, notice = null, noticeUntil = 0;
+  // Simple HUD state: the chosen state (Calm, Stress, Dopamine), what the camera looks at, the
+  // resting adrenaline when Stress started, and the stress overlay strength last sent (−1: off).
+  let simple = null, mode = 'calm', stressBase = null, stressShown = -1;
 
   const naccHist = new Float32Array(600);   // NAcc core dopamine (nM), one sample per 0.1 screen s
   let histHead = 0, histAcc = 0;
@@ -315,46 +329,10 @@ async function start() {
     const d = pressAt;
     pressAt = null;
     if (e.button !== 0 || e.shiftKey || e.ctrlKey) return;   // right, middle and modified drags pan (camera.js)
-    if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > PICK.movePx || performance.now() - d.t > PICK.holdMs) return;
-    if (armedSense) {   // simple HUD: a click places the armed sense (a drag still turns the camera)
-      if (bodyMode === 'body' && bodyData) simplePickAt(e.clientX, e.clientY);
-      return;
-    }
-    if (!picking || bodyMode !== 'body' || !bodyData) return;
+    if (!picking || !d || bodyMode !== 'body' || !bodyData) return;
+    if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > PICK.movePx || performance.now() - d.t > PICK.holdMs) return;
     pickAt(e.clientX, e.clientY);
   });
-
-  // --- Simple HUD senses: one fixed record each (ui-simple.js SIMPLE_SENSES) ---
-  const say = (text) => { notice = text; noticeUntil = screenT + 3; };
-  const deliverSimple = (s, record) => {
-    const since = rt.events()[0]?.id ?? -1;
-    const r = rt.deliver({ ...record, params: {}, repeat: { count: 1, intervalS: 0 } });
-    if (!r) { say('This point cannot sense it. Try another point on the skin.'); return; }
-    const where = s.pick && record.site ? plainSite(record.site, hudSite(record.site)?.label) : null;
-    manualStory = {
-      stage: where ? `${s.label} on the ${where}` : s.label, since,
-      text: s.pick ? 'The signal travels from the skin to the brain.' : s.id === 'sound' ? 'A click in both ears.' : 'A flash in both eyes.',
-    };
-    lastPath = where;
-  };
-  const simplePickAt = (x, y) => {
-    const s = senseOf(armedSense);
-    if (!s) return;
-    const rec = s.record, m = modeOf(rec.sense, rec.mode), sn = senseById(rec.sense);
-    const sites = m && !m.siteFree ? m.sites ?? sn?.sites ?? null : null;
-    const hit = pick(camera.unproject(x, y), { sense: rec.sense, bodyMode, yaw: camera.yaw, sites });
-    if (!hit) { say('Click a point on the skin.'); return; }
-    deliverSimple(s, { ...rec, site: hit.site.base, side: sideName(hit.site.side) });
-  };
-  const armSense = (id) => {
-    const s = id ? senseOf(id) : null;
-    armedSense = null;
-    if (!s) return;
-    if (!s.pick) { deliverSimple(s, s.record); return; }
-    if (bodyMode !== 'body') setBodyMode('body');   // also flies to the upper body
-    else if (!isBodyView(viewQueued ?? view)) requestView('upperBody');   // the skin must be in view to click it
-    armedSense = id;
-  };
 
   // --- Overlays and Views toggles (display only, A.5, §13.10, §13.13) ---
   const setOverlay = (id, on) => {
@@ -375,6 +353,25 @@ async function start() {
   };
   rmQuery.addEventListener?.('change', () => { if (rmSetting === 'system') applyReducedMotion(); });
 
+  // Quality (both HUDs): 'auto' returns to the adaptive tier of performance.js; a tier index fixes it,
+  // generating the larger point populations first when that tier was not built yet.
+  async function setQuality(value) {
+    if (value === 'auto') { quality.unlock(); return; }
+    const idx = Number(value);
+    if (idx > genTier) {
+      loading.hidden = false;
+      loadingText.textContent = `Placing ${TIERS[idx].neurons.toLocaleString('en-US')} neurons…`;
+      await nextFrame();
+      genTier = idx;
+      brain = makeBrain(TIERS[genTier]);
+      renderer.replaceBrain(brain);
+      quality.maxTier = genTier;
+      if (bodyData || bodyGen) { bodyGen = null; ensureBody(); }   // the body follows in slices (§13.4)
+      loading.hidden = true;
+    }
+    quality.force(idx);
+  }
+
   const hud = new Hud({
     // Orgasm scenario (Scenarios › scn-orgasm; Space and D act only while it runs).
     onMode: (m) => { rt.orgasmMode = m; model.setMode(m); },
@@ -391,22 +388,7 @@ async function start() {
     onPause: () => togglePause(),
     onView: (v) => requestView(v),
     onReset: () => resetAll(),
-    onQuality: async (value) => {
-      if (value === 'auto') { quality.unlock(); return; }
-      const idx = Number(value);
-      if (idx > genTier) {
-        loading.hidden = false;
-        loadingText.textContent = `Placing ${TIERS[idx].neurons.toLocaleString('en-US')} neurons…`;
-        await nextFrame();
-        genTier = idx;
-        brain = makeBrain(TIERS[genTier]);
-        renderer.replaceBrain(brain);
-        quality.maxTier = genTier;
-        if (bodyData || bodyGen) { bodyGen = null; ensureBody(); }   // the body follows in slices (§13.4)
-        loading.hidden = true;
-      }
-      quality.force(idx);
-    },
+    onQuality: (value) => setQuality(value),
     // Body, Interventions (A.5, B.11).
     onBodyMode: (m) => setBodyMode(m),
     onNet: (id, on) => { rt.setNet(id, on); syncAvailability(); },
@@ -450,51 +432,137 @@ async function start() {
   for (const [id, why] of Object.entries(UNDRAWN_TOGGLES)) hud.body.setToggleAvailable(id, false, why);
   applyReducedMotion();
 
-  // Simple HUD (the default; the full HUD above opens with ?advanced=1). It drives the same runtime
-  // calls as the full HUD; a scenario or view that needs the body turns the body on [model].
+  // --- Dopamine wave (display only; user decision, 5 November 2026) ---
+  // At the climax a bright shell leaves the core dopamine system (VTA) and runs out along its fibres
+  // and through the whole brain; a weaker, faster one follows each contraction, scaled by its
+  // amplitude. A new shell starts at most every ≈ 0.6 s (under 3 a second); reduced motion halves
+  // the climax wave and its push and drops the per-contraction ones [model].
+  const vtaMm = (() => {
+    const N = brain.neurons, ids = new Set([ANATOMY_R.vta, ANATOMY_R.vtaMedial]), c = [0, 0, 0];
+    let n = 0;
+    for (let i = 0; i < brain.neuronCount; i++) {
+      if (!ids.has(Math.round(N[i * 12 + 8]))) continue;
+      c[0] += N[i * 12]; c[1] += N[i * 12 + 1]; c[2] += N[i * 12 + 2]; n++;
+    }
+    return n ? c.map((v) => v / n / MM) : [0, -17, -14];   // fallback: VTA near MNI (0, −17, −14)
+  })();
+  const waves = [];
+  let wavePhase = null, wavePulses = 0;
+  function updateWaves(dt) {
+    if (!simple) return;   // the full HUD keeps the DOPAMINE.md display
+    if (adapter.active) {
+      const ph = model.phase, done = model.pulses?.done ?? 0;
+      if (ph === 'orgasm' && wavePhase !== 'orgasm') { waves.push({ age: 0, ...WAVE.climax }); wavePulses = done; }
+      else if (ph === 'orgasm' && done > wavePulses) {
+        const amps = model.train?.amps ?? [];
+        const rel = amps.length ? (amps[done - 1] ?? amps[amps.length - 1]) / Math.max(1e-6, amps[0]) : 1;
+        if (!reducedMotion) waves.push({ age: 0, speedMm: WAVE.pulse.speedMm, amp: WAVE.pulse.amp * Math.min(1, rel) });
+        wavePulses = done;
+      }
+      wavePhase = ph;
+    } else wavePhase = null;
+    for (const w of waves) w.age += dt;
+    while (waves.length && (waves[0].speedMm * waves[0].age > WAVE.fadeToMm || waves.length > WAVE.slots)) waves.shift();
+    const k = reducedMotion ? 0.5 : 1;
+    const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+    renderer.setWaves(vtaMm, waves.map((w) => {
+      const r = w.speedMm * w.age;
+      return {
+        radiusMm: r, widthMm: WAVE.width0Mm + WAVE.widthPerMm * r, pushMm: WAVE.pushMm * k,
+        amp: k * w.amp * smooth(0, WAVE.rise, w.age) * (1 - smooth(WAVE.fadeFromMm, WAVE.fadeToMm, r)),
+      };
+    }));
+  }
+
+  // Simple HUD (the default; the full HUD above opens with ?advanced=1): Calm, Stress or Dopamine;
+  // Look at Brain or Body (the camera only); Pause.
   function togglePause() { paused = !paused; hud.setPaused(paused); simple?.setPaused(paused); }
-  const playSimple = (id) => {
-    const why = rt.unavailable([id])[id];
-    if (why === 'Needs the body') setBodyMode('body');
-    else if (why) { say(why); return; }
-    armedSense = null;
-    manualStory = null;
+  // Stress is drawn on the brain (display only): the stress circuit brightens and the rest of the
+  // brain dims through the brain-systems overlay, scaled by k (0–1); the locus coeruleus takes its
+  // noradrenaline tint. null clears both.
+  const AREA_IDS = AREAS.map((a) => a.id);
+  const stressMembers = { regions: STRESS_CIRCUIT.regions, areas: STRESS_CIRCUIT.areas.map((a) => AREA_IDS.indexOf(a)).filter((i) => i >= 0) };
+  // The circuit's stars also take the noradrenaline colour (BrainNet tint channel, §13.6), written
+  // after BrainNet refills its tints each frame; alpha ≤ the BrainNet tint mix of 0.8 [model].
+  const stressRegionIdx = STRESS_CIRCUIT.regions.map((id) => ANATOMY_R[id]).filter((r) => r !== undefined);
+  const paintStressTint = (k) => {
+    const t = rt.brainnet?.tint;
+    if (!t) return;
+    const m = 0.8 * k;
+    for (const r of stressRegionIdx) {
+      for (let s = 0; s < 2; s++) {
+        const o = (2 * r + s) * 4;
+        if (t[o + 3] >= m) continue;
+        t[o] = STRESS_RGB[0]; t[o + 1] = STRESS_RGB[1]; t[o + 2] = STRESS_RGB[2]; t[o + 3] = m;
+      }
+    }
+  };
+  const showStress = (k) => {
+    if (k == null) {
+      if (stressShown < 0) return;
+      stressShown = -1;
+      renderer.state.setOverlay({});
+      rt.brainnet?.setTints(null);
+      return;
+    }
+    if (Math.abs(k - stressShown) < 0.02) return;
+    if (stressShown < 0) rt.brainnet?.setTints(['NE']);
+    stressShown = k;
+    const t = renderer.state.overlayTargets(stressMembers);   // members > 1, the rest < 1
+    const mix = (a) => a.map((v) => (v > 1 ? 1 + (STRESS_MEMBER - 1) * k : 1 - (1 - STRESS_OTHER) * k));
+    renderer.state.setOverlay({ region: mix(t.region), area: mix(t.area) });
+  };
+  // Emotion and view are separate states (user decision, 5 November 2026): an emotion runs its model
+  // and never moves the camera; a view moves the camera and never changes the emotion.
+  const setMode = (m) => {
+    const st = stateOf(m);
+    if (!st) return;
+    mode = m;
     if (paused) togglePause();
-    if (id === 'orgasm') selectScenario(id); else playScenario(id);
-    const v = viewParam ? null : scenarioView(id, rt.bodyMode);
-    if (v) requestView(v);
+    showStress(null);
+    if (!st.scenario) { rt.stop(); return; }
+    if (st.scenario === 'stressor' && rt.bodyMode !== 'body') {
+      const keep = viewQueued ?? view;
+      setBodyMode('body');   // adrenaline and cortisol need the body; the view stays as it was
+      requestView(keep);
+    }
+    playScenario(st.scenario);   // the orgasm scenario starts here without its fly-to (B.13 applies to the full HUD)
+    if (st.scenario === 'stressor') stressBase = rt.vitals().adrenaline;
+  };
+  const setSimpleView = (v) => {
+    if (isBodyView(v) && rt.bodyMode !== 'body') setBodyMode('body');
+    requestView(v);
   };
   const simpleState = () => {
-    const sh = rt.scenarioHud();
-    const playing = adapter.active || player.active;
-    // The last action tells the story: a sense used after a scenario started, else the scenario.
-    const st = !manualStory && playing ? rt.stage() : null;
-    const story = manualStory ? { scenario: '', stage: manualStory.stage, text: arrivalSentence(rt.events(), manualStory.since) || manualStory.text }
-      : st ? { scenario: scenarioLabel(rt.scenarioId) ?? rt.scenarioLabel(), ...plainStage(rt.scenarioId, st.name, st.text) }
-        : REST_STORY;
-    const live = notice && screenT < noticeUntil ? notice : null;
-    return {
-      story,
-      dopamine: adapter.active ? dopamineLevel(dopamine.readouts().ratioNacc) : null,
-      scenario: sh ? { id: sh.id, active: !!sh.active, progress: sh.spanH > 0 ? fractionFromTH(sh.tH, sh.spanH) : null } : null,
-      unavailable: rt.unavailable(HUD_SCENARIO_IDS), bodyMode: rt.bodyMode, nets: rt.nets, view: viewQueued ?? view, paused,
-      armed: armedSense,
-      hint: armedSense ? live ?? (bodyData ? 'Click a point on the skin.' : 'The body is still being drawn…') : live,
-    };
+    if (mode === 'stress' && !player.active) { mode = 'calm'; showStress(null); }   // the stressor ran to its end
+    const st = adapter.active || player.active ? rt.stage() : null;
+    const story = st ? { scenario: rt.scenarioId === 'orgasm' ? 'Orgasm' : rt.scenarioId === 'stressor' ? 'Stress' : rt.scenarioLabel(),
+      ...plainStage(rt.scenarioId, st.name, st.text) } : CALM_STORY;
+    let meter = null;
+    if (mode === 'dopamine' && adapter.active) meter = { kind: 'dopamine', level: dopamineLevel(dopamine.readouts().ratioNacc) };
+    if (mode === 'stress') {
+      const v = rt.vitals();
+      const level = stressLevel(v.adrenaline / (stressBase || v.adrenaline));
+      meter = { kind: 'stress', level };
+      showStress(stressOverlay(level));
+    }
+    const q = { value: quality.locked ? String(quality.tier) : 'auto', autoLabel: quality.locked ? null : TIERS[quality.tier].label };
+    return { state: mode, view: viewQueued ?? view, quality: q, paused, story, meter };
   };
   if (!url.advanced) {
     const refresh = () => simple.update(simpleState());
     simple = new SimpleHud(document, {
-      onScenario: (id) => { playSimple(id); refresh(); },
-      onRestart: () => { if (rt.scenarioId) playSimple(rt.scenarioId); refresh(); },
-      onStop: () => { rt.stop(); manualStory = null; refresh(); },
+      onState: (m) => { setMode(m); refresh(); },
+      onView: (v) => { setSimpleView(v); refresh(); },
+      onQuality: (value) => { setQuality(value).then(refresh); },
       onPause: () => { togglePause(); refresh(); },
-      onBodyMode: (m) => { setBodyMode(m); if (rt.bodyMode !== 'body') armedSense = null; refresh(); },
-      onView: (v) => { if (isBodyView(v) && bodyMode !== 'body') setBodyMode('body'); requestView(v); refresh(); },
-      onNet: (id, on) => { rt.setNet(id, on); syncAvailability(); refresh(); },
-      onSense: (id) => { armSense(id); refresh(); },
-      onAbout: () => document.getElementById('info-btn')?.click(),
     });
+    // The dopamine display of the app before the whole-body build (user decision, 5 November 2026;
+    // DOPAMINE.md §9.8 "current code" column): the climax reward locked to each contraction, so every
+    // contraction sends a burst from the midbrain along the fibres; the fibre flow at its old 0.5-s
+    // travel; no extra 2-s smoothing of the glows during the climax (the 0.3-s floor stays).
+    dopamine.setSwitch('pulseLocked', true);
+    Object.assign(dopamine.p, CLASSIC_DA);
   }
 
   // A scenario chosen by URL: the orgasm scenario starts on selection (B.13); the others play [model].
@@ -502,6 +570,10 @@ async function start() {
     rt.select(url.scenario);
     if (url.scenario !== 'orgasm' && !rt.unavailable()[url.scenario]) rt.play();
   }
+  // The simple HUD opens on the state of the scenario that plays: Dopamine for the default orgasm
+  // scenario, Stress for ?scenario=stressor, otherwise Calm.
+  mode = adapter.active || player.active ? stateForScenario(rt.scenarioId) : 'calm';
+  if (mode === 'stress') stressBase = rt.vitals().adrenaline;
 
   const p = dopamine.p;
   hud.syncSettings({
@@ -587,6 +659,8 @@ async function start() {
     // within the tier's budget (B.9), clock commit, BrainNet filter.
     const sdt = paused ? 0 : dt;
     rt.frame(sdt, { budgetMs: TIERS[quality.tier].kernelMs });
+    if (stressShown >= 0) paintStressTint(stressShown);   // simple HUD, Stress
+    updateWaves(sdt);
     animT += sdt;
 
     // The body follows the first brain frame in slices (B.9).

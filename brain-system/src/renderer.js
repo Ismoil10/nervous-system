@@ -131,6 +131,8 @@ export class BrainRenderer {
     this.netGain = new Float32Array(8).fill(1);
     this.netRate = (1 - PARAMS.ghost) / PARAMS.fade;
     this.organs = new Float32Array(4 * 2 * S.ORGAN_SLOTS);
+    this.waveO = new Float32Array(4);                  // dopamine wave origin; w = 1 while a wave runs
+    this.waves = new Float32Array(4 * S.WAVE_SLOTS);   // radius, amplitude, width, push per slot
     this.joints = new Float32Array(4 * 2 * S.JOINT_SLOTS);
     for (let k = 0; k < S.JOINT_SLOTS; k++) this.joints[k * 8 + 3] = 1;
     this.skinDim = 0;
@@ -223,6 +225,16 @@ export class BrainRenderer {
 
   // Direct display gains per bit (8 values in 0.08–1), e.g. driven by the kernel's g.<net> ramps.
   setNetworkGains(gains) { this.netTarget.set(gains); this.netGain.set(gains); }
+
+  // Dopamine waves (display only): origin [x, y, z] in mm and ≤ WAVE_SLOTS { radiusMm, amp, widthMm,
+  // pushMm }; an empty list switches them off.
+  setWaves(originMm, list = []) {
+    const w = this.waves;
+    w.fill(0);
+    list.slice(0, S.WAVE_SLOTS).forEach((x, k) => w.set([x.radiusMm * MM, Math.max(0, x.amp), Math.max(1e-3, x.widthMm * MM), (x.pushMm ?? 0) * MM], k * 4));
+    const on = list.some((x) => x.amp > 0);
+    this.waveO.set(originMm ? [originMm[0] * MM, originMm[1] * MM, originMm[2] * MM, on ? 1 : 0] : [0, 0, 0, 0]);
+  }
 
   // Organ geometry responses (§13.7), ≤ 8: { nodeId, centre: [x, y, z] mm, mode: 'scale' | 'shiftZ' |
   // 'iris', value (scale factor | shift mm), rest, inner, outer (iris radii mm) }.
@@ -418,6 +430,8 @@ export class BrainRenderer {
     gl.uniform1f(u.uDaGain, f.tune.bathing);
     gl.uniform3fv(u.uCool, f.cool);
     gl.uniform3fv(u.uWarm, f.warm);
+    gl.uniform4fv(u.uWaveO, this.waveO);
+    gl.uniform4fv(u.uWave, this.waves);
     gl.bindVertexArray(this.neuronVAO.vao);
     gl.drawArrays(gl.POINTS, 0, nNeurons);
     // New brain nuclei (§3): floor-stratified buffer, same per-star gain as the neurons.
@@ -436,6 +450,8 @@ export class BrainRenderer {
     u = P.da.uniforms;
     gl.uniform1f(u.uZoom, f.zoom);
     gl.uniform3fv(u.uFibre, f.fibre);
+    gl.uniform4fv(u.uWaveO, this.waveO);
+    gl.uniform4fv(u.uWave, this.waves);
     gl.bindVertexArray(this.daVAO.vao);
     gl.uniform1f(u.uGain, f.tune.somata);
     gl.drawArrays(gl.POINTS, r.soma[0], r.soma[1]);
