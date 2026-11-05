@@ -12,7 +12,7 @@ import { generateBody, generateBodyChunks, FLOATS, PARAMS as GEN } from '../src/
 import { pick, isPosteriorView } from '../src/body/picking.js';
 
 const TIERS = ['low', 'medium', 'high', 'ultra'];
-const B8_TOTAL = { low: 32500, medium: 63000, high: 104000, ultra: 158000 };   // B.8 `TIERS.body`
+const B8_TOTAL = { low: 122250, medium: 238500, high: 393000, ultra: 610000 };  // B.8 `TIERS.body` (dense star model, dense heart, vascular tree)
 const A9_TOLERANCE = 0.10;                                                      // A.9, §2.15
 const SEED = 1848;
 const bodies = new Map();
@@ -85,7 +85,16 @@ test('records follow the B.7 layout', () => {
       assert.ok(P[k + 15] >= 0 && P[k + 15] < 14, 'rigid segment');
       const nl = Math.hypot(P[k + 4], P[k + 5], P[k + 6]);
       if (r.tissue === TISSUE.skin) assert.ok(Math.abs(nl - 1) < 1e-3, 'skin normal');
-      else assert.equal(nl, 0, 'volume points carry no normal');
+      else if (r.tissue === TISSUE.organ && P[k + 5] > 0.5) {   // heart stars (HEART.md): τ, part, axial place
+        assert.ok([-1, -2, -3, -4, -5].includes(P[k + 4]) || (P[k + 4] >= 0 && P[k + 4] <= 3), 'heart τ (codes −1 to −5: inert, venous, leaflet valves)');
+        assert.ok(Number.isInteger(P[k + 5]) && P[k + 5] >= 1 && P[k + 5] <= 16, 'heart part');
+        assert.ok(P[k + 6] >= 0 && P[k + 6] <= 1, 'heart axial place');
+      } else if (r.tissue === TISSUE.vessel && P[k + 5] > 0.5) {   // vessel stars (PULSE.md §9): delay, part, amplitude
+        assert.ok(P[k + 4] === -1 || (P[k + 4] >= 0 && P[k + 4] < 0.3), 'pulse delay (s; −1 none)');
+        assert.ok(Number.isInteger(P[k + 5]) && P[k + 5] >= 1 && P[k + 5] <= 9, 'vessel part');
+        if (P[k + 5] === 5) assert.ok(P[k + 4] === -1 && P[k + 6] >= 0.6 && P[k + 6] <= 1, 'capillary: no pulse, oxygen saturation');
+        else assert.ok(P[k + 4] === -1 ? P[k + 6] === 0 : P[k + 6] > 0 && P[k + 6] < 2, 'pulse amplitude');
+      } else assert.equal(nl, 0, 'volume points carry no normal');
     }
   }
   const skin = b.ranges[TISSUE.skin];   // skin stars lie on the drawn skin (§2.15 ±3 mm)

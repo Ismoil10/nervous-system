@@ -129,7 +129,7 @@ the current skin lacks is form: the contours that the body's muscles, fat and sk
 - **Seamless guards.** A primitive is skipped only when a lower bound of its distance (to its
   bounding sphere) is at least `k` above the running minimum. In that case the smooth union equals
   the minimum exactly, so skipping it changes nothing and leaves no seam.
-- **Unchanged:**
+- **Unchanged in the first pass** (the head and neck follow in §8):
   - the head, the neck cylinder and the sense organs (§2.3);
   - the joints and landmarks (§2.6, §2.7);
   - the internal trunk field `sdTorso`, which places the gut and the regions;
@@ -180,9 +180,111 @@ field costs ≈ 0.5 µs per evaluation.
 **Unchanged.** Every skin site lies on the new skin (within 3 mm), and every geometry and somatic
 test passes.
 
+## 8. Head, face and neck (second pass, 5 November 2026)
+
+Seen through the glass, the head of §2.3 was a set of ellipsoids:
+- a blob face with round holes for the eyes;
+- a stick nose and oval ears;
+- a flat shelf under the jaw;
+- a vertical neck cylinder with a ledge where it met the occiput.
+
+The user asked for the head, face and body to read as a true human form, and for transparency to
+stay as it is. The second pass changes the shape only; the textures, the glass and the stars are
+unchanged.
+
+### 8.1 Targets
+
+Craniofacial norms: Farkas (1994) for soft-tissue landmarks, and ANSUR II head measures made neutral
+at 1,760 mm as in §1.
+
+| Measure | Neutral target | Built | Note |
+|---|---|---|---|
+| Head breadth (eu–eu) | ≈ 152 | 154.5 | the brain needs x ±66 plus the scalp and skull |
+| Head length (g–op) | ≈ 202 | 203 | glabella y 91, opisthocranion y −112 |
+| Vertex | z ≈ 89 | 91.5 | head height to the menton ≈ 250 |
+| Bizygomatic breadth (zy–zy) | ≈ 140 | 140.5 | — |
+| Bigonial breadth (go–go) | ≈ 104 | 105 | — |
+| Face height (n–gn) | ≈ 118 | 119 | nasion z −40, menton z −159 |
+| Nose width (al–al) | ≈ 33 | 33 | — |
+| Eye fissure | ≈ 30 × 11 | 30 × 11 | almond, around the §2.3 corneal apex |
+| Ear | length ≈ 62, width ≈ 34 | 62 × 34 | turned 25° forward, leaning 15° back |
+| Neck girth (z −150) | ≈ 375 | within 10 % | — |
+
+The §2.3 points are kept: nasion, pronasale, subnasale, the corneal apex, the eye, the meatus and the
+mandibular plane. They agree with these norms; for example, the eyes lie at the head's vertical
+midpoint.
+
+### 8.2 Form
+
+- **Cranium.** A vault, a narrower frontal mass (which gives the temples), a wide temporal base at
+  ear level, and the occiput and nape over the cerebellum. The brain surface lies at least 7 mm
+  under the skin; the old head left 2.4 mm at the occiput.
+- **Face.** The upper face and a lower-face mass over the masseters, both cut by the mandibular
+  plane, with:
+  - the cheeks, the malar eminences and the supraorbital ridge;
+  - the dental arches under the lips and the chin.
+- **Eyes.** The orbit is recessed. The lids are a shell round the §2.3 eye, and they part in an
+  almond fissure (`eyeFissure`) instead of the old 14-mm round hole. Skin stars keep 1 mm from it.
+- **Nose.** A dorsum profile from the nasion to the tip, the lobule and the alae.
+- **Mouth.** Upper and lower lips (mouth width ≈ 52) and a thin slab for the mouth line.
+- **Ear.** An oval plate with a rolled helix, the concha around the meatus, the tragus and the
+  lobule.
+- **Neck.** No longer a cylinder: four extra torso sections from under the skull to the neck base,
+  so the head, neck and trunk are one surface. The sternomastoids run from the mastoids to the
+  sternum and give the V of the neck.
+
+## 9. Shoulders, chest, limbs, hands and feet (second pass)
+
+- **Shoulders.** A probe found no skin at the front of the shoulder, between the chest and the arm,
+  down to the axilla. The pass adds:
+  - the clavicles and a supraclavicular slope from the neck base to the shoulder;
+  - the anterior and posterior axillary folds.
+
+  The deltoid now joins the arm. Each arm meets the trunk with a radius of 18 mm over the shoulder,
+  falling to 5 mm below the axilla (`FORM.armJoin`). The shoulder is one surface; the chest, flank
+  and hip keep a crease.
+- **Chest.** The pectoral ellipsoids read as two mounds. They are now a flat plate under a flatter
+  chest front, which gives a neutral, broad chest.
+- **Torso spline.** The rows are unevenly spaced, so the section spline is now Hermite in z. The
+  uniform Catmull–Rom changed slope at each row and drew a crease line across the chest. Between the
+  1-mm table rows the values are interpolated linearly, so the surface has no terraces.
+- **Joints.** Two equal limb sections overlapping under a 15-mm smooth union stand about 4 mm proud,
+  which made a band round the knee. Segments now:
+  - join with 3 mm (`PARAMS.kJoint`);
+  - run 30 % of their radius past the joint;
+  - shrink smoothly there (`PROFILE_ROUND`).
+
+  The patella and the vastus medialis are flatter. The thigh starts inside the pelvis, so the hip
+  has no flat cap.
+- **Hand.** The palm is two blended masses, carpus and metacarpus, about 80 wide at the knuckles,
+  with thenar and hypothenar eminences. The digits have three tapering phalanges that bow slightly
+  towards the palm. The bases are spread to a hand breadth of about 80, and the fingertips of §2.6
+  are kept.
+- **Foot.** It has:
+  - a rounded heel;
+  - a body that rises to the instep under the ankle and flattens to the ball (breadth ≈ 100);
+  - a flat sole lifted under the medial arch;
+  - five toes, the big toe medial.
+
+  Foot length ≈ 267, from heel contact (78, −95) to the toe tip.
+- **Field quality.** Near the skin, the field changes by less than 1.3 mm per mm on a 4-mm grid over
+  the whole body. Ellipsoid carves (eye, orbit, concha, arch) use a bounded inside distance. On
+  average, the field costs ≈ 0.4 µs per evaluation near the skin (old field: 0.35 µs).
+
+**Display.** On 6 November 2026 the glass shells gave way to the Detailed star style: 2–3 × denser,
+sharper body stars, with a brighter nervous system (ANALYSIS.md §13.4). The skin stars sample this
+same field, so the form above is what they draw.
+
+`test/body-form.test.mjs` checks:
+- the head and face proportions, the eye fissure and the brain depth;
+- the hand and foot measures and the free arch;
+- that the knee and the elbow carry no band.
+
 ## Sources
 
 - Gordon C. C. et al. (2014). *2012 Anthropometric Survey of U.S. Army Personnel: Methods and
   Summary Statistics.* NATICK/TR-15/007, US Army Natick Soldier RD&E Center.
   apps.dtic.mil/sti/tr/pdf/ADA611869.pdf
 - ANSUR II data explorer (50th percentiles by sex): ergoassessment.cam/ansur-2-data-explorer
+- Farkas L. G. (1994). *Anthropometry of the Head and Face*, 2nd ed. Raven Press. Soft-tissue
+  craniofacial norms of North American adults.

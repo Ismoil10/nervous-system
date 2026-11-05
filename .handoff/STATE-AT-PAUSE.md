@@ -213,6 +213,74 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
     - `test/body-form.test.mjs` checks the result.
     - The waist is narrower than ANSUR II, because the elbows at x 195 would otherwise fuse into it.
 
+14. **Head, face and body second pass; the glass no longer flickers.** The user asked for the head,
+    face and body to read as a true human form, keeping the transparency. They also reported the
+    body flickering in Glass while rotating.
+    - `BODY-FORM.md` §8–§9 and `geometry.js`:
+      - `HEAD_FORM`: cranium, face, almond eye fissures (`eyeFissure`), nose, lips, ears;
+      - the neck as torso sections, with the sternomastoids;
+      - clavicles and axillary folds; the deltoid joined to the arm with a height-dependent radius;
+      - `HAND_FORM` and `FOOT_FORM`;
+      - a Hermite section spline;
+      - joints without bands.
+    - Flicker: the glass rim is thinner than a pixel on limbs seen from afar. The background and the
+      shells are now drawn with 4× MSAA and resolved into the scene (`renderer._glassTarget`, where
+      the format allows it). The flickering pixels fell about tenfold.
+    - A glass remesh now also waits until the camera has rested for 1 s.
+
+15. **Glass replaced by a dense star model.** The user found the glass shells distorted and jagged.
+    They asked for a sharper, denser particle model, with the nervous system brighter so the signals
+    read.
+    - `glass.js`, the glass shaders and the MSAA pass are gone.
+    - Body budgets per tier are now 78.5k / 151k / 248.5k / 378k (skin and nerves ×3, cord ×2.5,
+      organs, ganglia and enteric mesh ×2, the rest ×1.5).
+    - The simple HUD style is Detailed (default) or Stars, through renderer `PARAMS.style`:
+      - Detailed draws every star at 0.8 × size, in anatomical colours. The nervous system gets
+        boost 1.6–2.0, and the skin 3.4 for the silhouette.
+      - Stars culls each class to its earlier share (`uKeep`), so it keeps the earlier look.
+    - A stored "glass" choice opens as Detailed.
+
+16. **Heart model.** The user asked for a realistic, beating heart. Details are in
+    `brain-system/research/HEART.md`.
+    - `src/body/heart-form.js` (`HEART_FORM`) and `heartEntries` in `generate.js`: ventricles with
+      helical fibres, atria, valves and leaflets, papillary muscles, great vessels, coronary vessels
+      and the conduction system.
+    - `src/heart.js` (`HeartBeat`): beats in screen time (steady glow above 150 bpm), PR, QT
+      (Fridericia), Wiggers volumes, valve timing and a schematic ECG. Rate, RSA and contractility
+      come from the simulation.
+    - Display: a Heart view, heart stars ×2.2 and the rest ×0.18; the simple HUD shows beats per
+      minute and an ECG trace.
+    - Organ budget 22k / 44k / 72k / 116k; body totals 88.5k / 171k / 280.5k / 430k (the heart takes
+      55 % of the organ stars).
+17. **Patient monitor.** The heart-rate readout is replaced by a bedside-style monitor. Details are in
+    `brain-system/research/HEART.md` §7.
+    - `src/monitor.js` (`MONITOR`, `RespTrace`, `isAlarm`, `monitorValues`) and `#shud-monitor` with
+      `SimpleHud.drawMonitor` in `src/ui-simple.js`. The arterial wave, `arterialWave`, is in `src/heart.js`.
+    - Channels: ECG and HR, ART, RESP, TEMP, and the orange model blood values ADR and CORT. A value
+      outside its limits turns yellow and never flashes.
+    - Every trace runs in screen time. SpO₂ and capnography are not shown, because the model does not compute them.
+18. **Arterial pulse and vascular tree.** The user asked for the pulse wave of each heartbeat on a
+    denser, realistic vascular network. Details are in `brain-system/research/PULSE.md`.
+    - `src/body/vessel-tree.js` (`VESSEL_TREE`, `buildTwigs`, `pulseSite`): 140 named arteries and veins
+      (aorta to the cerebral, digital and pedal arteries; cavae to the saphenous veins and dural
+      sinuses) and 1,223 twigs, radii by Murray's law; each artery point carries its arrival delay
+      (path ÷ PWV) and pulse amplitude.
+    - `src/pulse.js` (`PulseWave`): the time since the aortic valve opened, the delay scale k from MAP
+      and HR, the amplitude G from the pulse pressure, the energy-conserving mean (`BODY_VS` `uPulse`),
+      the PLETH trace and the PTT on the monitor. No SpO₂.
+    - Display: Detailed draws the tree (arteries red, veins blue) instead of the earlier great vessels;
+      Stars keeps the earlier look. `uAnat` and `uSizeK` became `uStyle`, so `BODY_VS` stays at 110 slots.
+    - Vessel budget 18k / 36k / 60k / 96k (the tree 87.5 %); body totals 104,250 / 202,500 / 333,000 / 514,000.
+    - The user decided to keep the Stars style as it is: no tree there (`keepTree` 0, the earlier look).
+    - Second pass, at the user's request ("all aortas, arteries, veins and capillaries down to the finest
+      details", PULSE.md §13): the aortic root sinuses; 314 named vessels; `buildDetail` with twigs
+      three generations deep, organ trees (lungs, liver, kidneys, spleen), gut arcades and the marginal
+      artery, intercostal and lumbar vessels, venous valves, vasa vasorum and 15,668 capillary strands
+      coloured by oxygen saturation. Part codes 1–7 for the tree, 8–9 for the earlier great vessels.
+      Vessel budget 36k / 72k / 120k / 192k; body totals 122,250 / 238,500 / 393,000 / 610,000.
+    - Next decision for the user: whether the denser vessels and their brightness suit them, and
+      whether the larger Ultra budget (610,000 stars) runs smoothly on their other computer.
+
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
   noEmit. No React, no `.ts`, no build step, no typescript dependency in `package.json` (`tsc` 7.0.2 must be
@@ -262,6 +330,12 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | After stage 5 and the fixes | 537 | 509 | 0 | 28 |
 | Mac (arm64, Node 26.4) at `0101203`, x64 golden | 537 | 505 | 4 (golden, platform bits) | 28 |
 | Mac, simple HUD, wave, emotion/view split, glass with colours, body form (decisions 8–13) | 558 | 526 | 4 (golden, platform bits) | 28 |
+| Mac, head/face/body second pass, glass MSAA (decision 14) | 562 | 530 | 4 (golden, platform bits) | 28 |
+| Mac, dense star model replaces the glass (decision 15) | 554 | 522 | 4 (golden, platform bits) | 28 |
+| Mac, heart model (decision 16) | 564 | 532 | 4 (golden, platform bits) | 28 |
+| Mac, patient monitor (decision 17) | 567 | 535 | 4 (golden, platform bits) | 28 |
+| Mac, arterial pulse and vascular tree (decision 18) | 573 | 541 | 4 (golden, platform bits) | 28 |
+| Mac, vascular tree to the capillaries (decision 18, second pass) | 574 | 542 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was

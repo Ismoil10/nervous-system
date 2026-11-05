@@ -5,6 +5,8 @@
 
 import { MM, PATHWAYS } from './anatomy.js';
 import { BODY_TEX_W, EDGE_TEX_W } from './statetex.js';
+import { HEART_FORM, PART as HP } from './body/heart-form.js';
+import { VPART as VP } from './body/vessel-tree.js';
 
 export const PATH_HIST = 16;   // samples of firing-rate history per pathway (axon impulse packets)
 export const PATH_COUNT = PATHWAYS.length;
@@ -35,7 +37,20 @@ export const PARAMS = {
   hand: { z: [-830, -790], x: [175, 195] },   // [model] distal skin for vasoconstriction: hands below the wrist (z −818, §2.6), lateral to the thighs
   foot: { z: [-1620, -1580] },         // [model] feet below the ankle (z −1,603, §2.6)
   size: [2.0, 1.0, 1.5],               // [model] point size uPx·(a + b·log2(1 + flux)), minimum
+  // Heart beat display (research/HEART.md §5) [model]: base descent towards the apex and inward wall
+  // motion at rest end-systole, atrial squeeze, the activation wave's gain and width in the
+  // conduction system and in the walls, and the Heart view's dimming of everything else.
+  heart: { descentMm: 12, wallIn: 0.12, atrialIn: 0.10, glow: [1.6, 0.5], sigma: [0.012, 0.02], focusDim: [0.18, 0.4], focusGain: 2.2,
+    leafletOpen: 1.3, coronaryFlow: 0.3 },
+  // Arterial pulse display (research/PULSE.md §8) [model]: each artery star brightens as the wave
+  // front passes, a Gaussian in reduced time (s ÷ the delay scale k) of width `sigma` centred `x0`
+  // after the foot, cut at ±`cut` σ, of peak gain `gain` × the star's amplitude A × the beat amplitude
+  // G; `partGain` is the tree's flux per part (artery, arterial branch, vein, venous branch, capillary,
+  // pulmonary artery, pulmonary vein) relative to the vessel class.
+  pulse: { x0: 0.03, sigma: 0.025, gain: 0.55, cut: 3, partGain: [4, 2.4, 2.6, 1.6, 1.4, 2.4, 2.4] },
 };
+const HF = HEART_FORM, vec3mm = (p) => `vec3(${f(p[0] * MM)}, ${f(p[1] * MM)}, ${f(p[2] * MM)})`;
+const vec3u = (p) => `vec3(${f(p[0])}, ${f(p[1])}, ${f(p[2])})`;
 
 const f = (x) => Number(x).toFixed(5);
 const HEADER = `#version 300 es
@@ -263,7 +278,7 @@ void main() {
 const T = PARAMS.torso, HS = PARAMS.headSkin;
 export const BODY_VS = HEADER + COMMON + `
 layout(location = 0) in vec4 aPos;    // xyz (units), flux
-layout(location = 1) in vec4 aNrm;    // skin normal (0 for volumes), seed
+layout(location = 1) in vec4 aNrm;    // skin normal (0 for volumes; heart stars: τ, part, axial place), seed
 layout(location = 2) in vec4 aNode;   // graph node id (−1 none), path id (−1 none), u along the path, tissue class
 layout(location = 3) in vec4 aNet;    // network bitmask, LOD, side, rigid segment id (−1 none)
 uniform highp sampler2D uBodyState;   // per node: activity (1 = rest), ghost, response, network
@@ -280,7 +295,13 @@ uniform float uSenseFull;  // 1: sense organs at full flux (Head & neck view, §
 uniform float uSkinDim;    // distal skin dimming by vasoconstriction (−0.10 … 0.15, §13.7)
 uniform float uMotion;     // 1: rigid limb transforms; 0 under reduced motion (§13.15)
 uniform float uTwinkle;    // shimmer twinkle amplitude (halved under reduced motion)
-uniform float uAnat;       // 0–1: anatomical colours per tissue class (simple HUD, Glass style)
+uniform vec2 uStyle;       // x: anatomical colours 0–1 (simple HUD, Detailed style); y: point size factor (Detailed: smaller, sharper stars at the same energy)
+uniform vec4 uKeep[3];     // per tissue class: share of the stars drawn (Stars style: the earlier budgets); [2].y the heart, .w the vascular tree
+uniform vec4 uHeartT;      // heart (heart.js): time since the SA firing (s), PR, QRS, P duration
+uniform vec4 uHeartM;      // atrial squeeze 0–1, ventricular contraction (1 = rest end-systole), root pulse, mean wave gain
+uniform vec4 uHeartK;      // beat mode (1) or steady glow (0), steady gain, motion amplitude, Heart view focus
+uniform vec4 uHeartV;      // atrioventricular valves open 0–1, semilunar valves open 0–1, diastole (coronary flow) 0–1
+uniform vec4 uPulse;       // arterial pulse (pulse.js): reduced time since the aortic valve opened (s), amplitude G, energy-conserving mean G·M, unused
 uniform vec4 uClassGain[3];   // per tissue class: flux ratio × tier compensation (§13.3, B.8)
 uniform vec4 uClassNorm[3];   // per tissue class: 1 / mean flux of the class
 uniform vec4 uNetGain[2];     // display gain per network bit, ghost 0.08 … 1 (carries the cross-fades)
@@ -299,11 +320,19 @@ const float TORSO_Z0 = ${f(T.z0 * MM)}, TORSO_Z1 = ${f(T.z1 * MM)};
 
 vec3 qrot(vec4 q, vec3 v) { return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v); }
 
-// Anatomical colours of the Glass style, one per tissue class (TISSUE order), as in anatomy atlases:
+// Anatomical colours of the Detailed style, one per tissue class (TISSUE order), as in anatomy atlases:
 // skin peach, organs rose, muscle red-brown, bone ivory, spinal cord and nerves yellow, ganglia
 // pale gold, the enteric nervous system yellow-green, vessels red. Applied as a chromaticity
 // substitution at equal luminance, so brightness and the safety limits are unchanged; travelling
 // packets keep their network colours [model].
+// Heart colours [model]: myocardium red, oxygenated vessels (coronary arteries, aorta, pulmonary
+// veins) brighter red, venous ones (cardiac veins, venae cavae, pulmonary arteries) blue, the
+// valves, leaflets and chordae ivory (the fibrous tissue).
+const float TREE_GAIN[7] = float[7](${PARAMS.pulse.partGain.map(f).join(', ')});   // vascular tree flux per part (PULSE.md §13.6)
+const vec3 HEART_MUSCLE = vec3(1.0, 0.46, 0.5), HEART_ART = vec3(1.0, 0.22, 0.2), HEART_VEIN = vec3(0.38, 0.55, 1.0), HEART_FIBROUS = vec3(1.0, 0.95, 0.85);
+const vec3 VALVE_C[4] = vec3[4](${HF.valves.map((v) => vec3mm(v.c)).join(', ')});
+const vec3 VALVE_AX[4] = vec3[4](${HF.valveAxis.map(vec3u).join(', ')});
+const float VALVE_R[4] = float[4](${HF.valves.map((v) => f(v.r * MM)).join(', ')});
 const vec3 ANAT[9] = vec3[9](
   vec3(1.0, 0.84, 0.76), vec3(1.0, 0.56, 0.58), vec3(0.92, 0.46, 0.4), vec3(1.0, 0.96, 0.84),
   vec3(1.0, 0.9, 0.38), vec3(1.0, 0.88, 0.32), vec3(1.0, 0.84, 0.46), vec3(0.82, 0.95, 0.42),
@@ -338,6 +367,14 @@ void main() {
   float lod = aNet.y;
   if ((lod > 1.5 && uPxMm < ${f(PARAMS.lodPxMm[0])}) || (lod > 2.5 && uPxMm < ${f(PARAMS.lodPxMm[1])})) { ${CULL} }
   int cls = clamp(int(aNode.w + 0.5), 0, 8);
+  float heartPart = cls == ${TISSUE.ORGAN} ? aNrm.y : 0.0;
+  float vPart = cls == ${TISSUE.VESSEL} ? aNrm.y : 0.0;   // vessel part code (vessel-tree.js VPART)
+  bool tree = vPart > 0.5 && vPart < ${f(VP.PULM_VEIN + 0.5)};   // the tree (1–7); 8–9 the earlier great vessels
+  // A random share per class; the heart and the vascular tree have their own, and the tree replaces
+  // the earlier great-vessel stars (PULSE.md §9).
+  float keep = heartPart > 0.5 ? uKeep[2].y : uKeep[cls / 4][cls % 4];
+  if (tree) keep = uKeep[2].w; else if (vPart > 0.5) keep *= 1.0 - uKeep[2].w;
+  if (fract(aNrm.w * 113.7 + 0.37) >= keep) { ${CULL} }
   int node = int(floor(aNode.x + 0.5));
   int path = int(floor(aNode.y + 0.5));
   vec3 p = aPos.xyz;
@@ -359,6 +396,69 @@ void main() {
       }
     }
   }
+  // Heart (HEART.md §5): the beat moves the chambers (atria, then the ventricles with the base
+  // descending towards the apex) and runs the activation wave through each star at its time τ.
+  float heartGlow = 1.0;
+  if (heartPart > 0.5) {
+    int hp = int(heartPart + 0.5);
+    if (uHeartK.x > 0.5) {
+      float m = uHeartK.z;
+      // Leaflets swing about their ring from closed (in the ring plane) to open (along the valve's
+      // axis): the atrioventricular valves in diastole, the semilunar ones during ejection.
+      if (hp == ${HP.LEAFLET}) {
+        int vi = clamp(int(-aNrm.x - 1.5), 0, 3);
+        vec3 vc = VALVE_C[vi], ax = VALVE_AX[vi];
+        float R = VALVE_R[vi], th = (vi < 2 ? uHeartV.x : uHeartV.y) * m * ${f(PARAMS.heart.leafletOpen)};
+        vec3 q = p - vc;
+        float h = dot(q, ax);
+        vec3 rad = q - ax * h;
+        float rl = length(rad);
+        vec3 rd = rl > 1e-6 ? rad / rl : vec3(0.0);
+        float L = max(0.0, R - rl);
+        p = vc + rd * (R - L * cos(th)) + ax * (L * sin(th) + h * cos(th));
+      }
+      if (hp == ${HP.RA} || hp == ${HP.LA} || hp == ${HP.SA} || hp == ${HP.ATRIAL_PATH}) {
+        vec3 c = hp == ${HP.LA} ? ${vec3mm(HF.la.c)} : ${vec3mm(HF.ra.c)};
+        p = c + (p - c) * (1.0 - ${f(PARAMS.heart.atrialIn)} * uHeartM.x * m);
+      } else if (hp != ${HP.AV}) {
+        vec3 q = p - ${vec3mm(HF.base)};
+        float s = dot(q, ${`vec3(${f(HF.w[0])}, ${f(HF.w[1])}, ${f(HF.w[2])})`});
+        vec3 rr = q - s * ${`vec3(${f(HF.w[0])}, ${f(HF.w[1])}, ${f(HF.w[2])})`};
+        float c = uHeartM.y * m;
+        float inward = (hp == ${HP.VALVE} || hp == ${HP.ROOT} || hp == ${HP.LEAFLET}) ? 0.0 : ${f(PARAMS.heart.wallIn)} * c;
+        p = ${vec3mm(HF.base)} + ${`vec3(${f(HF.w[0])}, ${f(HF.w[1])}, ${f(HF.w[2])})`} * (s + ${f(PARAMS.heart.descentMm * MM)} * c * aNrm.z) + rr * (1.0 - inward);
+      }
+      float tau = aNrm.x;
+      if (tau >= 0.0) {
+        float tA = tau < 1.0 ? tau * uHeartT.w
+          : tau < 2.0 ? uHeartT.w + (tau - 1.0) * max(0.0, uHeartT.y - 0.03 - uHeartT.w)
+          : uHeartT.y - 0.03 + (tau - 2.0) * (uHeartT.z + 0.03);
+        bool cond = hp == ${HP.SA} || hp == ${HP.ATRIAL_PATH} || hp == ${HP.AV} || hp == ${HP.HIS} || hp == ${HP.PURKINJE};
+        float d = (uHeartT.x - tA) / (cond ? ${f(PARAMS.heart.sigma[0])} : ${f(PARAMS.heart.sigma[1])});
+        heartGlow += (cond ? ${f(PARAMS.heart.glow[0])} : ${f(PARAMS.heart.glow[1])}) * exp(-d * d);
+      }
+      heartGlow = max(0.0, heartGlow - uHeartM.w);   // energy-conserving: the heart's mean wave gain is taken back
+      if (hp == ${HP.ROOT}) heartGlow *= 1.0 + 0.12 * uHeartM.z;
+      if (hp == ${HP.CORONARY_A}) heartGlow *= 1.0 + ${f(PARAMS.heart.coronaryFlow)} * uHeartV.z;   // coronary flow is diastolic
+    } else heartGlow = uHeartK.y;
+    if (uHeartK.w > 0.5) heartGlow *= ${f(PARAMS.heart.focusGain)};   // the Heart view lifts the heart
+    heartGlow *= uKeep[2].z;
+  } else if (uHeartK.w > 0.5) {
+    heartGlow = (cls == ${TISSUE.NERVE} || cls == ${TISSUE.GANGLION} || cls == ${TISSUE.CORD}) ? ${f(PARAMS.heart.focusDim[1])} : ${f(PARAMS.heart.focusDim[0])};
+  }
+  // Arterial pulse (PULSE.md §8): each artery star brightens as the wave front passes, at its delay
+  // from the aortic valve opening; every pulsing star gives back the mean, so the vessels' light is
+  // constant through the beat. Veins and the capillary haze carry no pulse.
+  float pulseGlow = 1.0;
+  if (vPart > 0.5) {
+    if (aNrm.x >= 0.0 && uPulse.y > 0.0) {
+      float d = (uPulse.x - aNrm.x - ${f(PARAMS.pulse.x0)}) / ${f(PARAMS.pulse.sigma)};
+      if (abs(d) < ${f(PARAMS.pulse.cut)}) pulseGlow += uPulse.y * ${f(PARAMS.pulse.gain)} * aNrm.z * exp(-d * d);
+      pulseGlow = max(0.0, pulseGlow - uPulse.z);
+    }
+    if (tree) pulseGlow *= TREE_GAIN[int(vPart + 0.5) - 1];
+  }
+
   // Rigid limb segments (§13.9): quaternion and translation; trunk and pelvis never move.
   int seg = int(floor(aNet.w + 0.5));
   if (uMotion > 0.5 && seg >= 0 && seg < ${JOINT_SLOTS}) {
@@ -385,23 +485,36 @@ void main() {
   float sat = clamp((g - GHOST) / (1.0 - GHOST), 0.0, 1.0);
   vec3 tintRGB = net >= 0 ? uNetRGB[net] : uStructRGB;
   vec3 base = net >= 0 ? mix(uStructRGB, tintRGB, ${f(PARAMS.restingNetMix)}) : uStructRGB;
-  if (uAnat > 0.0) {
+  if (uStyle.x > 0.0) {
+    // The heart's conduction system (SA node to Purkinje) takes the nerve colour: the signal's path.
     vec3 a = ANAT[cls];
-    base = mix(base, a * (dot(base, LUMA) / max(1e-4, dot(a, LUMA))), uAnat);
+    if (heartPart > 0.5) {
+      int hc = int(heartPart + 0.5);
+      a = (hc >= ${HP.SA} && hc <= ${HP.PURKINJE}) ? ANAT[${TISSUE.NERVE}]
+        : (hc == ${HP.CORONARY_A} || (hc == ${HP.ROOT} && aNrm.x > -1.5)) ? HEART_ART
+        : (hc == ${HP.CORONARY_V} || hc == ${HP.ROOT}) ? HEART_VEIN
+        : (hc == ${HP.VALVE} || hc == ${HP.LEAFLET} || hc == ${HP.CHORDAE}) ? HEART_FIBROUS : HEART_MUSCLE;
+    }
+    // Arteries and pulmonary veins oxygenated red, veins and pulmonary arteries blue, capillaries from
+    // blue to red by their oxygen saturation, 60–98 % (PULSE.md §13.6).
+    if (tree) a = vPart < 2.5 || vPart > ${f(VP.PULM_VEIN - 0.5)} ? HEART_ART
+      : vPart > ${f(VP.CAPILLARY - 0.5)} && vPart < ${f(VP.CAPILLARY + 0.5)} ? mix(HEART_VEIN, HEART_ART, clamp((aNrm.z - 0.6) / 0.38, 0.0, 1.0)) : HEART_VEIN;
+    base = mix(base, a * (dot(base, LUMA) / max(1e-4, dot(a, LUMA))), uStyle.x);
   }
 
   float flux = aPos.w * uClassNorm[cls / 4][cls % 4];
-  float size = clamp(uPx * (${f(PARAMS.size[0])} + ${f(PARAMS.size[1])} * log2(1.0 + flux)), ${f(PARAMS.size[2])}, uMaxPt);
-  flux *= uClassGain[cls / 4][cls % 4] * g * N.x * (1.0 + N.z) * uFade;
+  float size = clamp(uPx * uStyle.y * (${f(PARAMS.size[0])} + ${f(PARAMS.size[1])} * log2(1.0 + flux)), ${f(PARAMS.size[2])} * uStyle.y, uMaxPt);
+  flux *= uClassGain[cls / 4][cls % 4] * g * N.x * (1.0 + N.z) * uFade * heartGlow * pulseGlow;
 
   // Head skin and sense organs fade out at brain-view distances (§13.2).
   float head = smoothstep(${f(PARAMS.headZ[0] * MM)}, ${f(PARAMS.headZ[1] * MM)}, p.z);
   float headF = ${f(HS.gain)} * smoothstep(${f(HS.d0)}, ${f(HS.d1)}, uDist);
   if (cls == ${TISSUE.SKIN}) flux *= mix(1.0, headF, head);
   else if (cls == ${TISSUE.ORGAN}) flux *= mix(1.0, mix(headF, 1.0, uSenseFull), head);
+  else if (tree) flux *= mix(1.0, mix(smoothstep(${f(HS.d0)}, ${f(HS.d1)}, uDist), 1.0, uSenseFull), head);   // head vessels leave the brain view clear
 
   vec3 v = normalize(uEye - p);
-  if (dot(n, n) > 0.25) {
+  if (cls == ${TISSUE.SKIN} && dot(n, n) > 0.25) {   // only skin stars carry a normal (heart stars carry τ, part, axial)
     float nv = dot(normalize(n), v);
     flux *= mix(${f(PARAMS.faceBack)}, 1.0, smoothstep(${f(PARAMS.faceEdge[0])}, ${f(PARAMS.faceEdge[1])}, nv))
       * (${f(PARAMS.faceSqrt[0])} + ${f(PARAMS.faceSqrt[1])} * sqrt(abs(nv)));
@@ -486,47 +599,6 @@ void main() {
   float g = 0.85 * exp(-r2 * 28.0) + 0.15 * exp(-r2 * 7.0);
   float win = clamp(1.0 - r2 * 4.0, 0.0, 1.0);
   outColor = vec4(vColor * vPeak * g * win, 1.0);
-}
-`;
-
-// --- Glass shells (glass.js; the "Glass" style of the simple HUD) ---
-// Added to the scene like the stars, so the order of the shells does not matter and the stars stay
-// visible through them; back faces are culled. A Fresnel rim that fades just before the silhouette
-// (a soft edge without multisampling), a faint face tint and a small highlight. Where the facing
-// term changes faster than a pixel can show (thin folds seen edge-on), rim and highlight fade out,
-// so rotating the brain does not shimmer. The cutaway plane removes x < uCut.
-export const GLASS_VS = HEADER + `
-layout(location = 0) in vec3 aPos;    // world units
-layout(location = 1) in vec3 aNrm;    // outward unit normal
-uniform mat4 uView;
-uniform mat4 uProj;
-out vec3 vP;
-out vec3 vN;
-void main() {
-  vP = aPos;
-  vN = aNrm;
-  gl_Position = uProj * uView * vec4(aPos, 1.0);
-}
-`;
-export const GLASS_FS = HEADER + `
-in vec3 vP;
-in vec3 vN;
-uniform vec3 uEye;
-uniform float uCut;
-uniform vec3 uTint;
-uniform float uGain;
-uniform float uFace;
-out vec4 outColor;
-void main() {
-  if (vP.x < uCut) discard;
-  vec3 n = normalize(vN);
-  vec3 v = normalize(uEye - vP);
-  float c = abs(dot(n, v));
-  float aa = 1.0 - smoothstep(0.05, 0.3, fwidth(c));
-  float rim = pow(1.0 - c, 3.5) * smoothstep(0.0, 0.2, c) * aa;
-  vec3 h = normalize(normalize(vec3(0.35, 0.55, 0.75)) + v);
-  float spec = pow(abs(dot(n, h)), 40.0) * aa * aa;
-  outColor = vec4((uTint * (uFace + rim) + vec3(0.12 * spec)) * uGain, 1.0);
 }
 `;
 

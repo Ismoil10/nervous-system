@@ -3,7 +3,7 @@
 // state is kept apart from how the brain is shown:
 //   1. emotion: Calm, Stress or Pleasure (the primary choice; it never moves the camera);
 //   2. view: Brain, Cutaway, Dopamine system or Body (it never changes the emotion), and the style:
-//      Glass (glass shells around the stars) or Stars (the look before the glass, kept as a preset);
+//      Detailed (dense, sharp stars in anatomical colours) or Stars (the earlier look, kept as a preset);
 //   3. quality: Auto (adaptive, from the hardware and the measured frame time) or a fixed tier;
 //   4. Pause.
 // The readouts are a short story of what is happening and one meter with its percentage (stress
@@ -28,15 +28,23 @@ export const stateForScenario = (scenarioId) => STATES.find((s) => s.scenario ==
 // dopamine view fades the cortex so the dopamine system and its wave stand out.
 export const SIMPLE_VIEWS = [
   { id: 'whole', label: 'Brain' }, { id: 'cutaway', label: 'Cutaway' }, { id: 'dopamine', label: 'Dopamine' },
-  { id: 'upperBody', label: 'Body', body: true },
+  { id: 'upperBody', label: 'Body', body: true }, { id: 'heart', label: 'Heart', body: true },
 ];
 
 // Quality: Auto keeps the adaptive tier of performance.js (hardware start, frame-time scaling);
 // the others fix a tier (values are TIERS indices, as in the full HUD's Quality select).
+import { isAlarm } from './monitor.js';
+// Monitor numbers: integers; the temperature to 0.1 °C and cortisol to 0.1 µg/dL; "--" when unknown.
+const MONITOR_KEYS = ['hr', 'sys', 'dia', 'map', 'ptt', 'rr', 'temp', 'adr', 'cort'];
+export function monitorText(k, v) {
+  if (!Number.isFinite(v)) return '--';
+  return k === 'temp' || k === 'cort' ? v.toFixed(1) : String(Math.round(v));
+}
 export const QUALITY = [['auto', 'Auto'], ['0', 'Low'], ['1', 'Medium'], ['2', 'High'], ['3', 'Ultra']];
 
-// Visual style: Glass (glass.js shells) or Stars (the earlier look, kept as a preset).
-export const STYLES = [['glass', 'Glass'], ['stars', 'Stars']];
+// Visual style: Detailed (every body star, sharper, anatomical colours, a brighter nervous system) or
+// Stars (the earlier look, kept as a preset).
+export const STYLES = [['detailed', 'Detailed'], ['stars', 'Stars']];
 
 // The stress circuit drawn in Stress (display only, through the brain-systems overlay of
 // statetex.js): amygdala and bed nucleus, hypothalamic stress nuclei, the brainstem alarm and
@@ -110,7 +118,7 @@ export function plainStage(scenarioId, name, text) {
 
 // ---- SimpleHud ---------------------------------------------------------------------------------
 //
-// Handlers: onState('calm' | 'stress' | 'dopamine'), onView(view id), onStyle('glass' | 'stars'),
+// Handlers: onState('calm' | 'stress' | 'dopamine'), onView(view id), onStyle('detailed' | 'stars'),
 // onQuality('auto' | tier index), onPause().
 // update() payload: { state, view, style, quality: { value, autoLabel }, paused, dimmed, story: { scenario, stage, text },
 // meter: { kind: 'stress' | 'dopamine', level 0–1 } | null }. The meter shows one number, its percentage.
@@ -128,9 +136,11 @@ export class SimpleHud {
       root: $('shud'), scenario: $('shud-scenario'), stage: $('shud-stage'), text: $('shud-text'),
       meter: $('shud-meter'), meterLabel: $('shud-meter-label'), meterBar: $('shud-meter-bar'), meterLow: $('shud-meter-low'),
       meterHigh: $('shud-meter-high'), meterValue: $('shud-meter-value'), views: $('shud-views'), styles: $('shud-style'), quality: $('shud-quality'),
-      pause: $('shud-pause'), states: $('shud-states'),
+      pause: $('shud-pause'), states: $('shud-states'), monitor: $('shud-monitor'), monEcg: $('mon-ecg'), monAbp: $('mon-abp'),
+      monResp: $('mon-resp'), monPleth: $('mon-pleth'),
     };
-    this.s = { state: null, view: null, style: null, paused: null, dimmed: false, story: null, meterKind: null, meterLevel: -1, quality: null };
+    this.mon = Object.fromEntries(MONITOR_KEYS.map((k) => [k, $(`mon-${k}`)]));
+    this.s = { state: null, view: null, style: null, paused: null, dimmed: false, story: null, meterKind: null, meterLevel: -1, quality: null, monitor: null };
     this.btn = { state: new Map(), view: new Map(), style: new Map() };
     this._build();
     this._bind();
@@ -223,6 +233,40 @@ export class SimpleHud {
     this.el.root.classList.toggle('dimmed', !!dimmed);
   }
 
+  // Patient monitor traces (monitor.js), drawn every frame while the monitor shows: sweep mode, as on
+  // a bedside monitor. Each ring buffer maps to the width; the newest sample is at head − 1 and an
+  // erase bar runs just ahead of it.
+  drawMonitor(heart, resp, pulse = null) {
+    const e = this.el;
+    if (!e.monitor || e.monitor.hidden) return;
+    const art = [40, 180];
+    this._sweep(e.monEcg, heart.ecg, heart.ecgHead, (v) => 0.66 - 0.5 * v);
+    this._sweep(e.monAbp, heart.abp, heart.ecgHead, (v) => 0.92 - 0.84 * (v - art[0]) / (art[1] - art[0]));
+    if (pulse) this._sweep(e.monPleth, pulse.pleth, pulse.head, (v) => 0.9 - 0.55 * v);   // PPG, 1 = the resting pulse (pulse.js)
+    this._sweep(e.monResp, resp.trace, resp.head, (v) => 0.9 - 0.55 * v);
+  }
+  _sweep(c, ring, head, toY) {
+    if (!c || !c.getContext) return;
+    const ctx = c.getContext('2d');
+    if (!ctx) return;
+    const w = c.width, h = c.height, n = ring.length, gap = Math.ceil(n * 0.04);
+    ctx.clearRect(0, 0, w, h);
+    const colour = getComputedStyle(c).color || '#4dff88';
+    ctx.lineWidth = Math.max(1.5, h / 30);
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = colour;
+    ctx.shadowColor = colour;
+    ctx.shadowBlur = h / 14;
+    ctx.beginPath();
+    let pen = false;
+    for (let i = 0; i < n; i++) {
+      if ((i - head + n) % n < gap) { pen = false; continue; }
+      const x = (i / (n - 1)) * w, y = h * Math.min(0.98, Math.max(0.02, toY(ring[i])));
+      if (pen) ctx.lineTo(x, y); else { ctx.moveTo(x, y); pen = true; }
+    }
+    ctx.stroke();
+  }
+
   update(p) {
     const e = this.el, s = this.s;
     if (p.state && p.state !== s.state) {
@@ -259,6 +303,20 @@ export class SimpleHud {
       e.stage.textContent = st.stage || '';
       e.text.textContent = st.text || '';
       e.text.hidden = !st.text;
+    }
+
+    // Patient monitor (monitor.js): the numbers and their alarm colour; drawMonitor draws the traces.
+    const m = p.monitor ?? null;
+    const mKey = m ? MONITOR_KEYS.map((k) => monitorText(k, m[k])).join('|') : null;
+    if (mKey !== s.monitor) {
+      s.monitor = mKey;
+      if (e.monitor) e.monitor.hidden = !m;
+      if (m) {
+        for (const k of MONITOR_KEYS) if (this.mon[k]) this.mon[k].textContent = monitorText(k, m[k]);
+        const alarm = { hr: isAlarm('hr', m.hr), art: isAlarm('art', m.sys), rr: isAlarm('rr', m.rr), temp: isAlarm('temp', m.temp),
+          adr: isAlarm('adr', m.adr), cort: isAlarm('cort', m.cort) };
+        for (const row of e.monitor?.querySelectorAll?.('[data-key]') ?? []) row.classList.toggle('is-alarm', !!alarm[row.dataset.key]);
+      }
     }
 
     const kind = p.meter?.kind ?? null;

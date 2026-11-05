@@ -20,7 +20,9 @@ import { TIERS, detectTier, AdaptiveQuality } from './performance.js';
 import { generateBrain, generateBrainExtra, applyRelabel, areaIds } from './brain.js';
 import { BrainRenderer, PARAMS as RENDER } from './renderer.js';
 import { WAVE_SLOTS } from './shaders.js';
-import { glassChunks } from './glass.js';
+import { HeartBeat, HEART } from './heart.js';
+import { PulseWave } from './pulse.js';
+import { RespTrace, monitorValues } from './monitor.js';
 import { OrbitCamera } from './camera.js';
 import { PRESETS } from './clock.js';
 import { CENTER, MM, AREAS, R as ANATOMY_R } from './anatomy.js';
@@ -76,6 +78,7 @@ const VIEWS = {
   upperBody: bodyView([0, 0, -2.46], 13.6, -0.35, 0.10),
   headNeck: bodyView([0, 0.1, -0.4], 6.7, -0.5, 0.15),
   thorax: bodyView([-0.1, 0, -3.3], 6.7, -0.25, 0.10),
+  heart: bodyView([-0.25, 0.15, -3.45], 3.0, -0.45, 0.12),   // HEART.md §5: close on the heart; the rest dims
   abdomen: bodyView([0, 0.1, -5.9], 8.6, -0.25, 0.10),
   torso: bodyView([0, 0, -4.6], 14.3, -0.35, 0.10),
   spine: bodyView([0, -0.6, -4.3], 15.9, Math.PI, 0.10),
@@ -108,14 +111,15 @@ const WAVE = {
 // Pre-build dopamine display restored in the simple HUD: fibre-flow cadence (0.5/16 s per sample,
 // 0.5-s travel) and the climax glow filter without the 2-s pulse-locked floor.
 const CLASSIC_DA = { histStep: 0.5 / 16, tauVisLocked: 0.3 };
-// Visual style of the simple HUD [model]: "glass" adds the glass shells (glass.js) and dims the
-// neuron and body stars by these factors so the shells read; "stars" is the look before the glass,
-// kept as a preset (user decision, 5 November 2026). The choice is remembered in this browser.
-const STYLE = { key: 'brain-system.style', glassNeurons: 0.85, glassBody: 0.6 };
-// Glass style colours [model]: brain stars pink-lavender (the brain's colour in anatomy atlases);
+// Visual style of the simple HUD (user decisions, 5–6 November 2026): "detailed" draws every body
+// star, smaller and sharper, in anatomical colours, with the nervous system brighter (renderer
+// PARAMS.style); "stars" is the earlier look, kept as a preset. The glass shells of 5 November were
+// replaced by the detailed stars. The choice is remembered in this browser.
+const STYLE = { key: 'brain-system.style' };
+// Detailed style colours [model]: brain stars pink-lavender (the brain's colour in anatomy atlases);
 // the dopamine amber stays reserved for dopamine. The body stars take the anatomical tissue colours
-// of BODY_VS (uAnat).
-const GLASS_NEURON = { cool: [0.9, 0.82, 1.0], warm: [1.0, 0.84, 0.94] };
+// of BODY_VS (uStyle.x).
+const DETAILED_NEURON = { cool: [0.9, 0.82, 1.0], warm: [1.0, 0.84, 0.94] };
 const UNDRAWN_TOGGLES = { receptors: 'Touch receptors are not drawn in this build', labels: 'Labels are not drawn in this build' };
 
 // URL parameters (B.5 item 8).
@@ -231,12 +235,15 @@ async function start() {
   const netGhost = new NetGhost(RENDER.netSwitch);
   const rawPackets = [], bodyPackets = [], sources = [];
   let bodyGen = null, bodyData = null, bodyTier = -1;
+  const heart = new HeartBeat();   // the beat drawn on the heart stars and the HUD trace (HEART.md)
+  const pulse = new PulseWave();   // the arterial pulse on the vessel stars and the PLETH trace (PULSE.md)
+  const resp = new RespTrace();     // the patient monitor's respiration trace (monitor.js)
   let picking = false, limbMotion = true, lastPath = null;
   const overlayOn = {};
   // Simple HUD state: the chosen state (Calm, Stress, Dopamine), what the camera looks at, the
   // resting adrenaline when Stress started, and the stress overlay strength last sent (−1: off).
   let simple = null, mode = 'calm', stressBase = null, stressShown = -1;
-  let style = (() => { try { return localStorage.getItem(STYLE.key) === 'stars' ? 'stars' : 'glass'; } catch { return 'glass'; } })();
+  let style = (() => { try { return localStorage.getItem(STYLE.key) === 'stars' ? 'stars' : 'detailed'; } catch { return 'detailed'; } })();
 
   const naccHist = new Float32Array(600);   // NAcc core dopamine (nM), one sample per 0.1 screen s
   let histHead = 0, histAcc = 0;
@@ -272,6 +279,8 @@ async function start() {
     if (!body) return;
     bodyData = body;
     renderer.replaceBody(body);
+    heart.setStars(body.points, body.floats, body.count);
+    pulse.setStars(body.points, body.floats, body.count);
     if (bodyMode === 'body') renderer.setBodyFade(1);   // fade in over t_fade (B.9, §13.15)
     console.info(`[brain] body generated: ${body.count.toLocaleString('en-US')} points`);
   };
@@ -557,7 +566,8 @@ async function start() {
       showStress(stressOverlay(level));
     }
     const q = { value: quality.locked ? String(quality.tier) : 'auto', autoLabel: quality.locked ? null : TIERS[quality.tier].label };
-    return { state: mode, view: viewQueued ?? view, quality: q, style, paused, story, meter };
+    const monitor = renderer.bodyVisible && bodyData ? monitorValues(rt.vitals(), heart.bpm, pulse.ptt) : null;
+    return { state: mode, view: viewQueued ?? view, quality: q, style, paused, story, meter, monitor };
   };
   if (!url.advanced) {
     const refresh = () => simple.update(simpleState());
@@ -616,33 +626,10 @@ async function start() {
   // and cord clearly from Whole body to Thorax without saturating close-ups [model, browser check].
   const tune = { neurons: 0.05, bathing: 0.3, somata: 0.7, axons: 0.22, release: 0.35, lanterns: 0.03, exposure: 1.1, bloom: 0.8, lambda: 0.6, body: 6 };
 
-  // --- Visual style (simple HUD): Glass or Stars. The glass shells are meshed in slices after the
-  // first frames and again when the generated quality tier changes. ---
-  const starBase = { neurons: tune.neurons, body: tune.body };
-  // Shells are meshed for the tier that renders now (not the generated maximum), so a slow machine
-  // does not draw Ultra glass; a tier change must hold for 2 s before the shells are remeshed.
-  let glassGen = null, glassTier = -1, glassWant = -1, glassWantSince = 0;
-  const ensureGlass = () => {
-    const t = Math.min(quality.tier, genTier);
-    if (t !== glassWant) { glassWant = t; glassWantSince = screenT; }
-    if (glassGen || glassTier === t) return;
-    if (glassTier >= 0 && screenT - glassWantSince < 2) return;
-    glassGen = { it: glassChunks(t, 6), tier: t };
-  };
-  const stepGlass = () => {
-    const r = glassGen.it.next();
-    if (!r.done) return;
-    renderer.setGlass(r.value);
-    glassTier = glassGen.tier;
-    glassGen = null;
-  };
+  // --- Visual style (simple HUD): Detailed or Stars. ---
   function setStyle(s) {
-    style = s === 'stars' ? 'stars' : 'glass';
-    const glass = !!simple && style === 'glass';
-    renderer.glassOn = glass;
-    renderer.anatomical = glass ? 1 : 0;
-    tune.neurons = starBase.neurons * (glass ? STYLE.glassNeurons : 1);
-    tune.body = starBase.body * (glass ? STYLE.glassBody : 1);
+    style = s === 'stars' ? 'stars' : 'detailed';
+    renderer.detailed = !!simple && style === 'detailed';
     try { localStorage.setItem(STYLE.key, style); } catch { /* storage may be blocked */ }
   }
   setStyle(style);
@@ -703,12 +690,26 @@ async function start() {
     rt.frame(sdt, { budgetMs: TIERS[quality.tier].kernelMs });
     if (stressShown >= 0) paintStressTint(stressShown);   // simple HUD, Stress
     updateWaves(sdt);
+    // Heart (HEART.md §4–§5): beats in screen time at the simulated rate, with its respiratory
+    // variation (hrInst / hr) and contractility; with the legacy envelope (Pleasure) the systolic
+    // pressure stands in for contractility.
+    if (renderer.bodyVisible) {
+      const vit = rt.vitals(), hrK = kernel.get('hr'), hrI = kernel.get('aut.hrInst');
+      const contr = Math.max(kernel.get('contractility') || 1, 1 + ((vit.sbp ?? 115) - 115) / HEART.contrFromSbp);
+      heart.step(dt, { hr: vit.hr, rsa: hrK > 0 && hrI > 0 ? hrI / hrK : 1, contractility: contr, kh: clock.kh,
+        paused, reducedMotion, focus: view === 'heart', sbp: vit.sbp, dbp: vit.dbp });
+      resp.step(dt, { rr: vit.rr, vt: kernel.get('vt'), kh: clock.kh, paused });
+      renderer.setHeart(...heart.uniforms());
+      // Arterial pulse (PULSE.md §7–§8): the beat's wave through the tree; the skin blood flow sets the
+      // fingertip pulse amplitude.
+      pulse.step(heart, { sbf: kernel.get('sbf') });
+      renderer.setPulse(pulse.uniforms());
+    }
     animT += sdt;
 
     // The body follows the first brain frame in slices (B.9).
     if (frames > 0 && !bodyGen && !bodyData && bodyMode === 'body') ensureBody();
     if (bodyGen) stepBody();
-    if (simple && style === 'glass' && frames > 1) { ensureGlass(); if (glassGen) stepGlass(); }
     frames++;
 
     // Display state of the body: network ghosts follow g.<net> (A.5), the limb pose (§13.9; off in
@@ -739,7 +740,7 @@ async function start() {
       zoom: Math.pow((3.6 / camera.distance) * (Math.tan(camera.fov / 2) / Math.tan(camera.fovEff / 2)), 2),
       distance: camera.distance,
       dopamine, brainnet: rt.brainnet, kernel, packets: bodyPackets,
-      amber: DOPAMINE_RGB, cool: renderer.glassOn ? GLASS_NEURON.cool : NEURON_COOL, warm: renderer.glassOn ? GLASS_NEURON.warm : NEURON_WARM, fibre,
+      amber: DOPAMINE_RGB, cool: renderer.detailed ? DETAILED_NEURON.cool : NEURON_COOL, warm: renderer.detailed ? DETAILED_NEURON.warm : NEURON_WARM, fibre,
       exposure: tune.exposure, bloomStrength: tune.bloom, tune,
     });
     gpuTimer.end(q);
@@ -753,6 +754,7 @@ async function start() {
     }
     if (adapter.active && model.mode === 'demo') hud.setLevel(model.level);
 
+    if (simple && renderer.bodyVisible && bodyData) simple.drawMonitor(heart, resp, pulse);
     hudTimer -= dt;
     if (hudTimer <= 0 && simple) {
       hudTimer = 0.12;

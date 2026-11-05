@@ -20,10 +20,10 @@ const BONE = 3;        // tissue class index of the bone range (shaders.js TISSU
 export const PARAMS = {
   classRatio: [0.15, 0.38, 0.10, 0.08, 0.5, 0.30, 0.5, 0.2, 0.1],   // §13.3 flux × mean brain neuron-star flux
   classBudget: {                                                       // §13.4 points per tier
-    low: [9000, 6000, 2000, 1500, 2000, 6000, 2500, 2000, 1500],
-    medium: [16000, 12000, 4000, 3000, 4000, 12000, 5000, 4000, 3000],
-    high: [26000, 20000, 7000, 5000, 6000, 20000, 8000, 7000, 5000],
-    ultra: [40000, 32000, 10000, 7000, 9000, 30000, 12000, 10000, 8000],
+    low: [27000, 22000, 3000, 2250, 5000, 18000, 5000, 4000, 36000],
+    medium: [48000, 44000, 6000, 4500, 10000, 36000, 10000, 8000, 72000],
+    high: [78000, 72000, 10500, 7500, 15000, 60000, 16000, 14000, 120000],
+    ultra: [120000, 116000, 15000, 10500, 22500, 90000, 24000, 20000, 192000],
   },
   refTier: 'high',          // B.5: per-class gains normalised to a reference tier, as REF above (renderer L56–60)
   tierExponent: 1,          // gain = (reference count / drawn count)^exponent, as the neuron and axon gains
@@ -48,10 +48,27 @@ export const PARAMS = {
   netRole: ['afferent', 'somEff', 'symp', 'para', 'afferent', 'enteric', 'endocrine', 'immune'],
   netSwitch: ['somatic', 'somatic', 'autonomic', 'autonomic', 'autonomic', 'enteric', 'neuroendocrine', 'neuroimmune'],
   monitorEvery: 6,          // [model] luminance-monitor readback every n frames
-  // Glass shells (glass.js, the simple HUD's "Glass" style) [model]: HDR gains of the brain and body
-  // shells, the face tint, and the floor of the brain shell's view gain (the dopamine view fades the
-  // cortex, the glass only to this fraction).
-  glass: { brain: 0.2, body: 0.2, face: 0.02, shellFloor: 0.45 },
+  // Body star styles of the simple HUD (user decision, 6 November 2026) [model]. Detailed draws every
+  // generated star, sharper (point size × `size`), at `keep` × `boost` of the per-star flux: a class
+  // carries `boost` × its earlier light, spread over 1 / keep × more stars. The skin is lifted most so
+  // the silhouette reads as a dense surface of fine stars, and the nervous system (cord, nerves,
+  // ganglia, enteric mesh) stands out with its travelling signals [browser check]. Stars draws a
+  // random `keep` share of each class at full per-star flux: the earlier budgets (before the dense
+  // model) and so the earlier look. Classes in TISSUE order.
+  // The heart has its own share of the organ budget (HEART.md §6): `keep[1]` is the share of the
+  // other organ stars (their earlier 17,600 of the 32,400 now at High) and `keepHeart` that of the
+  // heart (its earlier 2,400 of 39,600); in Detailed the heart's stars carry `heartGain` × the organ
+  // star flux. The vascular tree (PULSE.md §9) is drawn in Detailed only (`keepTree` in Stars), and
+  // there it replaces the earlier great-vessel stars; `keep[8]` is the share of the earlier vessel,
+  // haze and immune stars (their earlier 5,000 of 7,500 at High).
+  style: {
+    keep: [1 / 3, 17600 / 32400, 2 / 3, 2 / 3, 2 / 5, 1 / 3, 1 / 2, 1 / 2, 2 / 3],
+    keepHeart: 2400 / 39600,
+    keepTree: 0,
+    boost: [3.4, 1.6, 1.2, 1.2, 1.6, 2.0, 1.6, 1.4, 1.2],
+    heartGain: 0.8,
+    size: 0.8,
+  },
 };
 
 export const PROGRAMS = {
@@ -59,7 +76,6 @@ export const PROGRAMS = {
   da: [S.DA_VS, S.STAR_FS],
   body: [S.BODY_VS, S.STAR_FS],
   lantern: [S.LANTERN_VS, S.LANTERN_FS],
-  glass: [S.GLASS_VS, S.GLASS_FS],
   bg: [S.FULLSCREEN_VS, S.BG_FS],
   down: [S.FULLSCREEN_VS, S.DOWN_FS],
   up: [S.FULLSCREEN_VS, S.UP_FS],
@@ -136,9 +152,19 @@ export class BrainRenderer {
     this.netGain = new Float32Array(8).fill(1);
     this.netRate = (1 - PARAMS.ghost) / PARAMS.fade;
     this.organs = new Float32Array(4 * 2 * S.ORGAN_SLOTS);
-    this.glass = [];          // glass shells (setGlass); drawn while glassOn
-    this.glassOn = false;
-    this.anatomical = 0;      // 0–1: anatomical colours of the body stars (BODY_VS uAnat)
+    this.detailed = false;    // body star style: Detailed (dense, sharp, anatomical colours) or Stars (PARAMS.style)
+    this.keep = new Float32Array(12);   // per class: share of the stars drawn (BODY_VS uKeep)
+    this.styleGain = new Float32Array(12);
+    this.drawGain = new Float32Array(12);   // class gains as drawn (× styleGain in Detailed)
+    // Heart beat (heart.js, BODY_VS uHeart*): timing, motion and wave, mode. Idle: a steady gain of 1.
+    this.heartT = new Float32Array(4);
+    this.heartM = new Float32Array(4);
+    this.heartK = new Float32Array([0, 1, 1, 0]);
+    this.heartV = new Float32Array([1, 0, 1, 0]);
+    // Arterial pulse (pulse.js, BODY_VS uPulse): reduced time, amplitude G (0 = off), and the mean
+    // brightening of the tree and of the earlier great arteries; the drawn style picks its mean.
+    this.pulse = new Float32Array(4);
+    this.pulseIn = new Float32Array(4);
     this.waveO = new Float32Array(4);                  // dopamine wave origin; w = 1 while a wave runs
     this.waves = new Float32Array(4 * S.WAVE_SLOTS);   // radius, amplitude, width, push per slot
     this.joints = new Float32Array(4 * 2 * S.JOINT_SLOTS);
@@ -234,35 +260,14 @@ export class BrainRenderer {
   // Direct display gains per bit (8 values in 0.08–1), e.g. driven by the kernel's g.<net> ramps.
   setNetworkGains(gains) { this.netTarget.set(gains); this.netGain.set(gains); }
 
-  // Glass shells (glass.js): [{ id, tint, gain, body, mesh: { positions (mm), normals, indices } }];
-  // an empty list removes them. Indexed triangles, positions and normals interleaved.
-  setGlass(shells = []) {
-    const gl = this.gl;
-    for (const g of this.glass) { gl.deleteBuffer(g.vb); gl.deleteBuffer(g.ib); gl.deleteVertexArray(g.vao); }
-    this.glass = shells.map((s) => {
-      const P = s.mesh.positions, N = s.mesh.normals, n = P.length / 3, data = new Float32Array(n * 6);
-      for (let i = 0; i < n; i++) {
-        data[i * 6] = P[i * 3] * MM; data[i * 6 + 1] = P[i * 3 + 1] * MM; data[i * 6 + 2] = P[i * 3 + 2] * MM;
-        data[i * 6 + 3] = N[i * 3]; data[i * 6 + 4] = N[i * 3 + 1]; data[i * 6 + 5] = N[i * 3 + 2];
-      }
-      const vao = gl.createVertexArray();
-      gl.bindVertexArray(vao);
-      const vb = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, vb);
-      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-      gl.enableVertexAttribArray(0);
-      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 24, 0);
-      gl.enableVertexAttribArray(1);
-      gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 24, 12);
-      const ib = gl.createBuffer();
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, s.mesh.indices, gl.STATIC_DRAW);
-      gl.bindVertexArray(null);
-      gl.bindBuffer(gl.ARRAY_BUFFER, null);
-      return { id: s.id, tint: s.tint, gain: s.gain, body: s.body, vao, vb, ib, count: s.mesh.indices.length };
-    });
-  }
-  get glassTriangles() { return this.glass.reduce((n, g) => n + g.count / 3, 0); }
+  // Heart beat state from heart.js (HeartBeat.uniforms): [T, PR, QRS, P], [atrial, ventricular,
+  // root pulse, mean wave gain], [beat mode, steady gain, motion, Heart view focus], [AV valves open,
+  // semilunar valves open, diastole].
+  setHeart(t, m, k, v) { this.heartT.set(t); this.heartM.set(m); this.heartK.set(k); if (v) this.heartV.set(v); }
+
+  // Arterial pulse from pulse.js (PulseWave.uniforms): [reduced time (s), amplitude G, mean of the
+  // tree, mean of the earlier great arteries] (PULSE.md §8).
+  setPulse(p) { this.pulseIn.set(p); }
 
   // Dopamine waves (display only): origin [x, y, z] in mm and ≤ WAVE_SLOTS { radiusMm, amp, widthMm,
   // pushMm }; an empty list switches them off.
@@ -354,6 +359,7 @@ export class BrainRenderer {
       this.counts.bodyClass[c] = body.ranges ? drawn : have;
       total += this.counts.bodyClass[c];
       this.classGain[c] = PARAMS.classRatio[c] * this.meanFlux * Math.pow(ref[c] / Math.max(1, drawn), PARAMS.tierExponent);
+      this.styleGain[c] = PARAMS.style.keep[c] * PARAMS.style.boost[c];
     }
     this.counts.body = body.ranges ? total : body.count;
   }
@@ -482,9 +488,6 @@ export class BrainRenderer {
     // 2. Body (if visible), one draw per tissue-class prefix.
     if (bodyOn) this._drawBody(f, st, dist);
 
-    // 2b. Glass shells (the simple HUD's "Glass" style): additive, so their order does not matter.
-    if (this.glassOn && this.glass.length) this._drawGlass(f, bodyOn);
-
     // 3. Dopamine system: cell bodies, axon bundles with travelling packets, release sparks.
     this._common(P.da, f);
     st.bind(P.da);
@@ -514,24 +517,6 @@ export class BrainRenderer {
     gl.bindVertexArray(null);
   }
 
-  _drawGlass(f, bodyOn) {
-    const gl = this.gl, p = this.progs.glass, u = p.uniforms, G = PARAMS.glass;
-    this._common(p, f);
-    gl.uniform1f(u.uFace, G.face);
-    const brainK = G.brain * Math.max(G.shellFloor, Math.min(1, f.shell / 0.55));
-    gl.enable(gl.CULL_FACE);   // the triangles wind counter-clockwise seen from outside
-    gl.cullFace(gl.BACK);
-    for (const g of this.glass) {
-      const k = g.body ? (bodyOn ? G.body * this.bodyFade : 0) : brainK;
-      if (k <= 0) continue;
-      gl.uniform3fv(u.uTint, g.tint);
-      gl.uniform1f(u.uGain, k * g.gain);
-      gl.bindVertexArray(g.vao);
-      gl.drawElements(gl.TRIANGLES, g.count, gl.UNSIGNED_INT, 0);
-    }
-    gl.disable(gl.CULL_FACE);
-  }
-
   _drawBody(f, st, dist) {
     const gl = this.gl, p = this.progs.body, u = p.uniforms, b = this.body, c = this.counts;
     this._common(p, f);
@@ -545,12 +530,26 @@ export class BrainRenderer {
     gl.uniform1f(u.uSkinDim, this.skinDim);
     gl.uniform1f(u.uMotion, this.motion ? 1 : 0);
     gl.uniform1f(u.uTwinkle, PARAMS.twinkle * (this.reducedMotion ? PARAMS.reducedTwinkle : 1));
-    gl.uniform4fv(u.uClassGain, this.classGain);
+    const D = this.detailed, K = PARAMS.style;
+    for (let k = 0; k < 9; k++) this.keep[k] = D ? 1 : K.keep[k];
+    this.keep[9] = D ? 1 : K.keepHeart;          // uKeep[2].y: heart stars
+    this.keep[10] = D ? K.heartGain : 1;         // uKeep[2].z: heart star flux relative to the organ class
+    this.keep[11] = D ? 1 : K.keepTree;          // uKeep[2].w: vascular tree stars
+    for (let k = 0; k < 12; k++) this.drawGain[k] = this.classGain[k] * (D ? this.styleGain[k] : 1);
+    gl.uniform4fv(u.uClassGain, this.drawGain);
     gl.uniform4fv(u.uClassNorm, this.classNorm);
+    gl.uniform4fv(u.uKeep, this.keep);
+    gl.uniform2f(u.uStyle, D ? 1 : 0, D ? K.size : 1);
+    gl.uniform4fv(u.uHeartT, this.heartT);
+    gl.uniform4fv(u.uHeartM, this.heartM);
+    gl.uniform4fv(u.uHeartK, this.heartK);
+    gl.uniform4fv(u.uHeartV, this.heartV);
+    const P = this.pulseIn;
+    this.pulse[0] = P[0]; this.pulse[1] = P[1]; this.pulse[2] = P[1] * (D ? P[2] : P[3]); this.pulse[3] = 0;
+    gl.uniform4fv(u.uPulse, this.pulse);
     gl.uniform4fv(u.uNetGain, this.netGain);
     gl.uniform3fv(u.uNetRGB, this.netRGB);
     gl.uniform3fv(u.uStructRGB, this.structRGB);
-    gl.uniform1f(u.uAnat, this.anatomical);
     gl.uniform3fv(u.uAffRGB, this.affRGB);
     gl.uniform4fv(u.uOrgan, this.organs);
     gl.uniform4fv(u.uJoint, this.joints);

@@ -14,9 +14,11 @@ import { VIEWS, isBodyView } from '../src/ui-body.js';
 import { SCENARIOS as SIM_SCENARIOS } from '../src/sim/scenarios.js';
 import { PHASES } from '../src/response.js';
 import { R, AREAS } from '../src/anatomy.js';
-import { NEURON_VS, DA_VS, WAVE_SLOTS, uniformSlots } from '../src/shaders.js';
+import { NEURON_VS, DA_VS, BODY_VS, WAVE_SLOTS, uniformSlots } from '../src/shaders.js';
 import { TIERS } from '../src/performance.js';
-import { BrainRenderer } from '../src/renderer.js';
+import { BrainRenderer, PARAMS as RP, PROGRAMS } from '../src/renderer.js';
+import { PARAMS as GEN } from '../src/body/generate.js';
+import { TISSUE_NAMES } from '../src/body/geometry.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const HTML = readFileSync(join(ROOT, 'index.html'), 'utf8');
@@ -29,7 +31,8 @@ test('index.html holds the simple HUD beside the full one; main.js chooses which
   assert.match(CSS, /body\.hud-simple #shud \{ display: grid; \}/);
   assert.match(CSS, /body\.hud-simple #hud \{ display: none; \}/);
   for (const id of ['shud-story', 'shud-scenario', 'shud-stage', 'shud-text', 'shud-meter', 'shud-meter-label', 'shud-meter-bar',
-    'shud-meter-low', 'shud-meter-high', 'shud-meter-value', 'shud-views', 'shud-style', 'shud-quality', 'shud-pause', 'shud-states']) {
+    'shud-meter-low', 'shud-meter-high', 'shud-meter-value', 'shud-views', 'shud-style', 'shud-quality', 'shud-pause', 'shud-states', 'shud-monitor', 'mon-ecg', 'mon-abp', 'mon-resp', 'mon-hr', 'mon-sys', 'mon-dia', 'mon-map', 'mon-rr',
+    'mon-temp', 'mon-adr', 'mon-cort']) {
     assert.match(SHUD, new RegExp(`id="${id}"`), `#${id}`);
   }
   const buttons = SHUD.match(/<button\b[^>]*>/g) ?? [];
@@ -63,7 +66,7 @@ test('views and quality name what the renderer has; emotions carry no view', () 
   }
   for (const s of simple.STATES) assert.ok(!('view' in s), `${s.id}: an emotion never names a view`);
   assert.equal(simple.QUALITY[0][0], 'auto');
-  assert.deepEqual(simple.STYLES.map(([id]) => id), ['glass', 'stars'], 'the earlier look stays as the Stars preset');
+  assert.deepEqual(simple.STYLES.map(([id]) => id), ['detailed', 'stars'], 'the earlier look stays as the Stars preset');
   assert.deepEqual(simple.QUALITY.slice(1).map(([v, label]) => [Number(v), label]), TIERS.map((t, i) => [i, t.label]));
 });
 
@@ -118,4 +121,26 @@ test('the dopamine wave: neurons and the dopamine system share it; the renderer 
   BrainRenderer.prototype.setWaves.call(fake, [0, -17, -14], []);
   assert.equal(fake.waveO[3], 0, 'no wave: off');
   assert.ok(fake.waves.every((x) => x === 0));
+});
+
+test('body star styles: Detailed draws every star, Stars the earlier share at the earlier flux', () => {
+  // The dense model raised each budget group by 1 / keep; the Stars style draws that share again.
+  const before = { skin: 26000, organ: 20000, muscle: 7000, bone: 5000, cord: 6000, nerve: 20000, ganglion: 8000, enteric: 7000, vessel: 5000 };
+  const K = RP.style;
+  TISSUE_NAMES.forEach((name, c) => {
+    // The organ class splits into the heart (55 % of it) and the rest, each with its own share.
+    // The vessel class splits into the vascular tree (PULSE.md §9) and the earlier stars.
+    const drawn = name === 'organ' ? GEN.budgets.high.organ * (0.45 * K.keep[c] + 0.55 * K.keepHeart)
+      : name === 'vessel' ? GEN.budgets.high.vessel * ((1 - GEN.treeShare) * K.keep[c] + GEN.treeShare * K.keepTree)
+      : GEN.budgets.high[name] * K.keep[c];
+    assert.ok(Math.abs(drawn - before[name]) < 1, `${name}: high-tier budget × keep = the earlier budget`);
+    assert.equal(RP.classBudget.high[c], GEN.budgets.high[name], `${name}: renderer and generator budgets agree`);
+  });
+  for (const name of ['cord', 'nerve', 'ganglion', 'enteric']) assert.ok(K.boost[TISSUE_NAMES.indexOf(name)] > 1, `${name}: brighter in Detailed`);
+  assert.ok(K.boost[TISSUE_NAMES.indexOf('skin')] > 1, 'the skin silhouette reads as a dense surface');
+  assert.ok(K.size > 0.5 && K.size < 1, 'Detailed stars are smaller (sharper) at the same energy');
+  assert.match(BODY_VS, /uniform vec4 uKeep\[3\];/);
+  assert.match(BODY_VS, /uniform vec2 uStyle;/);   // anatomical colours and point size, packed (PULSE.md §9)
+  assert.match(BODY_VS, /const vec3 ANAT\[9\] = vec3\[9\]\(/);
+  assert.ok(!('glass' in PROGRAMS), 'the glass shells are gone');
 });
