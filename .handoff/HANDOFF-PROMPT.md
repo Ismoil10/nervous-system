@@ -1,6 +1,8 @@
 > **Superseded** by `.handoff/STATE-AT-PAUSE.md` (the state on 5 November 2026 and the remaining plan) and `.handoff/RESUME.md`; read this file only where STATE-AT-PAUSE.md points to it.
 
-ultracode — use multi-agent workflows (the Workflow tool) for every substantive step of this task.
+> This prompt's original first line switched on multi-agent workflows for every step. It was removed on
+> 5 November 2026 so that pasting this file cannot switch that mode on again. The rule now is workflows
+> only for the big stages (STATE-AT-PAUSE.md §3).
 
 # Handoff: continue the Brain System build (galaxy workspace)
 
@@ -12,7 +14,7 @@ UTC+5). Read this whole prompt before acting. The working directory is `C:\Users
 
 - **Language:** reply to the user in **Uzbek**. Every project file (code, UI text, docs, data, file names,
   commit messages if ever asked) is **English only**, British spelling as in the existing docs.
-- **ultracode is on:** the user wants exhaustive, verified work. Use the Workflow tool (read the
+- **Multi-agent mode was on (31 October; no longer applies):** the user wants exhaustive, verified work. Use the Workflow tool (read the
   `workflow-authoring` skill first) for research, building, fact-checking and review; adversarially verify
   findings; use subagents in parallel on disjoint files. Token cost is not a constraint; correctness is.
 - **Graphify is mandatory and the user checks it** (they have asked twice whether it is used enough). Rules

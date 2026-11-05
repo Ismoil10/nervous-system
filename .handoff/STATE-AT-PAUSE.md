@@ -4,16 +4,19 @@ The build was paused on **Thursday 5 November 2026 at about 01:30 (Windows local
 user's request, to continue on another computer. It ran on the user's Windows 11 computer after the move
 from the Mac (the Mac pause state is this file at commit `71e27cd`).
 
-All work is on the branch **`wip/brain-build-windows`**, cut from `main` at `1e65443` (the merge of the Mac
-pause branch). Its commits, oldest first:
+The Windows work was done on the branch **`wip/brain-build-windows`**, cut from `main` at `1e65443` (the
+merge of the Mac pause branch). It is now merged into `main` (pull request #2, merge commit `0101203`), so
+`main` holds all the work and the same tree as the branch tip. Continue on a new branch cut from `main`
+(decision 7). The commits, oldest first:
 
 | Commit | Content |
 |---|---|
 | `5712f4c` | Windows setup: `-win` launch entries, golden traces re-recorded on x64, `.gitignore` |
 | `2d6e9aa` | Stage 5 integration and the fixes from the first browser review |
-| next | Stage 6: ANALYSIS.md fact-check round 2 and the opening-rule amendments |
-| next | This handoff: this file, `RESUME.md`, the stage 6 results and the partial PARAMS patch |
-| last | The rebuilt graph (`graphify-out/`) |
+| `dcd5325` | Stage 6: ANALYSIS.md fact-check round 2 and the opening-rule amendments |
+| `e503a9d` | This handoff: this file, `RESUME.md`, the stage 6 results and the partial PARAMS patch |
+| `b9136d0` | The rebuilt graph (`graphify-out/`) |
+| `0101203` | Merge of pull request #2 into `main` |
 
 When this file disagrees with older notes in `.handoff/`, this file wins. `RESUME.md` holds the setup and
 the resume prompt. `HANDOFF-PROMPT.md` and `RESUME-ON-WINDOWS.md` are superseded.
@@ -117,8 +120,10 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
 4. **Body brightness** `tune.body` = 6 [model, browser check].
 5. **Free camera:** zoom towards the cursor, pan and double-click fly-in.
 6. **anger-galaxy has no connection to this project.** The README link to it was removed.
-7. **Git:** work on `wip/brain-build-windows`, never on `main`; commit only when asked (the user asked for
-   these commits). Push only when asked.
+7. **Git:** work on a `wip/` branch, never on `main` itself; commit only when asked (the user asked for
+   these commits). Push only when asked. The Windows work was on `wip/brain-build-windows`; after its merge
+   into `main` (5 November), cut each new work branch from `main` and name it after the computer (for
+   example `wip/brain-build-mac`).
 
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
@@ -167,6 +172,11 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Windows, Node 24 or 26, Mac golden | 530 | 498 | 4 (golden, platform bits) | 28 |
 | Windows, golden re-recorded | 530 | 502 | 0 | 28 |
 | After stage 5 and the fixes | 537 | 509 | 0 | 28 |
+| Mac (arm64, Node 26.4) at `0101203`, x64 golden | 537 | 505 | 4 (golden, platform bits) | 28 |
+
+The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
+`npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was
+identical to the committed one.
 
 ## 5. The interrupted step: stage 6 PARAMS fold
 
@@ -228,6 +238,17 @@ verified as a whole. Its last action was recording the simulated IL-10 peak (§1
 - **Two refuted issues** (§6.10 contact-heat timing; §11.11 cortisol brake on immune cells) need no
   change.
 
+**Golden traces per architecture** (the user's decision, under decision 1):
+- The arm64 golden from `71e27cd` (`test/golden/orgasm-legacy.json` there) passed all 17
+  orgasm-regression tests against this code on the Mac. It was checked on 5 November, in a throwaway
+  worktree.
+- One golden per architecture would end the four failures on either machine with no re-recording and no
+  looser tolerance:
+  - `orgasm-legacy.arm64.json`, taken from `71e27cd`;
+  - `orgasm-legacy.x64.json`, today's file;
+  - the test picks one by `process.arch`.
+- Ask the user before doing it.
+
 **From the stage 5 integration** (for the stage 8 review and browser check):
 - **Model cost:**
   - The meal scenario crawls: the kernel hits its 1-ms budget (about 244 awake nodes and about 700 packets),
@@ -280,6 +301,9 @@ verified as a whole. Its last action was recording the simulated IL-10 peak (§1
   - ANALYSIS.md B.15 still names an old Windows path.
 
 **Environment notes:**
+- **`graphify-out/manifest.json`:** at session start the gate runs `graphify update`, which rewrites this
+  file with the machine's own file times. A fresh session therefore always shows it as changed in
+  `git status`. That is expected, not a sign of lost work.
 - **Git on the Windows computer:** system git there has `core.autocrlf=true`. The working tree is CRLF, but
   commits are LF. Clone new copies with `-c core.autocrlf=false`.
 - **Python on Windows:** run it with `PYTHONUTF8=1` (cp1251 code page).
@@ -290,8 +314,9 @@ verified as a whole. Its last action was recording the simulated IL-10 peak (§1
 
 Time estimates assume a working session at Opus high, without usage-limit pauses.
 
-1. **Baseline on the new machine** (15 min, direct): follow `RESUME.md`. Expect 537 / 509 / 0 / 28 and a
-   clean tsc. Explain any difference first; see decision 1 on the golden.
+1. **Baseline on the new machine** (15 min, direct): follow `RESUME.md`. Expect 537 / 509 / 0 / 28 on x64 and a
+   clean tsc. On arm64 (the Mac), expect 505 passing and the 4 golden failures (§4). Explain any other
+   difference first; see decision 1 and the per-architecture option in §6.
 2. **Finish the stage 6 PARAMS fold** (45–75 min, one agent or direct, **no workflow**): §5. Then
    `graphify update .`, the impact check and a commit (ask first).
 3. **Ask the user about the model re-calibrations** from §6: HPA delay chain, heart apex, the six overflow
