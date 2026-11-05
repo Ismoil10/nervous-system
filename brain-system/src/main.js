@@ -12,7 +12,8 @@
 //
 // URL parameters (B.5): body=0|1, nets=<comma list of networks on>|all|none, scenario=<id>, seed=<n>,
 // time=<preset name>|<locked kh>, view=<view key>, quality=low|medium|high|ultra; safetyMonitor=1
-// (renderer.js). Decisions where the spec is silent are marked [model].
+// (renderer.js); advanced=1 opens the full HUD instead of the simple one (ui-simple.js; user decision,
+// 5 November 2026). Decisions where the spec is silent are marked [model].
 
 import { createContext, GpuTimer } from './gl-utils.js';
 import { TIERS, detectTier, AdaptiveQuality } from './performance.js';
@@ -23,7 +24,8 @@ import { PRESETS } from './clock.js';
 import { CENTER, MM, AREAS } from './anatomy.js';
 import { NEURON_COOL, NEURON_WARM, DOPAMINE_RGB, blackbodyRGB } from './color.js';
 import { Hud } from './ui.js';
-import { SCENARIOS as HUD_SCENARIOS, isBodyView, modeOf, senseById, siteById as hudSite } from './ui-body.js';
+import { SCENARIOS as HUD_SCENARIOS, isBodyView, modeOf, senseById, siteById as hudSite, fractionFromTH } from './ui-body.js';
+import { SimpleHud, senseOf, scenarioLabel, scenarioView, dopamineLevel, arrivalSentence, plainStage, plainSite, REST_STORY } from './ui-simple.js';
 import { Runtime } from './sim/runtime.js';
 import { NET_IDS } from './sim/graph.js';
 import { SCENARIOS } from './sim/scenarios.js';
@@ -116,6 +118,7 @@ function readParams(search) {
     nets, scenario: sc === null ? DEFAULT_SCENARIO : SCENARIOS[sc] ? sc : null, seed: num('seed'),
     time: time !== null && PRESETS[time] ? time : kh,
     view: p.get('view'), quality: p.get('quality'),
+    advanced: p.get('advanced') === '1' || p.get('advanced') === 'true',
   };
 }
 
@@ -148,6 +151,8 @@ async function start() {
   // 1. Hardware capabilities -> initial quality tier.
   const hw = detectTier(gl);
   const url = readParams(location.search);
+  document.body.classList.toggle('hud-simple', !url.advanced);
+  document.body.classList.toggle('hud-advanced', url.advanced);
   const forced = TIERS.findIndex((t) => t.name === url.quality);
   const startTier = forced >= 0 ? forced : hw.tier;
   let genTier = forced >= 0 ? forced : Math.min(TIERS.length - 1, hw.tier + 1);   // headroom for adaptive upgrades
@@ -206,6 +211,8 @@ async function start() {
   let bodyGen = null, bodyData = null, bodyTier = -1;
   let picking = false, limbMotion = true, lastPath = null;
   const overlayOn = {};
+  // Simple HUD state: the armed one-tap sense, the story of the last manual stimulus, a short notice.
+  let simple = null, armedSense = null, manualStory = null, notice = null, noticeUntil = 0;
 
   const naccHist = new Float32Array(600);   // NAcc core dopamine (nM), one sample per 0.1 screen s
   let histHead = 0, histAcc = 0;
@@ -308,10 +315,46 @@ async function start() {
     const d = pressAt;
     pressAt = null;
     if (e.button !== 0 || e.shiftKey || e.ctrlKey) return;   // right, middle and modified drags pan (camera.js)
-    if (!picking || !d || bodyMode !== 'body' || !bodyData) return;
-    if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > PICK.movePx || performance.now() - d.t > PICK.holdMs) return;
+    if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) > PICK.movePx || performance.now() - d.t > PICK.holdMs) return;
+    if (armedSense) {   // simple HUD: a click places the armed sense (a drag still turns the camera)
+      if (bodyMode === 'body' && bodyData) simplePickAt(e.clientX, e.clientY);
+      return;
+    }
+    if (!picking || bodyMode !== 'body' || !bodyData) return;
     pickAt(e.clientX, e.clientY);
   });
+
+  // --- Simple HUD senses: one fixed record each (ui-simple.js SIMPLE_SENSES) ---
+  const say = (text) => { notice = text; noticeUntil = screenT + 3; };
+  const deliverSimple = (s, record) => {
+    const since = rt.events()[0]?.id ?? -1;
+    const r = rt.deliver({ ...record, params: {}, repeat: { count: 1, intervalS: 0 } });
+    if (!r) { say('This point cannot sense it. Try another point on the skin.'); return; }
+    const where = s.pick && record.site ? plainSite(record.site, hudSite(record.site)?.label) : null;
+    manualStory = {
+      stage: where ? `${s.label} on the ${where}` : s.label, since,
+      text: s.pick ? 'The signal travels from the skin to the brain.' : s.id === 'sound' ? 'A click in both ears.' : 'A flash in both eyes.',
+    };
+    lastPath = where;
+  };
+  const simplePickAt = (x, y) => {
+    const s = senseOf(armedSense);
+    if (!s) return;
+    const rec = s.record, m = modeOf(rec.sense, rec.mode), sn = senseById(rec.sense);
+    const sites = m && !m.siteFree ? m.sites ?? sn?.sites ?? null : null;
+    const hit = pick(camera.unproject(x, y), { sense: rec.sense, bodyMode, yaw: camera.yaw, sites });
+    if (!hit) { say('Click a point on the skin.'); return; }
+    deliverSimple(s, { ...rec, site: hit.site.base, side: sideName(hit.site.side) });
+  };
+  const armSense = (id) => {
+    const s = id ? senseOf(id) : null;
+    armedSense = null;
+    if (!s) return;
+    if (!s.pick) { deliverSimple(s, s.record); return; }
+    if (bodyMode !== 'body') setBodyMode('body');   // also flies to the upper body
+    else if (!isBodyView(viewQueued ?? view)) requestView('upperBody');   // the skin must be in view to click it
+    armedSense = id;
+  };
 
   // --- Overlays and Views toggles (display only, A.5, §13.10, §13.13) ---
   const setOverlay = (id, on) => {
@@ -345,7 +388,7 @@ async function start() {
     onSwitch: (name, value) => dopamine.setSwitch(name, value),     // the other §6.10 rows
     onNovelStimulus: () => dopamine.novelStimulus(),
     // Controls bar, Settings, Views, Performance.
-    onPause: () => { paused = !paused; hud.setPaused(paused); },
+    onPause: () => togglePause(),
     onView: (v) => requestView(v),
     onReset: () => resetAll(),
     onQuality: async (value) => {
@@ -406,6 +449,53 @@ async function start() {
   });
   for (const [id, why] of Object.entries(UNDRAWN_TOGGLES)) hud.body.setToggleAvailable(id, false, why);
   applyReducedMotion();
+
+  // Simple HUD (the default; the full HUD above opens with ?advanced=1). It drives the same runtime
+  // calls as the full HUD; a scenario or view that needs the body turns the body on [model].
+  function togglePause() { paused = !paused; hud.setPaused(paused); simple?.setPaused(paused); }
+  const playSimple = (id) => {
+    const why = rt.unavailable([id])[id];
+    if (why === 'Needs the body') setBodyMode('body');
+    else if (why) { say(why); return; }
+    armedSense = null;
+    manualStory = null;
+    if (paused) togglePause();
+    if (id === 'orgasm') selectScenario(id); else playScenario(id);
+    const v = viewParam ? null : scenarioView(id, rt.bodyMode);
+    if (v) requestView(v);
+  };
+  const simpleState = () => {
+    const sh = rt.scenarioHud();
+    const playing = adapter.active || player.active;
+    // The last action tells the story: a sense used after a scenario started, else the scenario.
+    const st = !manualStory && playing ? rt.stage() : null;
+    const story = manualStory ? { scenario: '', stage: manualStory.stage, text: arrivalSentence(rt.events(), manualStory.since) || manualStory.text }
+      : st ? { scenario: scenarioLabel(rt.scenarioId) ?? rt.scenarioLabel(), ...plainStage(rt.scenarioId, st.name, st.text) }
+        : REST_STORY;
+    const live = notice && screenT < noticeUntil ? notice : null;
+    return {
+      story,
+      dopamine: adapter.active ? dopamineLevel(dopamine.readouts().ratioNacc) : null,
+      scenario: sh ? { id: sh.id, active: !!sh.active, progress: sh.spanH > 0 ? fractionFromTH(sh.tH, sh.spanH) : null } : null,
+      unavailable: rt.unavailable(HUD_SCENARIO_IDS), bodyMode: rt.bodyMode, nets: rt.nets, view: viewQueued ?? view, paused,
+      armed: armedSense,
+      hint: armedSense ? live ?? (bodyData ? 'Click a point on the skin.' : 'The body is still being drawn…') : live,
+    };
+  };
+  if (!url.advanced) {
+    const refresh = () => simple.update(simpleState());
+    simple = new SimpleHud(document, {
+      onScenario: (id) => { playSimple(id); refresh(); },
+      onRestart: () => { if (rt.scenarioId) playSimple(rt.scenarioId); refresh(); },
+      onStop: () => { rt.stop(); manualStory = null; refresh(); },
+      onPause: () => { togglePause(); refresh(); },
+      onBodyMode: (m) => { setBodyMode(m); if (rt.bodyMode !== 'body') armedSense = null; refresh(); },
+      onView: (v) => { if (isBodyView(v) && bodyMode !== 'body') setBodyMode('body'); requestView(v); refresh(); },
+      onNet: (id, on) => { rt.setNet(id, on); syncAvailability(); refresh(); },
+      onSense: (id) => { armSense(id); refresh(); },
+      onAbout: () => document.getElementById('info-btn')?.click(),
+    });
+  }
 
   // A scenario chosen by URL: the orgasm scenario starts on selection (B.13); the others play [model].
   if (url.scenario) {
@@ -516,7 +606,7 @@ async function start() {
     // "Letting go" at the climax is shown at the interface: the HUD dims and the camera stops
     // drifting, only inside the orgasm scenario (B.13; ONSET and ORGASM).
     const climax = adapter.climax;
-    if (climax !== dimmed) { dimmed = climax; hud.setDimmed(climax); }
+    if (climax !== dimmed) { dimmed = climax; hud.setDimmed(climax); simple?.setDimmed(climax); }
     if (viewQueued && screenT - lastViewAt >= CAMERA.viewGapS) { const v = viewQueued; viewQueued = null; applyView(v); }
     camera.autoSpin = climax || reducedMotion || isBodyView(view) ? 0 : CAMERA.spin;   // §13.11 auto-orbit in brain views only
     camera.update(dt, canvas.width / canvas.height, animT);
@@ -547,7 +637,10 @@ async function start() {
     if (adapter.active && model.mode === 'demo') hud.setLevel(model.level);
 
     hudTimer -= dt;
-    if (hudTimer <= 0) {
+    if (hudTimer <= 0 && simple) {
+      hudTimer = 0.12;
+      simple.update(simpleState());
+    } else if (hudTimer <= 0) {
       hudTimer = 0.12;
       const refractory = adapter.active && model.I >= 0.08;
       let remaining = 0;

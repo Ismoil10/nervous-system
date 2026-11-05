@@ -6940,6 +6940,13 @@ At load the brain is generated and rendered first. The body follows in slices an
 
 ### B.10. HUD dropdowns, fields and controls
 
+> **Default interface (user decision, 5 November 2026).** The app opens with a simple HUD
+> (`src/ui-simple.js`) that keeps only the controls that change the scene: a scenario rail with
+> Pause, Restart and Stop; five one-tap senses (touch, pinprick and heat placed on the skin; sound
+> and light to both sides); Brain or Body; five views; the five network switches. Its readouts are a
+> plain-language story of the current stage or of the last manual stimulus, and one dopamine meter
+> in the orgasm scenario. The full HUD specified below is unchanged and opens with `?advanced=1`.
+
 Every dropdown keeps today's pattern: a heading button with title, optional status chip and chevron, a body hidden when closed, no subtitle, and open state saved under `brain-system.drop.<store>`. Titles and labels follow A.3 and A.7; §13 owns their wording. The left column holds data (Vitals, Live, Dopamine, Modulators); the right column holds controls (Body, Interventions, Stimulus, Scenarios, Time, Brain systems, Views, Performance, Settings). Below 760 px the right-column dropdowns become popovers, as Performance and Settings are today. New stimulus ids use the prefix `sens-`, because `stim-level` and `stim-val` belong to the orgasm slider.
 
 | Section id (`data-store`) | Controls (element ids) | Readouts | Brain-only mode |

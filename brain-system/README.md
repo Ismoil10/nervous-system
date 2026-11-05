@@ -81,6 +81,22 @@ coupling of arousal to peripheral vasocongestion is removed, and the vitals read
 - **Views.** Three brain views and nine body views; Skeleton off by default.
 
 ## Controls
+The app opens with a **simple HUD** (`src/ui-simple.js`). It keeps only what changes the scene:
+- **Story** (top left): what is happening, in one plain sentence. In the orgasm scenario a single
+  dopamine meter runs from rest to peak.
+- **Brain / Body** (top right), with **Settings**: the five body networks and About.
+- **View**: Brain, Cutaway, Dopamine, Upper body, Whole body.
+- **Scenarios** (bottom): one tap plays a scenario, with Pause, Restart and Stop. A scenario that
+  needs the body turns it on, and the camera moves to the part that reacts.
+- **Senses** (bottom): Touch, Pinprick and Heat wait for a click on the skin; Sound and Light go
+  to both ears or both eyes. The story follows the signal to the brain.
+- `P` — pause · `Esc` — cancel a sense or close Settings.
+
+Every other control — interventions, the full stimulus panel, the clock, brain systems, vitals,
+dopamine and modulator readouts, performance, and the orgasm scenario's settings and hypotheses —
+is in the **full HUD**: open the page with `?advanced=1`. The rest of this section describes the
+full HUD.
+
 - Left drag — rotate; right or middle drag, Shift/Ctrl + drag, or a two-finger drag — pan; wheel or
   pinch — zoom towards the point under the cursor; double click — fly halfway in towards that point.
   With **Pick on body** armed, a click selects a site.
@@ -169,7 +185,8 @@ HUD actions reach the kernel.
 | `src/wiring.js` | Kernel packets onto body paths, network ghosts, limb pose, overlay members |
 | `src/safety.js` | Photosensitivity limiter and display-rate rules |
 | `src/color.js` | Planck and CIE colours (neurons 7,000–9,500 K, body ≥ 5,500 K, dopamine 2,300 K) |
-| `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/ui-body.js` | Quality tiers and adaptive quality, camera, HUD |
+| `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/ui-body.js` | Quality tiers and adaptive quality, camera, full HUD (`?advanced=1`) |
+| `src/ui-simple.js` | Simple HUD (the default): story, scenarios, senses, views, Brain/Body, body networks |
 
 Rendering assets (HDR pipeline, bloom, star point-spread function, adaptive quality, HUD style)
 come from the Orgasm Galaxy project (removed on 2026-11-02; its response-model analysis lives on as

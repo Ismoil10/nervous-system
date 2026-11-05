@@ -757,3 +757,367 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; overfl
   .chev, .bar-fill, .nc-fill, #rpe, .scrub-fill, .sw-track, .sw-track::after { transition: none; }
   .hud { transition: none; }
 }
+/* ---- Simple HUD (default; the full HUD above opens with ?advanced=1) -----------------------------
+   The story of what is happening is the one large element; every control sits in quiet glass.
+   Colour carries meaning: amber is dopamine and the scenario that plays, signal blue is your own
+   input (an armed sense and its hint). Nothing is shown that does not change the scene. */
+body.hud-simple #hud { display: none; }
+body.hud-advanced #shud { display: none; }
+
+.shud {
+  --glass: rgba(9, 11, 19, 0.62);
+  --glass-solid: rgba(12, 14, 23, 0.96);
+  --glass-line: rgba(255, 255, 255, 0.08);
+  --signal: #8fb8de;
+  --signal-tint: rgba(143, 184, 222, 0.16);
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "story corner" ". ." "bottom bottom";
+  column-gap: 16px;
+  padding: max(22px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+}
+.shud-corner, .shud-views, .shud-dock { pointer-events: auto; }
+
+/* Story: scenario, stage, one plain sentence; drags over it still turn the camera. */
+.shud-story {
+  grid-area: story;
+  max-width: 30rem;
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7);
+}
+.shud-scenario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.shud-scenario::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+.shud-stage {
+  margin: 0;
+  font-size: clamp(26px, 2.6vw + 12px, 40px);
+  line-height: 1.08;
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.shud-text {
+  margin: 10px 0 0;
+  max-width: 38ch;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--soft);
+}
+
+/* Dopamine meter (orgasm scenario): rest on the left, peak on the right. */
+.shud-da {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  margin-top: 18px;
+  width: min(240px, 100%);
+}
+.shud-da-label { font-size: 13px; color: var(--muted); }
+.shud-da-track {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(242, 193, 78, 0.14);
+  overflow: hidden;
+}
+.shud-da-bar {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-lo), var(--accent) 60%, var(--accent-hi));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s linear;
+}
+.shud-da-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  text-shadow: none;
+}
+
+/* Corner: Brain or Body, and the settings popover. */
+.shud-corner {
+  grid-area: corner;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.shud-mode {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.shud-mode button {
+  min-height: 34px;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+}
+.shud-mode button:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.shud-mode button[aria-pressed="true"] { color: #10131c; background: var(--text); }
+
+.shud .shud-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: var(--soft);
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 50%;
+}
+.shud-icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.shud-icon .i-play { display: none; fill: currentColor; stroke: none; }
+.shud-icon.is-paused .i-pause { display: none; }
+.shud-icon.is-paused .i-play { display: block; }
+.shud-icon.is-paused { color: var(--text); border-color: rgba(255, 255, 255, 0.24); }
+.shud-icon:hover:not(:disabled) { color: var(--text); background: rgba(30, 34, 48, 0.8); }
+#shud-gear { -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+
+.shud-settings {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 290px;
+  padding: 14px;
+  background: var(--glass-solid);
+  border: 1px solid var(--glass-line);
+  border-radius: 16px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+}
+.shud-settings-head { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+.shud-nets { list-style: none; margin: 0; padding: 0; }
+.shud-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 2px;
+  font-size: 14px;
+  color: var(--text);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+}
+.shud-switch:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); }
+.shud-switch-track {
+  position: relative;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  transition: background 0.15s;
+}
+.shud-switch-track::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: transform 0.15s, background 0.15s;
+}
+.shud-switch[aria-checked="true"] .shud-switch-track { background: var(--signal-tint); box-shadow: inset 0 0 0 1px var(--signal); }
+.shud-switch[aria-checked="true"] .shud-switch-track::after { transform: translateX(14px); background: var(--signal); }
+.shud-note { margin: 4px 2px 0; font-size: 13px; color: var(--muted); }
+.shud .shud-link {
+  margin-top: 10px;
+  padding: 6px 2px;
+  font-size: 13px;
+  color: var(--signal);
+  background: transparent;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.shud .shud-link:hover { color: #cfe2f5; background: transparent; }
+
+/* Bottom: views above the dock. */
+.shud-bottom {
+  grid-area: bottom;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.shud-views {
+  display: flex;
+  gap: 2px;
+  max-width: 100%;
+  padding: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.shud-views::-webkit-scrollbar { display: none; }
+.shud .shud-view {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+}
+.shud .shud-view:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.shud .shud-view[aria-pressed="true"] { color: var(--text); background: rgba(255, 255, 255, 0.12); }
+
+.shud-dock {
+  width: min(1000px, 100%);
+  padding: 8px 8px 10px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 18px;
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+  transition: opacity 0.6s;
+}
+.shud-dock-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 2px 8px 4px;
+}
+.shud-tabs { display: flex; gap: 4px; }
+.shud .shud-tabs [role="tab"] {
+  padding: 6px 4px;
+  margin-right: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: inset 0 -2px 0 transparent;
+}
+.shud .shud-tabs [role="tab"]:hover { color: var(--text); background: transparent; }
+.shud .shud-tabs [aria-selected="true"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--text); }
+.shud-hint {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--signal);
+}
+.shud-hint .shud-link { margin: 0; }
+.shud-transport { display: flex; gap: 6px; margin-left: auto; }
+.shud-transport .shud-icon { width: 38px; height: 38px; background: rgba(255, 255, 255, 0.05); }
+
+.shud-rail {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 2px;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+.shud-rail::-webkit-scrollbar { display: none; }
+.shud .shud-pill {
+  position: relative;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  padding: 10px 15px;
+  overflow: hidden;
+  font-size: 14px;
+  color: var(--soft);
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid transparent;
+  border-radius: 11px;
+}
+.shud .shud-pill:hover:not(:disabled) { color: var(--text); background: rgba(255, 255, 255, 0.09); }
+.shud .shud-pill.is-playing { color: var(--accent-hi); background: var(--accent-tint); border-color: var(--accent-line); }
+.shud-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+}
+.shud-pill.has-progress .shud-progress { opacity: 1; }
+.shud .shud-sense[aria-pressed="true"] { color: #dcecff; background: var(--signal-tint); border-color: var(--signal); }
+
+.shud button:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+
+/* "Letting go" at the climax (B.13): the controls fade, the story stays readable. */
+.shud .shud-corner, .shud .shud-bottom { transition: opacity 0.6s; }
+.shud.dimmed .shud-corner, .shud.dimmed .shud-bottom { opacity: 0.3; }
+.shud.dimmed .shud-corner:hover, .shud.dimmed .shud-corner:focus-within,
+.shud.dimmed .shud-bottom:hover, .shud.dimmed .shud-bottom:focus-within { opacity: 1; }
+
+@media (max-width: 640px) {
+  .shud {
+    column-gap: 10px;
+    padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+      max(12px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  .shud-stage { font-size: 24px; }
+  .shud-text { margin-top: 6px; font-size: 14px; }
+  .shud-da { margin-top: 12px; width: min(200px, 100%); }
+  .shud-mode button { min-height: 32px; padding: 0 12px; font-size: 13px; }
+  .shud .shud-icon { width: 36px; height: 36px; }
+  .shud-settings { width: min(290px, calc(100vw - 32px)); }
+  .shud-dock { border-radius: 14px; padding: 6px 6px 8px; }
+  .shud-dock-head { flex-wrap: wrap; row-gap: 4px; }
+  .shud-hint { order: 3; flex-basis: 100%; padding: 0 2px; }
+  .shud .shud-pill { padding: 9px 13px; font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shud-da-bar, .shud-dock, .shud .shud-corner, .shud .shud-bottom, .shud-switch-track, .shud-switch-track::after { transition: none; }
+}

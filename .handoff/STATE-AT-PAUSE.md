@@ -125,6 +125,28 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
    into `main` (5 November), cut each new work branch from `main` and name it after the computer (for
    example `wip/brain-build-mac`).
 
+**Made on the Mac after the merge (5 November 2026):**
+
+8. **Simple HUD by default.** The 13-dropdown HUD was too much for an average user. The app now opens
+   with `src/ui-simple.js`, which keeps only what changes the scene:
+   - a story line, plus a dopamine meter in the orgasm scenario;
+   - Brain / Body and Settings, which holds the five networks and About;
+   - five views;
+   - a bottom dock with a Scenarios / Senses switch and Pause, Restart and Stop.
+
+   The user chose:
+   - the bottom-dock layout;
+   - the full HUD hidden behind `?advanced=1`, with none of it deleted;
+   - only the story and the dopamine meter as readouts;
+   - one-tap senses: Touch, Pinprick and Heat clicked on the skin; Sound and Light to both sides.
+
+   A scenario or view that needs the body turns the body on, and each scenario flies to the part that
+   reacts (`SCENARIO_VIEWS`, [model]). The story uses plain stage texts (`PLAIN_STAGES`); the sourced
+   texts stay in the full HUD. ANALYSIS.md B.10 records this. Tests: `test/hud-simple.test.mjs`.
+9. **Dopamine visuals stay as specified.** After an explanation of the DOPAMINE.md §9.8 changes, the
+   user tried the two hypothesis switches before asking for anything else. An optional "expressive"
+   mode (the pre-correction flare mapping) is offered but not decided.
+
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
   noEmit. No React, no `.ts`, no build step, no typescript dependency in `package.json` (`tsc` 7.0.2 must be
@@ -173,6 +195,7 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Windows, golden re-recorded | 530 | 502 | 0 | 28 |
 | After stage 5 and the fixes | 537 | 509 | 0 | 28 |
 | Mac (arm64, Node 26.4) at `0101203`, x64 golden | 537 | 505 | 4 (golden, platform bits) | 28 |
+| Mac, simple HUD added (decision 8) | 542 | 510 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was
@@ -334,6 +357,7 @@ Time estimates assume a working session at Opus high, without usage-limit pauses
    - Two skeptics per finding; a fixer re-runs `npm test` and `npm run typecheck`.
    - Run `/graph-usage` afterwards.
 6. **Stage 8b, browser verification** (30–45 min, direct):
+   - Check both HUDs: the simple one (default) and the full one (`?advanced=1`).
    - Check brain only vs whole body.
    - Check every network switch on and off with a probe stimulus, and the stimulus panel.
    - Run every scenario (hotObject, kneeJerk, loudSound, brightLight, standUp, stressor, meal, infection,
