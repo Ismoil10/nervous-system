@@ -234,33 +234,33 @@
     "semantic_hash": ""
   },
   "brain-system/src/main.js": {
-    "mtime": 1793869186.486075,
-    "seen": 1793869192.477709,
-    "ast_hash": "8ef1e4bb12bfe3bea7faa4108ffe89ae",
+    "mtime": 1793870544.4641519,
+    "seen": 1793870545.520153,
+    "ast_hash": "996c1845823a7c855d3fed51b2f6ad84",
     "semantic_hash": ""
   },
   "brain-system/src/renderer.js": {
-    "mtime": 1793869073.6077716,
-    "seen": 1793869080.348473,
-    "ast_hash": "feae4b3460d07d85d055bf98ac30fa89",
+    "mtime": 1793870577.465754,
+    "seen": 1793870583.807062,
+    "ast_hash": "179df773fd653e2ad52c939e643ee672",
     "semantic_hash": ""
   },
   "brain-system/src/shaders.js": {
-    "mtime": 1793869073.607476,
-    "seen": 1793869080.348475,
-    "ast_hash": "07bed864267ba584eefe454b7f954bb0",
+    "mtime": 1793870538.9689307,
+    "seen": 1793870545.520155,
+    "ast_hash": "a8f4d84bda813fe1b246055f4442a99c",
     "semantic_hash": ""
   },
   "brain-system/README.md": {
-    "mtime": 1793868364.59968,
-    "seen": 1793869065.639648,
-    "ast_hash": "cf4aea50122313c6e77d7383414f1d04",
+    "mtime": 1793870712.7571719,
+    "seen": 1793871426.9497721,
+    "ast_hash": "676f62d748f7bd984314f19b8368d325",
     "semantic_hash": ""
   },
   "brain-system/index.html": {
-    "mtime": 1793869147.2238011,
-    "seen": 1793869182.58895,
-    "ast_hash": "c546524836b9077ffcf88cae7a4cd80f",
+    "mtime": 1793869975.6467147,
+    "seen": 1793869982.373187,
+    "ast_hash": "2ba4ed1c29e49649da97da9eff61fe53",
     "semantic_hash": ""
   },
   "brain-system/src/ui.js": {
@@ -1002,9 +1002,9 @@
     "semantic_hash": ""
   },
   "brain-system/src/body/geometry.js": {
-    "mtime": 1793694176.5710013,
-    "seen": 1793861628.537962,
-    "ast_hash": "3652e1f7ef86d6a3681bafc413d04f17",
+    "mtime": 1793871759.8747783,
+    "seen": 1793871765.6965492,
+    "ast_hash": "1788116a63f7198a2f7824a7782daf38",
     "semantic_hash": ""
   },
   "brain-system/src/clock.js": {
@@ -1098,9 +1098,9 @@
     "semantic_hash": ""
   },
   "brain-system/research/ANALYSIS.md": {
-    "mtime": 1793868364.6012855,
-    "seen": 1793869065.639717,
-    "ast_hash": "b06814d3af3dcf778a7876ad229b7856",
+    "mtime": 1793871914.2566998,
+    "seen": 1793872138.894144,
+    "ast_hash": "b1e58c31f892b379f1046aaf58780c92",
     "semantic_hash": ""
   },
   "brain-system/src/body/generate.js": {
@@ -1290,15 +1290,39 @@
     "semantic_hash": ""
   },
   "brain-system/src/ui-simple.js": {
-    "mtime": 1793869129.255083,
-    "seen": 1793869136.1148548,
-    "ast_hash": "3926b3ef7911b6903888a5f7f1e58ab5",
+    "mtime": 1793869975.646565,
+    "seen": 1793869982.373173,
+    "ast_hash": "82168dd4f22efbc2d801e2478869bcc1",
     "semantic_hash": ""
   },
   "brain-system/test/hud-simple.test.mjs": {
-    "mtime": 1793869278.9516127,
-    "seen": 1793869285.937842,
-    "ast_hash": "a3104e09d61af2076471dd527f81ec62",
+    "mtime": 1793870090.3596637,
+    "seen": 1793870100.870007,
+    "ast_hash": "6fa3e22ecb983bb5be0c57cf3473c11a",
+    "semantic_hash": ""
+  },
+  "brain-system/src/glass.js": {
+    "mtime": 1793870577.4636738,
+    "seen": 1793870583.80706,
+    "ast_hash": "b5cd5a37474f656ce73d682a34dcd7b8",
+    "semantic_hash": ""
+  },
+  "brain-system/test/glass.test.mjs": {
+    "mtime": 1793870617.8613276,
+    "seen": 1793870626.6150951,
+    "ast_hash": "74914e9fd278a4d03de1d53ab9f1288c",
+    "semantic_hash": ""
+  },
+  "brain-system/research/BODY-FORM.md": {
+    "mtime": 1793871914.256971,
+    "seen": 1793872138.894144,
+    "ast_hash": "5e76e6397ee04482dbbe3bcf9060a4d7",
+    "semantic_hash": ""
+  },
+  "brain-system/test/body-form.test.mjs": {
+    "mtime": 1793871887.0086281,
+    "seen": 1793871894.0112078,
+    "ast_hash": "7b264a57cd0119422fc105b252e05a51",
     "semantic_hash": ""
   }
 }
