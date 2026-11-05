@@ -20,10 +20,10 @@ const BONE = 3;        // tissue class index of the bone range (shaders.js TISSU
 export const PARAMS = {
   classRatio: [0.15, 0.38, 0.10, 0.08, 0.5, 0.30, 0.5, 0.2, 0.1],   // §13.3 flux × mean brain neuron-star flux
   classBudget: {                                                       // §13.4 points per tier
-    low: [9000, 6000, 2000, 1500, 2000, 6000, 2500, 2000, 1500],
-    medium: [16000, 12000, 4000, 3000, 4000, 12000, 5000, 4000, 3000],
-    high: [26000, 20000, 7000, 5000, 6000, 20000, 8000, 7000, 5000],
-    ultra: [40000, 32000, 10000, 7000, 9000, 30000, 12000, 10000, 8000],
+    low: [27000, 22000, 3000, 2250, 5000, 18000, 5000, 4000, 36000],
+    medium: [48000, 44000, 6000, 4500, 10000, 36000, 10000, 8000, 72000],
+    high: [78000, 72000, 10500, 7500, 15000, 60000, 16000, 14000, 120000],
+    ultra: [120000, 116000, 15000, 10500, 22500, 90000, 24000, 20000, 192000],
   },
   refTier: 'high',          // B.5: per-class gains normalised to a reference tier, as REF above (renderer L56–60)
   tierExponent: 1,          // gain = (reference count / drawn count)^exponent, as the neuron and axon gains
@@ -48,6 +48,27 @@ export const PARAMS = {
   netRole: ['afferent', 'somEff', 'symp', 'para', 'afferent', 'enteric', 'endocrine', 'immune'],
   netSwitch: ['somatic', 'somatic', 'autonomic', 'autonomic', 'autonomic', 'enteric', 'neuroendocrine', 'neuroimmune'],
   monitorEvery: 6,          // [model] luminance-monitor readback every n frames
+  // Body star styles of the simple HUD (user decision, 6 November 2026) [model]. Detailed draws every
+  // generated star, sharper (point size × `size`), at `keep` × `boost` of the per-star flux: a class
+  // carries `boost` × its earlier light, spread over 1 / keep × more stars. The skin is lifted most so
+  // the silhouette reads as a dense surface of fine stars, and the nervous system (cord, nerves,
+  // ganglia, enteric mesh) stands out with its travelling signals [browser check]. Stars draws a
+  // random `keep` share of each class at full per-star flux: the earlier budgets (before the dense
+  // model) and so the earlier look. Classes in TISSUE order.
+  // The heart has its own share of the organ budget (HEART.md §6): `keep[1]` is the share of the
+  // other organ stars (their earlier 17,600 of the 32,400 now at High) and `keepHeart` that of the
+  // heart (its earlier 2,400 of 39,600); in Detailed the heart's stars carry `heartGain` × the organ
+  // star flux. The vascular tree (PULSE.md §9) is drawn in Detailed only (`keepTree` in Stars), and
+  // there it replaces the earlier great-vessel stars; `keep[8]` is the share of the earlier vessel,
+  // haze and immune stars (their earlier 5,000 of 7,500 at High).
+  style: {
+    keep: [1 / 3, 17600 / 32400, 2 / 3, 2 / 3, 2 / 5, 1 / 3, 1 / 2, 1 / 2, 2 / 3],
+    keepHeart: 2400 / 39600,
+    keepTree: 0,
+    boost: [3.4, 1.6, 1.2, 1.2, 1.6, 2.0, 1.6, 1.4, 1.2],
+    heartGain: 0.8,
+    size: 0.8,
+  },
 };
 
 export const PROGRAMS = {
@@ -131,6 +152,21 @@ export class BrainRenderer {
     this.netGain = new Float32Array(8).fill(1);
     this.netRate = (1 - PARAMS.ghost) / PARAMS.fade;
     this.organs = new Float32Array(4 * 2 * S.ORGAN_SLOTS);
+    this.detailed = false;    // body star style: Detailed (dense, sharp, anatomical colours) or Stars (PARAMS.style)
+    this.keep = new Float32Array(12);   // per class: share of the stars drawn (BODY_VS uKeep)
+    this.styleGain = new Float32Array(12);
+    this.drawGain = new Float32Array(12);   // class gains as drawn (× styleGain in Detailed)
+    // Heart beat (heart.js, BODY_VS uHeart*): timing, motion and wave, mode. Idle: a steady gain of 1.
+    this.heartT = new Float32Array(4);
+    this.heartM = new Float32Array(4);
+    this.heartK = new Float32Array([0, 1, 1, 0]);
+    this.heartV = new Float32Array([1, 0, 1, 0]);
+    // Arterial pulse (pulse.js, BODY_VS uPulse): reduced time, amplitude G (0 = off), and the mean
+    // brightening of the tree and of the earlier great arteries; the drawn style picks its mean.
+    this.pulse = new Float32Array(4);
+    this.pulseIn = new Float32Array(4);
+    this.waveO = new Float32Array(4);                  // dopamine wave origin; w = 1 while a wave runs
+    this.waves = new Float32Array(4 * S.WAVE_SLOTS);   // radius, amplitude, width, push per slot
     this.joints = new Float32Array(4 * 2 * S.JOINT_SLOTS);
     for (let k = 0; k < S.JOINT_SLOTS; k++) this.joints[k * 8 + 3] = 1;
     this.skinDim = 0;
@@ -224,6 +260,25 @@ export class BrainRenderer {
   // Direct display gains per bit (8 values in 0.08–1), e.g. driven by the kernel's g.<net> ramps.
   setNetworkGains(gains) { this.netTarget.set(gains); this.netGain.set(gains); }
 
+  // Heart beat state from heart.js (HeartBeat.uniforms): [T, PR, QRS, P], [atrial, ventricular,
+  // root pulse, mean wave gain], [beat mode, steady gain, motion, Heart view focus], [AV valves open,
+  // semilunar valves open, diastole].
+  setHeart(t, m, k, v) { this.heartT.set(t); this.heartM.set(m); this.heartK.set(k); if (v) this.heartV.set(v); }
+
+  // Arterial pulse from pulse.js (PulseWave.uniforms): [reduced time (s), amplitude G, mean of the
+  // tree, mean of the earlier great arteries] (PULSE.md §8).
+  setPulse(p) { this.pulseIn.set(p); }
+
+  // Dopamine waves (display only): origin [x, y, z] in mm and ≤ WAVE_SLOTS { radiusMm, amp, widthMm,
+  // pushMm }; an empty list switches them off.
+  setWaves(originMm, list = []) {
+    const w = this.waves;
+    w.fill(0);
+    list.slice(0, S.WAVE_SLOTS).forEach((x, k) => w.set([x.radiusMm * MM, Math.max(0, x.amp), Math.max(1e-3, x.widthMm * MM), (x.pushMm ?? 0) * MM], k * 4));
+    const on = list.some((x) => x.amp > 0);
+    this.waveO.set(originMm ? [originMm[0] * MM, originMm[1] * MM, originMm[2] * MM, on ? 1 : 0] : [0, 0, 0, 0]);
+  }
+
   // Organ geometry responses (§13.7), ≤ 8: { nodeId, centre: [x, y, z] mm, mode: 'scale' | 'shiftZ' |
   // 'iris', value (scale factor | shift mm), rest, inner, outer (iris radii mm) }.
   setOrgans(list = []) {
@@ -304,6 +359,7 @@ export class BrainRenderer {
       this.counts.bodyClass[c] = body.ranges ? drawn : have;
       total += this.counts.bodyClass[c];
       this.classGain[c] = PARAMS.classRatio[c] * this.meanFlux * Math.pow(ref[c] / Math.max(1, drawn), PARAMS.tierExponent);
+      this.styleGain[c] = PARAMS.style.keep[c] * PARAMS.style.boost[c];
     }
     this.counts.body = body.ranges ? total : body.count;
   }
@@ -418,6 +474,8 @@ export class BrainRenderer {
     gl.uniform1f(u.uDaGain, f.tune.bathing);
     gl.uniform3fv(u.uCool, f.cool);
     gl.uniform3fv(u.uWarm, f.warm);
+    gl.uniform4fv(u.uWaveO, this.waveO);
+    gl.uniform4fv(u.uWave, this.waves);
     gl.bindVertexArray(this.neuronVAO.vao);
     gl.drawArrays(gl.POINTS, 0, nNeurons);
     // New brain nuclei (§3): floor-stratified buffer, same per-star gain as the neurons.
@@ -436,6 +494,8 @@ export class BrainRenderer {
     u = P.da.uniforms;
     gl.uniform1f(u.uZoom, f.zoom);
     gl.uniform3fv(u.uFibre, f.fibre);
+    gl.uniform4fv(u.uWaveO, this.waveO);
+    gl.uniform4fv(u.uWave, this.waves);
     gl.bindVertexArray(this.daVAO.vao);
     gl.uniform1f(u.uGain, f.tune.somata);
     gl.drawArrays(gl.POINTS, r.soma[0], r.soma[1]);
@@ -470,8 +530,23 @@ export class BrainRenderer {
     gl.uniform1f(u.uSkinDim, this.skinDim);
     gl.uniform1f(u.uMotion, this.motion ? 1 : 0);
     gl.uniform1f(u.uTwinkle, PARAMS.twinkle * (this.reducedMotion ? PARAMS.reducedTwinkle : 1));
-    gl.uniform4fv(u.uClassGain, this.classGain);
+    const D = this.detailed, K = PARAMS.style;
+    for (let k = 0; k < 9; k++) this.keep[k] = D ? 1 : K.keep[k];
+    this.keep[9] = D ? 1 : K.keepHeart;          // uKeep[2].y: heart stars
+    this.keep[10] = D ? K.heartGain : 1;         // uKeep[2].z: heart star flux relative to the organ class
+    this.keep[11] = D ? 1 : K.keepTree;          // uKeep[2].w: vascular tree stars
+    for (let k = 0; k < 12; k++) this.drawGain[k] = this.classGain[k] * (D ? this.styleGain[k] : 1);
+    gl.uniform4fv(u.uClassGain, this.drawGain);
     gl.uniform4fv(u.uClassNorm, this.classNorm);
+    gl.uniform4fv(u.uKeep, this.keep);
+    gl.uniform2f(u.uStyle, D ? 1 : 0, D ? K.size : 1);
+    gl.uniform4fv(u.uHeartT, this.heartT);
+    gl.uniform4fv(u.uHeartM, this.heartM);
+    gl.uniform4fv(u.uHeartK, this.heartK);
+    gl.uniform4fv(u.uHeartV, this.heartV);
+    const P = this.pulseIn;
+    this.pulse[0] = P[0]; this.pulse[1] = P[1]; this.pulse[2] = P[1] * (D ? P[2] : P[3]); this.pulse[3] = 0;
+    gl.uniform4fv(u.uPulse, this.pulse);
     gl.uniform4fv(u.uNetGain, this.netGain);
     gl.uniform3fv(u.uNetRGB, this.netRGB);
     gl.uniform3fv(u.uStructRGB, this.structRGB);

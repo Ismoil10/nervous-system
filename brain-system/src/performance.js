@@ -15,13 +15,13 @@
 // The model itself is tier-independent (B.8): every tier runs the same plugins on the same grids.
 export const TIERS = [
   { name: 'low',    label: 'Low',    neurons: 60000,  axon: 6000,  vari: 4000,  bloomLevels: 4, maxDpr: 1.0,  scale: 0.85,
-    extra: 3200,  body: 32500,  bodyLod: 1, packets: 128, gutSegments: 125, kernelMs: 2 },
+    extra: 3200,  body: 122250,  bodyLod: 1, packets: 128, gutSegments: 125, kernelMs: 2 },
   { name: 'medium', label: 'Medium', neurons: 130000, axon: 10000, vari: 7000,  bloomLevels: 5, maxDpr: 1.25, scale: 1.0,
-    extra: 6500,  body: 63000,  bodyLod: 2, packets: 192, gutSegments: 125, kernelMs: 1 },
+    extra: 6500,  body: 238500,  bodyLod: 2, packets: 192, gutSegments: 125, kernelMs: 1 },
   { name: 'high',   label: 'High',   neurons: 240000, axon: 16000, vari: 11000, bloomLevels: 6, maxDpr: 1.5,  scale: 1.0,
-    extra: 10800, body: 104000, bodyLod: 2, packets: 256, gutSegments: 250, kernelMs: 1 },
+    extra: 10800, body: 393000, bodyLod: 2, packets: 256, gutSegments: 250, kernelMs: 1 },
   { name: 'ultra',  label: 'Ultra',  neurons: 400000, axon: 24000, vari: 16000, bloomLevels: 6, maxDpr: 2.0,  scale: 1.0,
-    extra: 18000, body: 158000, bodyLod: 2, packets: 256, gutSegments: 250, kernelMs: 1 },
+    extra: 18000, body: 610000, bodyLod: 2, packets: 256, gutSegments: 250, kernelMs: 1 },
 ];
 
 export function readGpuName(gl) {

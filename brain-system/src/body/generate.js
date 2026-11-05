@@ -6,7 +6,9 @@
 //
 // Record layout (B.7 "Body vertex record", 16 floats, 64 B per point):
 //   a0: pos.x, pos.y, pos.z (render units, mm × MM as brain.js), flux (× mean brain neuron-star flux, §13.3)
-//   a1: normal.x, normal.y, normal.z (skin only; 0 for volumes and streams), seed ∈ [0, 1)
+//   a1: normal.x, normal.y, normal.z (skin only; 0 for volumes and streams; heart stars carry τ, part and
+//       axial place instead, heart-form.js; vessel stars their pulse delay, part and amplitude,
+//       vessel-tree.js), seed ∈ [0, 1)
 //   a2: nodeId (index into geometry NODE_IDS), pathId (index into geometry PATHS, −1 = none),
 //       u (A.2 arc parameter on that path, 0 at the CNS end; 0 when no path), tissue class (TISSUE)
 //   a3: network bitmask (NET, eight display bits), LOD (0 always, 1 mid, 2 fine: ≥ 0.8 px/mm, §13.4),
@@ -20,26 +22,35 @@ import { MM, mulberry32 } from '../anatomy.js';
 import {
   PARAMS as GEO, NET, TISSUE, TISSUE_NAMES, BODY_BOUNDS, HEAD, ORGANS, ORGAN_SHARES, PELVIC_FLOOR, GUT, GANGLIA, MUSCLES,
   VESSELS, PATHS, SITES, SKIN_REGIONS, bodySDF, bodyNormal, skinRegion, diaphragmZ, sdEllipsoid, gutAt, drawToS, sToDraw,
-  gutRegionAt, rigidAt, pathById, pathSamples, nodeIndex,
+  gutRegionAt, rigidAt, pathById, pathSamples, nodeIndex, eyeFissure,
 } from './geometry.js';
+import { HEART_FORM, PART, axialOf, lvInside, surfacePoint } from './heart-form.js';
+import { TREE, VPART, VESSEL_TREE, arteryAt, buildDetail, vesselPoint } from './vessel-tree.js';
 import { SEGMENTS, CORD_SEGMENTS, CORD_ARC_CONUS, VERTEBRAE, PARAMS as FRAME, canalAt, canalAtArc, cordRadiiAtArc, drg, sided } from './frame.js';
 
 export const FLOATS = 16;   // B.7
 
 export const PARAMS = {
-  // §13.4 point budgets per tier and budget group (= B.8 `TIERS.body` totals 32.5k / 63k / 104k / 158k).
+  // §13.4 point budgets per tier and budget group (= B.8 `TIERS.body` totals 122,250 / 238,500 / 393,000 / 610,000).
+  // The dense star model (user decision, 6 November 2026) raised the earlier budgets per group by
+  // skin ×3, organ ×2, muscle ×1.5, bone ×1.5, cord ×2.5, nerve ×3, ganglion ×2, enteric ×2,
+  // vessel ×1.5; the Stars style draws the earlier share (renderer PARAMS.style.keep). The organ
+  // budget then grew again for the heart (HEART.md §6): 55 % of it is the heart, and the other organs
+  // keep their counts. The vessel budget then grew for the vascular tree (PULSE.md §9, §13): 93.75 % of it
+  // is the tree, and the earlier vessel, haze and immune stars keep their counts (the same 0.3 / 0.6 /
+  // 1 / 1.6 tier ratio as before).
   budgets: {
-    low:    { skin: 9000,  organ: 6000,  muscle: 2000,  bone: 1500, cord: 2000, nerve: 6000,  ganglion: 2500,  enteric: 2000,  vessel: 1500 },
-    medium: { skin: 16000, organ: 12000, muscle: 4000,  bone: 3000, cord: 4000, nerve: 12000, ganglion: 5000,  enteric: 4000,  vessel: 3000 },
-    high:   { skin: 26000, organ: 20000, muscle: 7000,  bone: 5000, cord: 6000, nerve: 20000, ganglion: 8000,  enteric: 7000,  vessel: 5000 },
-    ultra:  { skin: 40000, organ: 32000, muscle: 10000, bone: 7000, cord: 9000, nerve: 30000, ganglion: 12000, enteric: 10000, vessel: 8000 },
+    low:    { skin: 27000,  organ: 22000, muscle: 3000,  bone: 2250,  cord: 5000,  nerve: 18000, ganglion: 5000,  enteric: 4000,  vessel: 36000 },
+    medium: { skin: 48000,  organ: 44000, muscle: 6000,  bone: 4500,  cord: 10000, nerve: 36000, ganglion: 10000, enteric: 8000,  vessel: 72000 },
+    high:   { skin: 78000,  organ: 72000, muscle: 10500, bone: 7500,  cord: 15000, nerve: 60000, ganglion: 16000, enteric: 14000, vessel: 120000 },
+    ultra:  { skin: 120000, organ: 116000, muscle: 15000, bone: 10500, cord: 22500, nerve: 90000, ganglion: 24000, enteric: 20000, vessel: 192000 },
   },
   // §13.2 Lund–Browder skin shares (% BSA); the perineal 1 % is folded into the smooth pelvic shell.
   skinShares: { head: 7, neck: 2, trunkAnt: 13, trunkPost: 13, buttocks: 5, perineum: 1, upperArm: 8, forearm: 6, hand: 5, thigh: 19, leg: 14, foot: 7 },
   isoGrid: { low: 6, medium: 6, high: 4, ultra: 4 },   // §13.2 iso-surface sampling grid (mm)
   coarseCell: 24,                                     // §13.4 narrow band: coarse 24-mm pass, then the fine grid near the surface
   bandMargin: 1.25,                                   // [model] widening of the band tests (the field is not an exact distance)
-  eyeSkinGap: 1,                                      // [model] no skin stars within eyeOpening + 1 mm of the corneal apex (dark pupil)
+  eyeSkinGap: 1,                                      // [model] no skin stars within 1 mm of the eye fissure (geometry.js eyeFissure; dark pupil)
   // §13.3 flux ratios (× mean brain neuron-star flux; brain.js lum() has mean ≈ 1).
   flux: { skin: 0.15, organ: 0.38, muscle: 0.10, bone: 0.08, cordWhite: 0.5, cordGrey: 0.3, nerve: 0.30, ganglion: 0.5, enteric: 0.2, icc: 0.08, vessel: 0.1 },
   fluxJitter: 0.2,                                    // [model] uniform ± jitter around the class flux (mean kept)
@@ -54,7 +65,15 @@ export const PARAMS = {
   // [model] splits inside a budget group (fractions of the group budget).
   cordSplit: { cord: 0.55, drg: 0.15, roots: 0.30 },
   autonomicSplit: { ganglia: 0.35, streams: 0.65 },
-  vesselSplit: { vessels: 0.65, haze: 0.15, immune: 0.20 },
+  vesselSplit: { vessels: 0.65, haze: 0.15, immune: 0.20 },   // of the earlier vessel stars (1 − treeShare)
+  // Vascular tree (PULSE.md §9, §13.6) [model]: its share of the vessel group, split by part (VPART 1–7:
+  // artery, arterial branch, vein, venous branch, capillary, pulmonary artery, pulmonary vein); within a
+  // part, star weight per vessel ∝ its length × (densityFloor + √r, r in mm) × its weight factor.
+  // Vessels of radius ≥ wallR mm are walls (a shell at wall × r; the aortic root lobed by its
+  // sinuses), smaller ones a Gaussian core of σ = coreSigma × r (≥ minR mm), cut at 1.3 r; capillary
+  // stars lie within their strand's width.
+  treeShare: 0.9375,
+  tree: { shares: [0.26, 0.16, 0.14, 0.08, 0.24, 0.07, 0.05], densityFloor: 0.35, wallR: 4, wall: [0.8, 1], coreSigma: 0.5, minR: 0.4 },
   immuneSplit: { spleen: 0.6, ileum: 0.4 },           // §13.5 speckle at the source tissue and the spleen
   boneSplit: { vertebrae: 0.5, pelvis: 0.2, ribs: 0.3 },
   senseShares: { iris: 30, eye: 20, retina: 15, cochlea: 7, vestLabyrinth: 8, olfEpith: 6, tongue: 8, tonguePatch: 6 }, // % of the §13.4 sense-organ share
@@ -169,7 +188,8 @@ class Writer {
     const jit = 1 + PARAMS.fluxJitter * (2 * rnd.u() - 1);
     b[k] = p[0] * MM; b[k + 1] = p[1] * MM; b[k + 2] = p[2] * MM; b[k + 3] = o.flux * jit;
     const nn = o.n;
-    b[k + 4] = nn ? nn[0] : 0; b[k + 5] = nn ? nn[1] : 0; b[k + 6] = nn ? nn[2] : 0; b[k + 7] = rnd.u();
+    b[k + 4] = nn ? nn[0] : 0; b[k + 5] = nn ? nn[1] : 0; b[k + 6] = nn ? nn[2] : 0;
+    b[k + 7] = Math.min(rnd.u(), 0.99999994);   // the seed stays below 1 once stored as float32 (B.7)
     b[k + 8] = o.node; b[k + 9] = o.path ?? -1; b[k + 10] = o.u ?? 0; b[k + 11] = o.tissue;
     b[k + 12] = o.bits || 0; b[k + 13] = o.lod || 0; b[k + 14] = o.side || 0; b[k + 15] = rigidAt(p);
     this.n++;
@@ -287,7 +307,6 @@ function* genSkin(w, count, rnd, ctx) {
   const grid = yield* skinGrid(ctx.isoGrid, ctx);
   const shares = SKIN_REGIONS.map((r) => PARAMS.skinShares[r] || 0);
   const quotas = apportion(count, shares);
-  const apex = HEAD.cornealApex, eyeR = GEO.eyeOpening + PARAMS.eyeSkinGap;
   for (let ri = 0; ri < SKIN_REGIONS.length; ri++) {
     let cells = grid.cells[ri], node = nodeIndex(`skin.${SKIN_REGIONS[ri]}`);
     if (cells.length === 0) { cells = grid.cells[SKIN_REGIONS.indexOf('trunkAnt')]; node = nodeIndex('skin.trunkAnt'); }
@@ -305,7 +324,7 @@ function* genSkin(w, count, rnd, ctx) {
           d = bodySDF(q[0], q[1], q[2]);
         }
         if (Math.abs(d) > 0.5) continue;
-        if (Math.abs(q[0]) < 80 && len3(Math.abs(q[0]) - apex[0], q[1] - apex[1], q[2] - apex[2]) < eyeR) continue;
+        if (Math.abs(q[0]) < 80 && q[2] > -60 && q[2] < -15 && eyeFissure(q[0], q[1], q[2]) < PARAMS.eyeSkinGap) continue;
         p = q; n = bodyNormal(q[0], q[1], q[2]);
         break;
       }
@@ -402,6 +421,223 @@ function gutWallEntry(group) {
     },
   };
 }
+// ---------------------------------------------------------------------------------------------
+// Heart (research/HEART.md §2): chamber walls, valve rings, great-vessel roots and the conduction
+// system. Each star carries its activation place τ, its part and its axial place in the normal slot
+// (heart-form.js), which the body shader animates with the beat (heart.js).
+// ---------------------------------------------------------------------------------------------
+const HEART_WEIGHTS = { lv: 0.30, rv: 0.12, ra: 0.06, la: 0.06, appendages: 0.025, valves: 0.025, leaflets: 0.05,
+  chordae: 0.015, papillary: 0.02, roots: 0.07, coronaryA: 0.05, coronaryV: 0.035, sa: 0.012, atrialPaths: 0.03,
+  av: 0.008, his: 0.04, purkinje: 0.09 };
+const HEART_CONDUCTION_FLUX = 2.0;   // [model] × the organ flux: the conduction system reads as bright fibres
+const HEART_VESSEL_FLUX = 2.2;       // [model] coronary vessels and leaflets stand out from the muscle
+function heartEntries() {
+  const H = HEART_FORM, W = H.w, A = H.ant, R = H.right, clamp01 = (x) => clamp(x, 0, 1);
+  const nodes = { heart: nodeIndex('heart'), ventricles: nodeIndex('ventricles'), sa: nodeIndex('saNode'), av: nodeIndex('avNode') };
+  const at = (b, s, x, y) => [b[0] + W[0] * s + A[0] * x + R[0] * y, b[1] + W[1] * s + A[1] * x + R[1] * y, b[2] + W[2] * s + A[2] * x + R[2] * y];
+  const fluxC = PARAMS.flux.organ * HEART_CONDUCTION_FLUX, fluxV = PARAMS.flux.organ * HEART_VESSEL_FLUX;
+  const star = (p, node, tau, part, flux, axial) => ({ p, o: { node, bits: 0, side: 0, n: [tau, part, axial ?? axialOf(p)], ...(flux ? { flux } : {}) } });
+  const poly = (pts) => {   // polyline sampler by arc-length fraction
+    const segs = [], cum = [0];
+    for (let i = 0; i < pts.length - 1; i++) { segs.push([pts[i], pts[i + 1]]); cum.push(cum[i] + len3(...sub(pts[i + 1], pts[i]))); }
+    const total = cum[cum.length - 1];
+    return { total, at(f) {
+      const d = f * total; let i = 0;
+      while (i < segs.length - 1 && cum[i + 1] < d) i++;
+      return lerp3(segs[i][0], segs[i][1], (d - cum[i]) / Math.max(1e-9, cum[i + 1] - cum[i]));
+    } };
+  };
+  const jitter = (rnd, p, sd) => [p[0] + rnd.gauss() * sd, p[1] + rnd.gauss() * sd, p[2] + rnd.gauss() * sd];
+  const tube = (rnd, P, f, r, wall) => {   // a point in the wall of a tube along polyline P
+    const c = P.at(f), c2 = P.at(Math.min(1, f + 0.02)), c1 = P.at(Math.max(0, f - 0.02)), d = norm(sub(c2, c1));
+    const e1 = norm(cross(d, Math.abs(d[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])), e2 = cross(d, e1);
+    const a = 2 * Math.PI * rnd.u(), rr = r - wall * rnd.u();
+    return [c[0] + (e1[0] * Math.cos(a) + e2[0] * Math.sin(a)) * rr, c[1] + (e1[1] * Math.cos(a) + e2[1] * Math.sin(a)) * rr,
+      c[2] + (e1[2] * Math.cos(a) + e2[2] * Math.sin(a)) * rr];
+  };
+  const entries = [];
+  const put = (key, sample) => entries.push({ weight: HEART_WEIGHTS[key], sample });
+  const fr = new Rng(0x5eed);   // fixed, seed-independent heart geometry (fibres, strands)
+
+  // Ventricular wall timing over the QRS: septum first, then apex to base and endocardium to
+  // epicardium (Durrer 1970), spread across the whole window so the wave runs rather than flashes.
+  const ventTau = (ax, tm, septal) => 2.27 + 0.73 * clamp01((0.6 * ax + 0.4 * tm + (septal ? 0 : 0.15)) / 1.15);
+  const SEPTAL = norm([A[0] + R[0], A[1] + R[1], A[2] + R[2]]);
+  // Each ventricle is an ellipsoid centred `equator` of the way down (lvS0, rvS0), cut by the base plane.
+  const lvA = len3(...sub(H.apex, H.lv.base)), lvS0 = H.lv.equator * lvA, lvE = lvA - lvS0, lvR = H.lv.r;
+  const lvIn = [lvE - H.lv.wall, lvR - H.lv.wall];
+  const rvA = H.rv.reach * H.length, rvS0 = H.rv.equator * rvA, rvE = rvA - rvS0, [rvX, rvY] = H.rv.r, rw = H.rv.wall;
+  // Surfaces of equal depth k (0 endocardium … 1 epicardium) of each ventricle, from [s, θ]; `a` is
+  // the far end (the apex side) of that surface along the axis.
+  const lvSurf = (s, th, k) => {
+    const e = lvIn[0] + (lvE - lvIn[0]) * k, r = lvIn[1] + (lvR - lvIn[1]) * k, rho = r * Math.sqrt(Math.max(0, 1 - ((s - lvS0) / e) ** 2));
+    return { p: at(H.lv.base, s, rho * Math.cos(th), rho * Math.sin(th)), a: lvS0 + e, rho };
+  };
+  const rvSurf = (s, th, k) => {
+    const e = rvE - rw + rw * k, rx = rvX - rw + rw * k, ry = rvY - rw + rw * k, f = Math.sqrt(Math.max(0, 1 - ((s - rvS0) / e) ** 2));
+    return { p: at(H.rv.base, s, rx * f * Math.cos(th), ry * f * Math.sin(th)), a: rvS0 + e, rho: Math.min(rx, ry) * f };
+  };
+  // Myocardial fibres (Streeter 1969): strands on a surface of equal depth, at a helix angle that
+  // turns from +60° (endocardium) to −60° (epicardium); the RV's are flatter.
+  const fibresOf = (surf, n, helix, isRv) => {
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const k = fr.u(), alpha = ((helix[0] + (helix[1] - helix[0]) * k) * Math.PI) / 180;
+      let s = fr.u() * (isRv ? rvA : lvA) * 0.95, th = 2 * Math.PI * fr.u();
+      const L = fr.range(H.fibres.length[0], H.fibres.length[1]), pts = [];
+      for (let d = 0; d <= L; d += H.fibres.step) {
+        const S = surf(s, th, k);
+        if (S.rho < 1.5 || s < 0 || s > S.a * 0.98) break;
+        if (!isRv || !lvInside(S.p, 0.5)) pts.push({ p: S.p, k });
+        s += H.fibres.step * Math.sin(alpha); th += (H.fibres.step * Math.cos(alpha)) / S.rho;
+      }
+      if (pts.length > 2) out.push({ P: poly(pts.map((q) => q.p)), k });
+    }
+    return out;
+  };
+  const lvFibres = fibresOf(lvSurf, H.fibres.lv, H.fibres.helix, false);
+  const rvFibres = fibresOf(rvSurf, H.fibres.rv, H.fibres.rvHelix, true);
+  const wallStar = (p, k, part) => {
+    const q = sub(p, H.lv.base), sAx = dot(q, W), rad = sub(q, [W[0] * sAx, W[1] * sAx, W[2] * sAx]);
+    const septal = part === PART.LV && dot(norm(rad), SEPTAL) > 0.55;
+    return star(p, nodes.ventricles, ventTau(axialOf(p), k, septal), part);
+  };
+  // Left ventricle: fibre strands, and a scatter through the wall.
+  put('lv', (rnd) => {
+    if (rnd.u() < H.fibres.share && lvFibres.length) {
+      const F = lvFibres[rnd.int(lvFibres.length)];
+      return wallStar(jitter(rnd, F.P.at(rnd.u()), 0.35), F.k, PART.LV);
+    }
+    for (let k = 0; k < 64; k++) {
+      const s = rnd.u() * lvA, x = rnd.range(-lvR, lvR), y = rnd.range(-lvR, lvR), rho2 = x * x + y * y;
+      const o = ((s - lvS0) / lvE) ** 2 + rho2 / (lvR * lvR), i = ((s - lvS0) / lvIn[0]) ** 2 + rho2 / (lvIn[1] * lvIn[1]);
+      if (o > 1 || i < 1) continue;
+      return wallStar(at(H.lv.base, s, x, y), clamp01((Math.sqrt(o) - Math.sqrt(o / i)) / (1 - Math.sqrt(o / i) + 1e-9)), PART.LV);
+    }
+    return wallStar(lvSurf(lvA * 0.5, 0, 0.5).p, 0.5, PART.LV);
+  });
+  // Right ventricle: an ellipsoid shell outside the LV (a crescent), fibres and scatter.
+  put('rv', (rnd) => {
+    if (rnd.u() < H.fibres.share && rvFibres.length) {
+      const F = rvFibres[rnd.int(rvFibres.length)];
+      return wallStar(jitter(rnd, F.P.at(rnd.u()), 0.35), F.k, PART.RV);
+    }
+    for (let k = 0; k < 96; k++) {
+      const s = rnd.u() * rvA, x = rnd.range(-rvX, rvX), y = rnd.range(-rvY, rvY);
+      const o = ((s - rvS0) / rvE) ** 2 + (x / rvX) ** 2 + (y / rvY) ** 2, i = ((s - rvS0) / (rvE - rw)) ** 2 + (x / (rvX - rw)) ** 2 + (y / (rvY - rw)) ** 2;
+      if (o > 1 || i < 1) continue;
+      const p = at(H.rv.base, s, x, y);
+      if (lvInside(p)) continue;
+      return wallStar(p, clamp01((o - 0.85) / 0.15), PART.RV);
+    }
+    return wallStar(rvSurf(rvA * 0.4, 0.5, 0.5).p, 0.5, PART.RV);
+  });
+  // Papillary muscles (with the ventricle) and their chordae to the free edges of the leaflets.
+  const cavity = (ch, s, thDeg, f) => {   // a point of the cavity at [s, θ], f of the way out to the endocardium
+    const th = (thDeg * Math.PI) / 180, S = ch === 'lv' ? lvSurf(s * lvA, th, 0) : rvSurf(s * rvA, th, 0);
+    const c = at(ch === 'lv' ? H.lv.base : H.rv.base, s * (ch === 'lv' ? lvA : rvA), 0, 0);
+    return lerp3(c, S.p, f);
+  };
+  const papillary = H.papillary.map((m) => ({ ...m, b: cavity(m.chamber, m.base[0], m.base[1], 1), t: cavity(m.chamber, m.tip[0], m.tip[1], m.tipR) }));
+  put('papillary', (rnd) => {
+    const m = papillary[rnd.int(papillary.length)], f = rnd.u(), c = lerp3(m.b, m.t, f), r = 6 - 3 * f;
+    const p = jitter(rnd, c, r * 0.5);
+    return star(p, nodes.ventricles, ventTau(axialOf(p), 0, false), m.chamber === 'lv' ? PART.LV : PART.RV);
+  });
+  // Valve rings (the fibrous skeleton) and the leaflets, closed in the ring plane with a slight dome.
+  const ringBasis = (i) => {
+    const ax = H.valveAxis[i], e1 = norm(cross(ax, Math.abs(ax[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])), e2 = cross(ax, e1);
+    return { ax, e1, e2 };
+  };
+  const rings = H.valves.map((v, i) => ({ ...v, ...ringBasis(i), i }));
+  const onRing = (v, a, r, h) => [v.c[0] + (v.e1[0] * Math.cos(a) + v.e2[0] * Math.sin(a)) * r + v.ax[0] * h,
+    v.c[1] + (v.e1[1] * Math.cos(a) + v.e2[1] * Math.sin(a)) * r + v.ax[1] * h, v.c[2] + (v.e1[2] * Math.cos(a) + v.e2[2] * Math.sin(a)) * r + v.ax[2] * h];
+  put('valves', (rnd) => {
+    const v = rings[rnd.int(rings.length)];
+    return star(onRing(v, 2 * Math.PI * rnd.u(), v.r + rnd.gauss() * 1.0, rnd.gauss() * 0.8), nodes.heart, -1, PART.VALVE, null, v.i < 2 ? 1 : 0);
+  });
+  put('leaflets', (rnd) => {
+    const v = rings[rnd.int(rings.length)], L = H.leaflets[v.i], f = Math.sqrt(rnd.u());   // area-uniform
+    // Each leaflet is a sector; its free edge bows in towards the centre between the commissures.
+    const sector = rnd.int(L.n), a = 2 * Math.PI * (sector + 0.06 + 0.88 * rnd.u()) / L.n;
+    const r = v.r * f, h = L.dome * (1 - f * f) + rnd.gauss() * 0.4;
+    return star(onRing(v, a, r, h), nodes.heart, -(2 + v.i), PART.LEAFLET, fluxV, v.i < 2 ? 1 : 0);
+  });
+  const chordae = [];
+  for (const m of papillary) {
+    const v = rings[m.valve];
+    for (let k = 0; k < 7; k++) chordae.push(poly([m.t, onRing(v, 2 * Math.PI * fr.u(), v.r * fr.range(0.25, 0.6), 0)]));
+  }
+  put('chordae', (rnd) => {
+    const C = chordae[rnd.int(chordae.length)], p = jitter(rnd, C.at(rnd.u()), 0.25);
+    return star(p, nodes.ventricles, -1, PART.CHORDAE);
+  });
+  // Atria and their appendages: thin shells above the base plane, timed by distance from the SA node.
+  const atrialTau = (p) => clamp01(len3(...sub(p, H.sa.c)) / H.atrialReach);
+  for (const [key, E, part] of [['ra', H.ra, PART.RA], ['la', H.la, PART.LA]]) {
+    put(key, (rnd) => {
+      const p = tryPoint(rnd, () => onEllShell(rnd, E.c, E.r, E.wall), (q) => dot(sub(q, H.base), W) < 6 && !lvInside(q, 2));
+      return star(p, nodes.heart, atrialTau(p), part);
+    });
+  }
+  put('appendages', (rnd) => {
+    const right = rnd.u() < 0.5, E = right ? H.ra.appendage : H.la.appendage;
+    const p = onEllShell(rnd, E.c, E.r, 2.5);
+    return star(p, nodes.heart, atrialTau(p), right ? PART.RA : PART.LA);
+  });
+  // Great vessels: walls of tubes; the aorta and pulmonary veins oxygenated (τ −1), the rest venous (−2).
+  const roots = H.roots.map((g) => ({ ...g, P: poly(g.pts) }));
+  const rootW = roots.map((g) => g.P.total * g.r);
+  const rootCdf = cumulative(rootW);
+  put('roots', (rnd) => {
+    const g = roots[rnd.pick(rootCdf)];
+    return star(tube(rnd, g.P, rnd.u(), g.r, 2), nodes.heart, g.venous ? -2 : -1, PART.ROOT, null, 0);
+  });
+  // Coronary arteries and veins on the epicardium.
+  const vessels = (list) => list.map((c) => ({ r: c.r, P: poly(c.pts.map(([sf, th]) => surfacePoint(sf, th, c.r + 0.5))) }));
+  const arteries = vessels(H.coronary.arteries), veins = vessels(H.coronary.veins);
+  const vCdf = (list) => cumulative(list.map((c) => c.P.total * c.r));
+  const aCdf = vCdf(arteries), wCdf = vCdf(veins);
+  put('coronaryA', (rnd) => { const c = arteries[rnd.pick(aCdf)]; return star(tube(rnd, c.P, rnd.u(), c.r, c.r * 0.6), nodes.heart, -1, PART.CORONARY_A, fluxV); });
+  put('coronaryV', (rnd) => { const c = veins[rnd.pick(wCdf)]; return star(tube(rnd, c.P, rnd.u(), c.r, c.r * 0.5), nodes.heart, -1, PART.CORONARY_V, fluxV); });
+  // Conduction system.
+  put('sa', (rnd) => star(inEll(rnd, H.sa.c, H.sa.r), nodes.sa, 0.04 * rnd.u(), PART.SA, fluxC));
+  const atrialPaths = H.atrialPaths.map(poly);
+  put('atrialPaths', (rnd) => {
+    const P = atrialPaths[rnd.int(atrialPaths.length)], f = rnd.u();
+    return star(jitter(rnd, P.at(f), 0.8), nodes.sa, clamp01(f * P.total / H.atrialReach), PART.ATRIAL_PATH, fluxC);
+  });
+  const avDir = norm(sub(H.his[1], H.his[0])), avR = Math.max(...H.av.r);
+  put('av', (rnd) => {
+    const p = inEll(rnd, H.av.c, H.av.r);
+    return star(p, nodes.av, 1 + clamp01(0.5 + dot(sub(p, H.av.c), avDir) / (2 * avR)), PART.AV, fluxC);
+  });
+  const his = poly(H.his), branches = H.branches.map(poly);
+  put('his', (rnd) => {
+    if (rnd.u() < 0.2) { const f = rnd.u(); return star(jitter(rnd, his.at(f), 0.9), nodes.ventricles, 2 + 0.12 * f, PART.HIS, fluxC); }
+    const B = branches[rnd.int(branches.length)], f = rnd.u();
+    return star(jitter(rnd, B.at(f), 0.9), nodes.ventricles, 2.12 + 0.2 * f, PART.HIS, fluxC);
+  });
+  // Purkinje strands: fixed paths on the endocardium, from near the apex up the walls.
+  const strands = [];
+  for (let k = 0; k < H.purkinje.strands; k++) {
+    const lv = k % 3 !== 0, surf = lv ? lvSurf : rvSurf, reach = lv ? lvA : rvA;
+    let th = 2 * Math.PI * fr.u(), s = reach * fr.range(0.62, 0.9);
+    const L = fr.range(H.purkinje.length[0], H.purkinje.length[1]), pts = [];
+    for (let d = 0; d <= L; d += 4) {
+      const S = surf(s, th, 0.08);
+      if (lv || !lvInside(S.p, 1)) pts.push(S.p);
+      s -= 4; th += fr.gauss() * 0.06;
+      if (s < 4) break;
+    }
+    if (pts.length > 1) strands.push(poly(pts));
+  }
+  put('purkinje', (rnd) => {
+    const S = strands[rnd.int(strands.length)], f = rnd.u();
+    return star(jitter(rnd, S.at(f), 0.7), nodes.ventricles, 2.22 + 0.3 * f, PART.PURKINJE, fluxC);
+  });
+  return entries;
+}
 function organEntries() {
   const byId = new Map();
   for (const o of ORGANS) { if (!byId.has(o.id)) byId.set(o.id, []); byId.get(o.id).push(o); }
@@ -414,6 +650,7 @@ function organEntries() {
   const add = (g, e) => { if (e) { if (!groups.has(g)) groups.set(g, []); groups.get(g).push(e); } };
   for (const o of ORGANS) {
     const node = nodeIndex(ORGAN_NODE(o)), bits = ORGAN_BITS[o.id] || 0, mult = o.sided ? 2 : 1;
+    if (o.group === 'heart') continue;   // the heart's stars come from heartEntries (HEART.md); ORGANS keeps its volume for carving
     if (o.type === 'e') {
       const r = enlarge(o.r);
       const ok = (p) => insideSkin(p) && (o.clipBelow === undefined || p[2] >= o.clipBelow)
@@ -438,6 +675,7 @@ function organEntries() {
       add(o.group, { weight: area * o.wall, sample(rnd) { return { p: onEllShell(rnd, o.c, o.r, o.wall), o: { node, bits, side: 0 } }; } });
     }
   }
+  for (const e of heartEntries()) add('heart', e);
   for (const g of ['intestines', 'stomach', 'pelvic', 'other']) add(g, gutWallEntry(g));
   {   // gastric fundus dome (§2.9) as a wall shell
     const F = GUT.fundus, node = nodeIndex('gut.fundus'), path = pathById('gut');
@@ -671,8 +909,74 @@ function* genEnteric(w, count, rnd, ctx) {
 // ---------------------------------------------------------------------------------------------
 // Vascular and immune (§13.3 blood haze; §13.5 neuroendocrine haze and neuroimmune speckle)
 // ---------------------------------------------------------------------------------------------
+// The earlier great-vessel stars take their pulse delay and amplitude from the nearest tree artery
+// (PULSE.md §9); the venae cavae carry none.
+function earlierPulse(path, p) {
+  if (path.nerve === 'aorta') { const h = arteryAt(p, ['aorta']); return [h.d, VPART.EARLIER_ARTERY, h.a]; }
+  if (path.nerve === 'carotid') { const h = arteryAt(p, ['cca', 'ica'], path.side); return [h.d, VPART.EARLIER_ARTERY, h.a]; }
+  return [-1, VPART.EARLIER_VEIN, 0];
+}
+// Vascular tree (PULSE.md §9, §13): the named vessels, their branches and the capillary beds as fine
+// stars. Each star carries its arrival delay, part code and pulse amplitude in the normal slot
+// (vessel-tree.js); a capillary star carries its oxygen saturation in place of the amplitude.
+function detailContext() {
+  const org = (id, side) => { const o = ORGANS.find((x) => x.id === id && (side === undefined || x.side === side)); return { c: o.c, r: o.r }; };
+  const liver = ORGANS.filter((o) => o.id === 'liver');
+  const gut = (s0, s1, step) => {
+    const out = [];
+    for (let s = s0; s <= s1; s += step) { const g = gutAt(sToDraw(s) * 10); out.push({ p: g.p, r: g.r, t: g.t }); }
+    return out;
+  };
+  return {
+    inside: (p) => bodySDF(p[0], p[1], p[2]) < -TREE.twig.skinGap,
+    organs: { lungR: org('lungs', 1), lungL: org('lungs', -1), liver: { c: liver[0].c, r: liver[0].r }, liverL: { c: liver[1].c, r: liver[1].r },
+      spleen: org('spleen'), kidneyR: org('kidney', 1), kidneyL: org('kidney', -1) },
+    gut: { small: gut(85, 340, 12), colon: gut(346, 480, 5) },   // jejunum and ileum; caecum to sigmoid (in-vivo s, cm)
+    intercostal: PATHS.filter((p) => /^intercostal\.T/.test(p.nerve)).map((p) => ({ seg: p.nerve.split('.')[1], side: p.side, pts: pathSamples(p).pts })),
+  };
+}
+// The detail of the vascular tree (branches and capillary beds) for this body geometry (tests, PULSE.md §13).
+export const vascularDetail = () => buildDetail(detailContext());
+let TREE_ENTRIES = null;
+function treeEntries() {
+  if (TREE_ENTRIES) return TREE_ENTRIES;
+  const G = PARAMS.tree, node = { art: nodeIndex('aorta'), ven: nodeIndex('ivc'), cap: nodeIndex('blood') };
+  const D = vascularDetail();
+  const parts = Array.from({ length: G.shares.length }, () => []);
+  for (const v of [...VESSEL_TREE.vessels, ...D.branches]) {
+    if (!(v.len > 0.5)) continue;
+    const meanR = v.r.reduce((a, b) => a + b, 0) / v.r.length;
+    parts[v.part - 1].push({ weight: v.len * (G.densityFloor + Math.sqrt(meanR)) * (v.wf ?? 1), sample(r) {
+      const s = r.u() * v.len, q = vesselPoint(v, s), t = q.t;
+      const n1 = norm(cross(t, Math.abs(t[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])), n2 = cross(t, n1);
+      let a, b;
+      if (q.r >= G.wallR) {
+        const th = 2 * Math.PI * r.u();
+        let rho = q.r * (G.wall[0] + (G.wall[1] - G.wall[0]) * r.u());
+        if (v.sinus && s < v.sinus.len) rho *= 1 + v.sinus.k * Math.max(0, Math.cos(3 * th)) * Math.sin(Math.PI * s / v.sinus.len);
+        a = rho * Math.cos(th); b = rho * Math.sin(th);
+      } else {
+        const rad = Math.max(G.minR, q.r);
+        do { a = r.gauss() * G.coreSigma; b = r.gauss() * G.coreSigma; } while (a * a + b * b > 1.69);
+        a *= rad; b *= rad;
+      }
+      const p = [q.p[0] + n1[0] * a + n2[0] * b, q.p[1] + n1[1] * a + n2[1] * b, q.p[2] + n1[2] * a + n2[2] * b];
+      return { p, o: { node: v.vein ? node.ven : node.art, bits: NET.NE, lod: 0, side: v.side, n: [v.vein ? -1 : q.d, v.part, v.vein ? 0 : q.a] } };
+    } });
+  }
+  for (const c of D.beds) {
+    parts[VPART.CAPILLARY - 1].push({ weight: c.len, sample(r) {
+      const q = vesselPoint(c, r.u() * c.len), oxy = c.oxy[q.i] + (c.oxy[q.i + 1] - c.oxy[q.i]) * q.f, j = c.r[0];
+      const p = [q.p[0] + r.gauss() * j, q.p[1] + r.gauss() * j, q.p[2] + r.gauss() * j];
+      return { p, o: { node: node.cap, bits: NET.NE, lod: 0, side: c.side, n: [-1, VPART.CAPILLARY, oxy] } };
+    } });
+  }
+  TREE_ENTRIES = parts;
+  return parts;
+}
 function* genVessels(w, count, rnd, ctx) {
-  const V = PARAMS.vesselSplit, [nV, nH, nI] = apportion(count, [V.vessels, V.haze, V.immune]);
+  const nTree = Math.round(count * PARAMS.treeShare);
+  const V = PARAMS.vesselSplit, [nV, nH, nI] = apportion(count - nTree, [V.vessels, V.haze, V.immune]);
   const base = { flux: PARAMS.flux.vessel, tissue: TISSUE.vessel };
   const vpaths = PATHS.filter((p) => p.kind === 'vessel');
   const ves = vpaths.map((path) => {
@@ -684,7 +988,7 @@ function* genVessels(w, count, rnd, ctx) {
       let a, b;
       do { a = r.gauss() * 0.6; b = r.gauss() * 0.6; } while (a * a + b * b > 1.69);
       const p = [q.p[0] + (q.N[0] * a + q.B[0] * b) * rad, q.p[1] + (q.N[1] * a + q.B[1] * b) * rad, q.p[2] + (q.N[2] * a + q.B[2] * b) * rad];
-      return { p, o: { node, path: path.index, u, bits: NET.NE, lod: 0, side: path.side } };
+      return { p, o: { node, path: path.index, u, bits: NET.NE, lod: 0, side: path.side, n: earlierPulse(path, p) } };
     } };
   });
   yield* fill(w, rnd, ctx, 'vessels', nV, ves, base);
@@ -705,6 +1009,8 @@ function* genVessels(w, count, rnd, ctx) {
     } },
   ];
   yield* fill(w, rnd, ctx, 'immune', nI, imm, base);
+  const parts = treeEntries(), counts = apportion(nTree, PARAMS.tree.shares);
+  for (let k = 0; k < parts.length; k++) yield* fill(w, rnd, ctx, `tree.${k + 1}`, counts[k], parts[k], base);
 }
 
 // ---------------------------------------------------------------------------------------------

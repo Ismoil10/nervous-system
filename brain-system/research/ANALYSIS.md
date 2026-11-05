@@ -245,6 +245,13 @@ The eye and chin fractions (0.936, 0.870) are not used, because the MNI head alr
 
 ### 2.3. Head soft tissue and sense organs
 
+> **Head form (5 November 2026).** The skin of the head and neck no longer uses the envelope
+> primitives below. It follows `research/BODY-FORM.md` §8: a cranium, a face skeleton and soft
+> tissue, the nose, lips, eyelids with an almond fissure, and auricles, sized to craniofacial norms,
+> with the neck as part of the torso sections. The §2.3 points (nasion, pronasale, subnasale, corneal
+> apex, eye, meatus, the mandibular plane) and every sense organ below are unchanged. `headEnv.scalp`
+> and `pinna.R` remain as picking volumes.
+
 The head envelope is the smooth union (k = 10 mm) of the primitives below. The two lens-BG ellipsoids left the brow, cheekbones, tragus and occiput 7–16 mm uncovered, so three primitives were added. The skin passes within ±6 mm of every skin landmark.
 
 | Structure | id | Position (x, y, z) mm | Extent mm | Frame | Conf. | Source |
@@ -322,6 +329,20 @@ Cord sections are ellipses whose axes are the Frostell et al. 2016 diameters, ta
 Each spinal nerve `sn.*` starts at its DRG.
 
 ### 2.6. Trunk, limbs and joints
+
+> **Skin form (5 November 2026).** The joints, landmarks, limb axes and internal trunk sections below
+> are unchanged, and they still place the gut, the regions and the rigid segments. The outer skin now
+> follows `research/BODY-FORM.md`, an anthropometric analysis of the human form (ANSUR II, neutral
+> at 1,760 mm):
+> - front/back superelliptic torso sections with the chest, abdomen, lumbar curve and buttocks;
+> - deltoid, trapezius, pectoral, scapular and gluteal masses;
+> - profiled limbs with the biceps, quadriceps, knee, calf and malleoli;
+> - arms joined with a crease;
+> - guards that cannot cut a term near the surface.
+>
+> A second pass (`BODY-FORM.md` §9) adds the clavicles and axillary folds, joins the deltoid to the
+> arm, flattens the chest front, removes the band at the knee and the elbow, and replaces the box
+> hand and the slab foot with a palm, jointed digits, a heel, an arch and toes.
 
 The torso is lofted through elliptical sections, the limbs are tapered capsules, and the hands and feet are boxes. The ellipse puts the chest wall ≈ 15 mm too far back at the midclavicular line. Skin points are therefore snapped to the drawn skin (§2.7), and deep structures follow the depth rules of §2.15.
 
@@ -5802,16 +5823,43 @@ The body needs its own zoom exponent for the following reason. Per-star energy s
 
 | Quantity | Low | Medium | High | Ultra | Species | Conf. | Source |
 |---|---|---|---|---|---|---|---|
-| Skin | 9,000 | 16,000 | 26,000 | 40,000 | — | low | [model] |
-| Organs | 6,000 | 12,000 | 20,000 | 32,000 | — | low | [model] |
-| Muscles | 2,000 | 4,000 | 7,000 | 10,000 | — | low | [model] |
-| Bone (faint skeleton) | 1,500 | 3,000 | 5,000 | 7,000 | — | low | [model] |
-| Spinal cord, roots, DRG | 2,000 | 4,000 | 6,000 | 9,000 | — | low | [model] |
-| Peripheral and cranial nerves | 6,000 | 12,000 | 20,000 | 30,000 | — | low | [model] |
-| Autonomic chain, ganglia, splanchnic and vagal streams | 2,500 | 5,000 | 8,000 | 12,000 | — | low | [model] |
-| Enteric mesh | 2,000 | 4,000 | 7,000 | 10,000 | — | low | [model] |
-| Vascular and immune (haze, speckle) | 1,500 | 3,000 | 5,000 | 8,000 | — | low | [model] |
-| **Body total** | **32,500** | **63,000** | **104,000** | **158,000** | — | low | [model]; A.7 |
+| Skin | 27,000 | 48,000 | 78,000 | 120,000 | — | low | [model] |
+| Organs | 22,000 | 44,000 | 72,000 | 116,000 | — | low | [model] |
+| Muscles | 3,000 | 6,000 | 10,500 | 15,000 | — | low | [model] |
+| Bone (faint skeleton) | 2,250 | 4,500 | 7,500 | 10,500 | — | low | [model] |
+| Spinal cord, roots, DRG | 5,000 | 10,000 | 15,000 | 22,500 | — | low | [model] |
+| Peripheral and cranial nerves | 18,000 | 36,000 | 60,000 | 90,000 | — | low | [model] |
+| Autonomic chain, ganglia, splanchnic and vagal streams | 5,000 | 10,000 | 16,000 | 24,000 | — | low | [model] |
+| Enteric mesh | 4,000 | 8,000 | 14,000 | 20,000 | — | low | [model] |
+| Vascular tree, capillary beds, blood haze and immune speckle | 36,000 | 72,000 | 120,000 | 192,000 | — | low | [model]; PULSE.md §9, §13 |
+| **Body total** | **122,250** | **238,500** | **393,000** | **610,000** | — | low | [model]; A.7 |
+
+> **Dense star model (6 November 2026).** At the user's request the glass shells were replaced by a
+> denser, sharper body of stars. Each budget group above grew by:
+> - skin ×3, nerves ×3;
+> - cord ×2.5;
+> - organs, ganglia and enteric mesh ×2;
+> - muscle, bone and vessels ×1.5.
+>
+> The earlier totals were 32.5k / 63k / 104k / 158k. The simple HUD's Detailed style draws every
+> star, 0.8 × the point size at the same energy, with a class gain `keep × boost`
+> (renderer `PARAMS.style`). The nervous system gets boost 1.6–2.0 and the skin 3.4, so the
+> silhouette reads. The Stars style draws a random `keep` share of each class (the earlier budgets)
+> at the earlier per-star flux, which keeps the earlier look.
+>
+> The heart takes 55 % of the organ stars (≈ 39,600 at High, ≈ 63,800 at Ultra), so the organ budget
+> rose to 22k / 44k / 72k / 116k. The other organ shares were scaled so that their counts stay as
+> before. The Stars style keeps the earlier look (other organs 17,600 / 32,400, heart 2,400 / 39,600),
+> and in Detailed the heart stars carry 0.8 × the organ star flux. The totals before the heart were
+> 78.5k / 151k / 248.5k / 378k. See research/HEART.md §6.
+>
+> **Vascular tree (PULSE.md §9).** The vessel group grew to 18k / 36k / 60k / 96k for a branching tree
+> of named arteries and veins with their twigs, which takes 87.5 % of it (15,750 / 31,500 / 52,500 /
+> 84,000). The earlier vessel, haze and immune stars keep their counts (2,250 / 4,500 / 7,500 /
+> 12,000) and are bit-identical. The Stars style draws no tree star; Detailed draws the tree in place
+> of the earlier great-vessel polylines. The totals before the tree were 88.5k / 171k / 280.5k / 430k.
+> The second pass (PULSE.md §13) doubled the vessel group to 36k / 72k / 120k / 192k for the organ
+> trees, the finer branches and the capillary beds; the tree now takes 93.75 % of it.
 | Packet pool | 128 | 192 | 256 | 256 | — | low | [model] |
 | Brain-side points (neurons, DA somata, axons, release sites, lanterns at 400) | ≈ 73,900 | ≈ 150,900 | ≈ 270,900 | ≈ 443,900 | — | high | `src/performance.js` L8–L13; DOPAMINE.md §9.2 |
 | New brain nuclei (§3): a separate buffer (`TIERS.extra`) added on top of `TIERS.neurons`, 5.3 / 5.0 / 4.5 / 4.5 % of it, so existing structures keep every star (B.8) | 3,200 | 6,500 | 10,800 | 18,000 | — | low | [model]; ≥ 77 new-star structures (B.8) |
@@ -5975,6 +6023,11 @@ Hormones and cytokines never travel as packets. Moving blobs along vessels would
 | Contested route (inflammatory-reflex efferent, A.8 #16) | 60 % opacity, dashed legend "Contested route" | — | — | low | [model]; DOPAMINE.md §10 rule 9 |
 
 ### 13.9. Rhythms, heartbeat and limb motion
+
+> **Heart (6 November 2026).** The heart is drawn per beat, in screen time, up to 150 bpm, regardless
+> of `kh`. The photosensitivity limit concerns the screen frequency, which is the heart rate itself,
+> not the time compression. Time compression does not speed the beat; slow motion slows it. Above
+> 150 bpm the heart shows a steady glow. See research/HEART.md.
 
 Rhythm rule. A periodic luminance or motion is drawn cycle by cycle only while its screen frequency (f × `kh`) is at most 1 Hz. Above that it is drawn as its cycle mean (envelope mode), and the numeric rate goes to Vitals. The only exceptions are small-point twinkle at ≤ 2 Hz and the heartbeat row below.
 
@@ -6156,7 +6209,7 @@ These limits apply in screen time `tS` to the composited frame. Everything drawn
 | Large-area slew | any region larger than the flash area changes by ≤ 10 % of maximum per ⅓ s | — | H | medium | DOPAMINE.md §10 rule 2 |
 | Packets; single points | ≤ 2 per s past any bundle point and per window (§13.8); ≤ 2 Hz per point | 1/s, Hz | — | low | DOPAMINE.md §10 rule 3; tightened from 3 so that the packet stream cannot itself reach the flash ceiling |
 | Toggle and overlay fade | t_fade = max(0.8 s, ΔL_max ÷ 0.3 s⁻¹), ΔL_max = largest regional change as a fraction of maximum; ghost at 8 % flux | s | — | low | A.5; A.9; [model] |
-| Heartbeat | ≤ 8 % of maximum; per beat only at `kh` ≤ 1 and `hr` ≤ 150 bpm | — | — | low | §13.9; A.9 |
+| Heartbeat | ≤ 8 % of maximum; per beat in screen time at `hr` ≤ 150 bpm, any `kh` | — | — | low | §13.9; A.9 |
 | Vasoconstriction dimming | ≤ 15 %, τ ≥ 2 s | — | — | low | A.9 |
 | Lantern colour | ≥ 2,200 K (default 2,300 K); displayed red ratio ≤ 0.75 | K | — | high | DOPAMINE.md §10 rule 4 |
 | Red ratio, body colours / modulator tints | maximum 0.411 / 0.46 | — | — | high | computed (§13.5, §13.6) |
@@ -6591,7 +6644,7 @@ Lens sources: brain-systems → §3; signal-processing → §4; sensory → §5;
 | 10 | Neuroimmune network | Cytokines (identity, mass, potency); peripheral innate model; immune → brain routes with latencies; inflammatory reflex (contested route, α7nAChR); splenic sympathetic action; glucocorticoid brake; fever (set point, EP3, bounds, effectors → §6, §7); sickness behaviour mapped to modifiers of other systems; insula immune encoding; interventions; off-semantics; endotoxaemia validation | Cytokine values; LPS model; route latencies; set-point law, thresholds, ceiling 41–42 °C; Liebermeister slope; brake forms; sickness modifiers; VNS | §2, §3, §6, §7, §8, §9, §11, §12, §13 |
 | 11 | Integration: switches and simulation architecture | Ownership model and edge `nets`; full switch table (expanding A.5) and AND table; interventions; graph schema and sizes (≈ 500 nodes, ≈ 1,500 edges); ports (→ §3); kernel layers, striding, determinism; clock (A.4); stimulus pipeline; model-side packet caps; cross-network coupling list (writer → reader); orgasm adapter (with all networks on, identical to the legacy path of the same commit; brain-only = central form); per-region state as a data texture; interface semantics (B.4 holds the module list); CPU budget; headless tests; `graphify update .`; reconciliation with `src/` and DOPAMINE.md (proposed rule-7 amendment pending user confirmation, splits, port order) | Step sizes; kh range, presets, slew, anticipation; CPU budget (≤ 1 ms/frame desktop, ≤ 2 ms low tier); history buffer; packet emission (every 20–50 ms, ≤ 20 /s per edge); graph sizes; RNG rules | §3–§10 (semantics), §12, §13; DOPAMINE.md §6, §9 |
 | 12 | Scenarios and validation | Scenario format (id, label, span, inputs(tH), clock keyframes, checkpoints); the nine core scenarios: inputs, staged timeline with node paths, expected readouts **by reference**, keyframes, **switch-off outcome matrix**, brain-only form; optional scenarios; manual-stimulus default behaviour per sense; repetition and habituation; checkpoint table (target → owner, tolerance); orgasm regression requirement | Scenario inputs (hot object 55 °C on right palm and fingers; 105 dB SPL broadband noise 50 ms, rise < 1 ms, both ears; 1,000 cd/m² for 1 s, right eye; patellar tap 2 mm right; active stand supine → upright over 3 s; 600 kcal mixed meal over 10 min after 2 min sight/smell; 15 min psychosocial stressor, pulsatile regime; i.v. endotoxin 2 ng/kg); keyframes; tolerances | §5–§11, §13; DOPAMINE.md §9.6 |
-| 13 | Rendering, visual design, HUD, performance and safety | Body SDF and skin sampling (Lund–Browder); non-explicit mannequin; organs, nerves, cord, faint skeleton, enteric mesh; flux ratios; depth attenuation; brain dominance and LOD; point budgets; palette (CCT/Duv tints, afferent/efferent, network swatches, modulator tints with pairwise ΔE2000 ≥ 10, ≤ 4 at once); packet and shimmer display; organ-response display; limb motion; camera presets and limits; picking and site snapping; HUD dropdowns and labels; disclosures (1 star ≈ N, enlarged for legibility, estimates); photosensitivity limiter; reduced motion and keyboard sites; lazy body generation | All visual numbers; point budgets (body 32.5k / 63k / 104k / 158k per tier; new brain nuclei a separate buffer of 4.5–5.3 % on top of the neuron budget, ≥ 120 stars each at high tier, ≥ 40 at low); colours; packet σ and gain; fades; camera values; photosensitivity numbers; HUD labels | §2, §3, §11, §12; DOPAMINE.md §8, §10; `performance.js` |
+| 13 | Rendering, visual design, HUD, performance and safety | Body SDF and skin sampling (Lund–Browder); non-explicit mannequin; organs, nerves, cord, faint skeleton, enteric mesh; flux ratios; depth attenuation; brain dominance and LOD; point budgets; palette (CCT/Duv tints, afferent/efferent, network swatches, modulator tints with pairwise ΔE2000 ≥ 10, ≤ 4 at once); packet and shimmer display; organ-response display; limb motion; camera presets and limits; picking and site snapping; HUD dropdowns and labels; disclosures (1 star ≈ N, enlarged for legibility, estimates); photosensitivity limiter; reduced motion and keyboard sites; lazy body generation | All visual numbers; point budgets (body 88.5k / 171k / 280.5k / 430k per tier, the dense star model; new brain nuclei a separate buffer of 4.5–5.3 % on top of the neuron budget, ≥ 120 stars each at high tier, ≥ 40 at low); colours; packet σ and gain; fades; camera values; photosensitivity numbers; HUD labels | §2, §3, §11, §12; DOPAMINE.md §8, §10; `performance.js` |
 | 14 | Sources | Written by the §1 writer: peer-reviewed (alphabetical, only as cited; no invented details), textbooks, [secondary] tabulations, [G] captures by folder and stem. Scratch prototypes are model checks, not sources. | — | All sections |
 
 HUD dropdowns (owner §13; titles only): **Body** (master and five switches, greyed but remembered in brain-only mode), **Interventions**, **Stimulus**, **Scenarios**, **Time**, **Brain systems** (overlays only), **Vitals** (the existing vitals panel renamed and extended), **Live** (incl. event log), **Dopamine**, **Modulators** (legend incl. NE, ACh, HA, OX tints), **Views**, **Performance**, **Settings**. Default at first load: whole body, all networks on, the orgasm scenario playing in demo mode on the "Dopamine system" view (user decision, 5 November 2026; `?scenario=none` opens at rest on the "Upper body" view).
@@ -6880,7 +6933,7 @@ The body vertex shader declares matrices and common scalars (≈ 16 slots), `uNe
 | Minimum vertex texture image units | 16 | units | — | high | Khronos OpenGL ES 3.0 specification |
 | State textures on the GPU (sum of the table above, `uPathIndex` sized for 1,024 paths) | ≈ 86 | KB | — | medium | [model] arithmetic |
 | Data passed from JS per frame (all textures as `Float32Array`) | ≈ 136 | KB | — | medium | [model] arithmetic |
-| GPU vertex memory at ultra (brain 400,000 × 48 B; dopamine system 43,500 × 48 B; extra 18,000 × 48 B; body 158,000 × 64 B; area 0.42 MB) | ≈ 32.7 | MB | — | medium | [model] from `performance.js` L12, B.8 and §13 |
+| GPU vertex memory at ultra (brain 400,000 × 48 B; dopamine system 43,500 × 48 B; extra 18,000 × 48 B; body 610,000 × 64 B; area 0.42 MB) | ≈ 61.6 | MB | — | medium | [model] from `performance.js` L12, B.8 and §13 |
 | Kernel history rings at the itemised size (variable per-source rings, layout §11.6) | ≈ 0.24 | MB (`Float32Array`) | — | high | §11.6 (10.4 MB with fixed 4,096-sample rings) |
 
 ### B.8. Point budgets per tier
@@ -6890,9 +6943,9 @@ The body vertex shader declares matrices and common scalars (≈ 16 slots), `uNe
 | Neuron stars (`TIERS.neurons`) | 60,000 | 130,000 | 240,000 | 400,000 | — | high | `performance.js` L9–12 |
 | Dopamine somata / axon / release points | 3,500 / 6,000 / 4,000 | 3,500 / 10,000 / 7,000 | 3,500 / 16,000 / 11,000 | 3,500 / 24,000 / 16,000 | — | high | DOPAMINE.md §9.2 |
 | New brain nuclei (`TIERS.extra`, a separate buffer on top of `TIERS.neurons`) | 3,200 (5.3 %) | 6,500 (5.0 %) | 10,800 (4.5 %) | 18,000 (4.5 %) | — | medium | share and floors §13; values [model] |
-| Body (`TIERS.body`) | 32,500 | 63,000 | 104,000 | 158,000 | — | medium | §13 |
+| Body (`TIERS.body`) | 122,250 | 238,500 | 393,000 | 610,000 | — | medium | §13.4 (dense star model, vascular tree with capillaries) |
 | Visible packets (`TIERS.packets`) | ≤ 256 | ≤ 256 | ≤ 256 | ≤ 256 | — | medium | texture capacity B.7; caps §11, §13 |
-| Total drawn in body views (before brain LOD; lanterns 400 included) | 109,600 | 220,400 | 385,700 | 619,900 | — | medium | [model] sum; §13.4 |
+| Total drawn in body views (before brain LOD; lanterns 400 included) | 165,600 | 328,400 | 562,200 | 891,900 | — | medium | [model] sum; §13.4 |
 
 The §13 floors per nucleus bind at the low and medium tiers, which therefore take 5.3 % and 5.0 % rather than 4.5 %:
 
@@ -6939,6 +6992,92 @@ Seeking from the nearest snapshot is affordable even on the active course, sprea
 At load the brain is generated and rendered first. The body follows in slices and fades in; the app opens with whole body, all networks on and the orgasm scenario playing in demo mode on the "Dopamine system" view (A.7); `?scenario=none` opens at rest on the "Upper body" view. `?body=0` starts in brain-only mode and defers body generation until the master switch first turns on.
 
 ### B.10. HUD dropdowns, fields and controls
+
+> **Default interface (user decisions, 5 November 2026).** The app opens with a simple HUD
+> (`src/ui-simple.js`) of four controls. The person's emotion and the way the brain is shown are
+> separate states: an emotion never moves the camera, and a view never changes the emotion.
+> - **Emotion: Calm, Stress or Pleasure.** Calm stops every scenario; Stress plays `stressor`;
+>   Pleasure plays the orgasm scenario in demo mode, without its fly-to.
+> - **View:** whole brain, cutaway, dopamine system or upper body.
+> - **Quality:** Auto (the adaptive tier of `performance.js`) or a fixed tier.
+> - **Pause.**
+>
+> Its readouts are a plain-language story of the current stage and one meter with its percentage,
+> the only number shown: stress hormones (plasma adrenaline over rest, log scale, full at ×4) or
+> accumbens dopamine.
+>
+> Stress is drawn on the brain, display only [model]:
+> - The stress circuit (amygdala, CeA, BNST, hypothalamus, PVN, LH, DMH, LC, PAG, RVLM; anterior
+>   insula, dACC, sgACC) brightens to ×2.2 through the brain-systems overlay, and the other regions
+>   dim to ×0.45. Both scale from 0.45 at the start to 1 at the meter's top.
+> - The circuit's regions take a blue tint (#5CB8FF) through the BrainNet tint channel.
+>
+> In the simple HUD the dopamine display is the one from before the whole-body build. The user asked
+> for it back, and these are display choices [model]:
+> - The climax reward is pulse-locked: the §6.10 switch is on, as it was by default before the
+>   DOPAMINE.md §9.8 port.
+> - The fibre flow uses the old 0.5-s travel (`histStep` 0.5/16 s).
+> - There is no 2-s pulse-locked floor on the glows; the 0.3-s floor stays.
+> - A dopamine wave, like an expanding shock-wave ring, runs from the VTA (`shaders.js` `WAVE`, used
+>   by `NEURON_VS` and `DA_VS`):
+>   - The climax starts one shell at 55 mm/s; each contraction starts a weaker one at 80 mm/s, scaled
+>     by the contraction's amplitude.
+>   - A shell is Gaussian, 5 mm wide plus 0.12 mm per mm of radius. It rises over 0.35 s and fades
+>     between 70 and 115 mm.
+>   - It pushes the points it crosses up to 1.6 mm outward.
+>   - It brightens neurons ×(1 + 2·w), adds amber, and lights the dopamine somata, fibres and release
+>     sites ×(1 + 4·w).
+>   - At most about 1.25 shells start per second. Reduced motion halves the climax wave and its
+>     push, and drops the others.
+>
+> **Superseded on 6 November 2026.** The user found the glass shells distorted and jagged, and
+> asked for a sharper, denser star model instead. The shells, `glass.js` and the `glass` program
+> were removed. The style choice is now Detailed (default) or Stars (§13.4, the dense star model).
+> The anatomical colours below stay with Detailed. The rest of this note records the glass as it
+> was.
+>
+> **Glass style (stage 1 of the visual upgrade).** The simple HUD also has a style choice: Glass
+> (default) or Stars (the earlier look, kept as a preset). Glass meshes the existing procedural
+> fields at load, with no downloaded meshes (DOPAMINE.md §7.2):
+> - the cerebrum hull with the `folding` field pressed in to 0.35 of its depth;
+> - the cerebellum, the skin (`bodySDF`) and the organ groups of `ORGANS` (heart, lungs, liver,
+>   spleen, kidney, pelvic).
+>
+> Meshing uses naive surface nets on a grid of 2.8–1.8 mm for the brain, 10–5.5 mm for the skin and
+> 5–3.2 mm for the organs, from the Low to the Ultra tier. Smoothing removes seams and terracing:
+> - the sampled field takes 1–2 [1 2 1]/4 blur passes, which melt the seams where `bodySDF` switches
+>   primitives at its z guards;
+> - the mesh takes 3–8 Taubin passes (λ 0.5, μ −0.53);
+> - normals are area-weighted mesh normals.
+>
+> The shells are meshed for the tier that renders now, not the generated maximum. A tier change must
+> hold for 2 s before remeshing. The work runs in slices of ≈ 6 ms (≈ 120k triangles at Low, 267k at
+> High).
+>
+> Drawing (`glass` program) is additive, so the shell order does not matter:
+> - back faces are culled;
+> - a Fresnel rim (1 − |n·v|)^3.5 that fades just before the silhouette, which gives a soft edge
+>   without multisampling;
+> - rim and highlight fade where `fwidth` of the facing term is large (thin folds seen edge-on), so
+>   rotation does not shimmer;
+> - a face tint of 0.02 and a small highlight;
+> - the cutaway plane applies;
+> - HDR gains are 0.2 for the brain and 0.2 for the body (with the body fade);
+> - the neuron and body stars dim to ×0.85 and ×0.6.
+>
+> Colours follow anatomy atlases:
+> - Shells: brain pink-lavender, skin faint peach, heart red, lungs pink, liver red-brown, spleen
+>   purple, kidneys maroon, bladder pale yellow.
+> - Brain stars turn pink-lavender.
+> - Body stars take one colour per tissue class through `BODY_VS` `uAnat`, a chromaticity
+>   substitution at equal luminance: skin peach, organs rose, muscle red-brown, bone ivory, cord and
+>   nerves yellow, ganglia pale gold, enteric yellow-green, vessels red.
+> - Packets keep their network colours, and dopamine keeps its amber.
+>
+> Stars restores the exact earlier gains. Real anatomical meshes and tractography are stage 2 and
+> need the user's go-ahead on downloaded open data.
+>
+> The full HUD specified below is unchanged and opens with `?advanced=1`.
 
 Every dropdown keeps today's pattern: a heading button with title, optional status chip and chevron, a body hidden when closed, no subtitle, and open state saved under `brain-system.drop.<store>`. Titles and labels follow A.3 and A.7; §13 owns their wording. The left column holds data (Vitals, Live, Dopamine, Modulators); the right column holds controls (Body, Interventions, Stimulus, Scenarios, Time, Brain systems, Views, Performance, Settings). Below 760 px the right-column dropdowns become popovers, as Performance and Settings are today. New stimulus ids use the prefix `sens-`, because `stim-level` and `stim-val` belong to the orgasm slider.
 

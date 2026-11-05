@@ -81,6 +81,58 @@ coupling of arousal to peripheral vasocongestion is removed, and the vitals read
 - **Views.** Three brain views and nine body views; Skeleton off by default.
 
 ## Controls
+The app opens with a **simple HUD** (`src/ui-simple.js`) of four controls. The person's emotion
+and the way the brain is shown are separate: an emotion never moves the camera, and a view never
+changes the emotion.
+- **Calm · Stress · Pleasure** (bottom): the emotional state.
+  - **Calm** stops everything.
+  - **Stress** plays the acute stressor. The brain's stress circuit (amygdala, hypothalamus,
+    brainstem alarm centres, insula and cingulate) turns blue and brightens as adrenaline rises,
+    while the rest of the brain dims.
+  - **Pleasure** plays the orgasm scenario, the model's strongest dopamine release, which peaks
+    about 45 s after the start. At the climax a bright wave leaves the core dopamine system in the
+    midbrain. It runs out along the dopamine fibres and through the whole brain, widening and
+    pushing the stars it crosses outward. A smaller wave follows each contraction.
+- **View** (above the emotions): Brain, Cutaway, Dopamine system or Body. Next to it, the **style**:
+  - **Detailed** (default) draws the body as a dense field of small, sharp stars: about two to three
+    times as many as before, with the nervous system (cord, nerves, ganglia, enteric mesh) brighter
+    so the travelling signals stand out. Everything takes the colours of anatomy atlases:
+    - brain: pink-lavender;
+    - spinal cord and nerves: yellow;
+    - enteric nerves: yellow-green;
+    - muscle: red-brown; bone: ivory; vessels: red;
+    - heart red, lungs pink, liver red-brown, spleen purple, kidneys maroon, bladder pale yellow.
+
+    Dopamine keeps its amber.
+  - **Stars** is the earlier look, kept as a preset.
+  - **Heart** (view button): a close camera on a beating heart with valves, fibres, coronary vessels
+    and the conduction system. In the Body and Heart views the HUD shows a patient monitor: ECG and
+    heart rate, arterial pressure, a fingertip pulse (PLETH) with the pulse transit time, respiration,
+    temperature, and the adrenaline and cortisol blood values.
+  - **Pulse and vessels** (Detailed): a branching tree of arteries (red) and veins (blue) in fine stars,
+    from the aorta (with its root sinuses) to the cerebral, digital and pedal arteries, with the
+    vessels of the lungs, liver, kidneys, spleen and gut, and capillary beds coloured from red to blue
+    by their oxygen saturation. Each heartbeat sends its pressure wave
+    through the arteries at the measured wave speeds, faster under Stress and Pleasure; the total light
+    stays constant (`research/PULSE.md`).
+  The browser remembers the choice. The body stars follow the human form of `research/BODY-FORM.md`:
+  head and face, neck, shoulders, a jointed hand and an arched foot. (The glass shells of 5 November
+  were replaced by the Detailed stars.)
+- **Quality** (top right): Auto adapts to the computer. It picks a starting tier from the graphics
+  hardware, then lowers the render scale or the tier when frames are slow, and raises them again
+  when there is headroom. Low, Medium, High and Ultra fix the tier. Auto names the tier it is using.
+- **Pause** (top right, or `P`). Keys `1`, `2` and `3` choose Calm, Stress and Pleasure.
+
+Top left, a short story says what is happening in plain words. Below it, one meter with its
+percentage rises from rest: stress hormones or dopamine. It is the only number on screen. After an
+update, reload with Cmd+Shift+R (Ctrl+Shift+R on Windows), so that the browser does not keep old
+scripts.
+
+Every other control — interventions, the full stimulus panel, the clock, brain systems, vitals,
+dopamine and modulator readouts, performance, and the orgasm scenario's settings and hypotheses —
+is in the **full HUD**: open the page with `?advanced=1`. The rest of this section describes the
+full HUD.
+
 - Left drag — rotate; right or middle drag, Shift/Ctrl + drag, or a two-finger drag — pan; wheel or
   pinch — zoom towards the point under the cursor; double click — fly halfway in towards that point.
   With **Pick on body** armed, a click selects a site.
@@ -169,7 +221,13 @@ HUD actions reach the kernel.
 | `src/wiring.js` | Kernel packets onto body paths, network ghosts, limb pose, overlay members |
 | `src/safety.js` | Photosensitivity limiter and display-rate rules |
 | `src/color.js` | Planck and CIE colours (neurons 7,000–9,500 K, body ≥ 5,500 K, dopamine 2,300 K) |
-| `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/ui-body.js` | Quality tiers and adaptive quality, camera, HUD |
+| `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/ui-body.js` | Quality tiers and adaptive quality, camera, full HUD (`?advanced=1`) |
+| `src/ui-simple.js` | Simple HUD (the default): emotion (Calm / Stress / Pleasure), view and style, quality, Pause; story and one meter |
+| `src/heart.js` | `HeartBeat`: the beat clock, conduction timing, Wiggers volumes, valves and the schematic ECG |
+| `src/monitor.js` | `MONITOR`, `RespTrace`, `isAlarm`, `monitorValues`: the patient monitor's channels, alarm limits and respiration trace |
+| `src/pulse.js` | `PulseWave`: the arterial pulse from the beat (arrival delays scaled by the state's wave speed, the energy-conserving mean for `BODY_VS`), the PLETH trace and the pulse transit time |
+| `src/body/vessel-tree.js` | `VESSEL_TREE`, `buildDetail`, `pulseSite`: the named arteries and veins, their branches, organ trees and capillary beds, radii (Murray), arrival delays and pulse amplitudes |
+| `src/body/heart-form.js` | `HEART_FORM`: heart geometry (ventricles, fibres, atria, valves, vessels, conduction system) |
 
 Rendering assets (HDR pipeline, bloom, star point-spread function, adaptive quality, HUD style)
 come from the Orgasm Galaxy project (removed on 2026-11-02; its response-model analysis lives on as

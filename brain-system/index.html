@@ -543,6 +543,7 @@
                 <option value="upperBody">Upper body</option>
                 <option value="headNeck">Head &amp; neck</option>
                 <option value="thorax">Thorax</option>
+                <option value="heart">Heart</option>
                 <option value="abdomen">Abdomen</option>
                 <option value="torso">Torso</option>
                 <option value="spine">Spine</option>
@@ -633,6 +634,72 @@
       <button type="button" id="pause" aria-pressed="false" title="P key">Pause</button>
       <button type="button" id="view-btn" title="Cycle view (V key)">View</button>
     </nav>
+  </div>
+
+  <!-- Simple HUD, the default (src/ui-simple.js); main.js shows it by putting hud-simple on <body>.
+       The full HUD above opens with ?advanced=1. Emotion (bottom) and view (above it) are separate. -->
+  <div id="shud" class="shud">
+    <h1 class="sr-only">Brain System</h1>
+
+    <section id="shud-story" class="shud-story" aria-live="polite" aria-label="What is happening">
+      <p id="shud-scenario" class="shud-scenario" hidden></p>
+      <p id="shud-stage" class="shud-stage">Calm</p>
+      <p id="shud-text" class="shud-text">Brain and body at rest. Choose Stress or Dopamine below.</p>
+      <div id="shud-meter" class="shud-meter" role="meter" aria-label="Level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
+        <span class="shud-meter-head"><span id="shud-meter-label"></span><span id="shud-meter-value" class="shud-meter-value">0%</span></span>
+        <span class="shud-meter-track" aria-hidden="true"><span id="shud-meter-bar" class="shud-meter-bar"></span></span>
+        <span class="shud-meter-ends" aria-hidden="true"><span id="shud-meter-low"></span><span id="shud-meter-high"></span></span>
+      </div>
+      <section id="shud-monitor" class="shud-monitor" aria-label="Patient monitor" hidden>
+        <div class="mon-row mon-hr" data-key="hr">
+          <canvas id="mon-ecg" class="mon-wave" width="440" height="76" aria-hidden="true"></canvas>
+          <span class="mon-tag" aria-hidden="true">II</span>
+          <div class="mon-val"><span class="mon-label">HR</span><span class="mon-lim" aria-hidden="true">120<br>50</span>
+            <span id="mon-hr" class="mon-num">68</span><span class="mon-unit">bpm</span></div>
+        </div>
+        <div class="mon-row mon-art" data-key="art">
+          <canvas id="mon-abp" class="mon-wave" width="440" height="76" aria-hidden="true"></canvas>
+          <span class="mon-tag" aria-hidden="true">ART</span>
+          <div class="mon-val"><span class="mon-label">ART</span><span class="mon-lim" aria-hidden="true">160<br>90</span>
+            <span class="mon-num mon-num-bp"><span id="mon-sys">115</span>/<span id="mon-dia">75</span></span><span class="mon-unit">(<span id="mon-map">88</span>) mmHg</span></div>
+        </div>
+        <div class="mon-row mon-pleth" data-key="ptt">
+          <canvas id="mon-pleth" class="mon-wave" width="440" height="76" aria-hidden="true"></canvas>
+          <span class="mon-tag" aria-hidden="true">PLETH</span>
+          <div class="mon-val" title="Fingertip pulse (plethysmograph). PTT: pulse transit time from the ECG R wave to the foot of the fingertip pulse. No SpO₂: the model does not compute it.">
+            <span class="mon-label">PTT</span><span id="mon-ptt" class="mon-num">163</span><span class="mon-unit">ms</span></div>
+        </div>
+        <div class="mon-row mon-rr" data-key="rr">
+          <canvas id="mon-resp" class="mon-wave" width="440" height="76" aria-hidden="true"></canvas>
+          <span class="mon-tag" aria-hidden="true">RESP</span>
+          <div class="mon-val"><span class="mon-label">RR</span><span class="mon-lim" aria-hidden="true">25<br>8</span>
+            <span id="mon-rr" class="mon-num">14</span><span class="mon-unit">/min</span></div>
+        </div>
+        <div class="mon-tiles">
+          <div class="mon-tile mon-temp" data-key="temp"><span class="mon-label">TEMP</span><span id="mon-temp" class="mon-num-s">37.0</span><span class="mon-unit">°C</span></div>
+          <div class="mon-tile mon-lab" data-key="adr" title="Plasma adrenaline (model value; in practice a blood test)"><span class="mon-label">ADR</span><span id="mon-adr" class="mon-num-s">--</span><span class="mon-unit">pg/mL</span></div>
+          <div class="mon-tile mon-lab" data-key="cort" title="Plasma cortisol (model value; in practice a blood test)"><span class="mon-label">CORT</span><span id="mon-cort" class="mon-num-s">--</span><span class="mon-unit">µg/dL</span></div>
+        </div>
+      </section>
+    </section>
+
+    <div class="shud-corner">
+      <label class="shud-quality"><span class="sr-only">Quality</span>
+        <select id="shud-quality" title="Quality: Auto adapts to this computer"></select>
+      </label>
+      <button type="button" id="shud-pause" class="shud-icon" aria-pressed="false" aria-label="Pause" title="Pause (P)">
+        <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
+        <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
+      </button>
+    </div>
+
+    <div class="shud-bottom">
+      <div class="shud-display">
+        <div id="shud-views" class="shud-views" role="group" aria-label="View"></div>
+        <div id="shud-style" class="shud-views" role="group" aria-label="Style"></div>
+      </div>
+      <div id="shud-states" class="shud-states" role="group" aria-label="Emotional state"></div>
+    </div>
   </div>
 
   <div id="info" class="info" hidden>

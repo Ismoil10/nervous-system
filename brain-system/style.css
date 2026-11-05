@@ -757,3 +757,233 @@ code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; overfl
   .chev, .bar-fill, .nc-fill, #rpe, .scrub-fill, .sw-track, .sw-track::after { transition: none; }
   .hud { transition: none; }
 }
+
+/* ---- Simple HUD (default; the full HUD above opens with ?advanced=1) -----------------------------
+   Four controls: emotion (Calm, Stress, Pleasure), view (Brain, Cutaway, Dopamine, Body), Quality and
+   Pause; the emotion never moves the camera and the view never changes the emotion. The story of what is happening is the one large element. Colour carries meaning: amber is
+   dopamine (the colour of dopamine in the scene), blue is the stress alarm (the colour of the
+   stress circuit drawn in the brain), white is calm. main.js shows this HUD by putting hud-simple
+   on <body>, so a stale cached script leaves the full HUD working instead of a dead one. */
+#shud { display: none; }
+body.hud-simple #shud { display: grid; }
+body.hud-simple #hud { display: none; }
+
+.shud {
+  --glass: rgba(9, 11, 19, 0.62);
+  --glass-line: rgba(255, 255, 255, 0.08);
+  --stress: #5cb8ff;
+  --stress-tint: rgba(92, 184, 255, 0.16);
+  --stress-line: rgba(92, 184, 255, 0.55);
+  --calm: #e8ecf4;
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "story corner" ". ." "bottom bottom";
+  column-gap: 16px;
+  padding: max(22px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right))
+    max(22px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
+}
+.shud-corner, .shud-views, .shud-states { pointer-events: auto; }
+.shud-display { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 100%; }
+
+/* Story: what is happening; drags over it still turn the camera. */
+.shud-story { grid-area: story; max-width: 30rem; text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7); }
+.shud-scenario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+}
+.shud[data-state="stress"] .shud-scenario { color: var(--stress); }
+.shud-scenario::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+}
+.shud-stage {
+  margin: 0;
+  font-size: clamp(28px, 2.6vw + 14px, 44px);
+  line-height: 1.06;
+  font-weight: 300;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+.shud-text { margin: 10px 0 0; max-width: 38ch; font-size: 15px; line-height: 1.5; color: var(--soft); }
+
+/* One meter: stress hormones (ice blue) or dopamine (amber), rest on the left. */
+.shud-meter { display: grid; gap: 6px; margin-top: 18px; width: min(240px, 100%); }
+/* Patient monitor (monitor.js, HEART.md §7): a bedside monitor in the body views. Black screen,
+   channels in the conventional colours, sweep traces, large tabular numbers with their alarm limits;
+   a value outside its limits turns the alarm colour (no flashing, §13.15). */
+.shud-monitor {
+  display: grid; gap: 2px; margin-top: 16px; width: min(340px, 100%); padding: 6px 8px 8px;
+  background: #030507; border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 6px;
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.8); font-variant-numeric: tabular-nums; pointer-events: auto;
+}
+.shud-monitor[hidden] { display: none; }
+.mon-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 104px; align-items: center; gap: 8px;
+  padding: 2px 0 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); color: var(--c); }
+.mon-hr { --c: #4dff88; } .mon-art { --c: #ff5a5f; } .mon-pleth { --c: #5ad8ff; } .mon-rr { --c: #ffe066; }
+.mon-wave { display: block; width: 100%; height: 38px; color: var(--c); }
+.mon-tag { position: absolute; left: 1px; top: 1px; font-size: 9px; letter-spacing: 0.04em; opacity: 0.75; }
+.mon-val { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "label lim" "num num" "unit unit"; line-height: 1; }
+.mon-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; opacity: 0.85; }
+.mon-val .mon-label { grid-area: label; }
+.mon-lim { grid-area: lim; font-size: 8px; line-height: 1.05; text-align: right; opacity: 0.55; }
+.mon-num { grid-area: num; justify-self: end; font-size: 30px; font-weight: 600; letter-spacing: -0.02em; margin-top: 1px; }
+.mon-num-bp { font-size: 22px; }
+.mon-unit { font-size: 9px; opacity: 0.7; margin-top: 2px; }
+.mon-val .mon-unit { grid-area: unit; justify-self: end; }
+.mon-tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding-top: 4px; }
+.mon-tile { display: grid; grid-template-columns: 1fr; line-height: 1; color: var(--c); }
+.mon-temp { --c: #e8f1ff; } .mon-lab { --c: #ffb44d; }
+.mon-num-s { font-size: 18px; font-weight: 600; margin: 3px 0 2px; }
+.mon-row.is-alarm .mon-num, .mon-tile.is-alarm .mon-num-s { color: #ffcc00; }
+@media (max-width: 600px) {
+  .shud-monitor { width: 100%; padding: 4px 6px 6px; }
+  .mon-row { grid-template-columns: minmax(0, 1fr) 88px; }
+  .mon-wave { height: 28px; }
+  .mon-num { font-size: 22px; } .mon-num-bp { font-size: 17px; } .mon-num-s { font-size: 15px; }
+}
+.shud-meter-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; color: var(--muted); }
+.shud-meter-value { font-size: 15px; font-weight: 500; color: var(--accent-hi); font-variant-numeric: tabular-nums; }
+.shud-meter[data-kind="stress"] .shud-meter-value { color: var(--stress); }
+.shud-meter-track { display: block; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+.shud-meter-bar {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-lo), var(--accent) 60%, var(--accent-hi));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.35s linear;
+}
+.shud-meter[data-kind="stress"] .shud-meter-bar { background: linear-gradient(90deg, #4f7fa0, var(--stress)); }
+.shud-meter-ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); text-shadow: none; }
+
+/* Corner: Quality and Pause. */
+.shud-corner { grid-area: corner; display: flex; align-items: flex-start; gap: 6px; }
+.shud .shud-quality select {
+  height: 34px;
+  padding: 0 28px 0 10px;
+  font-size: 13px;
+  color: var(--soft);
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 7px;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.shud .shud-quality select:hover { color: var(--text); }
+.shud .shud-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  color: var(--soft);
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 7px;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.shud .shud-icon:hover { color: var(--text); background: rgba(30, 34, 48, 0.8); }
+.shud-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.shud-icon .i-play { display: none; fill: currentColor; stroke: none; }
+.shud-icon.is-paused .i-pause { display: none; }
+.shud-icon.is-paused .i-play { display: block; }
+.shud .shud-icon.is-paused { color: var(--text); border-color: rgba(255, 255, 255, 0.3); }
+
+/* The primary choice: three states, centred at the bottom. */
+.shud-bottom { grid-area: bottom; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+/* View: how the brain is shown, apart from the emotion below it. */
+.shud-views {
+  display: flex;
+  gap: 2px;
+  max-width: 100%;
+  padding: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 7px;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.shud-views::-webkit-scrollbar { display: none; }
+.shud .shud-view {
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 0 11px;
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+}
+.shud .shud-view:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.shud .shud-view[aria-pressed="true"] { color: #10131c; background: var(--text); }
+.shud-states {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  width: min(420px, 100%);
+  padding: 4px;
+  background: var(--glass);
+  border: 1px solid var(--glass-line);
+  border-radius: 9px;
+  -webkit-backdrop-filter: blur(16px) saturate(1.15);
+  backdrop-filter: blur(16px) saturate(1.15);
+}
+.shud .shud-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  min-width: 0;
+  padding: 8px 12px;
+  text-align: left;
+  color: var(--soft);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+.shud .shud-state:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+.shud-state-name { font-size: 15px; font-weight: 500; }
+.shud-state-hint { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.shud .shud-state[aria-pressed="true"] { color: var(--text); background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.22); }
+.shud .shud-state.is-stress[aria-pressed="true"] { color: #e6f6ff; background: var(--stress-tint); border-color: var(--stress-line); }
+.shud .shud-state.is-dopamine[aria-pressed="true"] { color: var(--accent-hi); background: var(--accent-tint); border-color: var(--accent-line); }
+.shud .shud-state[aria-pressed="true"] .shud-state-hint { color: inherit; opacity: 0.75; }
+
+.shud button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+/* "Letting go" at the climax (B.13): the controls fade, the story stays readable. */
+.shud .shud-corner, .shud .shud-bottom { transition: opacity 0.6s; }
+.shud.dimmed .shud-corner, .shud.dimmed .shud-bottom { opacity: 0.3; }
+.shud.dimmed .shud-corner:hover, .shud.dimmed .shud-corner:focus-within,
+.shud.dimmed .shud-bottom:hover, .shud.dimmed .shud-bottom:focus-within { opacity: 1; }
+
+@media (max-width: 640px) {
+  .shud {
+    column-gap: 10px;
+    padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+      max(14px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  .shud-stage { font-size: 26px; }
+  .shud-text { margin-top: 6px; font-size: 14px; }
+  .shud-meter { margin-top: 12px; width: min(200px, 100%); }
+  .shud .shud-state { padding: 8px 10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shud-meter-bar, .shud .shud-corner, .shud .shud-bottom { transition: none; }
+}

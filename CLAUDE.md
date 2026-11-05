@@ -2,6 +2,17 @@
 
 All work is on `brain-system/`. `anger-galaxy/` is a separate project that has nothing to do with this work: do not read, change, cite or borrow from it. It is excluded from the graph (`.graphifyignore`). Scope greps and searches to `brain-system/`.
 
+## Model and effort per task (mandatory)
+
+Before starting any task, and before each step of a multi-step task, decide which model and which effort level the work needs. Say it before you begin, as a short table: task, model, effort, reason. This applies to the main session and to every subagent and workflow agent you start: pass the chosen `model` (and `effort` where the tool takes it) explicitly. Do not start work without this choice. Guidance:
+
+- Shape, architecture, simulation design, visual design or anything that needs scientific accuracy: Opus, high effort.
+- Wiring into existing code, tuning, test and browser checks: Opus or Sonnet, medium effort.
+- Mechanical edits, renames and documentation: Sonnet or Haiku, low to medium effort.
+- Read-only where-is / who-calls / what-breaks searches: the graph-scout agent on Sonnet or Haiku.
+- Keep a step in the main session when handing it to an agent would cost more context than it saves, and say so in the table.
+- A step in the main session runs at the session's own model and effort (for example Opus 5.5 at Extra); name that setting in the table, not a lower one. A step that needs less goes to a subagent started with that `model` and `effort`.
+
 ## graphify
 
 This project has a knowledge graph at graphify-out/ with god nodes, community structure, and cross-file relationships. It covers Brain System only: its JavaScript (AST), and the research notes and source captures behind it (semantic).

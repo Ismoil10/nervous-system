@@ -1,15 +1,17 @@
 # Resume the Brain System build on another computer
 
 This replaces `.handoff/RESUME-ON-WINDOWS.md`. The build was paused on Windows on 5 November 2026, on the
-branch `wip/brain-build-windows`. Its state, decisions and remaining plan are in
-`.handoff/STATE-AT-PAUSE.md`.
+branch `wip/brain-build-windows`. That branch is merged into `main` (pull request #2, merge commit
+`0101203`), so `main` holds all the work. Continue on a new branch cut from `main`, never on `main` itself.
+The state, decisions and remaining plan are in `.handoff/STATE-AT-PAUSE.md`.
 
 Two parts, in this order:
 
 1. On the new computer, do the **setup** once.
 2. Paste the **resume prompt** into a new Claude Code session.
 
-Do not work on two computers at once. Pull the branch on a computer before you continue there.
+Do not work on two computers at once. Push the branch before you stop on one computer, and pull it before
+you continue on the other.
 
 ---
 
@@ -54,15 +56,36 @@ npm install -g typescript@7.0.2
 - Windows: if `tsc` fails in Git Bash with `node_modules/node/bin/node: No such file`, a broken global npm
   package `node` shadows Node. Remove it with `npm uninstall -g node`.
 
-**Clone the branch.** The repository is private; sign in to GitHub when asked. `core.autocrlf=false` keeps
-the files' LF line endings.
+**Clone and cut the work branch.** The repository is private; sign in to GitHub when asked.
+`core.autocrlf=false` keeps the files' LF line endings.
 
 ```bash
-git clone -c core.autocrlf=false -b wip/brain-build-windows https://github.com/Ismoil10/nervous-system.git
+git clone -c core.autocrlf=false https://github.com/Ismoil10/nervous-system.git
 ```
 
-On Windows, clone into `C:\Users\User\projects`; on the Mac, into the projects folder used there. If a
-clone already exists, run `git fetch` and then `git switch wip/brain-build-windows && git pull` in it.
+On Windows, clone into `C:\Users\User\projects`; on the Mac, into the projects folder used there. Then,
+inside the clone, cut the work branch from `main`. Name it after the computer, for example
+`wip/brain-build-mac`. On Windows pick a new name: `wip/brain-build-windows` is already merged.
+
+```bash
+git switch -c wip/brain-build-mac
+```
+
+If a clone already exists, fetch and cut the branch straight from `origin/main`. Do not switch to the local
+`main` first: it may be behind, and the switch fails while the gate's `graphify-out/manifest.json` change is
+in the tree.
+
+```bash
+git fetch
+```
+
+```bash
+git switch -c wip/brain-build-mac origin/main
+```
+
+On the Mac, the existing checkout (`/Users/ismoil/projects1/nervous-system`) is on the old
+`wip/brain-build-pause` branch, which now holds `main`'s content (`0101203`); leave that branch alone and
+run these two steps.
 
 **Open the session.**
 - In the Claude desktop app (Code tab), open the clone's folder in a new session.
@@ -88,13 +111,13 @@ How to work with me
 Steps
 1. Read, in this order: CLAUDE.md; .handoff/STATE-AT-PAUSE.md (the state, my decisions and the remaining plan; it wins over every older note in .handoff/).
 2. Check this machine. Tell me what is missing instead of working around it.
-   - `git status` is clean on the branch wip/brain-build-windows, and `git config core.autocrlf` is false in this clone.
+   - You are on a `wip/` branch cut from `main` at `0101203` or later, never on `main` itself. `git status` shows no changes outside graphify-out/; the gate's session-start `graphify update` rewrites graphify-out/manifest.json with this machine's file times, which is expected. `git config core.autocrlf` is false or unset in this clone.
    - Versions: node 26, tsc 7.0.2, graphify 0.9.95 or newer, graphify-mcp on PATH, python 3.9 or newer.
    - The gate runs: the graph-first protocol message appeared at session start, and `python .claude/hooks/graph-gate/tests/test_gate.py` passes (on Windows run it with PYTHONUTF8=1).
    - .claude/launch.json: on Windows use the `-win` entries (python); on the Mac the original entries (python3).
-3. Baseline. Run `graphify update .` from the repo root. Then, in brain-system/, run `npm test` and `npm run typecheck`. Compare with STATE-AT-PAUSE.md §4 and explain any difference before you change code. The orgasm golden traces are platform-specific (STATE §4): on a different CPU architecture the four golden tests in orgasm-regression.test.mjs may fail in the last bits; tell me and ask before re-recording.
+3. Baseline. Run `graphify update .` from the repo root. Then, in brain-system/, run `npm test` and `npm run typecheck`. Compare with STATE-AT-PAUSE.md §4 and explain any difference before you change code. The orgasm golden traces are platform-specific (STATE §3 decision 1, §4): on arm64 (the Mac) the four golden tests in orgasm-regression.test.mjs fail in the last bits. Tell me, and ask before re-recording; STATE §6 has an option that needs no re-recording.
 4. Save to your memory for this project: reply in Uzbek, files in English (British); brain-system only; the graph gate and /graph-usage; every decision of mine listed in STATE-AT-PAUSE.md §3.
-5. Tell me in Uzbek what you found and the plan, with time estimates. Then continue with the next step in STATE-AT-PAUSE.md §6.
+5. Tell me in Uzbek what you found and the plan, with time estimates. Then continue with the next step of the remaining plan in STATE-AT-PAUSE.md §7.
 
 Machine notes
 - Windows: run Python with PYTHONUTF8=1 and PYTHONIOENCODING=utf-8 (the ANSI code page is cp1251).

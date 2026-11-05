@@ -4,16 +4,19 @@ The build was paused on **Thursday 5 November 2026 at about 01:30 (Windows local
 user's request, to continue on another computer. It ran on the user's Windows 11 computer after the move
 from the Mac (the Mac pause state is this file at commit `71e27cd`).
 
-All work is on the branch **`wip/brain-build-windows`**, cut from `main` at `1e65443` (the merge of the Mac
-pause branch). Its commits, oldest first:
+The Windows work was done on the branch **`wip/brain-build-windows`**, cut from `main` at `1e65443` (the
+merge of the Mac pause branch). It is now merged into `main` (pull request #2, merge commit `0101203`), so
+`main` holds all the work and the same tree as the branch tip. Continue on a new branch cut from `main`
+(decision 7). The commits, oldest first:
 
 | Commit | Content |
 |---|---|
 | `5712f4c` | Windows setup: `-win` launch entries, golden traces re-recorded on x64, `.gitignore` |
 | `2d6e9aa` | Stage 5 integration and the fixes from the first browser review |
-| next | Stage 6: ANALYSIS.md fact-check round 2 and the opening-rule amendments |
-| next | This handoff: this file, `RESUME.md`, the stage 6 results and the partial PARAMS patch |
-| last | The rebuilt graph (`graphify-out/`) |
+| `dcd5325` | Stage 6: ANALYSIS.md fact-check round 2 and the opening-rule amendments |
+| `e503a9d` | This handoff: this file, `RESUME.md`, the stage 6 results and the partial PARAMS patch |
+| `b9136d0` | The rebuilt graph (`graphify-out/`) |
+| `0101203` | Merge of pull request #2 into `main` |
 
 When this file disagrees with older notes in `.handoff/`, this file wins. `RESUME.md` holds the setup and
 the resume prompt. `HANDOFF-PROMPT.md` and `RESUME-ON-WINDOWS.md` are superseded.
@@ -117,8 +120,166 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
 4. **Body brightness** `tune.body` = 6 [model, browser check].
 5. **Free camera:** zoom towards the cursor, pan and double-click fly-in.
 6. **anger-galaxy has no connection to this project.** The README link to it was removed.
-7. **Git:** work on `wip/brain-build-windows`, never on `main`; commit only when asked (the user asked for
-   these commits). Push only when asked.
+7. **Git:** work on a `wip/` branch, never on `main` itself; commit only when asked (the user asked for
+   these commits). Push only when asked. The Windows work was on `wip/brain-build-windows`; after its merge
+   into `main` (5 November), cut each new work branch from `main` and name it after the computer (for
+   example `wip/brain-build-mac`).
+
+**Made on the Mac after the merge (5 November 2026):**
+
+8. **Simple HUD by default.** The 13-dropdown HUD was too much for an average user.
+   A first simple HUD (scenario rail, senses, views, networks; commit `34ce9ea`) was still too much:
+   the user could not tell how to start anything, and stress had no visible effect. So the default
+   is now `src/ui-simple.js`; its controls were reworked again in decision 11. It first had three controls:
+   - Calm / Stress / Dopamine;
+   - Look at Brain / Body (the camera only);
+   - Pause.
+
+   The readouts are a plain story and one meter (stress hormones or dopamine).
+   - Stress plays `stressor` and draws the stress circuit on the brain. It is display only [model]:
+     an overlay ×2.2 on the circuit and ×0.45 elsewhere, plus a blue BrainNet tint, scaled by the
+     adrenaline meter. Without it the stressor changed only hormones and the heart rate; the scene
+     stayed almost unchanged (`kernel.display` is empty and `setOrgans` is never called).
+   - Dopamine plays the orgasm demo.
+   - The full HUD stays behind `?advanced=1`, with nothing deleted.
+   - `<body>` carries no HUD class in the markup: main.js adds `hud-simple`. A browser that keeps an
+     old cached `main.js` then still shows a working full HUD instead of a dead simple one. This was
+     the likely cause of "the simulation stopped working".
+
+   ANALYSIS.md B.10 records the design. Tests: `test/hud-simple.test.mjs`.
+9. **The pre-build dopamine wave is back in the simple HUD.** The user said the bright wave that
+   radiated from the nucleus through the brain at the dopamine peak had been there before the body
+   build and changed after it. They asked for it to start in the core dopamine system and run out
+   along the fibres. They said it was modelled on the anger wave of `anger-galaxy/`, and for this
+   task they allowed reading that project read-only ("Ha, faqat o'qish"; nothing there was changed;
+   the scope rule in CLAUDE.md otherwise stands).
+
+   The simple HUD now restores:
+   - pulse-locked climax reward;
+   - fibre flow with 0.5-s travel;
+   - no 2-s glow floor during the climax;
+   - an expanding shock-wave-style wave from the VTA (`shaders.js` `WAVE`, shared by `NEURON_VS` and
+     `DA_VS`; `renderer.setWaves`; `main.js` `updateWaves`). One slow bright shell starts at the
+     climax and a faster, weaker one with each contraction. The front widens, pushes the points it
+     crosses outward and lights the dopamine somata, fibres and release sites.
+
+   This stays under 3 shells a second, and reduced motion is respected. The full HUD (`?advanced=1`)
+   keeps the DOPAMINE.md display. The pre-build code itself is not in git (only the Windows
+   `.handoff/backup-brain-system-pre-build/` has it), so the wave is a reconstruction. Ask the user
+   whether it matches.
+10. **UI numbers and buttons.** The meter shows its percentage, the only number on screen. The
+   buttons are small, with 5–9 px corners.
+11. **Emotion and view are separate states; Quality is back.**
+   - The simple HUD has four controls: emotion (Calm / Stress / Pleasure), view (Brain / Cutaway /
+     Dopamine / Body), Quality (Auto or a fixed tier) and Pause.
+   - An emotion never moves the camera, and a view never changes the emotion.
+   - Adaptive quality (hardware start tier, then frame-time scaling of render scale and tier) was
+     already in `performance.js`, the same logic as `anger-galaxy/`. Only the manual control had
+     been missing from the simple HUD. `main.js` `setQuality` now serves both HUDs.
+
+12. **Glass style (stage 1 of the visual upgrade); Stars kept as a preset.** The user asked for a
+   more precise, translucent, crisp model and chose stage 1 of the proposal: glass shells from the
+   existing procedural fields, with no downloaded data.
+   - `src/glass.js` meshes them with surface nets at load: cerebrum with pressed-in folds,
+     cerebellum, skin, and the heart, lungs, liver, spleen, kidneys and bladder from `ORGANS`. The
+     work is sliced and the grid is finer at higher tiers.
+   - `shaders.js` `GLASS_VS/FS` with `renderer.setGlass` / `_drawGlass` draw them as additive glass.
+   - The simple HUD's style choice is Glass (default) or Stars (the earlier look, kept exactly as a
+     preset at the user's request). It is remembered in `localStorage`.
+   - Stage 2 (real meshes: BodyParts3D or Z-Anatomy organs, MNI surfaces, HCP1065 tracts; CC BY-SA)
+     waits for the user. It would change DOPAMINE.md §7.2 ("no downloaded meshes").
+   - After the user's first test:
+     - Field blur and Taubin smoothing remove the bumps and indents where `bodySDF` switches
+       primitives; the skin now follows the human form.
+     - Rotation lag is fixed: the shells were Ultra (≈ 1M triangles). They are now meshed at the tier
+       that renders, are coarser and cull back faces.
+     - Brain flicker is fixed with `fwidth` fading on thin folds and shallower glass folds
+       (`FOLD_SCALE` 0.25).
+     - Distinct anatomical colours (user request): brain pink-lavender, nerves and cord yellow,
+       organs in atlas colours; dopamine keeps amber.
+
+13. **The skin follows an analysis of the human form.** The user said the body was not a proper
+    human shape and asked for the form to be analysed first.
+    - `research/BODY-FORM.md` is that analysis. It sets ANSUR II 50th-percentile targets, made
+      sex-neutral at 1,760 mm, and walks the surface anatomy region by region. It lists the defects
+      of the old mannequin, the modelling method and the acceptance criteria.
+    - `bodySDF` in `src/body/geometry.js` now builds the skin from `FORM`:
+      - front/back superelliptic torso sections;
+      - deltoid, trapezius, pectoral, scapular and gluteal masses;
+      - profiled limbs with the calf, knee, malleoli and thenar eminence;
+      - arms joined with a crease;
+      - seamless guards; segment caps that never share a joint plane.
+    - Unchanged: the joints, landmarks, head, neck, internal `sdTorso`, organs, routes and sites.
+    - `test/body-form.test.mjs` checks the result.
+    - The waist is narrower than ANSUR II, because the elbows at x 195 would otherwise fuse into it.
+
+14. **Head, face and body second pass; the glass no longer flickers.** The user asked for the head,
+    face and body to read as a true human form, keeping the transparency. They also reported the
+    body flickering in Glass while rotating.
+    - `BODY-FORM.md` §8–§9 and `geometry.js`:
+      - `HEAD_FORM`: cranium, face, almond eye fissures (`eyeFissure`), nose, lips, ears;
+      - the neck as torso sections, with the sternomastoids;
+      - clavicles and axillary folds; the deltoid joined to the arm with a height-dependent radius;
+      - `HAND_FORM` and `FOOT_FORM`;
+      - a Hermite section spline;
+      - joints without bands.
+    - Flicker: the glass rim is thinner than a pixel on limbs seen from afar. The background and the
+      shells are now drawn with 4× MSAA and resolved into the scene (`renderer._glassTarget`, where
+      the format allows it). The flickering pixels fell about tenfold.
+    - A glass remesh now also waits until the camera has rested for 1 s.
+
+15. **Glass replaced by a dense star model.** The user found the glass shells distorted and jagged.
+    They asked for a sharper, denser particle model, with the nervous system brighter so the signals
+    read.
+    - `glass.js`, the glass shaders and the MSAA pass are gone.
+    - Body budgets per tier are now 78.5k / 151k / 248.5k / 378k (skin and nerves ×3, cord ×2.5,
+      organs, ganglia and enteric mesh ×2, the rest ×1.5).
+    - The simple HUD style is Detailed (default) or Stars, through renderer `PARAMS.style`:
+      - Detailed draws every star at 0.8 × size, in anatomical colours. The nervous system gets
+        boost 1.6–2.0, and the skin 3.4 for the silhouette.
+      - Stars culls each class to its earlier share (`uKeep`), so it keeps the earlier look.
+    - A stored "glass" choice opens as Detailed.
+
+16. **Heart model.** The user asked for a realistic, beating heart. Details are in
+    `brain-system/research/HEART.md`.
+    - `src/body/heart-form.js` (`HEART_FORM`) and `heartEntries` in `generate.js`: ventricles with
+      helical fibres, atria, valves and leaflets, papillary muscles, great vessels, coronary vessels
+      and the conduction system.
+    - `src/heart.js` (`HeartBeat`): beats in screen time (steady glow above 150 bpm), PR, QT
+      (Fridericia), Wiggers volumes, valve timing and a schematic ECG. Rate, RSA and contractility
+      come from the simulation.
+    - Display: a Heart view, heart stars ×2.2 and the rest ×0.18; the simple HUD shows beats per
+      minute and an ECG trace.
+    - Organ budget 22k / 44k / 72k / 116k; body totals 88.5k / 171k / 280.5k / 430k (the heart takes
+      55 % of the organ stars).
+17. **Patient monitor.** The heart-rate readout is replaced by a bedside-style monitor. Details are in
+    `brain-system/research/HEART.md` §7.
+    - `src/monitor.js` (`MONITOR`, `RespTrace`, `isAlarm`, `monitorValues`) and `#shud-monitor` with
+      `SimpleHud.drawMonitor` in `src/ui-simple.js`. The arterial wave, `arterialWave`, is in `src/heart.js`.
+    - Channels: ECG and HR, ART, RESP, TEMP, and the orange model blood values ADR and CORT. A value
+      outside its limits turns yellow and never flashes.
+    - Every trace runs in screen time. SpO₂ and capnography are not shown, because the model does not compute them.
+18. **Arterial pulse and vascular tree.** The user asked for the pulse wave of each heartbeat on a
+    denser, realistic vascular network. Details are in `brain-system/research/PULSE.md`.
+    - `src/body/vessel-tree.js` (`VESSEL_TREE`, `buildTwigs`, `pulseSite`): 140 named arteries and veins
+      (aorta to the cerebral, digital and pedal arteries; cavae to the saphenous veins and dural
+      sinuses) and 1,223 twigs, radii by Murray's law; each artery point carries its arrival delay
+      (path ÷ PWV) and pulse amplitude.
+    - `src/pulse.js` (`PulseWave`): the time since the aortic valve opened, the delay scale k from MAP
+      and HR, the amplitude G from the pulse pressure, the energy-conserving mean (`BODY_VS` `uPulse`),
+      the PLETH trace and the PTT on the monitor. No SpO₂.
+    - Display: Detailed draws the tree (arteries red, veins blue) instead of the earlier great vessels;
+      Stars keeps the earlier look. `uAnat` and `uSizeK` became `uStyle`, so `BODY_VS` stays at 110 slots.
+    - Vessel budget 18k / 36k / 60k / 96k (the tree 87.5 %); body totals 104,250 / 202,500 / 333,000 / 514,000.
+    - The user decided to keep the Stars style as it is: no tree there (`keepTree` 0, the earlier look).
+    - Second pass, at the user's request ("all aortas, arteries, veins and capillaries down to the finest
+      details", PULSE.md §13): the aortic root sinuses; 314 named vessels; `buildDetail` with twigs
+      three generations deep, organ trees (lungs, liver, kidneys, spleen), gut arcades and the marginal
+      artery, intercostal and lumbar vessels, venous valves, vasa vasorum and 15,668 capillary strands
+      coloured by oxygen saturation. Part codes 1–7 for the tree, 8–9 for the earlier great vessels.
+      Vessel budget 36k / 72k / 120k / 192k; body totals 122,250 / 238,500 / 393,000 / 610,000.
+    - Next decision for the user: whether the denser vessels and their brightness suit them, and
+      whether the larger Ultra budget (610,000 stars) runs smoothly on their other computer.
 
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
@@ -167,6 +328,18 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Windows, Node 24 or 26, Mac golden | 530 | 498 | 4 (golden, platform bits) | 28 |
 | Windows, golden re-recorded | 530 | 502 | 0 | 28 |
 | After stage 5 and the fixes | 537 | 509 | 0 | 28 |
+| Mac (arm64, Node 26.4) at `0101203`, x64 golden | 537 | 505 | 4 (golden, platform bits) | 28 |
+| Mac, simple HUD, wave, emotion/view split, glass with colours, body form (decisions 8–13) | 558 | 526 | 4 (golden, platform bits) | 28 |
+| Mac, head/face/body second pass, glass MSAA (decision 14) | 562 | 530 | 4 (golden, platform bits) | 28 |
+| Mac, dense star model replaces the glass (decision 15) | 554 | 522 | 4 (golden, platform bits) | 28 |
+| Mac, heart model (decision 16) | 564 | 532 | 4 (golden, platform bits) | 28 |
+| Mac, patient monitor (decision 17) | 567 | 535 | 4 (golden, platform bits) | 28 |
+| Mac, arterial pulse and vascular tree (decision 18) | 573 | 541 | 4 (golden, platform bits) | 28 |
+| Mac, vascular tree to the capillaries (decision 18, second pass) | 574 | 542 | 4 (golden, platform bits) | 28 |
+
+The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
+`npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was
+identical to the committed one.
 
 ## 5. The interrupted step: stage 6 PARAMS fold
 
@@ -228,6 +401,17 @@ verified as a whole. Its last action was recording the simulated IL-10 peak (§1
 - **Two refuted issues** (§6.10 contact-heat timing; §11.11 cortisol brake on immune cells) need no
   change.
 
+**Golden traces per architecture** (the user's decision, under decision 1):
+- The arm64 golden from `71e27cd` (`test/golden/orgasm-legacy.json` there) passed all 17
+  orgasm-regression tests against this code on the Mac. It was checked on 5 November, in a throwaway
+  worktree.
+- One golden per architecture would end the four failures on either machine with no re-recording and no
+  looser tolerance:
+  - `orgasm-legacy.arm64.json`, taken from `71e27cd`;
+  - `orgasm-legacy.x64.json`, today's file;
+  - the test picks one by `process.arch`.
+- Ask the user before doing it.
+
 **From the stage 5 integration** (for the stage 8 review and browser check):
 - **Model cost:**
   - The meal scenario crawls: the kernel hits its 1-ms budget (about 244 awake nodes and about 700 packets),
@@ -280,6 +464,9 @@ verified as a whole. Its last action was recording the simulated IL-10 peak (§1
   - ANALYSIS.md B.15 still names an old Windows path.
 
 **Environment notes:**
+- **`graphify-out/manifest.json`:** at session start the gate runs `graphify update`, which rewrites this
+  file with the machine's own file times. A fresh session therefore always shows it as changed in
+  `git status`. That is expected, not a sign of lost work.
 - **Git on the Windows computer:** system git there has `core.autocrlf=true`. The working tree is CRLF, but
   commits are LF. Clone new copies with `-c core.autocrlf=false`.
 - **Python on Windows:** run it with `PYTHONUTF8=1` (cp1251 code page).
@@ -290,8 +477,9 @@ verified as a whole. Its last action was recording the simulated IL-10 peak (§1
 
 Time estimates assume a working session at Opus high, without usage-limit pauses.
 
-1. **Baseline on the new machine** (15 min, direct): follow `RESUME.md`. Expect 537 / 509 / 0 / 28 and a
-   clean tsc. Explain any difference first; see decision 1 on the golden.
+1. **Baseline on the new machine** (15 min, direct): follow `RESUME.md`. Expect 537 / 509 / 0 / 28 on x64 and a
+   clean tsc. On arm64 (the Mac), expect 505 passing and the 4 golden failures (§4). Explain any other
+   difference first; see decision 1 and the per-architecture option in §6.
 2. **Finish the stage 6 PARAMS fold** (45–75 min, one agent or direct, **no workflow**): §5. Then
    `graphify update .`, the impact check and a commit (ask first).
 3. **Ask the user about the model re-calibrations** from §6: HPA delay chain, heart apex, the six overflow
@@ -309,6 +497,7 @@ Time estimates assume a working session at Opus high, without usage-limit pauses
    - Two skeptics per finding; a fixer re-runs `npm test` and `npm run typecheck`.
    - Run `/graph-usage` afterwards.
 6. **Stage 8b, browser verification** (30–45 min, direct):
+   - Check both HUDs: the simple one (default) and the full one (`?advanced=1`).
    - Check brain only vs whole body.
    - Check every network switch on and off with a probe stimulus, and the stimulus panel.
    - Run every scenario (hotObject, kneeJerk, loudSound, brightLight, standUp, stressor, meal, infection,

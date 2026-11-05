@@ -486,6 +486,9 @@ export class Hud {
       if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
       const t = ev.target;
       const modal = !e.info.hidden;
+      // With the simple HUD (the default) this HUD is hidden: only the About dialog's keys remain;
+      // ui-simple.js handles P and Escape itself.
+      if (!modal && document.body.classList.contains('hud-simple')) return;
 
       // Escape is not typing, so it works even while a slider or a select has focus. In order it
       // closes the dialog, cancels site picking, clears the focused site list, closes the dropdown

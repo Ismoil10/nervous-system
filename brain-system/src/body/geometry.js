@@ -24,16 +24,13 @@ import {
 // Parameters (every constant cites its owner section; [model] = design choice of this project)
 // ---------------------------------------------------------------------------------------------
 export const PARAMS = {
-  kHead: 10,              // §2.3 smooth union of the head envelope primitives
   kNeckTorso: 15,         // §13.2 smooth-union radius neck–torso
   kTorsoLimb: 15,         // §13.2 smooth-union radius torso–limb
+  kJoint: 3,              // [model] limb segment onto the next at a joint: their sections match there, and a
+                          // larger radius inflates the overlap by k/4 (a band round the knee and the elbow)
   kHand: 8,               // §13.2 hand, foot and digits
   kCrotch: 40,            // §13.2 crotch fillet radius (smooth surface into the thighs; A.1)
-  kNose: 6,               // [model] nose and pinna onto the head envelope
-  eyeOpening: 14,         // §2.3 no skin within 14 mm of the corneal apex
   mandibleSlope: 0.398,   // §2.3 mandibular plane z = −125 − 0.398·(y + 5)
-  handRound: 8,           // §13.2 hand box rounding (= hand smooth-union radius)
-  footRound: 8,           // §13.2
   gutSeed: 4726,          // [model] fixed geometry seed of the jejunoileum and sigmoid walks (tier-independent, §13.4)
   gutWalkStep: 10,        // [model] mm per random-walk step of the jejunoileum and sigmoid
   gutClearance: 3,        // §2.9 walks keep 3 mm from colon, stomach, duodenum, pancreas, bladder
@@ -66,6 +63,7 @@ const dist = (a, b) => len3(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 const norm = (a) => { const l = len3(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; };
 const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 const lerp3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+const PROFILE_ROUND = 10;   // mm: past a joint a limb section shrinks by e²/(2·10), e mm beyond it (makeProfile)
 function smin(a, b, k) { const h = clamp(0.5 + 0.5 * (b - a) / k); return b + (a - b) * h - k * h * (1 - h); }
 function smax(a, b, k) { return -smin(-a, -b, k); }
 export { dist, norm, cross, lerp3, len3 };
@@ -76,6 +74,14 @@ function sdEll(x, y, z, cx, cy, cz, rx, ry, rz) {
   const k0 = Math.sqrt(qx * qx + qy * qy + qz * qz);
   const k1 = Math.sqrt(qx * qx / (rx * rx) + qy * qy / (ry * ry) + qz * qz / (rz * rz));
   return k0 < 1e-9 ? -Math.min(rx, ry, rz) : k0 * (k0 - 1) / k1;
+}
+// Ellipsoid with a bounded gradient inside: there the conservative distance (k0 − 1)·min(r). The
+// k0(k0 − 1)/k1 estimate swings near the centre of a flat ellipsoid, which shows in a carve (the eye
+// fissure) and in a smooth union of flat parts (the lips).
+function sdEllCarve(x, y, z, e) {
+  const qx = (x - e.c[0]) / e.r[0], qy = (y - e.c[1]) / e.r[1], qz = (z - e.c[2]) / e.r[2];
+  const k0 = Math.sqrt(qx * qx + qy * qy + qz * qz);
+  return k0 < 1 ? (k0 - 1) * Math.min(e.r[0], e.r[1], e.r[2]) : sdEll(x, y, z, e.c[0], e.c[1], e.c[2], e.r[0], e.r[1], e.r[2]);
 }
 function sdEllipse2(x, y, a, b) {
   const qx = x / a, qy = y / b;
@@ -96,16 +102,10 @@ export function sdEllipsoid(p, c, r) { return sdEll(p[0], p[1], p[2], c[0], c[1]
 // Head soft tissue and sense organs (§2.3)
 // ---------------------------------------------------------------------------------------------
 export const HEAD = {
-  scalp: { c: [0, -17, 12], r: [80, 99, 77] },          // §2.3 headEnv.scalp
-  brow: { c: [0, 40, -20], r: [66, 46, 34] },           // §2.3 headEnv.brow
-  midface: { c: [0, 30, -52], r: [72, 60, 40] },        // §2.3 headEnv.midface
-  occiput: { c: [0, -28, -55], r: [80, 80, 42] },       // §2.3 headEnv.occiput
-  face: { c: [0, 50, -100], r: [62, 50, 70] },          // §2.3 headEnv.face, clipped by the mandibular plane
-  neck: { c: [0, -15], r: [60, 58], z0: -95, z1: -200 }, // §2.3 headEnv.neck (elliptic cylinder)
+  scalp: { c: [0, -17, 12], r: [80, 99, 77] },          // §2.3 headEnv.scalp (picking volume only; the skin is HEAD_FORM)
+  neck: { c: [0, -15], r: [60, 58], z0: -95, z1: -200 }, // §2.3 headEnv.neck (elliptic cylinder; skin regions only)
   nasion: [0, 87, -40], pronasale: [0, 108, -82], subnasale: [0, 96, -94], // §2.3 headEnv.nose
-  noseR: [1.5, 9, 3],                                   // [model] radii along the ridge (wedge half-width 16 at the alae)
-  alae: { c: [0, 92, -87], r: [16, 8, 8] },             // [model] alar base, half-width 16 (§2.3)
-  pinna: { c: [80, -24, -45], r: [8, 15, 30] },         // §2.3 pinna.R
+  pinna: { c: [80, -24, -45], r: [8, 15, 30] },         // §2.3 pinna.R (picking volume only; the skin is HEAD_FORM.ear)
   cornealApex: [33, 72, -38],                           // §2.3, A.2
   eye: { c: [33, 60, -38], r: 12 },                     // §2.3 eye.R
   retinaPole: [33, 48, -38], retinaR: 11,               // §2.3 retina.R shell
@@ -123,23 +123,115 @@ export const HEAD = {
   iris: { inner: 2, outer: 6 },                         // [model] iris ring around the dark pupil disc (§13.2); pupil 4.0 mm (§7)
 };
 
+// Head and face form (research/BODY-FORM.md §8): cranium, face skeleton and soft tissue, nose, lips,
+// eyelids and auricle, placed on the §2.3 points (nasion, pronasale, subnasale, corneal apex, eye,
+// meatus) and sized to the craniofacial norms of §8.1. Right side; the head is evaluated at |x|.
+export const HEAD_FORM = {
+  // Cranium: the vault, the wide temporal base at ear level, the occiput and nape over the cerebellum.
+  vault: { c: [0, -18, 14], r: [77, 94, 76] },
+  frontal: { c: [0, 14, 14], r: [66, 72, 72] },
+  temporal: { c: [0, -20, -36], r: [74, 74, 42] },
+  occiput: { c: [0, -62, -50], r: [64, 50, 40] },
+  kCranium: 22,
+  // Face skeleton and soft tissue.
+  midface: { c: [0, 32, -74], r: [57, 50, 52] },          // upper face; clipped below by the mandibular plane
+  lowerFace: { c: [0, 26, -120], r: [50, 54, 40] },       // cheeks over the masseters and the jaw, down to the mandibular plane
+  cheekbone: { c: [53, 48, -60], r: [17, 10, 10] },      // malar eminence and zygion (bizygomatic ≈ 138)
+  cheek: { c: [33, 48, -90], r: [21, 30, 32] },
+  muzzle: { c: [0, 64, -116], r: [38, 26, 28] },         // dental arches under the lips
+  chin: { c: [0, 77, -146], r: [18, 12, 13] },           // soft-tissue pogonion y ≈ 89
+  brow: { a: [0, 82, -27], b: [42, 70, -27], r: 9 },     // supraorbital ridge; glabella y ≈ 90
+  // Eyes: the orbit is recessed, the lids wrap the eye (§2.3 eye.R) and part in an almond fissure
+  // about 30 × 11 mm around the corneal apex.
+  orbit: { c: [33, 80, -35], r: [17, 10, 12] },
+  lidR: 13.6,
+  fissure: { r: [15, 7, 5.5] },
+  // Nose on the §2.3 points: dorsum from the nasion to the tip, the lobule, the alae (width ≈ 34).
+  dorsum: [[0, 6, 5, -5, 0], [0.45, 7.5, 7, -7, 0], [1, 9, 8, -8, 0]],
+  lobule: { c: [0, 99, -83], r: [10, 9, 8.5] },
+  ala: { c: [10, 89, -89], r: [7, 8, 6.5] },
+  kNose: 5,
+  // Lips (mouth width ≈ 52, stomion z ≈ −115) and the crease between them.
+  upperLip: { c: [0, 87, -106], r: [24, 9, 7] },
+  lowerLip: { c: [0, 85, -124], r: [22, 10, 8.5] },
+  stomion: { c: [0, 97, -115.5], r: [25, 11], half: 1.3 },   // a thin horizontal slab: the mouth line
+  // Auricle: an oval plate (length 62, width 34) with a rolled helix, the concha around the meatus
+  // and the lobule. Its lateral face turns 25° forward from the side of the head and its long axis
+  // leans 15° back.
+  ear: { attach: [70, -9, -49], turn: 25, lean: 15, half: [17, 31], thick: 2.6, helix: 3.2 },
+  kFace: 12,
+};
+// Local frame of the auricle: U along its width (back and out), V up its length, N its lateral face.
+const EAR = (() => {
+  const E = HEAD_FORM.ear, th = (E.turn * Math.PI) / 180, le = (E.lean * Math.PI) / 180;
+  const U = [Math.sin(th), -Math.cos(th), 0];
+  let V = [0, -Math.sin(le), Math.cos(le)];
+  const dv = V[0] * U[0] + V[1] * U[1] + V[2] * U[2];
+  V = norm([V[0] - dv * U[0], V[1] - dv * U[1], V[2] - dv * U[2]]);
+  const N = cross(V, U);
+  return { A: E.attach, U, V, N: N[0] > 0 ? N : [-N[0], -N[1], -N[2]] };
+})();
+const NOSE = makeProfile(HEAD.nasion, HEAD.pronasale, HEAD_FORM.dorsum);
+const ellF = (e, x, y, z) => sdEllCarve(x, y, z, e);   // head, hand and foot parts: bounded inside too
+const capF = (s, x, y, z) => sdCone(x, y, z, s.a, s.r, s.b, s.r);
+
+// Signed distance to the almond eye fissure (negative inside the opening); the skin is carved there.
+export function eyeFissure(x, y, z) {
+  const a = HEAD.cornealApex;
+  return sdEllCarve(Math.abs(x), y, z, { c: [a[0], a[1] + 2, a[2]], r: HEAD_FORM.fissure.r });
+}
+function sdEar(x, y, z) {
+  const E = HEAD_FORM.ear, F = EAR;
+  const px = x - F.A[0], py = y - F.A[1], pz = z - F.A[2];
+  const s = px * F.U[0] + py * F.U[1] + pz * F.U[2] - E.half[0];
+  const t = px * F.V[0] + py * F.V[1] + pz * F.V[2];
+  const w = px * F.N[0] + py * F.N[1] + pz * F.N[2];
+  const e = sdEllipse2(s, t, E.half[0], E.half[1]);
+  let d = smax(e, Math.abs(w - 1) - E.thick, 1.5);                       // the plate
+  d = smin(d, Math.hypot(e + E.helix, w - 2.2) - E.helix, 2);             // the helix rim
+  d = smin(d, sdEll(s, t, w, -4, -25, 1, 10, 8, 4.6), 3);                // the lobule
+  d = smax(d, -sdEllCarve(s, t, w, { c: [-5, -3, 8.5], r: [9.5, 12, 7.5] }), 2);   // the concha
+  d = smin(d, sdEll(s, t, w, -15.5, -4, 1.5, 4, 6, 4), 2);               // the tragus
+  return d;
+}
+
 function sdHead(x, y, z) {   // x = |x|
-  const H = HEAD, k = PARAMS.kHead;
-  let d = sdEll(x, y, z, H.scalp.c[0], H.scalp.c[1], H.scalp.c[2], H.scalp.r[0], H.scalp.r[1], H.scalp.r[2]);
-  d = smin(d, sdEll(x, y, z, H.brow.c[0], H.brow.c[1], H.brow.c[2], H.brow.r[0], H.brow.r[1], H.brow.r[2]), k);
-  d = smin(d, sdEll(x, y, z, H.midface.c[0], H.midface.c[1], H.midface.c[2], H.midface.r[0], H.midface.r[1], H.midface.r[2]), k);
-  d = smin(d, sdEll(x, y, z, H.occiput.c[0], H.occiput.c[1], H.occiput.c[2], H.occiput.r[0], H.occiput.r[1], H.occiput.r[2]), k);
-  let f = sdEll(x, y, z, H.face.c[0], H.face.c[1], H.face.c[2], H.face.r[0], H.face.r[1], H.face.r[2]);
+  const H = HEAD_FORM, kc = H.kCranium, kf = H.kFace;
+  // Cranium.
+  let d = ellF(H.vault, x, y, z);
+  d = smin(d, ellF(H.frontal, x, y, z), kc);
+  d = smin(d, ellF(H.temporal, x, y, z), kc);
+  d = smin(d, ellF(H.occiput, x, y, z), kc);
+  // Face: the midface down to the mandibular plane, then the bony prominences and the jaw.
   const m = PARAMS.mandibleSlope;
-  f = smax(f, ((-125 - m * (y + 5)) - z) / Math.sqrt(1 + m * m), 4);
-  d = smin(d, f, k);
-  const kn = PARAMS.kNose;
-  d = smin(d, sdCone(x, y, z, H.nasion, H.noseR[0], H.pronasale, H.noseR[1]), kn);
-  d = smin(d, sdCone(x, y, z, H.pronasale, H.noseR[1], H.subnasale, H.noseR[2]), kn);
-  d = smin(d, sdEll(x, y, z, H.alae.c[0], H.alae.c[1], H.alae.c[2], H.alae.r[0], H.alae.r[1], H.alae.r[2]), kn);
-  d = smin(d, sdEll(x, y, z, H.pinna.c[0], H.pinna.c[1], H.pinna.c[2], H.pinna.r[0], H.pinna.r[1], H.pinna.r[2]), kn);
-  const a = H.cornealApex;
-  d = smax(d, PARAMS.eyeOpening - len3(x - a[0], y - a[1], z - a[2]), 3);
+  const below = ((-125 - m * (y + 5)) - z) / Math.sqrt(1 + m * m);   // > 0 under the mandibular plane
+  let f = smax(smin(ellF(H.midface, x, y, z), ellF(H.lowerFace, x, y, z), 20), below, 8);
+  f = smin(f, ellF(H.cheek, x, y, z), kf);
+  f = smin(f, ellF(H.cheekbone, x, y, z), 18);
+  f = smin(f, ellF(H.muzzle, x, y, z), 10);
+  f = smin(f, ellF(H.chin, x, y, z), 9);
+  d = smin(d, f, 14);
+  d = smin(d, capF(H.brow, x, y, z), 10);
+  // Eyes: recess the orbit, wrap the lids round the eye, open the fissure.
+  const eye = HEAD.eye.c;
+  d = smax(d, -sdEllCarve(x, y, z, H.orbit), 6);
+  d = smin(d, len3(x - eye[0], y - eye[1], z - eye[2]) - H.lidR, 6);
+  d = smax(d, -eyeFissure(x, y, z), 1.5);
+  // Nose.
+  if (x < 40 && y > 50 && z < -25 && z > -110) {
+    let n = sdProfile(NOSE, x, y, z);
+    n = smin(n, ellF(H.lobule, x, y, z), 4);
+    n = smin(n, ellF(H.ala, x, y, z), 3);
+    d = smin(d, n, H.kNose);
+  }
+  // Lips and the mouth line.
+  if (x < 50 && y > 50 && z < -90 && z > -140) {
+    d = smin(d, smin(ellF(H.upperLip, x, y, z), ellF(H.lowerLip, x, y, z), 3), 5);
+    const S = H.stomion, e2 = sdEllipse2(x, y - S.c[1], S.r[0], S.r[1]), ez = Math.abs(z - S.c[2]) - S.half;
+    d = smax(d, -(Math.hypot(Math.max(e2, 0), Math.max(ez, 0)) + Math.min(Math.max(e2, ez), 0)), 1.2);
+  }
+  // Auricle.
+  if (x > 55 && y < 25 && y > -75 && z < 0 && z > -100) d = smin(d, sdEar(x, y, z), 3);
   return d;
 }
 function sdNeck(x, y, z) {
@@ -177,19 +269,15 @@ export const LIMB = {
   forearmKeys: [[0, 42, 42], [0.25, 45, 40], [1, 30, 20]], // §2.6 forearm (mediolateral × AP)
   thighR: [95, 60],                                     // §2.6 thigh 95 → 60
   legKeys: [[0, 60, 60], [120 / 433, 62, 62], [1, 37, 37]], // §2.6 leg 60 → 62 (calf, z −1,290) → 37
-  handHalf: [43, 15],                                   // §2.6 hand box half (breadth, thickness)
   fingerR: 9, thumbR: 11,                               // §2.6
   // Digit bases ([model]) and tips (§2.6 fingertips; ring tip interpolated [model]).
   digits: [
-    { id: 'thumb', base: [268, -8, -850], tip: [282, 0, -930], r: 11 },
-    { id: 'index', base: [248, -15, -918], tip: [258, -15, -1000], r: 9 },
-    { id: 'middle', base: [234, -15, -920], tip: [240, -15, -1008], r: 9 },
-    { id: 'ring', base: [220, -15, -916], tip: [222, -15, -1000], r: 8.5 },
-    { id: 'little', base: [206, -15, -908], tip: [205, -15, -985], r: 8 },
+    { id: 'thumb', base: [266, -10, -848], tip: [282, 0, -930], r: 11.5 },
+    { id: 'index', base: [254, -14, -916], tip: [258, -15, -1000], r: 9.5 },
+    { id: 'middle', base: [237, -14, -920], tip: [240, -15, -1008], r: 9.5 },
+    { id: 'ring', base: [220, -14, -916], tip: [222, -15, -1000], r: 9 },
+    { id: 'little', base: [204, -14, -906], tip: [205, -15, -985], r: 8 },
   ],
-  // Foot (§2.6): heel contact (78, −95), toe tip (95, 173), half-breadth 48, dorsum 69 (ankle) → 35 (MTP).
-  // Profile rows [y, x centre, half-breadth, height above the floor]; the heel and toe rows are [model].
-  footProfile: [[-95, 78, 30, 45], [-45, 79, 38, 69], [40, 84, 46, 55], [120, 90, 48, 35], [173, 95, 40, 18]],
 };
 
 const TORSO_SLOPE = (() => {   // per interval: max |Δ| / Δz × 1.5 (smoothstep peak), for the Lipschitz bound
@@ -258,71 +346,311 @@ export const LIMBS = {
   thigh: makeLimb(JOINTS.hip, JOINTS.knee, [[0, LIMB.thighR[0], LIMB.thighR[0]], [1, LIMB.thighR[1], LIMB.thighR[1]]]),
   leg: makeLimb(JOINTS.knee, JOINTS.ankle, LIMB.legKeys),
 };
-const HAND = (() => {
-  const a = JOINTS.wrist, b = [240, -15, -918];
-  const w = norm(sub(b, a)), u = norm([1 - w[0] * w[0], -w[0] * w[1], -w[0] * w[2]]), v = cross(u, w);
-  return { c: lerp3(a, b, 0.5), w, u, v, half: [LIMB.handHalf[0], LIMB.handHalf[1], dist(a, b) / 2] };
-})();
-const DIGITS = LIMB.digits.map((g) => {   // tips shortened by r so the skin passes through the §2.6 tip points
-  const ax = norm(sub(g.tip, g.base));
-  return { ...g, end: [g.tip[0] - ax[0] * g.r, g.tip[1] - ax[1] * g.r, g.tip[2] - ax[2] * g.r] };
+// Hand (BODY-FORM.md §9): a palm of two blended masses, from the wrist (≈ 58 × 30) to the knuckles
+// (≈ 76 × 27), and digits of three phalanges that taper and bow slightly towards the palm
+// (a relaxed hand); the skin passes through the §2.6 fingertips.
+export const HAND_FORM = {
+  carpus: { c: [231, -21, -840], r: [32, 21, 32] },   // base of the palm; covers the forearm's wrist cap
+  metacarpus: { c: [229.5, -16, -888], r: [41, 13.5, 32] },   // the palm proper, to the knuckles (breadth ≈ 80)
+  hypothenar: { c: [208, -10, -874], r: [11, 10, 28] },
+  joints: [0.47, 0.76],                                // PIP and DIP along each finger (thumb: MCP, IP)
+  taper: [1, 0.92, 0.84, 0.74],                        // radius at base, PIP, DIP, tip (× r)
+  bow: 4,                                              // mm towards the palm at the middle joints
+};
+const DIGITS = LIMB.digits.map((g) => {
+  const T = HAND_FORM.taper, [j1, j2] = HAND_FORM.joints, ax = norm(sub(g.tip, g.base)), L = dist(g.base, g.tip);
+  const rEnd = g.r * T[3], end = [g.tip[0] - ax[0] * rEnd, g.tip[1] - ax[1] * rEnd, g.tip[2] - ax[2] * rEnd];
+  const at = (f, bow) => { const p = lerp3(g.base, end, f * L / (L - rEnd)); return [p[0], p[1] + bow, p[2]]; };
+  const bow = g.id === 'thumb' ? 0 : HAND_FORM.bow;
+  return { ...g, pts: [g.base, at(j1, bow), at(j2, bow * 0.8), end], rs: T.map((k) => g.r * k) };
 });
 function sdHand(x, y, z) {
-  const H = HAND, rr = PARAMS.handRound;
-  const px = x - H.c[0], py = y - H.c[1], pz = z - H.c[2];
-  const lu = Math.abs(px * H.u[0] + py * H.u[1] + pz * H.u[2]) - (H.half[0] - rr);
-  const lv = Math.abs(px * H.v[0] + py * H.v[1] + pz * H.v[2]) - (H.half[1] - rr);
-  const lw = Math.abs(px * H.w[0] + py * H.w[1] + pz * H.w[2]) - (H.half[2] - rr);
-  let d = len3(Math.max(lu, 0), Math.max(lv, 0), Math.max(lw, 0)) + Math.min(Math.max(lu, lv, lw), 0) - rr;
-  for (const g of DIGITS) d = smin(d, sdCone(x, y, z, g.base, g.r, g.end, g.r), PARAMS.kHand);
+  const H = HAND_FORM;
+  let d = smin(ellF(H.carpus, x, y, z), ellF(H.metacarpus, x, y, z), 14);
+  d = smin(d, ellF(H.hypothenar, x, y, z), 10);
+  for (const D of DIGITS) {
+    let f2 = sdCone(x, y, z, D.pts[0], D.rs[0], D.pts[1], D.rs[1]);
+    f2 = smin(f2, sdCone(x, y, z, D.pts[1], D.rs[1], D.pts[2], D.rs[2]), 2);
+    f2 = smin(f2, sdCone(x, y, z, D.pts[2], D.rs[2], D.pts[3], D.rs[3]), 2);
+    d = smin(d, f2, PARAMS.kHand);
+  }
   return d;
 }
+// Foot (BODY-FORM.md §9): a rounded heel, a body whose section rises to the instep under the ankle
+// and flattens to the ball, a flat sole lifted under the medial arch, and five toes, the big toe
+// medial. Footprint of §2.6: heel contact (78, −95), toe tip (≈ 75, 173), half-breadth ≈ 47.
+export const FOOT_FORM = {
+  heel: { c: [78, -63, -1640], r: [32, 32, 35] },
+  body: { a: [78, -58, -1640], b: [98, 96, -1650], keys: [[0, 31, 34, 0, 0], [0.32, 36, 40, 0, 0], [0.7, 44, 28, 0, 0], [1, 46, 21, 0, 0]] },
+  ball: { c: [100, 104, -1654], r: [50, 22, 18] },   // the ball of the foot under the metatarsal heads (breadth ≈ 100)
+  arch: { c: [52, 30, -1677], r: [22, 62, 13] },
+  toes: [   // [base, base radius, tip end, tip radius]: big toe to little toe
+    [[70, 126, -1656], 12, [75, 160, -1660], 11.5], [[92, 126, -1660], 8.5, [96, 155, -1663], 8],
+    [[107, 120, -1661], 8, [110, 148, -1664], 7.5], [[120, 113, -1662], 7.5, [123, 139, -1665], 7],
+    [[132, 104, -1663], 7, [135, 126, -1666], 6.5],
+  ],
+};
+const FOOT_BODY = makeProfile(FOOT_FORM.body.a, FOOT_FORM.body.b, FOOT_FORM.body.keys, false);
 function sdFoot(x, y, z) {
-  const P = LIMB.footProfile, rr = PARAMS.footRound, n = P.length;
-  const yc = clamp(y, P[0][0], P[n - 1][0]);
+  const F = FOOT_FORM;
+  let d = smin(ellF(F.heel, x, y, z), sdProfile(FOOT_BODY, x, y, z), 10);
+  d = smin(d, ellF(F.ball, x, y, z), 10);
+  for (const t of F.toes) d = smin(d, sdCone(x, y, z, t[0], t[1], t[2], t[3]), 4);
+  d = smax(d, -sdEllCarve(x, y, z, F.arch), 6);
+  return smax(d, FRAME.floorZ - z, 3);   // the sole stands on the floor
+}
+// ---------------------------------------------------------------------------------------------
+// Skin form (research/BODY-FORM.md): the outer surface built from an analysis of the human shape
+// (ANSUR II, neutral at 1,760 mm; the head and face to the craniofacial norms of §8). The joints,
+// landmarks and the internal trunk field sdTorso (gut, regions, rigid segments) are unchanged; only
+// the skin takes this form. The neck is part of the torso sections.
+// ---------------------------------------------------------------------------------------------
+// Torso sections every 40–80 mm (BODY-FORM.md §2, §3, §5): z, half-breadth a, front yf, back yb,
+// superellipse exponents of the front and back halves. The line of greatest breadth lies at
+// ym = yb + 0.45·(yf − yb). Values interpolate with a Catmull–Rom spline over z.
+export const FORM = {
+  torso: [
+    //  z     a    yf    yb    nf   nb
+    [ -70,  48,  20,  -76, 2.0, 2.0],   // under the skull base (inside the head)
+    [-110,  52,  30,  -80, 1.9, 2.1],   // upper neck; the nape under the occiput
+    [-150,  55,  42,  -82, 1.9, 2.1],   // hyoid and larynx (front y 42); girth ≈ 375
+    [-185,  60,  50,  -92, 2.0, 2.2],   // neck base, towards the C7 spine
+    [-225, 120,  63, -106, 2.0, 2.3],   // jugular notch (y 60), clavicles; the trapezius slopes out
+    [-250, 142,  73, -118, 2.2, 2.4],   // clavicles to the acromia: the front of the shoulder is full, not a shelf
+    [-270, 150,  82, -128, 2.5, 2.5],   // sternal angle (y 80); axilla skin (T2 site at x 150)
+    [-330, 150, 103, -140, 2.8, 2.6],   // pectoral level; lungs reach x ±140
+    [-390, 148,  96, -136, 2.5, 2.5],   // xiphoid (y 92)
+    [-450, 150,  90, -126, 2.2, 2.4],   // costal margin; liver to x 134
+    [-520, 150,  92, -112, 2.1, 2.3],   // upper abdomen; the lumbar curve begins
+    [-590, 148,  98, -110, 2.1, 2.3],   // waist, just above the iliac crest (150, −30, −587)
+    [-650, 162, 100, -122, 2.2, 2.3],   // iliac crest and lower abdomen
+    [-720, 175,  92, -138, 2.3, 2.3],   // trochanters (170, −20, −739); the back fills towards the buttocks
+    [-780, 170,  72, -128, 2.3, 2.2],   // sacrum and the intergluteal cleft (S4 y −128); symphysis y 55
+    [-835, 160,  55, -125, 2.2, 2.1],   // crotch level
+  ],
+  // Muscle masses and bony prominences (right side; c, r in mm; k = smooth-union radius).
+  trapezius: { a: [35, -42, -172], ra: 33, b: [184, -24, -226], rb: 18, k: 20 },
+  sternomastoid: { a: [44, -40, -90], ra: 9, b: [14, 54, -220], rb: 8, k: 16 },   // mastoid to the sternal head: the V of the neck
+  deltoid: { c: [198, -22, -284], r: [50, 54, 72], k: 18 },     // bideltoid ≈ 496
+  pectoral: { c: [64, 58, -322], r: [70, 38, 44], k: 20 },     // a flat plate under the chest front, not a mound
+  clavicle: { a: [18, 46, -230], b: [176, -6, -228], r: 10, k: 22 },
+  supraclavicular: { a: [36, 6, -196], b: [150, -6, -224], r: 22, k: 24 },   // the slope from the neck base out to the shoulder, in front of the trapezius
+  axillaFront: { a: [118, 48, -300], b: [180, 10, -314], r: 18, k: 22 },   // anterior axillary fold (pectoralis major to the arm)
+  axillaBack: { a: [112, -114, -312], b: [178, -60, -320], r: 18, k: 22 },  // posterior axillary fold (latissimus, teres major)
+  scapula: { c: [80, -112, -300], r: [62, 30, 80], k: 20 },
+  gluteal: { c: [80, -100, -768], r: [74, 52, 88], k: 34 },     // a long, flat mass blended into the lower back; fold ≈ z −850; cleft at the midline
+  vastusMedialis: { c: [56, -12, -1102], r: [22, 26, 38], k: 20 },
+  patella: { c: [80, 20, -1162], r: [20, 8, 24], k: 12 },
+  gastrocMedial: { c: [64, -64, -1312], r: [26, 28, 72], k: 18 },
+  malleolusLat: { c: [110, -48, -1612], r: [11, 13, 15], k: 8 },
+  malleolusMed: { c: [50, -40, -1596], r: [11, 13, 15], k: 8 },
+  thenar: { c: [252, -6, -862], r: [16, 12, 24], k: 10 },
+  // Limb profiles along the §2.6 joint axes: [t, lateral radius, anterior radius, anterior offset,
+  // lateral offset] (mm). The offsets move the section centre: the calf behind the shin, the biceps
+  // and quadriceps in front.
+  upperArm: [[0, 50, 50, 0, 0], [0.3, 46, 48, 2, 0], [0.55, 44, 48, 4, 0], [0.85, 40, 40, 0, 0], [1, 40, 35, 0, 0]],
+  forearm: [[0, 40, 35, 0, 0], [0.22, 45, 40, 0, 0], [0.6, 37, 30, 0, 0], [1, 30, 20, 0, 0]],
+  thigh: [[-0.12, 74, 70, 0, 0], [0, 96, 92, 0, 6], [0.18, 100, 96, 4, 4], [0.5, 86, 82, 6, 2], [0.82, 66, 62, 4, 0], [1, 56, 55, 0, 0]],
+  leg: [[0, 56, 54, 0, 0], [0.12, 54, 58, -6, 0], [0.28, 60, 66, -14, 2], [0.55, 46, 50, -8, 0], [0.85, 36, 38, -2, 0], [1, 35, 40, 0, 0]],
+  distScale: 0.9,   // first-order distances are scaled down so they stay conservative (ray marching)
+  // Smooth-union radius of each arm onto the trunk and legs: [below, at the shoulder] and the heights
+  // between which it changes. Large over the shoulder (trapezius into deltoid), a crease from the axilla
+  // down (along the chest, the flank and the thigh).
+  armJoin: [5, 18], armJoinZ: [-345, -265],
+};
+
+// Section table at 1-mm steps (built once): a, yf, yb, nf, nb and the steepest |d/dz| for the
+// Lipschitz correction. The rows are unevenly spaced, so the spline is a cubic Hermite in z with
+// tangents from the neighbouring rows (Catmull–Rom by z): its slope is continuous at every row. A
+// spline uniform in the row index changes slope at rows next to a shorter or longer gap, which drew a
+// crease line across the chest.
+const FORM_TABLE = (() => {
+  const R = FORM.torso, top = R[0][0], bot = R[R.length - 1][0], n = Math.round(top - bot) + 1, m = R.length;
+  const tan = R.map((r, i) => r.map((_, c) => {   // d/dz at each row
+    const a = R[Math.max(0, i - 1)], b = R[Math.min(m - 1, i + 1)];
+    return c === 0 ? 0 : (b[c] - a[c]) / (b[0] - a[0]);
+  }));
+  const tab = new Float32Array(n * 6);
+  for (let k = 0; k < n; k++) {
+    const z = top - k;
+    let i = 0;
+    while (i < m - 2 && R[i + 1][0] > z) i++;
+    const h = R[i + 1][0] - R[i][0], t = (z - R[i][0]) / h, t2 = t * t, t3 = t2 * t;
+    const h00 = 2 * t3 - 3 * t2 + 1, h10 = t3 - 2 * t2 + t, h01 = -2 * t3 + 3 * t2, h11 = t3 - t2;
+    for (let c = 1; c < 6; c++) tab[k * 6 + c - 1] = h00 * R[i][c] + h10 * h * tan[i][c] + h01 * R[i + 1][c] + h11 * h * tan[i + 1][c];
+  }
+  for (let k = 0; k < n; k++) {
+    const a = Math.max(0, k - 1), b = Math.min(n - 1, k + 1);
+    let m = 0;
+    for (let c = 0; c < 3; c++) m = Math.max(m, Math.abs(tab[b * 6 + c] - tab[a * 6 + c]) / Math.max(1, b - a));
+    tab[k * 6 + 5] = m;
+  }
+  return { tab, top, bot, n };
+})();
+export function formSection(z) {   // linear between the 1-mm rows, so the surface has no terraces
+  const T = FORM_TABLE, u = Math.min(T.n - 1, Math.max(0, T.top - z)), k = Math.min(T.n - 2, Math.floor(u)), f = u - k;
+  const o = k * 6, t = T.tab, g = 1 - f;
+  return {
+    a: t[o] * g + t[o + 6] * f, yf: t[o + 1] * g + t[o + 7] * f, yb: t[o + 2] * g + t[o + 8] * f,
+    nf: t[o + 3] * g + t[o + 9] * f, nb: t[o + 4] * g + t[o + 10] * f, slope: Math.max(t[o + 5], t[o + 11]),
+  };
+}
+// Signed distance to a front/back superelliptic section (first-order estimate (r − 1)/|∇r|).
+function sdSection(x, y, s) {
+  const ym = s.yb + 0.45 * (s.yf - s.yb), dy = y - ym;
+  const depth = dy >= 0 ? s.yf - ym : ym - s.yb, n = dy >= 0 ? s.nf : s.nb;
+  const u = x / s.a, v = Math.abs(dy) / depth;
+  const r = Math.pow(Math.pow(u, n) + Math.pow(v, n), 1 / n);
+  if (r < 1e-6) return -Math.min(s.a, depth);
+  const k = Math.pow(r, 1 - n);
+  const g = Math.hypot(Math.pow(u, n - 1) * k / s.a, Math.pow(v, n - 1) * k / depth);
+  const d = (r - 1) / Math.max(g, 1e-6);
+  return r < 1 ? Math.max(d, -Math.min(s.a, depth)) : d * FORM.distScale;
+}
+function sdTorsoForm(x, y, z) {
+  const T = FORM_TABLE, s = formSection(z);
+  const d2 = sdSection(x, y, s) / Math.sqrt(1 + s.slope * s.slope);
+  const e = Math.max(z - T.top, T.bot - z);
+  return e > 0 ? (d2 > 0 ? Math.hypot(d2, e) : e) : (d2 > 0 ? d2 : Math.max(d2, e));
+}
+
+// Limb with a profile of keys [t, rx, ry, oy, ox], smoothly interpolated, rounded at both ends.
+function makeProfile(a, b, keys, extStart = true, extEnd = 0.3) {
+  const l = makeLimb(a, b, keys);
+  let slope = 0;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const dt = (keys[i + 1][0] - keys[i][0]) * l.L;
+    for (let c = 1; c < 5; c++) slope = Math.max(slope, 1.5 * Math.abs(keys[i + 1][c] - keys[i][c]) / dt);
+  }
+  // Each segment runs on past its joints by 30 % of its end radius (extEnd at the far end), so two
+  // caps never share the joint plane (a crease). Past the joint its section shrinks smoothly
+  // (PROFILE_ROUND), so it dips inside the neighbouring segment and leaves no rim: the knee and the
+  // elbow are not drums. The upper arm and the thigh start inside the deltoid and the pelvis, so they
+  // are not extended there.
+  // A first key at t < 0 starts the segment that far above its joint instead, capped there.
+  const r0 = keys[0], r1 = keys[keys.length - 1];
+  const ext0 = r0[0] < 0 ? -r0[0] * l.L : extStart ? 0.3 * Math.min(r0[1], r0[2]) : 0;
+  return { ...l, slope, ext: [ext0, extEnd * Math.min(r1[1], r1[2])], round: [r0[0] < 0 ? 0 : PROFILE_ROUND, PROFILE_ROUND] };
+}
+function profileAt(keys, t) {
+  if (t <= keys[0][0]) return keys[0];
+  const last = keys[keys.length - 1];
+  if (t >= last[0]) return last;
   let i = 0;
-  while (i < n - 2 && P[i + 1][0] < yc) i++;
-  const f = (yc - P[i][0]) / (P[i + 1][0] - P[i][0]);
-  const xc = P[i][1] + (P[i + 1][1] - P[i][1]) * f, w = P[i][2] + (P[i + 1][2] - P[i][2]) * f;
-  const h = P[i][3] + (P[i + 1][3] - P[i][3]) * f;
-  const slope = Math.max(Math.abs(P[i + 1][2] - P[i][2]), Math.abs(P[i + 1][3] - P[i][3])) / (P[i + 1][0] - P[i][0]);
-  const dx = Math.abs(x - xc) - (w - rr), dz = Math.abs(z - (FRAME.floorZ + h / 2)) - (h / 2 - rr);
-  const d2 = (Math.hypot(Math.max(dx, 0), Math.max(dz, 0)) + Math.min(Math.max(dx, dz), 0) - rr) / Math.sqrt(1 + slope * slope);
-  const e = Math.max(P[0][0] - y, y - P[n - 1][0]);
-  return e > 0 ? (d2 > 0 ? Math.hypot(d2, e) : e) : d2;
+  while (keys[i + 1][0] < t) i++;
+  const f = (t - keys[i][0]) / (keys[i + 1][0] - keys[i][0]), s = f * f * (3 - 2 * f);
+  const a = keys[i], b = keys[i + 1];
+  return [t, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s, a[3] + (b[3] - a[3]) * s, a[4] + (b[4] - a[4]) * s];
 }
-function sdArm(x, y, z) {
-  let d = sdCone(x, y, z, JOINTS.shoulder, LIMB.upperArmR[0], JOINTS.elbow, LIMB.upperArmR[1]);
-  d = smin(d, sdLimb(LIMBS.forearm, x, y, z), PARAMS.kTorsoLimb);
-  if (z < -780) d = smin(d, sdHand(x, y, z), PARAMS.kHand);
-  return d;
+// Inside the segment: the profile section; past either end, the end section continued up to a flat
+// cap ext mm beyond the joint (exact at the cap plane, so the field is continuous); the neighbouring
+// segment covers the cap.
+function sdProfile(l, x, y, z) {
+  const px = x - l.a[0], py = y - l.a[1], pz = z - l.a[2];
+  const s = px * l.w[0] + py * l.w[1] + pz * l.w[2], t = s / l.L;
+  const qx = px - l.w[0] * s, qy = py - l.w[1] * s, qz = pz - l.w[2] * s;
+  const cu = qx * l.u[0] + qy * l.u[1] + qz * l.u[2], cv = qx * l.v[0] + qy * l.v[1] + qz * l.v[2];
+  const k = profileAt(l.keys, t);
+  let d2 = sdEllipse2(cu - k[4], cv - k[3], k[1], k[2]) / Math.sqrt(1 + l.slope * l.slope);
+  const past = s < 0 ? (l.ext[0] > 0 ? -s / l.round[0] : 0) : s > l.L ? (s - l.L) / l.round[1] : 0;   // e/w beyond a joint
+  if (past > 0 && Number.isFinite(past)) d2 = (d2 + 0.5 * past * past * (s < 0 ? l.round[0] : l.round[1])) / Math.sqrt(1 + past * past);
+  const e = Math.max(-s - l.ext[0], s - l.L - l.ext[1]);
+  return e > 0 ? (d2 > 0 ? Math.hypot(d2, e) : e) : (d2 > 0 ? d2 : Math.max(d2, e));
 }
-function sdLeg(x, y, z) {
-  let d = 1e9;
-  if (z > -1230) d = sdCone(x, y, z, JOINTS.hip, LIMB.thighR[0], JOINTS.knee, LIMB.thighR[1]);
-  if (z < -1080) d = smin(d, sdLimb(LIMBS.leg, x, y, z), PARAMS.kTorsoLimb);
-  if (z < -1560) d = smin(d, sdFoot(x, y, z), PARAMS.kHand);
-  return d;
-}
-function sdTrunk(x, y, z) {
-  let d = sdTorso(x, y, z);
-  if (z > -300) d = smin(d, sdCone(x, y, z, SHOULDER.a, SHOULDER.ra, SHOULDER.b, SHOULDER.rb), PARAMS.kNeckTorso);
+const PROFILES = {
+  upperArm: makeProfile(JOINTS.shoulder, JOINTS.elbow, FORM.upperArm, false),
+  forearm: makeProfile(JOINTS.elbow, JOINTS.wrist, FORM.forearm, true, 0.6),   // its wrist cap lies in the carpus
+  thigh: makeProfile(JOINTS.hip, JOINTS.knee, FORM.thigh, false),
+  leg: makeProfile(JOINTS.knee, JOINTS.ankle, FORM.leg, true, 0.6),             // its ankle cap lies in the foot
+};
+
+// Seamless guards: a primitive is skipped only when a lower bound of its distance (to a bounding
+// sphere around it) is at least k + margin above the running value, where the smooth union already
+// equals the minimum. So no term is ever cut while it shapes the surface (BODY-FORM.md §4 item 7).
+const GUARD_MARGIN = 12;
+const sphereOf = (pts, r) => {
+  const c = [0, 0, 0];
+  for (const p of pts) for (let i = 0; i < 3; i++) c[i] += p[i] / pts.length;
+  return { c, r: Math.max(...pts.map((p) => dist(p, c))) + r };
+};
+const ellSphere = (e) => ({ c: e.c, r: Math.max(...e.r) });
+const limbSphere = (l) => sphereOf([l.a, l.b], Math.max(...l.keys.map((k) => Math.max(k[1], k[2]) + Math.abs(k[3]) + Math.abs(k[4]))));
+const BOUNDS = {
+  head: { c: [0, 0, -40], r: 175 },
+  neck: { c: [0, -15, -147], r: 100 },
+  torso: { c: [0, -20, -455], r: 440 },
+  trapezius: sphereOf([FORM.trapezius.a, FORM.trapezius.b], FORM.trapezius.ra),
+  sternomastoid: sphereOf([FORM.sternomastoid.a, FORM.sternomastoid.b], FORM.sternomastoid.ra),
+  clavicle: sphereOf([FORM.clavicle.a, FORM.clavicle.b], FORM.clavicle.r),
+  supraclavicular: sphereOf([FORM.supraclavicular.a, FORM.supraclavicular.b], FORM.supraclavicular.r),
+  axillaFront: sphereOf([FORM.axillaFront.a, FORM.axillaFront.b], FORM.axillaFront.r),
+  axillaBack: sphereOf([FORM.axillaBack.a, FORM.axillaBack.b], FORM.axillaBack.r),
+  deltoid: ellSphere(FORM.deltoid), pectoral: ellSphere(FORM.pectoral), scapula: ellSphere(FORM.scapula),
+  gluteal: ellSphere(FORM.gluteal), vastusMedialis: ellSphere(FORM.vastusMedialis), patella: ellSphere(FORM.patella),
+  gastrocMedial: ellSphere(FORM.gastrocMedial), malleolusLat: ellSphere(FORM.malleolusLat),
+  malleolusMed: ellSphere(FORM.malleolusMed), thenar: ellSphere(FORM.thenar),
+  upperArm: limbSphere(PROFILES.upperArm), forearm: limbSphere(PROFILES.forearm),
+  hand: { c: [240, -12, -912], r: 120 }, foot: { c: [100, 35, -1640], r: 150 },
+  thigh: limbSphere(PROFILES.thigh), leg: limbSphere(PROFILES.leg),
+};
+const armJoin = (z) => {
+  const [k0, k1] = FORM.armJoin, [z0, z1] = FORM.armJoinZ, t = clamp((z - z0) / (z1 - z0));
+  return k0 + (k1 - k0) * t * t * (3 - 2 * t);
+};
+const far = (b, x, y, z, d, k) => len3(x - b.c[0], y - b.c[1], z - b.c[2]) - b.r >= d + k + GUARD_MARGIN;
+const ell = (e, x, y, z) => sdEll(x, y, z, e.c[0], e.c[1], e.c[2], e.r[0], e.r[1], e.r[2]);
+const add = (d, b, k, x, y, z, f) => (far(b, x, y, z, d, k) ? d : smin(d, f(), k));
+
+// One leg (right side at x ≥ 0; called at −|x| for the crotch fillet of the other leg).
+function sdLegForm(x, y, z, d0) {
+  const F = FORM, B = BOUNDS;
+  let d = d0;
+  d = add(d, B.thigh, PARAMS.kTorsoLimb, x, y, z, () => sdProfile(PROFILES.thigh, x, y, z));
+  d = add(d, B.leg, PARAMS.kJoint, x, y, z, () => sdProfile(PROFILES.leg, x, y, z));
+  d = add(d, B.gluteal, F.gluteal.k, x, y, z, () => ell(F.gluteal, x, y, z));
+  d = add(d, B.vastusMedialis, F.vastusMedialis.k, x, y, z, () => ell(F.vastusMedialis, x, y, z));
+  d = add(d, B.patella, F.patella.k, x, y, z, () => ell(F.patella, x, y, z));
+  d = add(d, B.gastrocMedial, F.gastrocMedial.k, x, y, z, () => ell(F.gastrocMedial, x, y, z));
+  d = add(d, B.malleolusLat, F.malleolusLat.k, x, y, z, () => ell(F.malleolusLat, x, y, z));
+  d = add(d, B.malleolusMed, F.malleolusMed.k, x, y, z, () => ell(F.malleolusMed, x, y, z));
+  d = add(d, B.foot, 16, x, y, z, () => sdFoot(x, y, z));
   return d;
 }
 
 // Signed distance to the skin (mm; negative inside). Mirror-symmetric, so primitives are
 // evaluated at |x|; both thighs enter near the midline for the crotch fillet.
+// The trunk (head, neck, torso and its muscle masses, the deltoid caps) is joined to the legs by the
+// crotch and hip fillet; each arm is built on its own and joined with a small radius, so it meets the
+// shoulder inside the deltoid and leaves a crease along the chest, the flank and the thigh
+// (FORM.armJoin).
 export function bodySDF(x, y, z) {
-  const ax = x < 0 ? -x : x;
+  const ax = x < 0 ? -x : x, F = FORM, B = BOUNDS, kn = PARAMS.kNeckTorso, kl = PARAMS.kTorsoLimb;
   let d = 1e9;
-  if (z > -190) d = sdHead(ax, y, z);
-  if (z < -70 && z > -225) d = smin(d, sdNeck(ax, y, z), PARAMS.kNeckTorso);
-  if (z < -140 && z > -880) d = smin(d, sdTrunk(ax, y, z), PARAMS.kNeckTorso);
-  if (ax > 112 && z < -192 && z > -1030) d = smin(d, sdArm(ax, y, z), PARAMS.kTorsoLimb);
-  if (z < -590) {
-    let l = sdLeg(ax, y, z);
-    if (ax < 140 && z > -1000) l = smin(l, sdLeg(-ax, y, z), PARAMS.kCrotch);
-    d = smin(d, l, PARAMS.kCrotch);
+  d = add(d, B.torso, kn, ax, y, z, () => sdTorsoForm(ax, y, z));
+  d = add(d, B.head, kn, ax, y, z, () => sdHead(ax, y, z));
+  d = add(d, B.sternomastoid, F.sternomastoid.k, ax, y, z, () => sdCone(ax, y, z, F.sternomastoid.a, F.sternomastoid.ra, F.sternomastoid.b, F.sternomastoid.rb));
+  d = add(d, B.trapezius, F.trapezius.k, ax, y, z, () => sdCone(ax, y, z, F.trapezius.a, F.trapezius.ra, F.trapezius.b, F.trapezius.rb));
+  d = add(d, B.pectoral, F.pectoral.k, ax, y, z, () => ell(F.pectoral, ax, y, z));
+  d = add(d, B.scapula, F.scapula.k, ax, y, z, () => ell(F.scapula, ax, y, z));
+  d = add(d, B.clavicle, F.clavicle.k, ax, y, z, () => capF(F.clavicle, ax, y, z));
+  d = add(d, B.supraclavicular, F.supraclavicular.k, ax, y, z, () => capF(F.supraclavicular, ax, y, z));
+  d = add(d, B.axillaFront, F.axillaFront.k, ax, y, z, () => capF(F.axillaFront, ax, y, z));
+  d = add(d, B.axillaBack, F.axillaBack.k, ax, y, z, () => capF(F.axillaBack, ax, y, z));
+  if (z < -560) {   // legs: both of them near the midline, joined by the crotch fillet
+    if (!far(B.thigh, ax, y, z, d, PARAMS.kCrotch) || z < -1000) {
+      let l = sdLegForm(ax, y, z, 1e9);
+      if (ax < 160) l = smin(l, sdLegForm(-ax, y, z, 1e9), PARAMS.kCrotch);
+      d = smin(d, l, PARAMS.kCrotch);
+    }
+  }
+  const kj = armJoin(z), kg = F.armJoin[1];
+  if (!far(B.deltoid, ax, y, z, d, kg) || !far(B.upperArm, ax, y, z, d, kg) || !far(B.forearm, ax, y, z, d, kg) || !far(B.hand, ax, y, z, d, kg)) {
+    let a = sdProfile(PROFILES.upperArm, ax, y, z);
+    a = add(a, B.forearm, PARAMS.kJoint, ax, y, z, () => sdProfile(PROFILES.forearm, ax, y, z));
+    a = add(a, B.deltoid, F.deltoid.k, ax, y, z, () => ell(F.deltoid, ax, y, z));
+    a = add(a, B.thenar, F.thenar.k, ax, y, z, () => ell(F.thenar, ax, y, z));
+    a = add(a, B.hand, PARAMS.kHand, ax, y, z, () => sdHand(ax, y, z));
+    d = smin(d, a, kj);
   }
   return d;
 }
@@ -484,8 +812,10 @@ export const ORGANS = [
   { id: 'airways', sided: true, group: 'other', type: 'tube', pts: [[0, -10, -290, 7], [45, -20, -300, 5]] },   // §2.8 bronchi to the hila
 ];
 export const ORGAN_SHARES = {   // §13.4 organ star share (% of the organ budget)
-  intestines: 22, lungs: 18, heart: 12, liver: 12, kidney: 7, stomach: 6, sense: 6, spleen: 3, pancreas: 3,
-  pelvic: 3, thyroid: 1, other: 7,
+  // The heart takes 55 % (HEART.md §6: a dense heart of fine stars, as the brain); the other organs
+  // share 45 % of a budget that grew so their counts stay as before.
+  heart: 55, intestines: 10, lungs: 9, liver: 6, kidney: 4, stomach: 3.5, sense: 3.5, spleen: 2, pancreas: 1.5,
+  pelvic: 1.5, thyroid: 0.5, other: 3.5,
 };
 export const PELVIC_FLOOR = { id: 'pelvicFloor', c: [0, -20, -810], r: [45, 50, 8] };   // §2.8 unlabelled field (A.1)
 
