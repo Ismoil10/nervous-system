@@ -1,8 +1,9 @@
 // @ts-check
-// Simple HUD: the default interface (user decisions, 5 November 2026). Four controls, with the
-// person's emotional state kept apart from how the brain is shown:
+// Simple HUD: the default interface (user decisions, 5 November 2026). The person's emotional
+// state is kept apart from how the brain is shown:
 //   1. emotion: Calm, Stress or Pleasure (the primary choice; it never moves the camera);
-//   2. view: Brain, Cutaway, Dopamine system or Body (it never changes the emotion);
+//   2. view: Brain, Cutaway, Dopamine system or Body (it never changes the emotion), and the style:
+//      Glass (glass shells around the stars) or Stars (the look before the glass, kept as a preset);
 //   3. quality: Auto (adaptive, from the hardware and the measured frame time) or a fixed tier;
 //   4. Pause.
 // The readouts are a short story of what is happening and one meter with its percentage (stress
@@ -33,6 +34,9 @@ export const SIMPLE_VIEWS = [
 // Quality: Auto keeps the adaptive tier of performance.js (hardware start, frame-time scaling);
 // the others fix a tier (values are TIERS indices, as in the full HUD's Quality select).
 export const QUALITY = [['auto', 'Auto'], ['0', 'Low'], ['1', 'Medium'], ['2', 'High'], ['3', 'Ultra']];
+
+// Visual style: Glass (glass.js shells) or Stars (the earlier look, kept as a preset).
+export const STYLES = [['glass', 'Glass'], ['stars', 'Stars']];
 
 // The stress circuit drawn in Stress (display only, through the brain-systems overlay of
 // statetex.js): amygdala and bed nucleus, hypothalamic stress nuclei, the brainstem alarm and
@@ -106,9 +110,9 @@ export function plainStage(scenarioId, name, text) {
 
 // ---- SimpleHud ---------------------------------------------------------------------------------
 //
-// Handlers: onState('calm' | 'stress' | 'dopamine'), onView(view id), onQuality('auto' | tier index),
-// onPause().
-// update() payload: { state, view, quality: { value, autoLabel }, paused, dimmed, story: { scenario, stage, text },
+// Handlers: onState('calm' | 'stress' | 'dopamine'), onView(view id), onStyle('glass' | 'stars'),
+// onQuality('auto' | tier index), onPause().
+// update() payload: { state, view, style, quality: { value, autoLabel }, paused, dimmed, story: { scenario, stage, text },
 // meter: { kind: 'stress' | 'dopamine', level 0–1 } | null }. The meter shows one number, its percentage.
 
 export class SimpleHud {
@@ -123,11 +127,11 @@ export class SimpleHud {
     this.el = {
       root: $('shud'), scenario: $('shud-scenario'), stage: $('shud-stage'), text: $('shud-text'),
       meter: $('shud-meter'), meterLabel: $('shud-meter-label'), meterBar: $('shud-meter-bar'), meterLow: $('shud-meter-low'),
-      meterHigh: $('shud-meter-high'), meterValue: $('shud-meter-value'), views: $('shud-views'), quality: $('shud-quality'),
+      meterHigh: $('shud-meter-high'), meterValue: $('shud-meter-value'), views: $('shud-views'), styles: $('shud-style'), quality: $('shud-quality'),
       pause: $('shud-pause'), states: $('shud-states'),
     };
-    this.s = { state: null, view: null, paused: null, dimmed: false, story: null, meterKind: null, meterLevel: -1, quality: null };
-    this.btn = { state: new Map(), view: new Map() };
+    this.s = { state: null, view: null, style: null, paused: null, dimmed: false, story: null, meterKind: null, meterLevel: -1, quality: null };
+    this.btn = { state: new Map(), view: new Map(), style: new Map() };
     this._build();
     this._bind();
   }
@@ -160,6 +164,16 @@ export class SimpleHud {
       e.views.append(b);
       this.btn.view.set(v.id, b);
     }
+    for (const [id, label] of STYLES) {
+      const b = this.doc.createElement('button');
+      b.type = 'button';
+      b.className = 'shud-view';
+      b.dataset.id = id;
+      b.textContent = label;
+      b.setAttribute('aria-pressed', 'false');
+      e.styles.append(b);
+      this.btn.style.set(id, b);
+    }
     for (const [value, label] of QUALITY) {
       const o = this.doc.createElement('option');
       o.value = value;
@@ -177,6 +191,10 @@ export class SimpleHud {
     e.views.addEventListener('click', (ev) => {
       const b = /** @type {any} */ (ev.target).closest('.shud-view');
       if (b) h.onView?.(b.dataset.id);
+    });
+    e.styles.addEventListener('click', (ev) => {
+      const b = /** @type {any} */ (ev.target).closest('.shud-view');
+      if (b) h.onStyle?.(b.dataset.id);
     });
     e.quality.addEventListener('change', () => h.onQuality?.(e.quality.value));
     e.pause.addEventListener('click', () => h.onPause?.());
@@ -215,6 +233,10 @@ export class SimpleHud {
     if (p.view && p.view !== s.view) {
       s.view = p.view;
       for (const [id, b] of this.btn.view) b.setAttribute('aria-pressed', String(id === p.view));
+    }
+    if (p.style && p.style !== s.style) {
+      s.style = p.style;
+      for (const [id, b] of this.btn.style) b.setAttribute('aria-pressed', String(id === p.style));
     }
     // Quality: the select shows the user's choice; Auto names the tier it is running now.
     const q = p.quality;

@@ -93,7 +93,19 @@ changes the emotion.
     about 45 s after the start. At the climax a bright wave leaves the core dopamine system in the
     midbrain. It runs out along the dopamine fibres and through the whole brain, widening and
     pushing the stars it crosses outward. A smaller wave follows each contraction.
-- **View** (above the emotions): Brain, Cutaway, Dopamine system or Body.
+- **View** (above the emotions): Brain, Cutaway, Dopamine system or Body. Next to it, the **style**:
+  - **Glass** (default) wraps the brain, the cerebellum, the skin and the main organs in clear glass
+    shells, with the stars and signals visible inside. Everything takes the colours of anatomy
+    atlases:
+    - brain: pink-lavender;
+    - spinal cord and nerves: yellow;
+    - enteric nerves: yellow-green;
+    - muscle: red-brown; bone: ivory; vessels: red;
+    - heart red, lungs pink, liver red-brown, spleen purple, kidneys maroon, bladder pale yellow.
+
+    Dopamine keeps its amber.
+  - **Stars** is the earlier look, kept as a preset.
+  The browser remembers the choice.
 - **Quality** (top right): Auto adapts to the computer. It picks a starting tier from the graphics
   hardware, then lowers the render scale or the tier when frames are slow, and raises them again
   when there is headroom. Low, Medium, High and Ultra fix the tier. Auto names the tier it is using.
@@ -198,7 +210,8 @@ HUD actions reach the kernel.
 | `src/safety.js` | Photosensitivity limiter and display-rate rules |
 | `src/color.js` | Planck and CIE colours (neurons 7,000–9,500 K, body ≥ 5,500 K, dopamine 2,300 K) |
 | `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/ui-body.js` | Quality tiers and adaptive quality, camera, full HUD (`?advanced=1`) |
-| `src/ui-simple.js` | Simple HUD (the default): emotion (Calm / Stress / Pleasure), view, quality, Pause; story and one meter |
+| `src/ui-simple.js` | Simple HUD (the default): emotion (Calm / Stress / Pleasure), view and style, quality, Pause; story and one meter |
+| `src/glass.js` | Glass shells: the procedural brain, skin and organ fields meshed at load (surface nets); drawn by the `glass` program |
 
 Rendering assets (HDR pipeline, bloom, star point-spread function, adaptive quality, HUD style)
 come from the Orgasm Galaxy project (removed on 2026-11-02; its response-model analysis lives on as

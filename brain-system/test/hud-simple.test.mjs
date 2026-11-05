@@ -29,7 +29,7 @@ test('index.html holds the simple HUD beside the full one; main.js chooses which
   assert.match(CSS, /body\.hud-simple #shud \{ display: grid; \}/);
   assert.match(CSS, /body\.hud-simple #hud \{ display: none; \}/);
   for (const id of ['shud-story', 'shud-scenario', 'shud-stage', 'shud-text', 'shud-meter', 'shud-meter-label', 'shud-meter-bar',
-    'shud-meter-low', 'shud-meter-high', 'shud-meter-value', 'shud-views', 'shud-quality', 'shud-pause', 'shud-states']) {
+    'shud-meter-low', 'shud-meter-high', 'shud-meter-value', 'shud-views', 'shud-style', 'shud-quality', 'shud-pause', 'shud-states']) {
     assert.match(SHUD, new RegExp(`id="${id}"`), `#${id}`);
   }
   const buttons = SHUD.match(/<button\b[^>]*>/g) ?? [];
@@ -63,6 +63,7 @@ test('views and quality name what the renderer has; emotions carry no view', () 
   }
   for (const s of simple.STATES) assert.ok(!('view' in s), `${s.id}: an emotion never names a view`);
   assert.equal(simple.QUALITY[0][0], 'auto');
+  assert.deepEqual(simple.STYLES.map(([id]) => id), ['glass', 'stars'], 'the earlier look stays as the Stars preset');
   assert.deepEqual(simple.QUALITY.slice(1).map(([v, label]) => [Number(v), label]), TIERS.map((t, i) => [i, t.label]));
 });
 

@@ -20,6 +20,7 @@ import { TIERS, detectTier, AdaptiveQuality } from './performance.js';
 import { generateBrain, generateBrainExtra, applyRelabel, areaIds } from './brain.js';
 import { BrainRenderer, PARAMS as RENDER } from './renderer.js';
 import { WAVE_SLOTS } from './shaders.js';
+import { glassChunks } from './glass.js';
 import { OrbitCamera } from './camera.js';
 import { PRESETS } from './clock.js';
 import { CENTER, MM, AREAS, R as ANATOMY_R } from './anatomy.js';
@@ -95,7 +96,7 @@ const PICK = { movePx: 6, holdMs: 600 };     // [model] a press that moves less 
 // context only, so the brain-only image stays the post-port one [model].
 const LIMIT = { packetLum: 0.25, packetPx: 5, bodyLum: 0.12, lanternLum: 0.3, brainRadiusMm: 75 };
 const HUD_SCENARIO_IDS = HUD_SCENARIOS.map((s) => s.id);
-const DEFAULT_SCENARIO = 'orgasm';
+const DEFAULT_SCENARIO = 'orgasm';   // opened when the URL names no scenario (readParams)
 // Dopamine wave (display only) [model], like an expanding shock-wave ring. Each shell's radius
 // grows at speedMm per screen second; its width grows with the radius; its strength rises over
 // `rise` s and fades out between fadeFromMm and fadeToMm; it pushes the points it crosses outward by
@@ -106,7 +107,15 @@ const WAVE = {
 };
 // Pre-build dopamine display restored in the simple HUD: fibre-flow cadence (0.5/16 s per sample,
 // 0.5-s travel) and the climax glow filter without the 2-s pulse-locked floor.
-const CLASSIC_DA = { histStep: 0.5 / 16, tauVisLocked: 0.3 };   // opened when the URL names no scenario (readParams)
+const CLASSIC_DA = { histStep: 0.5 / 16, tauVisLocked: 0.3 };
+// Visual style of the simple HUD [model]: "glass" adds the glass shells (glass.js) and dims the
+// neuron and body stars by these factors so the shells read; "stars" is the look before the glass,
+// kept as a preset (user decision, 5 November 2026). The choice is remembered in this browser.
+const STYLE = { key: 'brain-system.style', glassNeurons: 0.85, glassBody: 0.6 };
+// Glass style colours [model]: brain stars pink-lavender (the brain's colour in anatomy atlases);
+// the dopamine amber stays reserved for dopamine. The body stars take the anatomical tissue colours
+// of BODY_VS (uAnat).
+const GLASS_NEURON = { cool: [0.9, 0.82, 1.0], warm: [1.0, 0.84, 0.94] };
 const UNDRAWN_TOGGLES = { receptors: 'Touch receptors are not drawn in this build', labels: 'Labels are not drawn in this build' };
 
 // URL parameters (B.5 item 8).
@@ -227,6 +236,7 @@ async function start() {
   // Simple HUD state: the chosen state (Calm, Stress, Dopamine), what the camera looks at, the
   // resting adrenaline when Stress started, and the stress overlay strength last sent (−1: off).
   let simple = null, mode = 'calm', stressBase = null, stressShown = -1;
+  let style = (() => { try { return localStorage.getItem(STYLE.key) === 'stars' ? 'stars' : 'glass'; } catch { return 'glass'; } })();
 
   const naccHist = new Float32Array(600);   // NAcc core dopamine (nM), one sample per 0.1 screen s
   let histHead = 0, histAcc = 0;
@@ -547,7 +557,7 @@ async function start() {
       showStress(stressOverlay(level));
     }
     const q = { value: quality.locked ? String(quality.tier) : 'auto', autoLabel: quality.locked ? null : TIERS[quality.tier].label };
-    return { state: mode, view: viewQueued ?? view, quality: q, paused, story, meter };
+    return { state: mode, view: viewQueued ?? view, quality: q, style, paused, story, meter };
   };
   if (!url.advanced) {
     const refresh = () => simple.update(simpleState());
@@ -556,6 +566,7 @@ async function start() {
       onView: (v) => { setSimpleView(v); refresh(); },
       onQuality: (value) => { setQuality(value).then(refresh); },
       onPause: () => { togglePause(); refresh(); },
+      onStyle: (s) => { setStyle(s); refresh(); },
     });
     // The dopamine display of the app before the whole-body build (user decision, 5 November 2026;
     // DOPAMINE.md §9.8 "current code" column): the climax reward locked to each contraction, so every
@@ -604,6 +615,37 @@ async function start() {
   // the sparse body points stayed below visibility at body-view distances; 6 shows the figure, nerves
   // and cord clearly from Whole body to Thorax without saturating close-ups [model, browser check].
   const tune = { neurons: 0.05, bathing: 0.3, somata: 0.7, axons: 0.22, release: 0.35, lanterns: 0.03, exposure: 1.1, bloom: 0.8, lambda: 0.6, body: 6 };
+
+  // --- Visual style (simple HUD): Glass or Stars. The glass shells are meshed in slices after the
+  // first frames and again when the generated quality tier changes. ---
+  const starBase = { neurons: tune.neurons, body: tune.body };
+  // Shells are meshed for the tier that renders now (not the generated maximum), so a slow machine
+  // does not draw Ultra glass; a tier change must hold for 2 s before the shells are remeshed.
+  let glassGen = null, glassTier = -1, glassWant = -1, glassWantSince = 0;
+  const ensureGlass = () => {
+    const t = Math.min(quality.tier, genTier);
+    if (t !== glassWant) { glassWant = t; glassWantSince = screenT; }
+    if (glassGen || glassTier === t) return;
+    if (glassTier >= 0 && screenT - glassWantSince < 2) return;
+    glassGen = { it: glassChunks(t, 6), tier: t };
+  };
+  const stepGlass = () => {
+    const r = glassGen.it.next();
+    if (!r.done) return;
+    renderer.setGlass(r.value);
+    glassTier = glassGen.tier;
+    glassGen = null;
+  };
+  function setStyle(s) {
+    style = s === 'stars' ? 'stars' : 'glass';
+    const glass = !!simple && style === 'glass';
+    renderer.glassOn = glass;
+    renderer.anatomical = glass ? 1 : 0;
+    tune.neurons = starBase.neurons * (glass ? STYLE.glassNeurons : 1);
+    tune.body = starBase.body * (glass ? STYLE.glassBody : 1);
+    try { localStorage.setItem(STYLE.key, style); } catch { /* storage may be blocked */ }
+  }
+  setStyle(style);
   window.__brain = {   // console inspection and testing
     tune, runtime: rt, model, dopamine, adapter, clock, kernel, player, scenarios: player, stimuli, safety: limiter,
     camera, quality, renderer, packetMap, get body() { return bodyData; }, tick: (now) => tick(now), setView: requestView,
@@ -666,6 +708,7 @@ async function start() {
     // The body follows the first brain frame in slices (B.9).
     if (frames > 0 && !bodyGen && !bodyData && bodyMode === 'body') ensureBody();
     if (bodyGen) stepBody();
+    if (simple && style === 'glass' && frames > 1) { ensureGlass(); if (glassGen) stepGlass(); }
     frames++;
 
     // Display state of the body: network ghosts follow g.<net> (A.5), the limb pose (§13.9; off in
@@ -696,7 +739,7 @@ async function start() {
       zoom: Math.pow((3.6 / camera.distance) * (Math.tan(camera.fov / 2) / Math.tan(camera.fovEff / 2)), 2),
       distance: camera.distance,
       dopamine, brainnet: rt.brainnet, kernel, packets: bodyPackets,
-      amber: DOPAMINE_RGB, cool: NEURON_COOL, warm: NEURON_WARM, fibre,
+      amber: DOPAMINE_RGB, cool: renderer.glassOn ? GLASS_NEURON.cool : NEURON_COOL, warm: renderer.glassOn ? GLASS_NEURON.warm : NEURON_WARM, fibre,
       exposure: tune.exposure, bloomStrength: tune.bloom, tune,
     });
     gpuTimer.end(q);

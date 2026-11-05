@@ -48,6 +48,10 @@ export const PARAMS = {
   netRole: ['afferent', 'somEff', 'symp', 'para', 'afferent', 'enteric', 'endocrine', 'immune'],
   netSwitch: ['somatic', 'somatic', 'autonomic', 'autonomic', 'autonomic', 'enteric', 'neuroendocrine', 'neuroimmune'],
   monitorEvery: 6,          // [model] luminance-monitor readback every n frames
+  // Glass shells (glass.js, the simple HUD's "Glass" style) [model]: HDR gains of the brain and body
+  // shells, the face tint, and the floor of the brain shell's view gain (the dopamine view fades the
+  // cortex, the glass only to this fraction).
+  glass: { brain: 0.2, body: 0.2, face: 0.02, shellFloor: 0.45 },
 };
 
 export const PROGRAMS = {
@@ -55,6 +59,7 @@ export const PROGRAMS = {
   da: [S.DA_VS, S.STAR_FS],
   body: [S.BODY_VS, S.STAR_FS],
   lantern: [S.LANTERN_VS, S.LANTERN_FS],
+  glass: [S.GLASS_VS, S.GLASS_FS],
   bg: [S.FULLSCREEN_VS, S.BG_FS],
   down: [S.FULLSCREEN_VS, S.DOWN_FS],
   up: [S.FULLSCREEN_VS, S.UP_FS],
@@ -131,6 +136,9 @@ export class BrainRenderer {
     this.netGain = new Float32Array(8).fill(1);
     this.netRate = (1 - PARAMS.ghost) / PARAMS.fade;
     this.organs = new Float32Array(4 * 2 * S.ORGAN_SLOTS);
+    this.glass = [];          // glass shells (setGlass); drawn while glassOn
+    this.glassOn = false;
+    this.anatomical = 0;      // 0–1: anatomical colours of the body stars (BODY_VS uAnat)
     this.waveO = new Float32Array(4);                  // dopamine wave origin; w = 1 while a wave runs
     this.waves = new Float32Array(4 * S.WAVE_SLOTS);   // radius, amplitude, width, push per slot
     this.joints = new Float32Array(4 * 2 * S.JOINT_SLOTS);
@@ -225,6 +233,36 @@ export class BrainRenderer {
 
   // Direct display gains per bit (8 values in 0.08–1), e.g. driven by the kernel's g.<net> ramps.
   setNetworkGains(gains) { this.netTarget.set(gains); this.netGain.set(gains); }
+
+  // Glass shells (glass.js): [{ id, tint, gain, body, mesh: { positions (mm), normals, indices } }];
+  // an empty list removes them. Indexed triangles, positions and normals interleaved.
+  setGlass(shells = []) {
+    const gl = this.gl;
+    for (const g of this.glass) { gl.deleteBuffer(g.vb); gl.deleteBuffer(g.ib); gl.deleteVertexArray(g.vao); }
+    this.glass = shells.map((s) => {
+      const P = s.mesh.positions, N = s.mesh.normals, n = P.length / 3, data = new Float32Array(n * 6);
+      for (let i = 0; i < n; i++) {
+        data[i * 6] = P[i * 3] * MM; data[i * 6 + 1] = P[i * 3 + 1] * MM; data[i * 6 + 2] = P[i * 3 + 2] * MM;
+        data[i * 6 + 3] = N[i * 3]; data[i * 6 + 4] = N[i * 3 + 1]; data[i * 6 + 5] = N[i * 3 + 2];
+      }
+      const vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+      const vb = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 24, 0);
+      gl.enableVertexAttribArray(1);
+      gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 24, 12);
+      const ib = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, s.mesh.indices, gl.STATIC_DRAW);
+      gl.bindVertexArray(null);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      return { id: s.id, tint: s.tint, gain: s.gain, body: s.body, vao, vb, ib, count: s.mesh.indices.length };
+    });
+  }
+  get glassTriangles() { return this.glass.reduce((n, g) => n + g.count / 3, 0); }
 
   // Dopamine waves (display only): origin [x, y, z] in mm and ≤ WAVE_SLOTS { radiusMm, amp, widthMm,
   // pushMm }; an empty list switches them off.
@@ -444,6 +482,9 @@ export class BrainRenderer {
     // 2. Body (if visible), one draw per tissue-class prefix.
     if (bodyOn) this._drawBody(f, st, dist);
 
+    // 2b. Glass shells (the simple HUD's "Glass" style): additive, so their order does not matter.
+    if (this.glassOn && this.glass.length) this._drawGlass(f, bodyOn);
+
     // 3. Dopamine system: cell bodies, axon bundles with travelling packets, release sparks.
     this._common(P.da, f);
     st.bind(P.da);
@@ -473,6 +514,24 @@ export class BrainRenderer {
     gl.bindVertexArray(null);
   }
 
+  _drawGlass(f, bodyOn) {
+    const gl = this.gl, p = this.progs.glass, u = p.uniforms, G = PARAMS.glass;
+    this._common(p, f);
+    gl.uniform1f(u.uFace, G.face);
+    const brainK = G.brain * Math.max(G.shellFloor, Math.min(1, f.shell / 0.55));
+    gl.enable(gl.CULL_FACE);   // the triangles wind counter-clockwise seen from outside
+    gl.cullFace(gl.BACK);
+    for (const g of this.glass) {
+      const k = g.body ? (bodyOn ? G.body * this.bodyFade : 0) : brainK;
+      if (k <= 0) continue;
+      gl.uniform3fv(u.uTint, g.tint);
+      gl.uniform1f(u.uGain, k * g.gain);
+      gl.bindVertexArray(g.vao);
+      gl.drawElements(gl.TRIANGLES, g.count, gl.UNSIGNED_INT, 0);
+    }
+    gl.disable(gl.CULL_FACE);
+  }
+
   _drawBody(f, st, dist) {
     const gl = this.gl, p = this.progs.body, u = p.uniforms, b = this.body, c = this.counts;
     this._common(p, f);
@@ -491,6 +550,7 @@ export class BrainRenderer {
     gl.uniform4fv(u.uNetGain, this.netGain);
     gl.uniform3fv(u.uNetRGB, this.netRGB);
     gl.uniform3fv(u.uStructRGB, this.structRGB);
+    gl.uniform1f(u.uAnat, this.anatomical);
     gl.uniform3fv(u.uAffRGB, this.affRGB);
     gl.uniform4fv(u.uOrgan, this.organs);
     gl.uniform4fv(u.uJoint, this.joints);

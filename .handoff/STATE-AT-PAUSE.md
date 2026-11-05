@@ -177,6 +177,42 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
      already in `performance.js`, the same logic as `anger-galaxy/`. Only the manual control had
      been missing from the simple HUD. `main.js` `setQuality` now serves both HUDs.
 
+12. **Glass style (stage 1 of the visual upgrade); Stars kept as a preset.** The user asked for a
+   more precise, translucent, crisp model and chose stage 1 of the proposal: glass shells from the
+   existing procedural fields, with no downloaded data.
+   - `src/glass.js` meshes them with surface nets at load: cerebrum with pressed-in folds,
+     cerebellum, skin, and the heart, lungs, liver, spleen, kidneys and bladder from `ORGANS`. The
+     work is sliced and the grid is finer at higher tiers.
+   - `shaders.js` `GLASS_VS/FS` with `renderer.setGlass` / `_drawGlass` draw them as additive glass.
+   - The simple HUD's style choice is Glass (default) or Stars (the earlier look, kept exactly as a
+     preset at the user's request). It is remembered in `localStorage`.
+   - Stage 2 (real meshes: BodyParts3D or Z-Anatomy organs, MNI surfaces, HCP1065 tracts; CC BY-SA)
+     waits for the user. It would change DOPAMINE.md §7.2 ("no downloaded meshes").
+   - After the user's first test:
+     - Field blur and Taubin smoothing remove the bumps and indents where `bodySDF` switches
+       primitives; the skin now follows the human form.
+     - Rotation lag is fixed: the shells were Ultra (≈ 1M triangles). They are now meshed at the tier
+       that renders, are coarser and cull back faces.
+     - Brain flicker is fixed with `fwidth` fading on thin folds and shallower glass folds
+       (`FOLD_SCALE` 0.25).
+     - Distinct anatomical colours (user request): brain pink-lavender, nerves and cord yellow,
+       organs in atlas colours; dopamine keeps amber.
+
+13. **The skin follows an analysis of the human form.** The user said the body was not a proper
+    human shape and asked for the form to be analysed first.
+    - `research/BODY-FORM.md` is that analysis. It sets ANSUR II 50th-percentile targets, made
+      sex-neutral at 1,760 mm, and walks the surface anatomy region by region. It lists the defects
+      of the old mannequin, the modelling method and the acceptance criteria.
+    - `bodySDF` in `src/body/geometry.js` now builds the skin from `FORM`:
+      - front/back superelliptic torso sections;
+      - deltoid, trapezius, pectoral, scapular and gluteal masses;
+      - profiled limbs with the calf, knee, malleoli and thenar eminence;
+      - arms joined with a crease;
+      - seamless guards; segment caps that never share a joint plane.
+    - Unchanged: the joints, landmarks, head, neck, internal `sdTorso`, organs, routes and sites.
+    - `test/body-form.test.mjs` checks the result.
+    - The waist is narrower than ANSUR II, because the elbows at x 195 would otherwise fuse into it.
+
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
   noEmit. No React, no `.ts`, no build step, no typescript dependency in `package.json` (`tsc` 7.0.2 must be
@@ -225,7 +261,7 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Windows, golden re-recorded | 530 | 502 | 0 | 28 |
 | After stage 5 and the fixes | 537 | 509 | 0 | 28 |
 | Mac (arm64, Node 26.4) at `0101203`, x64 golden | 537 | 505 | 4 (golden, platform bits) | 28 |
-| Mac, simple HUD, wave, emotion/view split (decisions 8–11) | 544 | 512 | 4 (golden, platform bits) | 28 |
+| Mac, simple HUD, wave, emotion/view split, glass with colours, body form (decisions 8–13) | 558 | 526 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was

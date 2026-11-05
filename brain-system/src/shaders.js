@@ -280,6 +280,7 @@ uniform float uSenseFull;  // 1: sense organs at full flux (Head & neck view, §
 uniform float uSkinDim;    // distal skin dimming by vasoconstriction (−0.10 … 0.15, §13.7)
 uniform float uMotion;     // 1: rigid limb transforms; 0 under reduced motion (§13.15)
 uniform float uTwinkle;    // shimmer twinkle amplitude (halved under reduced motion)
+uniform float uAnat;       // 0–1: anatomical colours per tissue class (simple HUD, Glass style)
 uniform vec4 uClassGain[3];   // per tissue class: flux ratio × tier compensation (§13.3, B.8)
 uniform vec4 uClassNorm[3];   // per tissue class: 1 / mean flux of the class
 uniform vec4 uNetGain[2];     // display gain per network bit, ghost 0.08 … 1 (carries the cross-fades)
@@ -297,6 +298,16 @@ const vec2 TORSO_R = vec2(${f(T.a * MM)}, ${f(T.b * MM)});
 const float TORSO_Z0 = ${f(T.z0 * MM)}, TORSO_Z1 = ${f(T.z1 * MM)};
 
 vec3 qrot(vec4 q, vec3 v) { return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v); }
+
+// Anatomical colours of the Glass style, one per tissue class (TISSUE order), as in anatomy atlases:
+// skin peach, organs rose, muscle red-brown, bone ivory, spinal cord and nerves yellow, ganglia
+// pale gold, the enteric nervous system yellow-green, vessels red. Applied as a chromaticity
+// substitution at equal luminance, so brightness and the safety limits are unchanged; travelling
+// packets keep their network colours [model].
+const vec3 ANAT[9] = vec3[9](
+  vec3(1.0, 0.84, 0.76), vec3(1.0, 0.56, 0.58), vec3(0.92, 0.46, 0.4), vec3(1.0, 0.96, 0.84),
+  vec3(1.0, 0.9, 0.38), vec3(1.0, 0.88, 0.32), vec3(1.0, 0.84, 0.46), vec3(0.82, 0.95, 0.42),
+  vec3(1.0, 0.36, 0.4));
 
 // Path length (units) of the segment point → eye inside the torso envelope (§13.3).
 float torsoPath(vec3 p) {
@@ -374,6 +385,10 @@ void main() {
   float sat = clamp((g - GHOST) / (1.0 - GHOST), 0.0, 1.0);
   vec3 tintRGB = net >= 0 ? uNetRGB[net] : uStructRGB;
   vec3 base = net >= 0 ? mix(uStructRGB, tintRGB, ${f(PARAMS.restingNetMix)}) : uStructRGB;
+  if (uAnat > 0.0) {
+    vec3 a = ANAT[cls];
+    base = mix(base, a * (dot(base, LUMA) / max(1e-4, dot(a, LUMA))), uAnat);
+  }
 
   float flux = aPos.w * uClassNorm[cls / 4][cls % 4];
   float size = clamp(uPx * (${f(PARAMS.size[0])} + ${f(PARAMS.size[1])} * log2(1.0 + flux)), ${f(PARAMS.size[2])}, uMaxPt);
@@ -471,6 +486,47 @@ void main() {
   float g = 0.85 * exp(-r2 * 28.0) + 0.15 * exp(-r2 * 7.0);
   float win = clamp(1.0 - r2 * 4.0, 0.0, 1.0);
   outColor = vec4(vColor * vPeak * g * win, 1.0);
+}
+`;
+
+// --- Glass shells (glass.js; the "Glass" style of the simple HUD) ---
+// Added to the scene like the stars, so the order of the shells does not matter and the stars stay
+// visible through them; back faces are culled. A Fresnel rim that fades just before the silhouette
+// (a soft edge without multisampling), a faint face tint and a small highlight. Where the facing
+// term changes faster than a pixel can show (thin folds seen edge-on), rim and highlight fade out,
+// so rotating the brain does not shimmer. The cutaway plane removes x < uCut.
+export const GLASS_VS = HEADER + `
+layout(location = 0) in vec3 aPos;    // world units
+layout(location = 1) in vec3 aNrm;    // outward unit normal
+uniform mat4 uView;
+uniform mat4 uProj;
+out vec3 vP;
+out vec3 vN;
+void main() {
+  vP = aPos;
+  vN = aNrm;
+  gl_Position = uProj * uView * vec4(aPos, 1.0);
+}
+`;
+export const GLASS_FS = HEADER + `
+in vec3 vP;
+in vec3 vN;
+uniform vec3 uEye;
+uniform float uCut;
+uniform vec3 uTint;
+uniform float uGain;
+uniform float uFace;
+out vec4 outColor;
+void main() {
+  if (vP.x < uCut) discard;
+  vec3 n = normalize(vN);
+  vec3 v = normalize(uEye - vP);
+  float c = abs(dot(n, v));
+  float aa = 1.0 - smoothstep(0.05, 0.3, fwidth(c));
+  float rim = pow(1.0 - c, 3.5) * smoothstep(0.0, 0.2, c) * aa;
+  vec3 h = normalize(normalize(vec3(0.35, 0.55, 0.75)) + v);
+  float spec = pow(abs(dot(n, h)), 40.0) * aa * aa;
+  outColor = vec4((uTint * (uFace + rim) + vec3(0.12 * spec)) * uGain, 1.0);
 }
 `;
 

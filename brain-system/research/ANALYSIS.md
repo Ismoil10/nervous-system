@@ -323,6 +323,16 @@ Each spinal nerve `sn.*` starts at its DRG.
 
 ### 2.6. Trunk, limbs and joints
 
+> **Skin form (5 November 2026).** The joints, landmarks, limb axes and internal trunk sections below
+> are unchanged, and they still place the gut, the regions and the rigid segments. The outer skin now
+> follows `research/BODY-FORM.md`, an anthropometric analysis of the human form (ANSUR II, neutral
+> at 1,760 mm):
+> - front/back superelliptic torso sections with the chest, abdomen, lumbar curve and buttocks;
+> - deltoid, trapezius, pectoral, scapular and gluteal masses;
+> - profiled limbs with the biceps, quadriceps, knee, calf and malleoli;
+> - arms joined with a crease;
+> - guards that cannot cut a term near the surface.
+
 The torso is lofted through elliptical sections, the limbs are tapered capsules, and the hands and feet are boxes. The ellipse puts the chest wall ≈ 15 mm too far back at the midclavicular line. Skin points are therefore snapped to the drawn skin (§2.7), and deep structures follow the depth rules of §2.15.
 
 | Structure | id | Position (x, y, z) mm | Extent mm | Frame | Conf. | Source |
@@ -6976,6 +6986,47 @@ At load the brain is generated and rendered first. The body follows in slices an
 >     sites ×(1 + 4·w).
 >   - At most about 1.25 shells start per second. Reduced motion halves the climax wave and its
 >     push, and drops the others.
+>
+> **Glass style (stage 1 of the visual upgrade).** The simple HUD also has a style choice: Glass
+> (default) or Stars (the earlier look, kept as a preset). Glass meshes the existing procedural
+> fields at load, with no downloaded meshes (DOPAMINE.md §7.2):
+> - the cerebrum hull with the `folding` field pressed in to 0.35 of its depth;
+> - the cerebellum, the skin (`bodySDF`) and the organ groups of `ORGANS` (heart, lungs, liver,
+>   spleen, kidney, pelvic).
+>
+> Meshing uses naive surface nets on a grid of 2.8–1.8 mm for the brain, 10–5.5 mm for the skin and
+> 5–3.2 mm for the organs, from the Low to the Ultra tier. Smoothing removes seams and terracing:
+> - the sampled field takes 1–2 [1 2 1]/4 blur passes, which melt the seams where `bodySDF` switches
+>   primitives at its z guards;
+> - the mesh takes 3–8 Taubin passes (λ 0.5, μ −0.53);
+> - normals are area-weighted mesh normals.
+>
+> The shells are meshed for the tier that renders now, not the generated maximum. A tier change must
+> hold for 2 s before remeshing. The work runs in slices of ≈ 6 ms (≈ 120k triangles at Low, 267k at
+> High).
+>
+> Drawing (`glass` program) is additive, so the shell order does not matter:
+> - back faces are culled;
+> - a Fresnel rim (1 − |n·v|)^3.5 that fades just before the silhouette, which gives a soft edge
+>   without multisampling;
+> - rim and highlight fade where `fwidth` of the facing term is large (thin folds seen edge-on), so
+>   rotation does not shimmer;
+> - a face tint of 0.02 and a small highlight;
+> - the cutaway plane applies;
+> - HDR gains are 0.2 for the brain and 0.2 for the body (with the body fade);
+> - the neuron and body stars dim to ×0.85 and ×0.6.
+>
+> Colours follow anatomy atlases:
+> - Shells: brain pink-lavender, skin faint peach, heart red, lungs pink, liver red-brown, spleen
+>   purple, kidneys maroon, bladder pale yellow.
+> - Brain stars turn pink-lavender.
+> - Body stars take one colour per tissue class through `BODY_VS` `uAnat`, a chromaticity
+>   substitution at equal luminance: skin peach, organs rose, muscle red-brown, bone ivory, cord and
+>   nerves yellow, ganglia pale gold, enteric yellow-green, vessels red.
+> - Packets keep their network colours, and dopamine keeps its amber.
+>
+> Stars restores the exact earlier gains. Real anatomical meshes and tractography are stage 2 and
+> need the user's go-ahead on downloaded open data.
 >
 > The full HUD specified below is unchanged and opens with `?advanced=1`.
 

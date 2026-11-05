@@ -291,38 +291,218 @@ function sdFoot(x, y, z) {
   const e = Math.max(P[0][0] - y, y - P[n - 1][0]);
   return e > 0 ? (d2 > 0 ? Math.hypot(d2, e) : e) : d2;
 }
-function sdArm(x, y, z) {
-  let d = sdCone(x, y, z, JOINTS.shoulder, LIMB.upperArmR[0], JOINTS.elbow, LIMB.upperArmR[1]);
-  d = smin(d, sdLimb(LIMBS.forearm, x, y, z), PARAMS.kTorsoLimb);
-  if (z < -780) d = smin(d, sdHand(x, y, z), PARAMS.kHand);
-  return d;
+// ---------------------------------------------------------------------------------------------
+// Skin form (research/BODY-FORM.md): the outer surface built from an analysis of the human shape
+// (ANSUR II, neutral at 1,760 mm). The joints, landmarks, head, neck and the internal trunk field
+// sdTorso (gut, regions, rigid segments) are unchanged; only the skin takes this form.
+// ---------------------------------------------------------------------------------------------
+// Torso sections every 40–80 mm (BODY-FORM.md §2, §3, §5): z, half-breadth a, front yf, back yb,
+// superellipse exponents of the front and back halves. The line of greatest breadth lies at
+// ym = yb + 0.45·(yf − yb). Values interpolate with a Catmull–Rom spline over z.
+export const FORM = {
+  torso: [
+    //  z     a    yf    yb    nf   nb
+    [-185,  62,  40,  -74, 2.0, 2.0],   // neck base, onto the neck cylinder (60 × 58 about y −15)
+    [-225, 118,  60, -106, 2.2, 2.3],   // jugular notch (y 60), clavicles; the trapezius slopes out
+    [-270, 150,  82, -128, 2.4, 2.5],   // sternal angle (y 80); axilla skin (T2 site at x 150)
+    [-330, 150, 103, -140, 2.4, 2.6],   // pectoral level; lungs reach x ±140
+    [-390, 148,  96, -136, 2.3, 2.5],   // xiphoid (y 92)
+    [-450, 150,  90, -126, 2.2, 2.4],   // costal margin; liver to x 134
+    [-520, 150,  92, -112, 2.1, 2.3],   // upper abdomen; the lumbar curve begins
+    [-590, 148,  98, -110, 2.1, 2.3],   // waist, just above the iliac crest (150, −30, −587)
+    [-650, 162, 100, -122, 2.2, 2.3],   // iliac crest and lower abdomen
+    [-720, 175,  92, -138, 2.3, 2.3],   // trochanters (170, −20, −739); the back fills towards the buttocks
+    [-780, 170,  72, -128, 2.3, 2.2],   // sacrum and the intergluteal cleft (S4 y −128); symphysis y 55
+    [-835, 160,  55, -125, 2.2, 2.1],   // crotch level
+  ],
+  // Muscle masses and bony prominences (right side; c, r in mm; k = smooth-union radius).
+  trapezius: { a: [35, -45, -172], ra: 30, b: [186, -30, -226], rb: 15, k: 18 },
+  deltoid: { c: [198, -22, -284], r: [50, 54, 72], k: 18 },     // bideltoid ≈ 496
+  pectoral: { c: [70, 70, -326], r: [72, 34, 52], k: 20 },
+  scapula: { c: [80, -112, -300], r: [62, 30, 80], k: 20 },
+  gluteal: { c: [80, -100, -768], r: [74, 52, 88], k: 34 },     // a long, flat mass blended into the lower back; fold ≈ z −850; cleft at the midline
+  vastusMedialis: { c: [56, -12, -1102], r: [26, 30, 42], k: 16 },
+  patella: { c: [80, 20, -1162], r: [24, 12, 26], k: 10 },
+  gastrocMedial: { c: [64, -64, -1312], r: [26, 28, 72], k: 18 },
+  malleolusLat: { c: [110, -48, -1612], r: [11, 13, 15], k: 8 },
+  malleolusMed: { c: [50, -40, -1596], r: [11, 13, 15], k: 8 },
+  thenar: { c: [256, 2, -858], r: [18, 14, 26], k: 8 },
+  // Limb profiles along the §2.6 joint axes: [t, lateral radius, anterior radius, anterior offset,
+  // lateral offset] (mm). The offsets move the section centre: the calf behind the shin, the biceps
+  // and quadriceps in front.
+  upperArm: [[0, 50, 50, 0, 0], [0.3, 46, 48, 2, 0], [0.55, 44, 48, 4, 0], [0.85, 40, 40, 0, 0], [1, 40, 35, 0, 0]],
+  forearm: [[0, 40, 35, 0, 0], [0.22, 45, 40, 0, 0], [0.6, 37, 30, 0, 0], [1, 30, 20, 0, 0]],
+  thigh: [[0, 96, 92, 0, 6], [0.18, 100, 96, 4, 4], [0.5, 86, 82, 6, 2], [0.82, 66, 62, 4, 0], [1, 56, 55, 0, 0]],
+  leg: [[0, 56, 54, 0, 0], [0.12, 54, 58, -6, 0], [0.28, 60, 66, -14, 2], [0.55, 46, 50, -8, 0], [0.85, 36, 38, -2, 0], [1, 35, 40, 0, 0]],
+  distScale: 0.9,   // first-order distances are scaled down so they stay conservative (ray marching)
+  armJoin: 5,       // smooth-union radius of each arm onto the trunk and legs (a crease, not a web)
+};
+
+const catmull = (p0, p1, p2, p3, t) => {
+  const t2 = t * t, t3 = t2 * t;
+  return 0.5 * (2 * p1 + (p2 - p0) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (3 * p1 - p0 - 3 * p2 + p3) * t3);
+};
+// Section table at 1-mm steps (built once): a, yf, yb, nf, nb and the steepest |d/dz| for the
+// Lipschitz correction.
+const FORM_TABLE = (() => {
+  const R = FORM.torso, top = R[0][0], bot = R[R.length - 1][0], n = Math.round(top - bot) + 1;
+  const tab = new Float32Array(n * 6);
+  for (let k = 0; k < n; k++) {
+    const z = top - k;
+    let i = 0;
+    while (i < R.length - 2 && R[i + 1][0] > z) i++;
+    const t = (R[i][0] - z) / (R[i][0] - R[i + 1][0]);
+    const r0 = R[Math.max(0, i - 1)], r1 = R[i], r2 = R[i + 1], r3 = R[Math.min(R.length - 1, i + 2)];
+    for (let c = 1; c < 6; c++) tab[k * 6 + c - 1] = catmull(r0[c], r1[c], r2[c], r3[c], t);
+  }
+  for (let k = 0; k < n; k++) {
+    const a = Math.max(0, k - 1), b = Math.min(n - 1, k + 1);
+    let m = 0;
+    for (let c = 0; c < 3; c++) m = Math.max(m, Math.abs(tab[b * 6 + c] - tab[a * 6 + c]) / Math.max(1, b - a));
+    tab[k * 6 + 5] = m;
+  }
+  return { tab, top, bot, n };
+})();
+export function formSection(z) {
+  const T = FORM_TABLE, k = Math.min(T.n - 1, Math.max(0, Math.round(T.top - z))), o = k * 6, t = T.tab;
+  return { a: t[o], yf: t[o + 1], yb: t[o + 2], nf: t[o + 3], nb: t[o + 4], slope: t[o + 5] };
 }
-function sdLeg(x, y, z) {
-  let d = 1e9;
-  if (z > -1230) d = sdCone(x, y, z, JOINTS.hip, LIMB.thighR[0], JOINTS.knee, LIMB.thighR[1]);
-  if (z < -1080) d = smin(d, sdLimb(LIMBS.leg, x, y, z), PARAMS.kTorsoLimb);
-  if (z < -1560) d = smin(d, sdFoot(x, y, z), PARAMS.kHand);
-  return d;
+// Signed distance to a front/back superelliptic section (first-order estimate (r − 1)/|∇r|).
+function sdSection(x, y, s) {
+  const ym = s.yb + 0.45 * (s.yf - s.yb), dy = y - ym;
+  const depth = dy >= 0 ? s.yf - ym : ym - s.yb, n = dy >= 0 ? s.nf : s.nb;
+  const u = x / s.a, v = Math.abs(dy) / depth;
+  const r = Math.pow(Math.pow(u, n) + Math.pow(v, n), 1 / n);
+  if (r < 1e-6) return -Math.min(s.a, depth);
+  const k = Math.pow(r, 1 - n);
+  const g = Math.hypot(Math.pow(u, n - 1) * k / s.a, Math.pow(v, n - 1) * k / depth);
+  const d = (r - 1) / Math.max(g, 1e-6);
+  return r < 1 ? Math.max(d, -Math.min(s.a, depth)) : d * FORM.distScale;
 }
-function sdTrunk(x, y, z) {
-  let d = sdTorso(x, y, z);
-  if (z > -300) d = smin(d, sdCone(x, y, z, SHOULDER.a, SHOULDER.ra, SHOULDER.b, SHOULDER.rb), PARAMS.kNeckTorso);
+function sdTorsoForm(x, y, z) {
+  const T = FORM_TABLE, s = formSection(z);
+  const d2 = sdSection(x, y, s) / Math.sqrt(1 + s.slope * s.slope);
+  const e = Math.max(z - T.top, T.bot - z);
+  return e > 0 ? (d2 > 0 ? Math.hypot(d2, e) : e) : (d2 > 0 ? d2 : Math.max(d2, e));
+}
+
+// Limb with a profile of keys [t, rx, ry, oy, ox], smoothly interpolated, rounded at both ends.
+function makeProfile(a, b, keys, extStart = true) {
+  const l = makeLimb(a, b, keys);
+  let slope = 0;
+  for (let i = 0; i < keys.length - 1; i++) {
+    const dt = (keys[i + 1][0] - keys[i][0]) * l.L;
+    for (let c = 1; c < 5; c++) slope = Math.max(slope, 1.5 * Math.abs(keys[i + 1][c] - keys[i][c]) / dt);
+  }
+  // Each segment runs on past its joints by 60 % of its end radius, so its cap lies inside the
+  // neighbouring segment: two caps never share the joint plane (that left a crease at every joint).
+  // The upper arm and the thigh start inside the deltoid and the trunk, so they are not extended there.
+  const r0 = keys[0], r1 = keys[keys.length - 1];
+  return { ...l, slope, ext: [extStart ? 0.6 * Math.min(r0[1], r0[2]) : 0, 0.6 * Math.min(r1[1], r1[2])] };
+}
+function profileAt(keys, t) {
+  if (t <= keys[0][0]) return keys[0];
+  const last = keys[keys.length - 1];
+  if (t >= last[0]) return last;
+  let i = 0;
+  while (keys[i + 1][0] < t) i++;
+  const f = (t - keys[i][0]) / (keys[i + 1][0] - keys[i][0]), s = f * f * (3 - 2 * f);
+  const a = keys[i], b = keys[i + 1];
+  return [t, a[1] + (b[1] - a[1]) * s, a[2] + (b[2] - a[2]) * s, a[3] + (b[3] - a[3]) * s, a[4] + (b[4] - a[4]) * s];
+}
+// Inside the segment: the profile section; past either end, the end section continued up to a flat
+// cap ext mm beyond the joint (exact at the cap plane, so the field is continuous); the neighbouring
+// segment covers the cap.
+function sdProfile(l, x, y, z) {
+  const px = x - l.a[0], py = y - l.a[1], pz = z - l.a[2];
+  const s = px * l.w[0] + py * l.w[1] + pz * l.w[2], t = s / l.L;
+  const qx = px - l.w[0] * s, qy = py - l.w[1] * s, qz = pz - l.w[2] * s;
+  const cu = qx * l.u[0] + qy * l.u[1] + qz * l.u[2], cv = qx * l.v[0] + qy * l.v[1] + qz * l.v[2];
+  const k = profileAt(l.keys, t);
+  const d2 = sdEllipse2(cu - k[4], cv - k[3], k[1], k[2]) / Math.sqrt(1 + l.slope * l.slope);
+  const e = Math.max(-s - l.ext[0], s - l.L - l.ext[1]);
+  return e > 0 ? (d2 > 0 ? Math.hypot(d2, e) : e) : (d2 > 0 ? d2 : Math.max(d2, e));
+}
+const PROFILES = {
+  upperArm: makeProfile(JOINTS.shoulder, JOINTS.elbow, FORM.upperArm, false),
+  forearm: makeProfile(JOINTS.elbow, JOINTS.wrist, FORM.forearm),
+  thigh: makeProfile(JOINTS.hip, JOINTS.knee, FORM.thigh, false),
+  leg: makeProfile(JOINTS.knee, JOINTS.ankle, FORM.leg),
+};
+
+// Seamless guards: a primitive is skipped only when a lower bound of its distance (to a bounding
+// sphere around it) is at least k + margin above the running value, where the smooth union already
+// equals the minimum. So no term is ever cut while it shapes the surface (BODY-FORM.md §4 item 7).
+const GUARD_MARGIN = 12;
+const sphereOf = (pts, r) => {
+  const c = [0, 0, 0];
+  for (const p of pts) for (let i = 0; i < 3; i++) c[i] += p[i] / pts.length;
+  return { c, r: Math.max(...pts.map((p) => dist(p, c))) + r };
+};
+const ellSphere = (e) => ({ c: e.c, r: Math.max(...e.r) });
+const limbSphere = (l) => sphereOf([l.a, l.b], Math.max(...l.keys.map((k) => Math.max(k[1], k[2]) + Math.abs(k[3]) + Math.abs(k[4]))));
+const BOUNDS = {
+  head: { c: [0, 0, -40], r: 175 },
+  neck: { c: [0, -15, -147], r: 100 },
+  torso: { c: [0, -20, -510], r: 380 },
+  trapezius: sphereOf([FORM.trapezius.a, FORM.trapezius.b], FORM.trapezius.ra),
+  deltoid: ellSphere(FORM.deltoid), pectoral: ellSphere(FORM.pectoral), scapula: ellSphere(FORM.scapula),
+  gluteal: ellSphere(FORM.gluteal), vastusMedialis: ellSphere(FORM.vastusMedialis), patella: ellSphere(FORM.patella),
+  gastrocMedial: ellSphere(FORM.gastrocMedial), malleolusLat: ellSphere(FORM.malleolusLat),
+  malleolusMed: ellSphere(FORM.malleolusMed), thenar: ellSphere(FORM.thenar),
+  upperArm: limbSphere(PROFILES.upperArm), forearm: limbSphere(PROFILES.forearm),
+  hand: { c: [240, -15, -925], r: 110 }, foot: { c: [86, 30, -1640], r: 160 },
+  thigh: limbSphere(PROFILES.thigh), leg: limbSphere(PROFILES.leg),
+};
+const far = (b, x, y, z, d, k) => len3(x - b.c[0], y - b.c[1], z - b.c[2]) - b.r >= d + k + GUARD_MARGIN;
+const ell = (e, x, y, z) => sdEll(x, y, z, e.c[0], e.c[1], e.c[2], e.r[0], e.r[1], e.r[2]);
+const add = (d, b, k, x, y, z, f) => (far(b, x, y, z, d, k) ? d : smin(d, f(), k));
+
+// One leg (right side at x ≥ 0; called at −|x| for the crotch fillet of the other leg).
+function sdLegForm(x, y, z, d0) {
+  const F = FORM, B = BOUNDS;
+  let d = d0;
+  d = add(d, B.thigh, PARAMS.kTorsoLimb, x, y, z, () => sdProfile(PROFILES.thigh, x, y, z));
+  d = add(d, B.gluteal, F.gluteal.k, x, y, z, () => ell(F.gluteal, x, y, z));
+  d = add(d, B.vastusMedialis, F.vastusMedialis.k, x, y, z, () => ell(F.vastusMedialis, x, y, z));
+  d = add(d, B.patella, F.patella.k, x, y, z, () => ell(F.patella, x, y, z));
+  d = add(d, B.leg, PARAMS.kTorsoLimb, x, y, z, () => sdProfile(PROFILES.leg, x, y, z));
+  d = add(d, B.gastrocMedial, F.gastrocMedial.k, x, y, z, () => ell(F.gastrocMedial, x, y, z));
+  d = add(d, B.malleolusLat, F.malleolusLat.k, x, y, z, () => ell(F.malleolusLat, x, y, z));
+  d = add(d, B.malleolusMed, F.malleolusMed.k, x, y, z, () => ell(F.malleolusMed, x, y, z));
+  d = add(d, B.foot, PARAMS.kHand, x, y, z, () => sdFoot(x, y, z));
   return d;
 }
 
 // Signed distance to the skin (mm; negative inside). Mirror-symmetric, so primitives are
 // evaluated at |x|; both thighs enter near the midline for the crotch fillet.
+// The trunk (head, neck, torso and its muscle masses, the deltoid caps) is joined to the legs by the
+// crotch and hip fillet; each arm is built on its own and joined with a small radius, so it meets the
+// shoulder inside the deltoid and leaves a crease along the chest, the flank and the thigh
+// (FORM.armJoin).
 export function bodySDF(x, y, z) {
-  const ax = x < 0 ? -x : x;
+  const ax = x < 0 ? -x : x, F = FORM, B = BOUNDS, kn = PARAMS.kNeckTorso, kl = PARAMS.kTorsoLimb;
   let d = 1e9;
-  if (z > -190) d = sdHead(ax, y, z);
-  if (z < -70 && z > -225) d = smin(d, sdNeck(ax, y, z), PARAMS.kNeckTorso);
-  if (z < -140 && z > -880) d = smin(d, sdTrunk(ax, y, z), PARAMS.kNeckTorso);
-  if (ax > 112 && z < -192 && z > -1030) d = smin(d, sdArm(ax, y, z), PARAMS.kTorsoLimb);
-  if (z < -590) {
-    let l = sdLeg(ax, y, z);
-    if (ax < 140 && z > -1000) l = smin(l, sdLeg(-ax, y, z), PARAMS.kCrotch);
-    d = smin(d, l, PARAMS.kCrotch);
+  d = add(d, B.torso, kn, ax, y, z, () => sdTorsoForm(ax, y, z));
+  d = add(d, B.head, kn, ax, y, z, () => sdHead(ax, y, z));
+  d = add(d, B.neck, kn, ax, y, z, () => sdNeck(ax, y, z));
+  d = add(d, B.trapezius, F.trapezius.k, ax, y, z, () => sdCone(ax, y, z, F.trapezius.a, F.trapezius.ra, F.trapezius.b, F.trapezius.rb));
+  d = add(d, B.pectoral, F.pectoral.k, ax, y, z, () => ell(F.pectoral, ax, y, z));
+  d = add(d, B.scapula, F.scapula.k, ax, y, z, () => ell(F.scapula, ax, y, z));
+  d = add(d, B.deltoid, F.deltoid.k, ax, y, z, () => ell(F.deltoid, ax, y, z));
+  if (z < -560) {   // legs: both of them near the midline, joined by the crotch fillet
+    if (!far(B.thigh, ax, y, z, d, PARAMS.kCrotch) || z < -1000) {
+      let l = sdLegForm(ax, y, z, 1e9);
+      if (ax < 160) l = smin(l, sdLegForm(-ax, y, z, 1e9), PARAMS.kCrotch);
+      d = smin(d, l, PARAMS.kCrotch);
+    }
+  }
+  if (!far(B.upperArm, ax, y, z, d, F.armJoin) || !far(B.forearm, ax, y, z, d, F.armJoin) || !far(B.hand, ax, y, z, d, F.armJoin)) {
+    let a = sdProfile(PROFILES.upperArm, ax, y, z);
+    a = add(a, B.forearm, kl, ax, y, z, () => sdProfile(PROFILES.forearm, ax, y, z));
+    a = add(a, B.thenar, F.thenar.k, ax, y, z, () => ell(F.thenar, ax, y, z));
+    a = add(a, B.hand, PARAMS.kHand, ax, y, z, () => sdHand(ax, y, z));
+    d = smin(d, a, F.armJoin);
   }
   return d;
 }

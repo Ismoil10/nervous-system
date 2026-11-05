@@ -787,6 +787,7 @@ body.hud-simple #hud { display: none; }
     max(22px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left));
 }
 .shud-corner, .shud-views, .shud-states { pointer-events: auto; }
+.shud-display { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 100%; }
 
 /* Story: what is happening; drags over it still turn the camera. */
 .shud-story { grid-area: story; max-width: 30rem; text-shadow: 0 1px 14px rgba(0, 0, 0, 0.7); }
