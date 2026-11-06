@@ -19,7 +19,7 @@ import { buildGraph, NET, BODY_BIT } from '../src/sim/graph.js';
 import { plugin as brainnet } from '../src/sim/brainnet.js';
 import { plugin as sensory } from '../src/sim/sensory.js';
 import { plugin as somatic, spinalCordInjury } from '../src/sim/somatic.js';
-import { plugin as autonomic, PARAMS, INTERVENTIONS, ihr } from '../src/sim/autonomic.js';
+import { plugin as autonomic, PARAMS, INTERVENTIONS, ihr, sao2, acutePH } from '../src/sim/autonomic.js';
 import { SCENARIOS, ScenarioPlayer, evaluate, checkpointSkip } from '../src/sim/scenarios.js';
 import { makeStimulus } from '../src/sim/stimuli.js';
 
@@ -371,9 +371,23 @@ describe('respiratory sinus arrhythmia (§7.8; §12.20 row 27, V13)', () => {
 describe('orgasm command record (§11.14)', () => {
   const recs = [{ tH: 0, cmdSym: 0, cmdVag: 0, cmdSacral: 0, apnoea: false, omega: 0 },
     { tH: 2, cmdSym: 1, cmdVag: 1, cmdSacral: 0.8, apnoea: true, omega: 0.5 }];
+  // The respiratory layer reads the record's arousal drive and breath-hold with every network on
+  // (LUNGS.md §8); the rest of the CV layer ignores it.
+  const RESP_STATE = ['rr', 'vt', 've', 'paco2', 'pao2'];
   test('all networks on: the CV layer ignores the record (the adapter passes legacy vitals through)', () => {
     const k = kernel(), k0 = kernel(); k.setExternalCommands({ commands: recs }); k.advanceTo(60); k0.advanceTo(60);
-    for (const n of CV_STATE) assert.equal(k.get(n), k0.get(n), n);
+    for (const n of CV_STATE.filter((x) => !RESP_STATE.includes(x))) assert.equal(k.get(n), k0.get(n), n);
+  });
+  test('all networks on: the respiratory layer follows the arousal drive and the breath-hold (LUNGS.md §8)', () => {
+    const ramp = [{ tH: 0, cmdSym: 0, cmdVag: 0, cmdSacral: 0, apnoea: false, omega: 0 },
+      { tH: 2, cmdSym: 0.9, cmdVag: 0.9, cmdSacral: 0, apnoea: false, omega: 0 },
+      { tH: 60, cmdSym: 0.9, cmdVag: 0.9, cmdSacral: 0, apnoea: true, omega: 0 }];
+    const k = kernel(); k.setExternalCommands({ commands: ramp }); k.advanceTo(59);
+    assert.ok(k.get('rr') > 24 && k.get('rr') < 27.5, `rr ${k.get('rr')} (14 + 13·h)`);
+    assert.ok(k.get('paco2') < 38, `hypocapnia: paco2 ${k.get('paco2')}`);
+    assert.ok(k.get('sao2') > 97.4 && k.get('sao2') < 100, `sao2 ${k.get('sao2')}`);
+    k.advanceTo(62);
+    assert.equal(k.get('rr'), 0); assert.equal(k.get('ve'), 0);
   });
   test('switched mode (neuroendocrine off): the record drives HR, the sacral tone and apnoea', () => {
     const k = kernel({ settle: false }); k.set('net.neuroendocrine', 0); k.settle({});
@@ -424,4 +438,53 @@ describe('determinism (A.8 #25, §12.20 row 42)', () => {
       assert.equal(w.d, 0, `max |Δ| ${w.d} at ${w.path}`);
     });
   }
+});
+
+describe('respiration: behavioural drive, CO₂ pools and the derived gases (LUNGS.md §8)', () => {
+  test('rest is unchanged: 14/min × 0.5 L, V̇A 4.9, PaCO₂ 40, PaO₂ 95, pH 7.40, SaO₂ 97.4 %, EtCO₂ 37', () => {
+    const k = kernel(); k.advanceTo(30);
+    assert.ok(Math.abs(k.get('rr') - 14) < 1e-9 && Math.abs(k.get('vt') - 0.5) < 1e-9 && Math.abs(k.get('va') - 4.9) < 1e-9);
+    assert.ok(Math.abs(k.get('paco2') - 40) < 1e-9 && Math.abs(k.get('pao2') - 95) < 1e-9);
+    assert.ok(Math.abs(k.get('phA') - 7.40) < 0.005, `pH ${k.get('phA')}`);
+    assert.ok(Math.abs(k.get('sao2') - 97.4) < 0.1, `sao2 ${k.get('sao2')}`);
+    assert.equal(k.get('etco2'), 37); assert.equal(k.get('sighRate'), 12);
+  });
+  test('Calm (relax 1): slow and deep at the same alveolar ventilation (LUNGS.md §6)', () => {
+    const k = kernel(); k.set('relax', 1); k.advanceTo(120);
+    assert.ok(k.get('rr') > 10 && k.get('rr') < 11, `rr ${k.get('rr')}`);
+    assert.ok(k.get('vt') > 0.6 && k.get('vt') < 0.65, `vt ${k.get('vt')}`);
+    assert.ok(Math.abs(k.get('paco2') - 40) < 0.2, `paco2 ${k.get('paco2')}`);
+  });
+  test('Calm slows the breath and so enlarges the RSA (ANALYSIS.md §7.8)', () => {
+    const swing = (relax) => {
+      const k = kernel(); k.set('relax', relax); k.advanceTo(120);
+      let lo = Infinity, hi = -Infinity;
+      for (let t = 120; t < 140; t += 0.05) { k.advanceTo(t); const x = k.get('aut.hrInst'); lo = Math.min(lo, x); hi = Math.max(hi, x); }
+      return hi - lo;
+    };
+    assert.ok(swing(1) > swing(0) * 1.15, `RSA calm ${swing(1)} rest ${swing(0)}`);
+  });
+  test('acute stressor: faster, shallower, more ventilation, mild hypocapnia, twice the sighs (LUNGS.md §6)', () => {
+    const k = kernel(), p = new ScenarioPlayer({ kernel: k }); p.select('stressor'); p.play(); p.advanceTo(600);
+    assert.ok(k.get('rr') > 17 && k.get('rr') < 20, `rr ${k.get('rr')}`);
+    assert.ok(k.get('vt') < 0.5 && k.get('ve') > 7.5, `vt ${k.get('vt')} ve ${k.get('ve')}`);
+    assert.ok(k.get('paco2') > 36 && k.get('paco2') < 39.5, `paco2 ${k.get('paco2')}`);
+    assert.equal(k.get('sighRate'), 24);
+  });
+  test('Severinghaus curve and the Bohr shift (LUNGS.md §4.2)', () => {
+    assert.ok(Math.abs(sao2(95, 7.4, 40) - 97.39) < 0.02);
+    assert.ok(Math.abs(sao2(60, 7.4, 40) - 90.58) < 0.02);
+    assert.ok(Math.abs(sao2(26.8, 7.4, 40) - 50) < 0.2);
+    assert.ok(sao2(60, 7.5, 30) > sao2(60, 7.4, 40), 'alkalosis shifts the curve left');
+    assert.ok(Math.abs(acutePH(40) - 7.40) < 0.005 && acutePH(25) > 7.5 && acutePH(55) < 7.3);
+  });
+  test('two-pool CO₂: most of the fall comes within a minute of hyperventilation (LUNGS.md §4.3)', () => {
+    const recs = [{ tH: 0, cmdSym: 0, cmdVag: 0, cmdSacral: 0, apnoea: false, omega: 0 }, { tH: 1, cmdSym: 1, cmdVag: 1, cmdSacral: 0, apnoea: false, omega: 0 }];
+    const k = kernel(); k.setExternalCommands({ commands: recs }); k.advanceTo(61);
+    const d60 = 40 - k.get('paco2');
+    k.advanceTo(601);
+    const d600 = 40 - k.get('paco2');
+    assert.ok(d60 > 0.5 * d600 && d600 > d60, `ΔPaCO₂ 60 s ${d60}, 600 s ${d600}`);
+    assert.ok(Math.abs(k.get('etco2') - (k.get('paco2') - 3)) < 1e-9);
+  });
 });

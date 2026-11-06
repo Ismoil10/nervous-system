@@ -5,7 +5,7 @@
 // ventricular volume curves (Wiggers), a schematic ECG for the HUD, and the uniforms of the body
 // shader (BODY_VS uHeart*). Pure and DOM-free, so it also runs in Node tests.
 
-import { PART, CONDUCTION } from './body/heart-form.js';
+import { PART, CONDUCTION, HEART_SECTION } from './body/heart-form.js';
 import { PARAMS as SP } from './shaders.js';
 
 export const HEART = {
@@ -27,6 +27,7 @@ export const HEART = {
   ecg: { rate: 250, seconds: 4 }, // HUD trace samples per second and its length (the ECG and the arterial trace)
   art: { rise: 0.08, late: 0.75, notch: [0.03, 0.10], floor: 0.05 },   // arterial pressure wave (HEART.md §3.4)
   maxStars: 3000,                 // heart stars sampled for the energy-conserving wave mean
+  focusTau: 0.3,                  // s: the heart's focus (Heart view, or the camera close to the heart) eases in and out
 };
 
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
@@ -92,7 +93,7 @@ export class HeartBeat {
     this.t = 0;                         // beat time (s; screen time, slowed by kh < 1)
     this.beats = [];                    // the last beats: { t0, iv, ef, edv }
     this.hr = HEART.rest; this.bpm = HEART.rest; this.ef = HEART.ef[0];
-    this.mode = 1; this.steady = 1; this.motion = 1; this.focus = 0;
+    this.mode = 1; this.steady = 1; this.motion = 1; this.focus = 0; this.section = 0; this.detailed = true;
     this.stars = null;                  // sampled heart stars for the wave mean: { tau, gain, sigma, flux }
     this.ecg = new Float32Array(HEART.ecg.rate * HEART.ecg.seconds);
     this.abp = new Float32Array(this.ecg.length).fill(80);   // arterial pressure (mmHg), same clock as the ECG
@@ -117,19 +118,25 @@ export class HeartBeat {
     if (this.beats.length > 3) this.beats.shift();
   }
 
-  // Heart stars from the body buffer (generate.js records: τ in float 4, part in 5, flux in 3).
+  // Heart stars from the body buffer (generate.js records: τ in float 4, part in 5, flux in 3). Two
+  // samples: every heart star (Detailed) and the parts the Stars style draws (no fine anatomy, §8.5).
   setStars(points, floats, count, organClass = 1) {
-    const tau = [], gain = [], sigma = [], flux = [];
-    for (let i = 0; i < count; i++) {
-      const o = i * floats, part = Math.round(points[o + 5]);
-      if (points[o + 11] !== organClass || part < 1) continue;
-      const c = CONDUCTION.has(part);
-      tau.push(points[o + 4]); flux.push(points[o + 3]);
-      gain.push(points[o + 4] < 0 ? 0 : SP.heart.glow[c ? 0 : 1]); sigma.push(SP.heart.sigma[c ? 0 : 1]);
-    }
-    const step = Math.max(1, Math.ceil(tau.length / HEART.maxStars));
-    const pick = (a) => Float32Array.from(a.filter((_, i) => i % step === 0));
-    this.stars = tau.length ? { tau: pick(tau), gain: pick(gain), sigma: pick(sigma), flux: pick(flux) } : null;
+    const sample = (keep) => {
+      const tau = [], gain = [], sigma = [], flux = [];
+      for (let i = 0; i < count; i++) {
+        const o = i * floats, part = Math.round(points[o + 5]);
+        if (points[o + 11] !== organClass || part < 1 || !keep(part)) continue;
+        const c = CONDUCTION.has(part);
+        tau.push(points[o + 4]); flux.push(points[o + 3]);
+        gain.push(points[o + 4] < 0 ? 0 : SP.heart.glow[c ? 0 : 1]); sigma.push(SP.heart.sigma[c ? 0 : 1]);
+      }
+      const step = Math.max(1, Math.ceil(tau.length / HEART.maxStars));
+      const pick = (a) => Float32Array.from(a.filter((_, i) => i % step === 0));
+      return tau.length ? { tau: pick(tau), gain: pick(gain), sigma: pick(sigma), flux: pick(flux) } : null;
+    };
+    this.allStars = sample(() => true);
+    this.earlierStars = sample((part) => part < PART.TRABECULA);
+    this.stars = this.detailed ? this.allStars : this.earlierStars;
   }
 
   // Activation time (s after the SA firing) of a star at τ, for a beat with intervals iv (BODY_VS).
@@ -154,7 +161,11 @@ export class HeartBeat {
 
   // One display frame. dt: screen seconds; hr: beat-averaged rate (bpm, null = rest); rsa: the
   // kernel's hrInst / hr; contractility; kh: the clock factor (time compression never speeds the beat).
-  step(dt, { hr = null, rsa = 1, contractility = 1, kh = 1, paused = false, reducedMotion = false, focus = false, sbp = null, dbp = null } = {}) {
+  // focus: the heart's focus target 0–1 (true = 1); section: the heart opened (HEART.md §8.4);
+  // detailed: the body style, which picks the stars the wave mean is taken over.
+  step(dt, { hr = null, rsa = 1, contractility = 1, kh = 1, paused = false, reducedMotion = false, focus = false, sbp = null, dbp = null,
+    section = false, detailed = this.detailed } = {}) {
+    if (detailed !== this.detailed) { this.detailed = detailed; if (this.allStars !== undefined) this.stars = detailed ? this.allStars : this.earlierStars; }
     if (Number.isFinite(sbp) && Number.isFinite(dbp) && sbp > dbp) { this.sbp = sbp; this.dbp = dbp; }
     this.hr = Number.isFinite(hr) && hr > 0 ? hr : HEART.rest;
     const hrNow = this.hr * (Number.isFinite(rsa) && rsa > 0 ? rsa : 1);
@@ -186,11 +197,15 @@ export class HeartBeat {
     this.mode = hrNow <= HEART.beatMaxHr ? 1 : 0;
     this.steady = clamp(this.hr / HEART.rest, 1 - HEART.steadyRange, 1 + HEART.steadyRange);
     this.motion = reducedMotion ? 0 : 1;
-    this.focus = focus ? 1 : 0;
+    const ease = Number.isFinite(dt) && dt > 0 ? 1 - Math.exp(-dt / HEART.focusTau) : 0;
+    this.focus += (clamp(+focus || 0, 0, 1) - this.focus) * ease;
+    if (Math.abs(this.focus - (+focus || 0)) < 1e-3) this.focus = clamp(+focus || 0, 0, 1);
+    const sStep = Number.isFinite(dt) && dt > 0 ? dt / HEART_SECTION.seconds : 0;
+    this.section = clamp(this.section + (section ? sStep : -sStep), 0, 1);
     this.T[0] = T; this.T[1] = iv.pr; this.T[2] = iv.qrs; this.T[3] = iv.pDur;
     this.M[0] = atrial; this.M[1] = (1 - V) / HEART.efRef; this.M[2] = root; this.M[3] = this.mode ? this.meanWave(T, iv) : 0;
     this.K[0] = this.mode; this.K[1] = this.steady; this.K[2] = this.motion; this.K[3] = this.focus;
-    this.V[0] = clamp(avOpen, 0, 1); this.V[1] = clamp(slOpen, 0, 1); this.V[2] = this.V[0];
+    this.V[0] = clamp(avOpen, 0, 1); this.V[1] = clamp(slOpen, 0, 1); this.V[2] = this.V[0]; this.V[3] = this.section;
 
     // ECG trace at a fixed sample rate in beat time.
     this._ecgAcc += dtB * HEART.ecg.rate;

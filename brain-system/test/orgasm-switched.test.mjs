@@ -92,7 +92,9 @@ describe('switched-mode vitals of the orgasm scenario (§11.14, §12.14)', () =>
     }
     assert.ok(r.adapter.commands.written > 0, 'command records written');
     assert.ok(climax, 'the run reaches onset');
-    for (const n of ['hr', 'sbp', 'dbp', 'rr', 'paco2', 'tone.sacral', 'tone.symCard', 'tone.vagCard']) assert.equal(r.k.get(n), r0.k.get(n), `${n}: record ignored with every network on`);
+    for (const n of ['hr', 'sbp', 'dbp', 'tone.sacral', 'tone.symCard', 'tone.vagCard']) assert.equal(r.k.get(n), r0.k.get(n), `${n}: record ignored with every network on`);
+    // The respiratory layer follows the arousal drive with every network on (LUNGS.md §8).
+    assert.notEqual(r.k.get('paco2'), r0.k.get('paco2'), 'paco2 follows the arousal drive');
   });
 
   test('neuroendocrine off: the command record drives the autonomic CV layer; HUD vitals come from the kernel', () => {

@@ -3424,6 +3424,8 @@ The rhythm arises in the pre-Bötzinger complex (Smith et al. 1991, R; human hom
 
 Ownership follows A.8 decision 8. `preBotC` sets `respPhase`. Ventilation follows chemoreflex and arousal drives, with VT rising before rate: `vt = 0.5 · (ve/7)^0.6`, `rr = ve/vt` [model]. The orgasm breath-hold in `vitals()` (L361) becomes a central apnoea command (§11).
 
+> **Lungs (6 November 2026, LUNGS.md §8).** CO₂ now balances on alveolar ventilation V̇A = (VT − 0.15)·f in two pools (a fast lung-and-blood pool, share 0.6, τ 60 s, and the tissue pool, τ 600 s, both ∝ V̇A₀/V̇A), so rest is unchanged. A behavioural drive sets the rate: the stressor input (+30 % at u = 1, extra V̇A 20 %), the arousal drive h of the orgasm adapter's record (14 + 13·h, extra V̇A 3·h⁴·V̇A₀; read with every network on, while the HUD keeps the legacy vitals and the rest of the CV layer ignores the record), and the HUD's relaxation input `relax` (Calm: −25 %). VT = V̇A/f + VD. The CO₂ response below eupnoea is flat while awake (0.5 L/min per mmHg). Derived: acute pH, SaO₂ (Severinghaus 1979 with the Bohr shift), EtCO₂ = PaCO₂ − 3, sighs 12 per hour (×2 in a full stressor). Measured: Calm 10.5/min × 0.62 L at PaCO₂ 40; Stress 18.2/min × 0.43 L, PaCO₂ 38; the arousal plateau 23/min, PaCO₂ ≈ 34.
+
 | Quantity | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|
 | Resting `rr` | 14 (12–16) | breaths/min | H | high | `response.js` L361; [T] |
@@ -5974,7 +5976,7 @@ If a user picks a tint that conflicts with one already shown, the choice is refu
 | DA variables | lanterns, embers, flares, tract flow | DOPAMINE.md §8.1, unchanged | DOPAMINE.md §10 |
 | `arousalState`, `procS`, `procC`, `salience`, `lcPhasic`, `predErr` (§3) | activity of their nodes (LC, insula, dACC); Brain systems readout | — | no global brightening |
 | `hr` (§7) | heart cluster beat or steady glow | §13.9 | ≤ 8 % of maximum |
-| `rr`, `respPhase`, `vt` (§7); `diaphragmExc` (§6) | uniform lung scale about the hila of ±2 % × (`vt` ÷ resting VT, §7); diaphragm sheet displaced at true scale | — | rhythm rule (§13.9) |
+| `rr`, `respPhase`, `vt` (§7); `diaphragmExc` (§6) | **Superseded by LUNGS.md §7.3 (6 November 2026):** a breath clock in screen time (`src/breath.js`) drives an anisotropic field in `BODY_VS`: the diaphragm piston (excursion 15 mm × (ΔV/0.5 L)^0.85), bucket- and pump-handle rib expansion, the mediastinum and abdominal viscera carried along, the abdominal wall out; each star's flux follows its craniocaudal strain (energy-conserving). Drawn × 3 (user decision, LUNGS.md §14.3); air particles show the flow. Was: a uniform lung scale about the hila of ±2 % × (`vt` ÷ resting VT) | — | breath per breath in screen time, ≤ 40/min (LUNGS.md §7) |
 | `pupilD.L`, `pupilD.R` (§7) | iris-ring inner radius = `pupilD`/2; outer radius 6 mm covers the physiological range [G Pupillary_response L23] | geometry only | no luminance change |
 | `fSudo.<site>` (§7) | sparkle at palm, sole, forehead and axilla stars | patch mean ≤ +10 %, τ ≥ 1 s | ≤ 2 Hz per star, asynchronous |
 | `sbf`, `tone.fSymSkin` (§7) | distal skin flux × (1 − 0.15·constriction); dilation ≤ +10 % | τ ≥ 2 s | ≤ 15 % dimming |
@@ -6925,6 +6927,8 @@ Width 256 holds the 122 regions per side (244 columns). If §3's final list exce
 Tissue classes match the nine budget groups of §13: skin, organ, muscle, bone, cord, nerve, ganglion, enteric, vessel/immune; "structural" (§13.5) is carried by the tissue class. The network bitmask holds eight display bits: somatic afferent, somatic efferent, sympathetic, parasympathetic, visceral afferent, enteric, neuroendocrine, neuroimmune. This is the single bit list (§13.16).
 
 The body vertex shader declares matrices and common scalars (≈ 16 slots), `uNetGain` (2 vec4), `uOrgan[16]` (heart beat, lung scale, diaphragm, pupil radii, bladder radius, vasoconstriction dimming and others) and `uJoint[40]` (20 rigid segments × quaternion and translation): ≈ 74 slots, well under 256.
+
+> **Budget as built (6 November 2026).** `BODY_VS` uses 106 of the 110 slots its test allows (`test/shaders.test.mjs`): 104 after the close-up work (CLOSEUP.md; `uJoint` 16 slots), plus `uBreath` and `uAir` for the breathing motion and the airflow front (LUNGS.md §7.3–7.4). Breathing does not use `uOrgan`; its 16 slots stay unused (nothing calls `setOrgans`) and are the room for later organ passes.
 
 | Quantity | Value | Unit | Species | Conf. | Source |
 |---|---|---|---|---|---|

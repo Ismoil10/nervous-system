@@ -14,6 +14,7 @@
 
 import { mulberry32 } from '../anatomy.js';
 import { HEART_FORM } from './heart-form.js';
+import { buildAirwayTree } from './airway-tree.js';
 
 // Part codes (normal slot y): the tree is 1–7, the earlier great-vessel stars 8–9 (PULSE.md §13.6).
 export const VPART = { EARLIER: 0, ARTERY: 1, ARTERY_TWIG: 2, VEIN: 3, VEIN_TWIG: 4, CAPILLARY: 5, PULM_ARTERY: 6, PULM_VEIN: 7,
@@ -34,7 +35,11 @@ export const TREE = {
   // and the other by Murray ((1 − γ³)^⅓), children `lenRatio` × the parent length, `angle` degrees off
   // the parent, each generation in a plane turned ≈ 90°. The heart is carved out of the lungs.
   organ: { ratio: [0.75, 0.85], lenRatio: [0.7, 0.85], angle: [22, 42], pwv: 10, pulmPwv: 2.0, pulmAmp: 0.38, pulmDelay: 0.025,
-    heart: { c: [-30, 15, -345], r: 58 }, shrink: 3 },
+    heart: { c: [-30, 15, -345], r: 58 }, shrink: 3,
+    // Pulmonary arteries in the bronchovascular bundles (research/LUNGS.md §2.5, §7.2) [model]: one
+    // beside each airway branch from the lobar bronchi to generation `pulmGen`, `pulmCal` × the airway's
+    // lumen radius, `pulmGap` mm clear of its wall.
+    pulmGen: 7, pulmCal: 0.9, pulmGap: 1, pulmVeinGen: 5 },   // generation 7 matches the whole-body airways (LUNGS.md §14.2)
   // Capillary beds (§13.4) [model]: strands (random walks of `steps` × `step` mm, turning by up to
   // `spread`) from each terminal arterial tip, `n` per bed, drawn `width` mm wide; saturation `from`
   // at the arteriole to `to` at the venule (the organ's venous saturation; the lungs run the other way).
@@ -46,7 +51,7 @@ export const TREE = {
     liver: { n: [5, 7], steps: 3, step: 1.6, spread: 1.2, from: 0.9, to: 0.7, width: 0.35 },
     spleen: { n: [5, 6], steps: 3, step: 1.4, spread: 1.2, from: 0.98, to: 0.75, width: 0.3 },
     gut: { n: [4, 5], steps: 3, step: 1.2, spread: 0.9, from: 0.98, to: 0.7, width: 0.3 },
-    lung: { n: [6, 8], steps: 3, step: 2.0, spread: 1.3, from: 0.75, to: 0.98, width: 0.4 },
+    lung: { n: [2, 3], steps: 3, step: 2.0, spread: 1.3, from: 0.75, to: 0.98, width: 0.4 },   // fewer strands: the lung's bed is haze at body scale (LUNGS.md §14.2)
   },
   brain: { c: [0, -15, 12], r: [62, 82, 60] },   // [model] the brain's envelope for the bed type
   vasa: { minR: 6, every: 30, steps: 6, step: 4, r: 0.35, amp: 0.3 },   // vasa vasorum on the aorta and the venae cavae
@@ -521,14 +526,30 @@ export function buildDetail(ctx, seed = 1848) {
   const lung = (e) => (p) => inEll(e, p, O.shrink) && outHeart(p) && ctx.inside(p);
   const rootEnd = (id) => { const r = HEART_FORM.roots.find((x) => x.id === id); return r.pts[r.pts.length - 1]; };
   const sys = (part, vein, name, side, bedKind, centre, a0) => ({ part, vein, name, side, bedKind, centre, pwv: O.pwv, a0, ampTip: 0.4, d0: 0 });
-  for (const [side, lungE, pa, pvs] of [[1, E.lungR, 'pulmonaryArteryR', ['pulmonaryVeinRU', 'pulmonaryVeinRL']],
-    [-1, E.lungL, 'pulmonaryArteryL', ['pulmonaryVeinLU', 'pulmonaryVeinLL']]]) {
-    const inside = lung(lungE), p0 = rootEnd(pa);
-    fractal(p0, sub(lungE.c, p0), 6, 34, 8, inside, { part: VPART.PULM_ARTERY, vein: false, name: 'pulmonary', side, bedKind: 'lung', centre: lungE.c,
-      pwv: O.pulmPwv, a0: O.pulmAmp, ampTip: 0.5, d0: O.pulmDelay });
+  // Pulmonary arteries beside the bronchi (bronchovascular bundles, LUNGS.md §2.5, §7.2): from each
+  // pulmonary artery's end (heart-form.js) an artery runs beside every airway branch of the lobar
+  // bronchi down to generation pulmGen, on a side carried down the tree (rotation-minimising), with a
+  // capillary bed at each tip. The veins keep their own trees between the segments.
+  const AW = buildAirwayTree(), artEnd = new Map();
+  for (const side of [1, -1]) artEnd.set(`root${side}`, { p: rootEnd(side > 0 ? 'pulmonaryArteryR' : 'pulmonaryArteryL'), d: O.pulmDelay, off: null });
+  for (const b of AW.branches) {
+    if (b.gen < 2 || b.gen > O.pulmGen || !b.side) continue;
+    const par = artEnd.get(b.parent) ?? artEnd.get(`root${b.side}`);
+    const t = norm(sub(b.b, b.a)), seed = par.off ?? sub(par.p, b.a);
+    let off = sub(seed, [t[0] * dot(seed, t), t[1] * dot(seed, t), t[2] * dot(seed, t)]);
+    off = len(off) > 1e-6 ? norm(off) : perp(t);
+    const ra = Math.max(T.minR, b.r * O.pulmCal), gap = b.r + ra + O.pulmGap;
+    const e = along(b.b, off, gap), mid = along(mix3(b.a, b.b, 0.5), off, gap);
+    const a = O.pulmAmp * (1 - 0.5 * (b.gen - 2) / Math.max(1, O.pulmGen - 2));
+    const br = add(mk([par.p, mid, e], ra, ra * 0.92, { part: VPART.PULM_ARTERY, vein: false, d0: par.d, a, pwv: O.pulmPwv, side: b.side, level: b.gen - 1, name: 'pulmonary' }));
+    artEnd.set(b.id, { p: e, d: br ? end(br).d : par.d, off });
+    if (b.gen === O.pulmGen || !b.children || !b.children.length) bed(e, t, 'lung', b.side);
+  }
+  for (const [side, lungE, pvs] of [[1, E.lungR, ['pulmonaryVeinRU', 'pulmonaryVeinRL']], [-1, E.lungL, ['pulmonaryVeinLU', 'pulmonaryVeinLL']]]) {
+    const inside = lung(lungE);
     for (const pv of pvs) {
       const q = rootEnd(pv), aim = [lungE.c[0], lungE.c[1], lungE.c[2] + (pv.endsWith('U') ? 50 : -50)];
-      fractal(q, sub(aim, q), 4.5, 30, 7, inside, { part: VPART.PULM_VEIN, vein: true, name: 'pulmonaryV', side, bedKind: 'lung', centre: lungE.c, pwv: 1, a0: 0, ampTip: 1, d0: -1 });
+      fractal(q, sub(aim, q), 4.5, 30, O.pulmVeinGen, inside, { part: VPART.PULM_VEIN, vein: true, name: 'pulmonaryV', side, bedKind: 'lung', centre: lungE.c, pwv: 1, a0: 0, ampTip: 1, d0: -1 });
     }
   }
   const liver = organ([E.liver, E.liverL]), hep = named('hepatic'), por = named('portal');

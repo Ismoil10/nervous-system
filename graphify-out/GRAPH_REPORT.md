@@ -1,17 +1,17 @@
-# Graph Report - nervous-system  (2026-11-05)
+# Graph Report - nervous-system  (2026-11-06)
 
 ## Corpus Check
-- 228 files · ~668,821 words
+- 242 files · ~725,743 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 4 file(s) not represented in the graph (top: (none) 3, .css 1)
 
 ## Summary
-- 5948 nodes · 10665 edges · 281 communities (260 shown, 21 thin omitted)
-- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 956 edges (avg confidence: 0.87)
+- 6258 nodes · 11503 edges · 280 communities (258 shown, 22 thin omitted)
+- Extraction: 91% EXTRACTED · 9% INFERRED · 0% AMBIGUOUS · INFERRED: 1011 edges (avg confidence: 0.88)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `637d757a`
+- Built from commit: `b27d3207`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -20,236 +20,236 @@
 - enteric.js
 - picking.js
 - dopamine.test.mjs
-- anatomy.js
-- Hypothalamus
-- Neurotransmitter
+- Sympathetic trunk
+- airway-tree.js
+- Reward system
 - stimuli.js
 - Endocrine
-- Hypothalamus
-- LogRamp
+- Reticular formation
+- Lungs and the respiratory system: anatomy, breathing and its response to emotion
 - generate.js
-- wiring.js
-- scenarios.test.mjs
+- Neuron
+- pulse.test.mjs
 - somatic.js
-- shaders.js
+- SimClock
 - geometry.js
-- Human brain
-- ._bindStimulus
-- Ventral tegmental area
-- Spinal Cord
+- Locus coeruleus
+- BodyHud
+- Excitement Phase
+- Basal forebrain
 - Brain System HUD
 - Nerve conduction velocity
 - KernelApi
-- geometry-brain.test.mjs
-- Enteric nervous system
-- Sexual Arousal
-- Myenteric plexus
-- ResponseModel
-- Dorsal column–medial lemniscus pathway
-- ui-body.js
-- Baroreflex
-- Motor Cortex
-- contracts.d.ts
-- Nigrostriatal pathway
-- Golgi Tendon Organ
-- Hypothalamus
-- Locus coeruleus
-- Cranial nerves
-- BrainRenderer
-- DopamineModel
-- Interoception
-- BrainNet
-- BodyHud
-- color.js
-- Nucleus Accumbens (NAcc)
-- Hud
-- Sex Flush
-- makeBrain
-- statetex.js
-- 6. Somatic nervous system
-- generateBrain
-- Motor neuron
-- Sympathectomy
-- Lateral Inhibition Circuits
 - shaders.js
-- Medial preoptic nucleus (mPOA)
-- Nerve conduction velocity
-- Marr-Albus theory
+- Autonomic
+- Sexual Arousal
+- Dopamine
+- ResponseModel
+- Runtime
+- ui-body.js
+- BreathClock
+- Acetylcholine
+- contracts.d.ts
+- Hippocampus
+- bodySDF
+- Corticospinal Tract
+- wiring.js
+- Cranial nerves
+- anatomy.js
+- DopamineModel
+- graph.js
+- BrainNet
+- 6. Somatic nervous system
+- renderer.js
+- GpuTimer
+- Hud
+- runtime.js
+- immune.test.mjs
+- Brainstem
+- Cortisol
+- Golgi Tendon Organ
+- Lower motor neuron
+- StateTextures
+- Lateral Inhibition Circuits
+- Prefrontal Cortex
+- Hypothalamus
+- mulberry32
+- Myenteric plexus
 - Kernel
 - safety.test.mjs
 - Vagus nerve
 - frame.js
 - Orgasm Model Equations
 - Orgasm Galaxy Targets
-- Somatic
+- ._bindStimulus
 - DopamineModel
 - Sickness Behavior
 - Thermoreceptor
 - 11. Integration: switches and simulation architecture
-- autonomic.js
+- 4. Signal processing
 - Thermoregulation
 - Brain System — the whole-body sexual response model: analysis and design rationale
-- Enteric Nervous System
+- start
 - Periaqueductal Gray (PAG)
-- Pelvic splanchnic nerves
-- Pelvic splanchnic nerves
-- Runtime
+- Appendix A. Framework contract
+- Pudendal Nerve
+- Nerve conduction velocity
 - Orgasm Body Physiology
-- Corticospinal Tract
-- Somatosensory System
-- Autoreceptor
+- Synapse
+- Ventral tegmental area
+- Type Ia Sensory Fiber
 - Thermoregulatory Set Points
 - 7. Autonomic nervous system
-- Commonly identified networks
-- sdCerebrum
-- pulse.test.mjs
+- Somatic
+- Dorsal column–medial lemniscus pathway
+- Cerebral cortex
 - Orgasm Brain Imaging
-- switches.test.mjs
-- Nervous system
-- Synapse
+- BrainRenderer
+- Central nervous system
+- Vagus Nerve
 - Orgasm Source Captures
 - Orgasm Analysis Sources
-- Appendix A. Framework contract
-- Blood-brain barrier
-- interventions.test.mjs
-- Vagus nerve
-- Anterior insula
-- Extended or Continuous Orgasm
 - Reflex Arc
+- LogRamp
+- Pelvic splanchnic nerves
+- dist
+- ui-simple.js
+- Hypothalamus
+- clamp
 - Proprioception
 - Sciatic nerve
 - Autoreceptor Examples
 - Autoreceptor References
 - Dopamine Pharmacology
 - Neuromodulator Systems
-- gutAt
-- Acetylcholine
+- Nociception
+- Sympathetic nervous system
 - Fight-or-flight response
-- Salience (midcingulo-insular)
-- Hypothalamic–pituitary–adrenal axis (HPA axis)
-- OrgasmAdapter
+- geometry-brain.test.mjs
+- AdaptiveQuality
+- Vagus nerve
 - Heart: anatomy, the beat and its response to emotion
-- Membrane potential
+- StateTextures
 - Refractory Period
-- Golgi Tendon Organ
+- Dopamine receptor
 - Cytokine Classes
-- mulberry32
+- Brain System — the brain, its internal systems and its networks throughout the body: analysis and design rationale
 - Interstitial Cells of Cajal
-- main.js
+- OrgasmAdapter
 - Lumbar plexus
 - Stretch Reflex
 - Vestibular System
-- Orgasm
+- Blood-brain barrier
 - Central Pattern Generators
-- Sympathetic nervous system
+- Clinical significance
 - hud-static.test.mjs
-- renderer.js
-- Adrenocorticotropic hormone (ACTH)
+- Marr-Albus theory
+- Body form: analysis of the human shape for the skin field
 - Internal medullary lamina (Y-shaped)
-- Thalamus
+- Orgasm
 - compilerOptions
-- autonomic
-- immune.test.mjs
-- Human Sexual Response Cycle
-- Lateral geniculate nucleus
-- Group A nerve fiber
+- Somatic nervous system
+- Appendix B. Implementation plan and integration with the current code
+- Submucosal plexus
+- Close-up clarity of the body
+- Enteric nervous system
 - Stevens's power law
-- Dopamine system
+- Trace amine-associated receptor 1 (TAAR1)
 - Cochlea
-- Cortisol
+- Adrenocorticotropic hormone (ACTH)
 - Human Body Composition
-- Spinal Cord
-- .settle
+- OrbitCamera
+- autonomic
 - Phrenic Nerve and Diaphragm
 - Raphe nuclei
-- Dopamine transporter
-- Submucosal plexus
-- Somatic nervous system
-- Neuroimmune system
+- heart-form.js
+- Pupillary Response
+- renderer.js
+- Somatosensory System
 - Vagotomy and Ulcers
-- Superior colliculus
-- Locus coeruleus
+- 8. Close-up detail (third pass)
+- Sensory Nervous System
 - FragmentContext
-- 4. Signal processing
-- Visual Cortex
-- Glial cells
-- Two-streams Hypothesis
+- Group A nerve fiber
+- Autoreceptor
+- Taste
+- TransitionCounter
 - Dermatomes and Referred Pain
 - Fever Clinical Features
 - Hypothalamic-pituitary-thyroid axis
-- Postcentral Gyrus
+- Sex Flush
 - orgasm-regression.test.mjs
 - Neural Adaptation
 - Rate Code
 - 12. Scenarios and validation
 - Nicotinic acetylcholine receptor (nAChR)
 - Predictive Coding
-- Excitement Phase
-- Pain
-- Pupillary Response
-- Clinical significance
-- Neuron
-- 4. Dopamine across the sexual response cycle and orgasm
-- Sympathetic trunk
-- Dopamine
-- bodySDF
-- D1-like family
-- Taste
+- Olfactory System
+- Extended or Continuous Orgasm
+- Pupillary Light Reflex
+- Hypothalamic–pituitary–adrenal axis (HPA axis)
+- Spinothalamic Tract
+- Inflammatory reflex
+- Commonly identified networks
+- Nigrostriatal pathway
+- Adrenal Medulla
+- Salience (midcingulo-insular)
+- Mechanoreceptor
 - Hirschsprung's Disease
-- brain-system/README.md
-- Cardiovascular centre
+- Visual Cortex
+- Insular cortex
 - Sacral plexus
 - Adrenaline
-- Central nervous system
+- Postcentral Gyrus
 - Basic Tastes
 - Receptive Field Theory
-- Advantages
-- Body form: analysis of the human shape for the skin field
+- response.js
+- Cytokines
 - Suprachiasmatic Nucleus
+- Sympathoadrenal system
 - Startle Response
-- brainnet.js
-- .advanceTo
+- Neurons
 - Auditory Cortex
-- AdaptiveQuality
-- runtime.js
-- Sensory neuron
+- SimpleHud
+- Spinal Cord
+- Auditory System
 - Biological Neuron Models
 - Cable Theory History
 - Cerebellum
-- Olfactory System
+- Human brain
 - Brain System — dopamine during the sexual response (orgasm scenario): analysis and design rationale
 - Interferon and Depression
 - Hodgkin-Huxley Model
 - Large-scale brain network
-- Arterial pulse wave and the vascular tree
-- Lateral Spinothalamic Tract
+- Anterior insula
+- Group C nerve fiber
 - Myelin and White Matter
-- Insular cortex
+- Node of Ranvier
 - Retina Structure
-- Cerebral cortex
-- Reinforcement learning
+- Neurotransmitter
+- Santiago Ramon y Cajal
 - Somatosensory System
 - Cerebral hemispheres
-- monitor.test.mjs
+- Structure
 - Dysautonomia and Sympathectomy
-- Visual Cortex
-- Autonomic nervous system
-- Marr-Albus theory
-- Cutaneous Mechanoreceptors
-- len3
+- Cardiovascular centre
+- Dopamine transporter
+- Proinflammatory cytokines (IL-1, IL-6, TNF)
+- Hypothalamus
+- ._resp
 - Spinal Cord Injury
 - Corticotropin-releasing hormone
-- runtime.js
-- CommandRing
+- Sympathetic nervous system
+- 3. Cellular physiology and kinetics
 - Thalamus Anatomy
-- Glucocorticoid negative feedback loop
-- Tuberoinfundibular pathway
+- Cerebellum
+- Oculomotor nerve (CN III)
 - Motor Neuron Development
-- Cable equation
+- len3
 - PluginInstance
-- Auditory System
-- 9. Implementation targets
-- Appendix B. Implementation plan and integration with the current code
+- Health effects
+- Trace amine-associated receptor 1 (TAAR1)
+- Outer Hair Cells (Cochlear Amplifier)
 - Vasopressin Hormone
 - 3. Brain systems
 - 5. Sensory systems
@@ -258,65 +258,64 @@
 - Reflex Effector Muscle
 - Reflex Efferent Fibers
 - Reflex Somatic Receptors
-- Health effects
-- Dopamine
+- Neuroimmune system
+- Interoception
 - 1. Purpose, scope and conventions
 - 2. Frames and the reference body
 - Plugin
-- Auditory Nerve
-- Cerebellar cortex (folia)
+- 7. Display options and the photosensitivity rules
+- 9. Implementation targets
 - InterventionPreset
-- Group C nerve fiber
+- sdCerebrum
 - 2. How stars look in space and how they are distributed
-- Reticular formation
+- Anterior Cingulate Cortex
 - 9. Neuroendocrine network
-- Meninges
-- Scenario
-- Proinflammatory cytokines (IL-1, IL-6, TNF)
-- Anatomy and physiology
-- .settle
-- DAT phosphorylation via PKA/PKC
-- A-delta fiber
-- Brain System — the brain, its internal systems and its networks throughout the body: analysis and design rationale
-- Spinal nerve
-- TRPM8
-- 8. Mapping: physiology → galaxy → animation parameter
-- Inflammatory reflex
-- Lateral motor column
-- Function
-- Polymodal C fibers
-- Structure
-- Sensory inhibition
-- package.json
-- Human brain
-- Cervical nerves
-- ._emit
-- Spinothalamic Tract
-- Mechanism and cycle
-- Glial cells
 - Femoral nerve
-- Left Vagus Nerve
-- Sympathoadrenal system
+- Scenario
+- 3. Mechanics of breathing
+- 2. Anatomy (adult, upright, neutral)
+- Mechanism and cycle
+- Lateral motor column
+- Superior colliculus
+- Sensory neuron
+- Cervical nerves
+- Structure
+- 8. Mapping: physiology → galaxy → animation parameter
+- Visual Cortex
+- Reinforcement learning
+- Two-streams Hypothesis
+- Function
+- Beta-Lipotropin
+- Structure
+- package.json
+- Dopamine
+- Advantages
+- 14. Second pass: the upper airway, sharpness and visible breathing (6 November 2026)
+- Sensory inhibition
+- Auditory Adaptation
+- 4. Gas exchange
+- Brain System — the whole-body sexual response model: analysis and design rationale
+- Sympathectomy
 
 ## God Nodes (most connected - your core abstractions)
 1. `Kernel` - 124 edges
-2. `start()` - 76 edges
+2. `start()` - 95 edges
 3. `BodyHud` - 67 edges
 4. `KernelApi` - 57 edges
 5. `ResponseModel` - 49 edges
 6. `ScenarioPlayer` - 46 edges
-7. `Hud` - 42 edges
-8. `BrainRenderer` - 39 edges
+7. `BrainRenderer` - 42 edges
+8. `Hud` - 42 edges
 9. `Runtime` - 39 edges
-10. `Hypothalamus` - 35 edges
+10. `bodySDF()` - 35 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `1.4. Scope` --references--> `autonomic()`  [INFERRED]
   brain-system/research/ANALYSIS.md → brain-system/src/sim/interventions.js
+- `3.4. Cortical hierarchy and areas` --references--> `corticalRegion()`  [INFERRED]
+  brain-system/research/ANALYSIS.md → brain-system/src/anatomy.js
 - `3.14. Brain ports` --references--> `autonomic()`  [INFERRED]
   brain-system/research/ANALYSIS.md → brain-system/src/sim/interventions.js
-- `4.4. Conduction` --references--> `C()`  [INFERRED]
-  brain-system/research/ANALYSIS.md → brain-system/src/sim/stimuli.js
 - `4.11. Latency method and model-vs-target table` --references--> `C()`  [INFERRED]
   brain-system/research/ANALYSIS.md → brain-system/src/sim/stimuli.js
 - `6.3. Cord cross-section map (ξ, η)` --references--> `autonomic()`  [INFERRED]
@@ -401,247 +400,239 @@
 - **Retinal Center-Surround Contrast Circuit** — brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_receptive_field_retinal_ganglion_cells, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_receptive_field_center_surround_organization, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_lateral_inhibition_horizontal_cells, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_lateral_inhibition_amacrine_cells, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_lateral_inhibition_lateral_inhibition, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_receptive_field_edge_detection [INFERRED 0.85]
 - **Striatal microcircuit: MSNs, interneurons and dopamine modulation** — brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_medium_spiny_neurons, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_d1_type_msn, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_d2_type_msn, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_cholinergic_interneurons, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_parvalbumin_fast_spiking_interneurons, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_neuropeptide_y_interneurons, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_dopamine, brain_system_raw_en_wikipedia_org_api_rest_v1_page_html_striatum_dopamine_receptor_d5 [INFERRED 0.85]
 
-## Communities (281 total, 21 thin omitted)
+## Communities (280 total, 22 thin omitted)
 
 ### Community 0 - "ScenarioPlayer"
-Cohesion: 0.09
-Nodes (12): 12.2. Scenario format, clamp(), grid(), now(), ramp(), runGroup(), ScenarioPlayer, tickOf() (+4 more)
+Cohesion: 0.07
+Nodes (18): 12.2. Scenario format, availability(), clamp(), DEFAULTS, grid(), LIGHT, LOUD, MODULES (+10 more)
 
 ### Community 1 - "enteric.js"
 Cohesion: 0.06
 Nodes (32): ANTRUM, CELLS, cellTable(), DUOD, EEC, fragment(), FX_DEFAULTS, GUT_CELLS (+24 more)
 
 ### Community 2 - "picking.js"
-Cohesion: 0.08
-Nodes (44): B.4. New modules and interfaces, FLOATS, generateBody(), generateBodyChunks(), PARAMS, BODY_BOUNDS, bodyNormal(), inPerineum() (+36 more)
+Cohesion: 0.09
+Nodes (38): BODY_BOUNDS, bodyNormal(), inPerineum(), NEVER_PICKABLE, NODE_IDS, PELVIC_FLOOR, siteById(), SITES (+30 more)
 
 ### Community 3 - "dopamine.test.mjs"
 Cohesion: 0.09
-Nodes (16): REGION_COUNT, F, FIELDS, HYPOTHESES, MODULATORS, P, PARAMS, PATH_SOURCE (+8 more)
+Nodes (15): F, FIELDS, HYPOTHESES, MODULATORS, P, PARAMS, PATH_SOURCE, POPS (+7 more)
 
-### Community 4 - "anatomy.js"
-Cohesion: 0.07
-Nodes (36): 3.4. Cortical hierarchy and areas, AREA, bandAxes(), BRAIN_PARAMS, BRAINSTEM, capCentroidY(), CHIASM_EXTENT, clamp() (+28 more)
+### Community 4 - "Sympathetic trunk"
+Cohesion: 0.10
+Nodes (21): General Visceral Afferent (GVA) Fibers, Additional images, Autonomic innervation of organs table, Carotid sheath, Celiac plexus, Comparative Vertebrate Neuroanatomy (Butler and Hodos, 2005), Function, Ganglion impar (+13 more)
 
-### Community 5 - "Hypothalamus"
+### Community 5 - "airway-tree.js"
 Cohesion: 0.06
-Nodes (45): Amygdala, Pituitary gland, Connections, Corticotropin-releasing hormone, Dorsomedial hypothalamic nucleus, Hypothalamus, Nuclei, Paraventricular nucleus (+37 more)
+Nodes (64): 13.2 Display, AIRWAY, along(), buildAirwayTree(), cache, centroid(), clearAirwayTreeCache(), cross() (+56 more)
 
-### Community 6 - "Neurotransmitter"
-Cohesion: 0.12
-Nodes (15): SNARE proteins, Synaptotagmin, Voltage-gated calcium channels, Acetylcholinesterase, Discovery, Exocytosis, Glycine, Identification (+7 more)
+### Community 6 - "Reward system"
+Cohesion: 0.04
+Nodes (65): Addictive drugs (cocaine, amphetamine, nicotine), Limbic sector of the basal ganglia, Reward learning, Aromatase, Ascorbic acid (vitamin C), Graham and Pfaus (2013) Ascorbic acid infusions into mPOA facilitate appetitive sexual behavior, Male copulatory (consummatory) behavior, Paredes (2003) Medial preoptic area/anterior hypothalamus and sexual motivation (+57 more)
 
 ### Community 7 - "stimuli.js"
-Cohesion: 0.06
-Nodes (40): B.11. Switches, interventions and the stimulus panel, mirror(), erfc(), clamp(), stim(), fragment(), NERVE_V, PARAMS (+32 more)
+Cohesion: 0.05
+Nodes (46): B.11. Switches, interventions and the stimulus panel, B.4. New modules and interfaces, generateBodyChunks(), erfc(), clamp(), stim(), NERVE_V, PARAMS (+38 more)
 
 ### Community 8 - "Endocrine"
 Cohesion: 0.24
 Nodes (3): clamp(), Endocrine, restS()
 
-### Community 9 - "Hypothalamus"
-Cohesion: 0.05
-Nodes (48): Amygdala, Amygdala sex differences, Amygdalofugal tract, Basolateral complex, Connections, Cortical and medial nuclei, Development and sex distinction, Episodic memory (+40 more)
+### Community 9 - "Reticular formation"
+Cohesion: 0.09
+Nodes (25): Central nucleus of the amygdala, Brainstem, Dorsal column-medial lemniscus pathway, Medulla oblongata, Midbrain, Midbrain nuclei, Periaqueductal gray, Pons (+17 more)
 
-### Community 10 - "LogRamp"
-Cohesion: 0.16
-Nodes (15): B.13. The orgasm scenario, 6.10. Hypothesis switches, 6.1. Design principles, 6.2. Inputs from `response.js`, 6.3. State variables, 6.4. Equations, 6.5. Parameters, 6.6. How phasic bursts and pauses arise (+7 more)
+### Community 10 - "Lungs and the respiratory system: anatomy, breathing and its response to emotion"
+Cohesion: 0.17
+Nodes (12): 10. "All the systems and organs": proposed order, 11. Questions put to the user before building, 12. Tests (planned), 5.1 The brainstem rhythm and its outputs, 5.2 Chemoreflexes and stretch reflexes, 5.3 Behavioural and emotional drive, 5. Control, 6. Response to emotion and arousal (+4 more)
 
 ### Community 11 - "generate.js"
-Cohesion: 0.05
-Nodes (81): apportion(), build(), clamp(), CORD_PATH(), cordSegAtArc(), cross(), cumulative(), detailContext() (+73 more)
-
-### Community 12 - "wiring.js"
-Cohesion: 0.12
-Nodes (14): RIGID, clamp(), dist(), JOINT_DRIVE, jointPose(), NetGhost, overlayMembers(), OVERLAYS (+6 more)
-
-### Community 13 - "scenarios.test.mjs"
 Cohesion: 0.06
-Nodes (32): availability(), checkpointSkip(), DEFAULTS, evaluate(), LIGHT, LOUD, MODULES, PARAMS (+24 more)
+Nodes (92): 3. The focus region, fissureSurfacePoint(), cordRadiiAtArc(), apportion(), boxFar(), build(), clamp(), CORD_PATH() (+84 more)
+
+### Community 12 - "Neuron"
+Cohesion: 0.08
+Nodes (34): Action potential, Afterhyperpolarization, Axonal initial segment, Cardiac action potential, Excitable cell, Overview, Pancreatic beta cell, Process in a typical neuron (+26 more)
+
+### Community 13 - "pulse.test.mjs"
+Cohesion: 0.06
+Nodes (56): 10. Monitor tie-in, 11. Tests (`test/pulse.test.mjs`), 12. Result (as built), 13.1 Aorta, 13.2 Named arteries added, 13.3 Organ trees, 13.4 Capillaries, 13.5 Veins added (+48 more)
 
 ### Community 14 - "somatic.js"
-Cohesion: 0.08
-Nodes (47): afferentRoute(), ANTIGRAVITY, arcOf(), ARM_SEGS, buildFragment(), canalUp(), cordPos(), cp() (+39 more)
+Cohesion: 0.05
+Nodes (66): SEGMENTS, afferentRoute(), ANTIGRAVITY, arcOf(), ARM_SEGS, buildFragment(), canalUp(), cordPos() (+58 more)
 
-### Community 15 - "shaders.js"
-Cohesion: 0.10
-Nodes (30): add(), ANT, APEX, axialOf(), BASE, CONDUCTION, cross(), dot() (+22 more)
+### Community 15 - "SimClock"
+Cohesion: 0.13
+Nodes (11): approachS(), clampKh(), descentH(), fmtNum(), formatRate(), formatTime(), group(), PARAMS (+3 more)
 
 ### Community 16 - "geometry.js"
 Cohesion: 0.03
-Nodes (86): drg(), polylineLength(), rootLength(), rootPath(), sided(), sideSuffix(), addPath(), BLADDER (+78 more)
+Nodes (68): BLADDER, BOUNDS, BP, BRACHIAL_VIA, BRAIN_ANCHORS, BRAIN_MID, CHAIN_L, CHAIN_S (+60 more)
 
-### Community 17 - "Human brain"
-Cohesion: 0.09
-Nodes (25): Spinocerebellar Tracts, Brainstem, Cerebellum, Midbrain, Pons, Brandao and Coimbra (2019) Role of dopamine in conditioned and unconditioned fear, Fear modulation, Giuliano and Allard (2001) Dopamine and sexual function (+17 more)
+### Community 17 - "Locus coeruleus"
+Cohesion: 0.08
+Nodes (26): Rostromedial tegmental nucleus, Ventral tegmental area, Ventral striatum and substantia nigra/ventral tegmental region, Anatomy, Connections, Corticotropin-releasing factor, Function, Hypothalamic-pituitary-adrenal axis (+18 more)
 
-### Community 18 - "._bindStimulus"
-Cohesion: 0.16
-Nodes (7): formatQuantity(), modeOf(), senseById(), sensesFor(), sitesFor(), sliderFromValue(), valueFromSlider()
-
-### Community 19 - "Ventral tegmental area"
-Cohesion: 0.04
-Nodes (57): Antipsychotics (dopamine antagonists), DOPA decarboxylase, Schizophrenia, Addiction (substance use disorder), Attention deficit hyperactivity disorder (ADHD), Dopaminergic pathways, Executive functions, Function (+49 more)
-
-### Community 20 - "Spinal Cord"
+### Community 18 - "BodyHud"
 Cohesion: 0.11
-Nodes (19): Spinal nerves (31 pairs), Schwann cell, Nerve fascicle, Peripheral nervous system, Central Canal, Cervical Enlargement, Conus Medullaris, Filum Terminale (+11 more)
+Nodes (8): BodyHud, clamp(), clampKh(), fractionFromTH(), scenarioAvailability(), scenarioById(), sliderFromKh(), tHFromFraction()
+
+### Community 19 - "Excitement Phase"
+Cohesion: 0.15
+Nodes (20): Alternative Sexual Response Models, Edging, Excitement Phase, Human Sexual Response (1966), Human Sexual Response Cycle, Masters and Johnson, Myotonia, 2006 Nipple Stimulation Arousal Survey (+12 more)
+
+### Community 20 - "Basal forebrain"
+Cohesion: 0.07
+Nodes (38): Basal forebrain, Clinical significance, Cortical gamma band activity (30-80 Hz), Deep brain stimulation of the nucleus basalis, Dementia (Alzheimer's and Parkinson's disease dementia), Diagonal band of Broca, Function, GABAergic basal forebrain neurons (+30 more)
 
 ### Community 21 - "Brain System HUD"
 Cohesion: 0.07
-Nodes (44): readParams(), vitalTags(), clamp01(), DA_FIELDS, DASHED, DEFAULT_TINTS, FIRING, fmt2() (+36 more)
+Nodes (44): TAG_TITLES, vitalTags(), clamp01(), DA_FIELDS, DASHED, DEFAULT_TINTS, FIRING, fmt2() (+36 more)
 
 ### Community 22 - "Nerve conduction velocity"
-Cohesion: 0.10
-Nodes (32): Axillary artery, Axillary nerve, Brachial plexus, Branches, Cords, Diagram, Divisions, Dorsal scapular nerve (+24 more)
+Cohesion: 0.11
+Nodes (30): Axillary artery, Axillary nerve, Brachial plexus, Branches, Cords, Diagram, Divisions, Dorsal scapular nerve (+22 more)
 
-### Community 24 - "geometry-brain.test.mjs"
-Cohesion: 0.07
-Nodes (36): AREA_NONE, AREAS, BRAIN_TRACTS, DA_GROUPS, GEOMETRY, KIND, LEGACY_REGION_COUNT, NUCLEI (+28 more)
-
-### Community 25 - "Enteric nervous system"
-Cohesion: 0.09
-Nodes (26): ENS Autonomous Reflex Circuitry (Integrating Center), William Bayliss and Ernest Starling, Complexity, Enteric Ganglionic Diffusion Barrier (Blood-Brain-Barrier-like), Enteric Glia (Astroglia-like Support Cells), Enteric nervous system, Function, Gastrointestinal Hormones (Gastrin, Secretin) (+18 more)
+### Community 24 - "shaders.js"
+Cohesion: 0.06
+Nodes (34): generateFocusRegion(), PARAMS, DIAPHRAGM, ORGAN_SHARES, FOCUS_LOD, BG_FS, BODY_FLOATS, BODY_VS (+26 more)
 
 ### Community 26 - "Sexual Arousal"
-Cohesion: 0.08
-Nodes (28): Erection, Vaginal Lubrication, Dorsal Nerve of the Clitoris, Dorsal Nerve of the Penis, Penile and Clitoral Erection (Afferent Component), Clitoral Tumescence and Erection, Corpora Cavernosa and Corpus Spongiosum, Cremaster Reflex (+20 more)
+Cohesion: 0.09
+Nodes (25): Erotic Stimuli, Vaginal Lubrication, Ejaculation, Arousal Non-Concordance, Corpora Cavernosa and Corpus Spongiosum, Cremaster Reflex, Penile Erection, Erogenous Zone (+17 more)
 
-### Community 27 - "Myenteric plexus"
-Cohesion: 0.11
-Nodes (23): Neural Crest, 5-HT4 Receptor, Achalasia, Additional images, Clinical significance, Anatomy and Physiology of the Enteric Nervous System (Costa et al., 2000), Enteric Sensory Neurons, Function (+15 more)
+### Community 27 - "Dopamine"
+Cohesion: 0.07
+Nodes (44): Basal ganglia, Dystonia, Ganglionic eminences, Hemiballismus, Huntington's disease, Obsessive-compulsive disorder, Structure, Substantia nigra (SNc, SNr) (+36 more)
 
 ### Community 28 - "ResponseModel"
-Cohesion: 0.09
-Nodes (8): 11.14. Orgasm scenario adapter, 12.23. Sources, B.15. Phased build order, 9.3. Timings and clocks, clamp(), relax(), ResponseModel, smoothstep()
-
-### Community 29 - "Dorsal column–medial lemniscus pathway"
-Cohesion: 0.13
-Nodes (19): Cuneate Fasciculus, Dorsal column–medial lemniscus pathway, Dorsal Column Nuclei (Gracile and Cuneate Nuclei), Dorsal Columns (Posterior Funiculi), First-order neurons, Gracile Fasciculus, Internal Arcuate Fibers, Periphery and spinal cord (+11 more)
+Cohesion: 0.10
+Nodes (5): 11.14. Orgasm scenario adapter, 12.23. Sources, clamp(), ResponseModel, smoothstep()
 
 ### Community 30 - "ui-body.js"
-Cohesion: 0.05
-Nodes (43): AROUSAL_STATES, BODY_MODES, BOTH_LR, clamp(), fibreLabel(), FIBRES, fmtThousands(), formatDurationMs() (+35 more)
+Cohesion: 0.06
+Nodes (40): AROUSAL_STATES, BODY_MODES, BOTH_LR, clockLabel(), fibreLabel(), FIBRES, fmtThousands(), formatClockTime() (+32 more)
 
-### Community 31 - "Baroreflex"
-Cohesion: 0.10
-Nodes (17): Activation, Anatomy, Atrial natriuretic peptide, Baroreflex, Blood pressure, Reflex bradycardia, Renin-angiotensin system, Set point and tonic activation (+9 more)
+### Community 31 - "BreathClock"
+Cohesion: 0.16
+Nodes (9): 9.7. Tests, BREATH, BreathClock, clamp(), excursion(), ribExpansion(), rng(), smooth() (+1 more)
 
-### Community 32 - "Motor Cortex"
-Cohesion: 0.09
-Nodes (20): Agranular Isocortex, Beta-Band Oscillations (13-30 Hz), Cytoarchitecture and connectivity, Descending pathways, di Pellegrino et al. (1992), Dorsal Premotor Cortex (PMd), Eye‑movement motor fields (FEF/SEF), Graziano (2008) (+12 more)
+### Community 32 - "Acetylcholine"
+Cohesion: 0.22
+Nodes (10): Anterior communicating artery aneurysm, Amnesia and confabulation, Acetylcholine, Alpha-7 Nicotinic Receptor, Nicotinic Cholinergic Receptors, Lower motor neuron (alpha motor neuron), Nicotinic acetylcholine receptor, Skeletal muscle (+2 more)
 
 ### Community 33 - "contracts.d.ts"
 Cohesion: 0.05
 Nodes (37): BodyMode, Checkpoint, ClockKey, CommandRecord, CommandSource, DeclareOptions, EdgeKind, EdgeSpec (+29 more)
 
-### Community 34 - "Nigrostriatal pathway"
-Cohesion: 0.04
-Nodes (68): Basal ganglia, Dystonia, Ganglionic eminences, Hemiballismus, Huntington's disease, Obsessive-compulsive disorder, Structure, Substantia nigra (SNc, SNr) (+60 more)
+### Community 34 - "Hippocampus"
+Cohesion: 0.05
+Nodes (46): Amygdala, Amygdala sex differences, Amygdalofugal tract, Basolateral complex, Connections, Cortical and medial nuclei, Development and sex distinction, Episodic memory (+38 more)
 
-### Community 35 - "Golgi Tendon Organ"
-Cohesion: 0.09
-Nodes (21): Camillo Golgi, Clasp-Knife Reflex, Encapsulated Collagen Strands (Intrafusal Fasciculi), Footnotes, Function, Golgi Tendon Organ, History, Houk and Henneman 1967 (+13 more)
+### Community 35 - "bodySDF"
+Cohesion: 0.11
+Nodes (37): insideSkin(), add(), bodySDF(), buildGut(), capF(), capsuleChainDist(), capsulesOf(), ell() (+29 more)
 
-### Community 36 - "Hypothalamus"
-Cohesion: 0.16
-Nodes (14): Adrenocorticotrophic hormone (ACTH), Anterior pituitary (adenohypophysis), Dora Jacobsohn, Functions, Geoffrey Harris, Hypothalamus, Major neuroendocrine axes, Neuroendocrine system (+6 more)
-
-### Community 37 - "Locus coeruleus"
+### Community 36 - "Corticospinal Tract"
 Cohesion: 0.06
-Nodes (32): Anatomy, Connections, Corticotropin-releasing factor, Function, Hypothalamic-pituitary-adrenal axis, In stress, Inputs, LC-related disorders (depression, panic disorder, PTSD, ADHD, Alzheimer's, Parkinson's) (+24 more)
+Nodes (38): Anatomy, Anterior Corticospinal Tract, Betz Cells, Corticobulbar Tract, Corticospinal Tract, Function, Guyton & Hall (2005) Textbook of Medical Physiology, Posterior Limb of the Internal Capsule (+30 more)
+
+### Community 37 - "wiring.js"
+Cohesion: 0.11
+Nodes (17): PATHS, RIGID, PLUGINS, clamp(), dist(), JOINT_DRIVE, jointPose(), NetGhost (+9 more)
 
 ### Community 38 - "Cranial nerves"
-Cohesion: 0.10
-Nodes (30): Aortic arch, Baroreceptor, Carotid sinus, Glossopharyngeal nerve (CN IX), PIEZO1, Vagus nerve (CN X), Abducens nerve (CN VI), Accessory nerve (CN XI) (+22 more)
+Cohesion: 0.12
+Nodes (26): Abducens nerve (CN VI), Accessory nerve (CN XI), Anatomy, Cranial nerves, Facial nerve (CN VII), Hypoglossal nerve (CN XII), Olfactory nerve (CN I), Optic nerve (CN II) (+18 more)
 
-### Community 39 - "BrainRenderer"
-Cohesion: 0.09
-Nodes (4): createTarget(), deleteTarget(), BrainRenderer, toward()
+### Community 39 - "anatomy.js"
+Cohesion: 0.07
+Nodes (36): AREA, AREAS, bandAxes(), capCentroidY(), CHIASM_EXTENT, clamp(), corticalRegion(), cross() (+28 more)
 
-### Community 41 - "Interoception"
-Cohesion: 0.13
-Nodes (12): Somatosensory System, 2000 and on, Cardiovascular Interoception, Early to mid-1900s, Glossopharyngeal Nerve, History and etymology, Interoception, Interoceptive Misrepresentation in Psychiatric Disorders (+4 more)
+### Community 41 - "graph.js"
+Cohesion: 0.04
+Nodes (62): brainFragment(), DRIVEN, edgeTable(), LOGGED_AREAS, N, PARAMS, plugin, POOL_IDS (+54 more)
 
 ### Community 42 - "BrainNet"
 Cohesion: 0.17
 Nodes (3): BrainNet, clamp(), logit()
 
-### Community 43 - "BodyHud"
+### Community 43 - "6. Somatic nervous system"
+Cohesion: 0.10
+Nodes (25): 12.5. Touching a hot object (`hotObject`), 2.12. Nerve routes, 4.4. Conduction, 5.5. Pain and itch, 5.6. Temperature, 6.10. Reflex circuits, 6.11. Reflex latencies, thresholds and gain, 6.12. Voluntary command and central motor conduction (+17 more)
+
+### Community 44 - "renderer.js"
 Cohesion: 0.12
-Nodes (7): BodyHud, clampKh(), clockLabel(), formatClockTime(), fractionFromTH(), scenarioAvailability(), scenarioById()
-
-### Community 44 - "color.js"
-Cohesion: 0.15
-Nodes (15): blackbodyRGB(), cctDuvRGB(), cie(), desaturate(), DOPAMINE_RGB, lobe(), NEURON_COOL, NEURON_WARM (+7 more)
-
-### Community 45 - "Nucleus Accumbens (NAcc)"
-Cohesion: 0.05
-Nodes (55): Hypothalamus (Autonomic Integrator), Addictive drugs (cocaine, amphetamine, nicotine), Limbic sector of the basal ganglia, Reward learning, Amygdala, Addiction, Addictive Drugs (Cocaine, Amphetamine, Alcohol, Nicotine, Opiates), Amygdala (+47 more)
+Nodes (17): ATTR_TYPES, bindAttributes(), compileShader(), createContext(), createInterleavedVAO(), createProgram(), deleteDataTexture(), deleteVAO() (+9 more)
 
 ### Community 46 - "Hud"
 Cohesion: 0.08
-Nodes (15): isBodyView(), viewLabel(), viewOrder(), formatDuration(), Hud, inputFromTref(), isTyping(), meter() (+7 more)
+Nodes (14): viewLabel(), viewOrder(), formatDuration(), Hud, inputFromTref(), isTyping(), meter(), readOpen() (+6 more)
 
-### Community 47 - "Sex Flush"
-Cohesion: 0.13
-Nodes (19): Sexual Frustration, Female Sex Flush Spread Pattern, Flushing (physiology), Male Sex Flush Spread Pattern, Sex Flush, Skin Vasocongestion, Ambient Temperature Dependence of Sex Flush, Anger (+11 more)
+### Community 47 - "runtime.js"
+Cohesion: 0.03
+Nodes (73): alphaFn(), CH, CI, E_1000, E_REST, fragment(), ihr(), lumDrive() (+65 more)
 
-### Community 48 - "makeBrain"
-Cohesion: 0.40
-Nodes (5): applyRelabel(), areaIds(), compileRule(), daBudget(), makeBrain()
+### Community 48 - "immune.test.mjs"
+Cohesion: 0.06
+Nodes (37): INTERVENTIONS, PRESET_PARAMS, NET, clamp(), Immune, INTERVENTIONS, NET_BIT, PARAMS (+29 more)
 
-### Community 49 - "statetex.js"
-Cohesion: 0.07
-Nodes (20): 11.15. Rendering hand-off: state texture, 13.7. Brain, organ and effector display, B.5. Changes to existing files, B.6. Frame loop and data flow, createDataTexture(), deleteDataTexture(), updateDataTexture(), clamp() (+12 more)
+### Community 49 - "Brainstem"
+Cohesion: 0.33
+Nodes (7): Brainstem, Midbrain, Pons, Giuliano and Allard (2001) Dopamine and sexual function, Parvocellular oxytocin cells, Parvocellular vasopressin cells, Spinal cord
 
-### Community 50 - "6. Somatic nervous system"
+### Community 50 - "Cortisol"
+Cohesion: 0.10
+Nodes (22): Biological activity, Bone formation, Cortisol, Cortisone (metabolite of cortisol), Diurnal cortisol cycle, GABA-A receptor biphasic modulation, Glucocorticoid receptor (GR), Gluconeogenesis (+14 more)
+
+### Community 51 - "Golgi Tendon Organ"
 Cohesion: 0.11
-Nodes (21): 5.5. Pain and itch, 5.6. Temperature, 6.10. Reflex circuits, 6.11. Reflex latencies, thresholds and gain, 6.12. Voluntary command and central motor conduction, 6.13. Pattern generators and the respiration rule, 6.14. Somatic switch, brain-only mode and cross-network gates, 6.15. Interventions: spinal cord injury, nerve section and dorsal rhizotomy (+13 more)
+Nodes (17): Camillo Golgi, Clasp-Knife Reflex, Encapsulated Collagen Strands (Intrafusal Fasciculi), Footnotes, Function, Golgi Tendon Organ, History, Houk and Henneman 1967 (+9 more)
 
-### Community 51 - "generateBrain"
-Cohesion: 0.16
-Nodes (15): 13.4. Point budgets, level of detail and lazy generation, insideCallosalWindow(), axonAllocation(), bathing(), bathingWeight(), generateBrain(), generateBrainExtra(), interleaveRecords() (+7 more)
+### Community 52 - "Lower motor neuron"
+Cohesion: 0.09
+Nodes (23): Anatomy and physiology, Betz cell, Corticomotorneuron, Descending motor tracts of the spinal cord, Development, Gamma motor neuron, General visceral motor neuron, Lower motor neuron (+15 more)
 
-### Community 52 - "Motor neuron"
-Cohesion: 0.10
-Nodes (22): Betz cell, Corticomotorneuron, Descending motor tracts of the spinal cord, Development, Gamma motor neuron, General visceral motor neuron, Glutamate, Lower motor neuron (+14 more)
-
-### Community 53 - "Sympathectomy"
-Cohesion: 0.10
-Nodes (21): Cardiac output, Total peripheral resistance, Accelerans nerve, Beta-1 adrenergic receptor, High blood pressure medications (beta-1 blockers), Norepinephrine, Parasympathetic nervous system, Sympathetic nervous system (+13 more)
+### Community 53 - "StateTextures"
+Cohesion: 0.09
+Nodes (17): createDataTexture(), PARAMS, PROGRAMS, BODY_TEX_W, EDGE_TEX_W, FIBRES, GUT_TEX_W, PACKET_CAP (+9 more)
 
 ### Community 54 - "Lateral Inhibition Circuits"
 Cohesion: 0.11
 Nodes (21): Amacrine Cells, Cortical Homunculus, Ernst Mach, Georg von Bekesy, Hermann Grid Illusion, History, Horizontal Cells, Lateral Inhibition (+13 more)
 
-### Community 55 - "shaders.js"
-Cohesion: 0.07
-Nodes (29): TISSUE_NAMES, BG_FS, BODY_FLOATS, BODY_VS, COMPOSITE_FS, DA_VS, DOWN_FS, f() (+21 more)
+### Community 55 - "Prefrontal Cortex"
+Cohesion: 0.11
+Nodes (23): Antipsychotics (dopamine antagonists), Schizophrenia, Addiction (substance use disorder), Attention deficit hyperactivity disorder (ADHD), Executive functions, Function, Mesocortical pathway, Mesocorticolimbic system (+15 more)
 
-### Community 56 - "Medial preoptic nucleus (mPOA)"
-Cohesion: 0.09
-Nodes (25): Aromatase, Bed nucleus of the stria terminalis (BNST), Bosch et al. (2010) Maternal behaviour and vasopressin release in mPOA and BNST, c-fos immediate early gene, Dopamine transmission in the mPOA, Ejaculation latency, Estradiol receptors, Female appetitive (precopulatory) sexual behavior (+17 more)
+### Community 56 - "Hypothalamus"
+Cohesion: 0.05
+Nodes (54): Pituitary gland, Connections, Corticotropin-releasing hormone, Dorsomedial hypothalamic nucleus, Hypothalamus, Nuclei, Orexin, Paraventricular nucleus (+46 more)
 
-### Community 57 - "Nerve conduction velocity"
-Cohesion: 0.12
-Nodes (17): Age, Anthropometric and other individualized factors, Causes of conduction velocity deviations, Electrodiagnosis, Height, Latency, Micromachined 3D electrode array, Micromachined 3D electrode arrays (+9 more)
+### Community 57 - "mulberry32"
+Cohesion: 0.13
+Nodes (12): 11.20. Sources, 7.14. Implementation notes, B.15. Phased build order, ellipsoidPoint(), mulberry32(), bathing(), bathingWeight(), generateBrainExtra() (+4 more)
+
+### Community 58 - "Myenteric plexus"
+Cohesion: 0.11
+Nodes (23): Neural Crest, 5-HT4 Receptor, Achalasia, Additional images, Clinical significance, Anatomy and Physiology of the Enteric Nervous System (Costa et al., 2000), Enteric Sensory Neurons, Function (+15 more)
 
 ### Community 59 - "Kernel"
-Cohesion: 0.06
-Nodes (4): clamp(), Kernel, RateNet, apply()
+Cohesion: 0.04
+Nodes (20): clamp(), Kernel, now(), RateNet, rngNext(), reader(), makeKernel(), kernel() (+12 more)
 
 ### Community 60 - "safety.test.mjs"
-Cohesion: 0.08
-Nodes (21): redRatio(), fadeTime(), flashAreaPx(), heartbeat(), History, isRedFlash(), lanternK(), PARAMS (+13 more)
+Cohesion: 0.11
+Nodes (19): redRatio(), fadeTime(), flashAreaPx(), heartbeat(), isRedFlash(), lanternK(), PARAMS, PhotoLimiter (+11 more)
 
 ### Community 61 - "Vagus nerve"
-Cohesion: 0.13
-Nodes (19): Nucleus ambiguus, Phrenic nerve, Apneustic center, Chemoreceptors, Clinical significance, Dorsal respiratory group, Eupnea, Mechanical ventilation (+11 more)
+Cohesion: 0.14
+Nodes (18): Nucleus ambiguus, Apneustic center, Chemoreceptors, Clinical significance, Dorsal respiratory group, Eupnea, Mechanical ventilation, Pneumotaxic center (+10 more)
 
 ### Community 62 - "frame.js"
-Cohesion: 0.06
-Nodes (32): CANAL, CANAL_ARC, CANAL_LENGTH, canalAt(), canalAtArc(), canalRadiusAt(), CORD, CORD_AP (+24 more)
+Cohesion: 0.07
+Nodes (31): CANAL, CANAL_ARC, CANAL_LENGTH, canalAt(), canalAtArc(), canalRadiusAt(), CORD, CORD_AP (+23 more)
 
 ### Community 63 - "Orgasm Model Equations"
 Cohesion: 0.20
@@ -650,6 +641,10 @@ Nodes (10): 7.1. Design principles, 7.2. Inputs and individual parameters, 7.3. 
 ### Community 64 - "Orgasm Galaxy Targets"
 Cohesion: 0.20
 Nodes (10): 9.1. Galaxy geometry and dynamics (model units: radius 1 = 15 kpc, time 1 = 60 Myr, V0 = 1 ≈ 244 km/s), 9.2. Clocks and durations, 9.3. Pulse train and jet, 9.4. Nucleus, cones and echoes, 9.5. Colour, 9.6. Brightness and HDR, 9.7. Vitals in the HUD, 9.8. HUD and controls (+2 more)
+
+### Community 65 - "._bindStimulus"
+Cohesion: 0.14
+Nodes (8): formatQuantity(), modeOf(), senseById(), sensesFor(), siteById(), sitesFor(), sliderFromValue(), valueFromSlider()
 
 ### Community 66 - "DopamineModel"
 Cohesion: 0.19
@@ -664,52 +659,56 @@ Cohesion: 0.12
 Nodes (14): C-fibres, Cold Receptor, Corneal Cold Receptor Blink Reflex, Darian-Smith et al. 1979 - Warm fibers innervating palmar and digital skin of the monkey, Distribution, Function, Location, Mechanism of transduction (+6 more)
 
 ### Community 69 - "11. Integration: switches and simulation architecture"
-Cohesion: 0.07
-Nodes (37): 11.10. Switch execution, 11.11. Cross-network AND edges, 11.12. Interventions, 11.13. Cross-network coupling, 11.16. Files, interfaces and tests, 11.17. CPU budget and prototype results, 11.19. Open questions, 11.1. Scope and ownership (+29 more)
+Cohesion: 0.06
+Nodes (38): 11.10. Switch execution, 11.11. Cross-network AND edges, 11.12. Interventions, 11.13. Cross-network coupling, 11.16. Files, interfaces and tests, 11.17. CPU budget and prototype results, 11.19. Open questions, 11.1. Scope and ownership (+30 more)
 
-### Community 70 - "autonomic.js"
-Cohesion: 0.09
-Nodes (21): alphaFn(), CH, CI, E_1000, E_REST, fragment(), ihr(), lumDrive() (+13 more)
+### Community 70 - "4. Signal processing"
+Cohesion: 0.13
+Nodes (15): 4.11. Latency method and model-vs-target table, 4.12. Delayed-loop stability, 4.13. Three-fidelity formalism and node-class time constants, 4.14. Analytic arrival-time overlay, 4.15. Open questions, 4.16. Sources, 4.1. Scope and conventions, 4.2. Membrane potential, spike and single-cell models (+7 more)
 
 ### Community 71 - "Thermoregulation"
-Cohesion: 0.11
+Cohesion: 0.09
 Nodes (19): Antifreeze proteins, Blubber, Classification of animals by thermal characteristics, Ectothermic cooling, Ectothermic heating (or minimizing heat loss), Ectotherms, Ectothermy, Endothermy (+11 more)
 
 ### Community 72 - "Brain System — the whole-body sexual response model: analysis and design rationale"
 Cohesion: 0.40
 Nodes (5): 3.1. Models, 3.2. Response patterns, 3.3. Typical quantitative timeline (adult, effective stimulation), 3.4. Sources of variability the model must allow, 3. The sexual response cycle
 
-### Community 73 - "Enteric Nervous System"
-Cohesion: 0.09
-Nodes (27): Carabotti et al. 2015 Review of Gut-Brain Interactions, Cephalic Phase of Digestion, Cryan et al. 2019 Review of the Microbiota-Gut-Brain Axis, Enteric Nervous System, Gut-Brain Axis, Gut Microbiota, Ivan Pavlov, Mayer et al. 2014 Review of the Gut-Brain Axis (+19 more)
+### Community 73 - "start"
+Cohesion: 0.13
+Nodes (17): 11.18. Reconciliation with `src/` and DOPAMINE.md, HeartUi, fatal(), fmtClock(), nextFrame(), readParams(), sideName(), start() (+9 more)
 
 ### Community 74 - "Periaqueductal Gray (PAG)"
 Cohesion: 0.06
 Nodes (35): Rewarding Experiences (Sex, Music, Exercise), Atosiban (Oxytocin Antagonist), Henry Hallett Dale, Maternal Bonding, Oxytocin Nonapeptide Structure (CYIQNCPLG-NH2), OXT Gene, Oxytocin, Oxytocin Receptor (+27 more)
 
-### Community 75 - "Pelvic splanchnic nerves"
-Cohesion: 0.10
-Nodes (19): Somatic nervous system, Autonomic and Somatic Systems to the Anorectum and Pelvic Floor (Bharucha & Klingele, 2005), Clinical significance, External links, Function, Gray's Anatomy for Students (Drake et al., 2005), Inferior Hypogastric Plexus, Internal Urethral Sphincter (+11 more)
+### Community 75 - "Appendix A. Framework contract"
+Cohesion: 0.12
+Nodes (16): 1.2. The request, restated, A.10 Working rules for writers, A.1 Conventions, A.2 Coordinate frames, A.3.1 Networks, layers and switches, A.3.2 Node and edge types, A.3.3 Main node ids, A.3.4 State variables (canonical names, units, owner) (+8 more)
 
-### Community 76 - "Pelvic splanchnic nerves"
-Cohesion: 0.08
-Nodes (25): Anesthesia, Anocutaneous Reflex (Anal Wink), Benjamin Alcock, Branches, Bulbospongiosus Muscle, Clinical significance, Course and relations, External Anal Sphincter (+17 more)
+### Community 76 - "Pudendal Nerve"
+Cohesion: 0.09
+Nodes (23): Erection, Anesthesia, Anocutaneous Reflex (Anal Wink), Benjamin Alcock, Bulbospongiosus Muscle, Clinical significance, Dorsal Nerve of the Clitoris, Dorsal Nerve of the Penis (+15 more)
+
+### Community 77 - "Nerve conduction velocity"
+Cohesion: 0.12
+Nodes (17): Age, Anthropometric and other individualized factors, Causes of conduction velocity deviations, Electrodiagnosis, Height, Latency, Micromachined 3D electrode array, Micromachined 3D electrode arrays (+9 more)
 
 ### Community 78 - "Orgasm Body Physiology"
 Cohesion: 0.25
 Nodes (8): 4.1. Cardiovascular and respiratory, 4.2. Vasocongestion, 4.3. Myotonia, 4.4. Sex flush, 4.5. Rhythmic contractions, 4.6. Other signs, 4.7. Autonomic sequence, 4. Peripheral physiology during arousal, orgasm and resolution
 
-### Community 79 - "Corticospinal Tract"
-Cohesion: 0.10
-Nodes (21): Anatomy, Anterior Corticospinal Tract, Betz Cells, Corticobulbar Tract, Corticospinal Tract, Function, Guyton & Hall (2005) Textbook of Medical Physiology, Posterior Limb of the Internal Capsule (+13 more)
+### Community 79 - "Synapse"
+Cohesion: 0.14
+Nodes (17): Axon terminal, Synaptic bouton, Arthur Woollgar Verrall, Autapse, Charles Sherrington, Definition, Electrical synapse, Electron microscope (+9 more)
 
-### Community 80 - "Somatosensory System"
-Cohesion: 0.20
-Nodes (11): Nociplastic Pain, Cutaneous Receptors, Emotion communication, Overview, Sensory receptors, Somatosensory cortex, Somatosensory System, Tactile Signing (+3 more)
+### Community 80 - "Ventral tegmental area"
+Cohesion: 0.08
+Nodes (23): Left amygdala, Dopaminergic pathways, Reward system, Tyrosine hydroxylase, Olds and Milner self-stimulation experiment (1954), Amygdala, Development, Inputs (+15 more)
 
-### Community 81 - "Autoreceptor"
-Cohesion: 0.11
-Nodes (19): Alpha-2 adrenergic autoreceptor, Autoreceptor, Bear, Connors, Paradiso 2006 - Neuroscience: Exploring the Brain, Beta-adrenergic autoreceptor (atypical, increases release), Clonidine, D2 dopamine autoreceptor, Feedback cell, H3 histamine autoreceptor (+11 more)
+### Community 81 - "Type Ia Sensory Fiber"
+Cohesion: 0.12
+Nodes (17): Conway, Hultborn and Kiehn 1987 - Proprioceptive input resets central locomotor rhythm in the spinal cat, Prochazka, Gillard and Bennett 1997 - Positive Force Feedback Control of Muscles, Stretch-Sensitive Cation Channels, Beta motor neuron, Extrafusal Muscle Fiber, Gamma Motor Neuron (Fusimotor Neuron), Ia Inhibitory Interneuron (Reciprocal Inhibition), Intrafusal Muscle Fiber (+9 more)
 
 ### Community 82 - "Thermoregulatory Set Points"
 Cohesion: 0.18
@@ -719,33 +718,29 @@ Nodes (5): Autonomic heat effector mechanisms, Norepinephrine-driven brown adipo
 Cohesion: 0.12
 Nodes (16): 7.10. Thermoregulation, 7.11. Interventions, 7.12. Switch-off behaviour, 7.13. Scenario contributions and validation targets, 7.15. Open questions, 7.16. Sources, 7.1. Definition, scope and ownership, 7.2. Anatomy of the outflow and the visceral afferents (+8 more)
 
-### Community 84 - "Commonly identified networks"
-Cohesion: 0.33
-Nodes (10): Central Executive (lateral frontoparietal), Commonly identified networks, Default mode (medial frontoparietal), Fluid intelligence, Organization for Human Brain Mapping, Sensorimotor network (pericentral), Task-positive network, Uddin, Yeo and Spreng (2019) six core networks proposal (+2 more)
+### Community 85 - "Dorsal column–medial lemniscus pathway"
+Cohesion: 0.12
+Nodes (21): Cuneate Fasciculus, Dorsal column–medial lemniscus pathway, Dorsal Column Nuclei (Gracile and Cuneate Nuclei), Dorsal Columns (Posterior Funiculi), Fine Touch (Epicritic), First-order neurons, Gracile Fasciculus, Internal Arcuate Fibers (+13 more)
 
-### Community 85 - "sdCerebrum"
-Cohesion: 0.19
-Nodes (17): 13.2. Body surface, skin sampling and the clinical mannequin, 3.16. MNI coordinates of new brain structures, 2.4. MNI coordinates and extents of every structure in the model, 7.1. Frame and units, 7.2. Procedural construction (no downloaded meshes), 7.3. Recommended changes to the current geometry, 7.4. Point budget per structure, 7.5. Dopamine-system points (+9 more)
-
-### Community 86 - "pulse.test.mjs"
-Cohesion: 0.10
-Nodes (35): 12. Result (as built), 1. What existed (before this pass), earlierPulse(), arcs(), ARTERIES, arteryAt(), buildDetail(), buildNamed() (+27 more)
+### Community 86 - "Cerebral cortex"
+Cohesion: 0.22
+Nodes (6): Magnetic resonance imaging of the brain, Cerebral cortex, Allocortex, Cerebral cortex, Grey matter, Neocortex
 
 ### Community 87 - "Orgasm Brain Imaging"
 Cohesion: 0.29
 Nodes (7): 5.1. Method caveat, 5.2. Activations and deactivations, 5.3. Time course, 5.4. Spinal cord, 5.5. What this means for the model, 5.6. Open questions, 5. Brain and spinal cord
 
-### Community 88 - "switches.test.mjs"
+### Community 88 - "BrainRenderer"
 Cohesion: 0.08
-Nodes (28): plugin, GLANDS, HPA_SETS, INTERVENTIONS, PARAMS, plugin, plugin, BODY_BIT (+20 more)
+Nodes (4): createTarget(), deleteTarget(), BrainRenderer, toward()
 
-### Community 89 - "Nervous system"
-Cohesion: 0.17
-Nodes (11): Cranial nerves, Bilaterian nervous system body plan, Endocrine system, Motor nerves (efferent), Nerve net, Nervous system, Neurology, Neuroscience (+3 more)
+### Community 89 - "Central nervous system"
+Cohesion: 0.11
+Nodes (20): Cranial nerves, Central nervous system, Cranial nerves, Optic nerve (cranial nerve II), Overview, Retina, Spinal cord, Spinal nerves (31 pairs) (+12 more)
 
-### Community 90 - "Synapse"
+### Community 90 - "Vagus Nerve"
 Cohesion: 0.14
-Nodes (17): Axon terminal, Synaptic bouton, Arthur Woollgar Verrall, Autapse, Charles Sherrington, Definition, Electrical synapse, Electron microscope (+9 more)
+Nodes (19): Carabotti et al. 2015 Review of Gut-Brain Interactions, Cryan et al. 2019 Review of the Microbiota-Gut-Brain Axis, Enteric Nervous System, Gut-Brain Axis, Gut Microbiota, Mayer et al. 2014 Review of the Gut-Brain Axis, Microbial Chemical Signals (SCFAs, BCAAs, Peptidoglycans, Cytokines), Neuroendocrine System (+11 more)
 
 ### Community 91 - "Orgasm Source Captures"
 Cohesion: 0.36
@@ -755,245 +750,241 @@ Nodes (11): Human Sexual Response Cycle (Wikipedia), Orgasm (Wikipedia), Refract
 Cohesion: 0.33
 Nodes (6): 11.1. Raw captures used (located with `graphify query` / `explain` / `path`), 11.2. Literature: human sexual response, physiology and neuroscience, 11.3. Literature: astrophysics, 11.4. Standards, 11.5. Textbook knowledge (lower confidence), 11. Sources
 
-### Community 93 - "Appendix A. Framework contract"
-Cohesion: 0.12
-Nodes (16): 1.2. The request, restated, A.10 Working rules for writers, A.1 Conventions, A.2 Coordinate frames, A.3.1 Networks, layers and switches, A.3.2 Node and edge types, A.3.3 Main node ids, A.3.4 State variables (canonical names, units, owner) (+8 more)
+### Community 93 - "Reflex Arc"
+Cohesion: 0.08
+Nodes (23): Autonomic Reflex Arc, External links, Integrating Center, Monosynaptic vs. polysynaptic, Polysynaptic Reflex, References, Reflex Arc, Saladin (2015) Anatomy & Physiology: The Unity of Form and Function (+15 more)
 
-### Community 94 - "Blood-brain barrier"
-Cohesion: 0.33
-Nodes (4): Blood-brain barrier, Glutamate Transporters (EAAT1, EAAT2), NF-kappaB, Sigma-1 Receptor
+### Community 94 - "LogRamp"
+Cohesion: 0.16
+Nodes (15): B.13. The orgasm scenario, 6.10. Hypothesis switches, 6.1. Design principles, 6.2. Inputs from `response.js`, 6.3. State variables, 6.4. Equations, 6.5. Parameters, 6.6. How phasic bursts and pauses arise (+7 more)
 
-### Community 95 - "interventions.test.mjs"
-Cohesion: 0.06
-Nodes (37): SEGMENTS, INTERVENTIONS, PRESET_PARAMS, apply(), compose(), INTERVENTION_IDS, INTERVENTIONS, KERNEL_ROW (+29 more)
-
-### Community 96 - "Vagus nerve"
+### Community 95 - "Pelvic splanchnic nerves"
 Cohesion: 0.10
-Nodes (20): Solitary nucleus, Vasomotor center, Cranial nerves, Facial Nerve Parasympathetic Fibers (CN VII), Heart Rate Variability (HRV), Intermediate Nerve, Parasympathetic nervous system, Structure (+12 more)
+Nodes (19): Somatic nervous system, Autonomic and Somatic Systems to the Anorectum and Pelvic Floor (Bharucha & Klingele, 2005), Clinical significance, External links, Function, Gray's Anatomy for Students (Drake et al., 2005), Inferior Hypogastric Plexus, Internal Urethral Sphincter (+11 more)
 
-### Community 97 - "Anterior insula"
-Cohesion: 0.20
-Nodes (11): Amygdala (amygdaloid complex), Anterior insula, Empathy, Primary gustatory cortex, Posterior insula, Pure speech apraxia, Secondary somatosensory cortex, Speech motor control (+3 more)
+### Community 96 - "dist"
+Cohesion: 0.17
+Nodes (20): 12.17. Manual-stimulus default behaviour per sense, drg(), polylineLength(), rootLength(), rootPath(), sided(), sideSuffix(), addPath() (+12 more)
 
-### Community 98 - "Extended or Continuous Orgasm"
-Cohesion: 0.33
-Nodes (6): Clitoris, Extended or Continuous Orgasm, G-spot, Vaginal Nerve Ending Distribution, Vasocongestion, 2023 Gender-Affirming Hormone Therapy Orgasm Study
+### Community 97 - "ui-simple.js"
+Cohesion: 0.05
+Nodes (46): CENTER, HEART_PICK, BODY, BRAIN_SHADE, CAMERA, canvas, CLASSIC_DA, daBudget() (+38 more)
 
-### Community 99 - "Reflex Arc"
-Cohesion: 0.09
-Nodes (22): Autonomic Reflex Arc, External links, Integrating Center, Monosynaptic vs. polysynaptic, Polysynaptic Reflex, References, Reflex Arc, Saladin (2015) Anatomy & Physiology: The Unity of Form and Function (+14 more)
+### Community 98 - "Hypothalamus"
+Cohesion: 0.13
+Nodes (17): Adrenocorticotrophic hormone (ACTH), Anterior pituitary (adenohypophysis), Dora Jacobsohn, Functions, Geoffrey Harris, Hypothalamus, Major neuroendocrine axes, Neuroendocrine system (+9 more)
+
+### Community 99 - "clamp"
+Cohesion: 0.21
+Nodes (17): armJoin(), clamp(), cross(), DIGITS, EAR, ellNorm(), len3(), lerp3() (+9 more)
 
 ### Community 100 - "Proprioception"
-Cohesion: 0.17
-Nodes (11): [Central pattern generators](./Central_pattern_generator "Central pattern generator"), Conscious and nonconscious, Golgi tendon organs, Hair Plate, Kinesthesia-Based Haptic Perception, Joint Receptors (Ruffini Endings and Pacinian Corpuscles), Muscle spindles, Physiology (+3 more)
+Cohesion: 0.12
+Nodes (16): [Central pattern generators](./Central_pattern_generator "Central pattern generator"), Conscious and nonconscious, Golgi tendon organs, Hair Plate, Kinesthesia-Based Haptic Perception, Joint Receptors (Ruffini Endings and Pacinian Corpuscles), Muscle spindles, Physiology (+8 more)
 
 ### Community 101 - "Sciatic nerve"
 Cohesion: 0.10
 Nodes (20): Common fibular nerve, Deep fibular nerve, Medial and lateral plantar nerves, Superficial fibular nerve, Tibial nerve, Additional images, Deep gluteal syndrome, Development (+12 more)
 
-### Community 106 - "gutAt"
-Cohesion: 0.21
-Nodes (18): armJoin(), clamp(), cross(), DIGITS, EAR, ellNorm(), gutAt(), len3() (+10 more)
+### Community 106 - "Nociception"
+Cohesion: 0.06
+Nodes (40): Nociceptive Autonomic Responses, Consequences, Detection of noxious stimuli, Hyperalgesia, In non-mammals, Mechanical, Neural, Nociception (+32 more)
 
-### Community 107 - "Acetylcholine"
-Cohesion: 0.22
-Nodes (10): Anterior communicating artery aneurysm, Amnesia and confabulation, Acetylcholine, Alpha-7 Nicotinic Receptor, Nicotinic Cholinergic Receptors, Lower motor neuron (alpha motor neuron), Nicotinic acetylcholine receptor, Skeletal muscle (+2 more)
+### Community 107 - "Sympathetic nervous system"
+Cohesion: 0.07
+Nodes (30): Autonomic nervous system, General Visceral Efferent (GVE) Neurons, Intrinsic Cardiac Nervous System, Non-Noradrenergic Non-Cholinergic Transmitters, Parasympathetic division, Sexual Arousal and Orgasm (Dual Autonomic Role), Structure, Sympathetic division (+22 more)
 
 ### Community 108 - "Fight-or-flight response"
-Cohesion: 0.10
-Nodes (20): Adrenal Medulla, Physiological effects, Autonomic nervous system, Clayton, Lang, Leshner and Quick (2019) antitobacco message study, Emotion regulation, Emotional components, Emotional reactivity, Emotional self-regulation (+12 more)
-
-### Community 109 - "Salience (midcingulo-insular)"
-Cohesion: 0.20
-Nodes (10): Pavlovian Conditioning, See also, Homeostatic emotions (hunger, thirst, pain, fatigue), Interoception, Attention (dorsal frontoparietal), Frontal eye fields, Intraparietal sulcus, Salience (midcingulo-insular) (+2 more)
-
-### Community 110 - "Hypothalamic–pituitary–adrenal axis (HPA axis)"
 Cohesion: 0.12
-Nodes (13): Amygdala (central nucleus), Cytokines (IL-1, IL-6, IL-10, TNF-alpha), General adaptation syndrome, Hypothalamic–pituitary–adrenal axis (HPA axis), Hypothalamic–pituitary–thyroid axis, Hypothalamic–neurohypophyseal system, Ernst and Berta Scharrer, History (+5 more)
+Nodes (16): Autonomic nervous system, Clayton, Lang, Leshner and Quick (2019) antitobacco message study, Emotion regulation, Emotional components, Emotional reactivity, Emotional self-regulation, Fight-or-flight response, Freezing behavior (+8 more)
 
-### Community 111 - "OrgasmAdapter"
-Cohesion: 0.13
-Nodes (7): clampKh(), descentH(), SimClock, OrgasmAdapter, run(), makeAdapter(), rig()
+### Community 109 - "geometry-brain.test.mjs"
+Cohesion: 0.07
+Nodes (40): AREA_NONE, BRAIN_PARAMS, BRAIN_TRACTS, BRAINSTEM, CN_ATTACH, CRUS, DA_GROUPS, KIND (+32 more)
+
+### Community 110 - "AdaptiveQuality"
+Cohesion: 0.27
+Nodes (5): AdaptiveQuality, detectTier(), readGpuName(), tierFromGpu(), TIERS
+
+### Community 111 - "Vagus nerve"
+Cohesion: 0.11
+Nodes (22): Baroreceptor, Carotid sinus, Glossopharyngeal nerve (CN IX), PIEZO1, Solitary nucleus, PIEZO2, Branches, Jugular Foramen and Carotid Sheath Course (+14 more)
 
 ### Community 112 - "Heart: anatomy, the beat and its response to emotion"
 Cohesion: 0.11
 Nodes (17): 1. What existed (6 November 2026), 2. Anatomy (adult, neutral), 3.1 Electrical sequence and timing (one beat, from the SA firing), 3.2 Mechanics (Wiggers cycle), 3.3 ECG (HUD trace), 3. The beat, 4. Response to emotion, 5. Display (+9 more)
 
-### Community 113 - "Membrane potential"
-Cohesion: 0.14
-Nodes (13): Cardiac action potential, Hyperpolarization, Ion pump, Lipid bilayer, Membrane potential, Potassium channel, Resting potential, Threshold potential (+5 more)
+### Community 113 - "StateTextures"
+Cohesion: 0.16
+Nodes (6): 11.15. Rendering hand-off: state texture, 13.7. Brain, organ and effector display, B.6. Frame loop and data flow, updateDataTexture(), clamp(), StateTextures
 
 ### Community 114 - "Refractory Period"
 Cohesion: 0.12
-Nodes (20): Multiple Orgasms, Refractory Period, Two-Stage Penile Detumescence, Multiple Orgasms, Age Dependence of Refractory Period, Peripheral Autonomic Feedback Theory, Coolidge Effect, Dopamine (+12 more)
+Nodes (20): Ejaculation, Endorphins, Prolactin, Resolution Phase, Age Dependence of Refractory Period, Peripheral Autonomic Feedback Theory, Coolidge Effect, Dopamine (+12 more)
 
-### Community 115 - "Golgi Tendon Organ"
-Cohesion: 0.10
-Nodes (21): Conway, Hultborn and Kiehn 1987 - Proprioceptive input resets central locomotor rhythm in the spinal cat, Prochazka, Gillard and Bennett 1997 - Positive Force Feedback Control of Muscles, Stretch-Sensitive Cation Channels, Beta motor neuron, Extrafusal Muscle Fiber, Function, Gamma Motor Neuron (Fusimotor Neuron), Ia Inhibitory Interneuron (Reciprocal Inhibition) (+13 more)
+### Community 115 - "Dopamine receptor"
+Cohesion: 0.12
+Nodes (18): Adenylyl cyclase, Ca2+/calmodulin-dependent protein kinase II, cAMP independent, Cyclin-dependent kinase 5, D1-like family, D1 receptor (DRD1), D2-like family, D3 receptor (DRD3) (+10 more)
 
 ### Community 116 - "Cytokine Classes"
 Cohesion: 0.09
 Nodes (24): Inflammation, Chemokine, Classification, Cysteine knot cytokines (TGF-beta superfamily), Cytokine, Cytokine receptor, Difference from hormones, Functional (+16 more)
 
-### Community 117 - "mulberry32"
-Cohesion: 0.22
-Nodes (5): 11.20. Sources, 13.16. Rendering implementation and reconciliation with `src/`, ellipsoidPoint(), mulberry32(), share()
+### Community 117 - "Brain System — the brain, its internal systems and its networks throughout the body: analysis and design rationale"
+Cohesion: 0.14
+Nodes (9): Brain System, Features, Getting started, Network switches, Safety, Tests and type check, What you see, Brain System — the brain, its internal systems and its networks throughout the body: analysis and design rationale (+1 more)
 
 ### Community 118 - "Interstitial Cells of Cajal"
 Cohesion: 0.07
 Nodes (34): Irritable Bowel Syndrome, Chronic Intestinal Pseudo-Obstruction, ANO1 calcium-activated chloride channel, Carbachol, Embryology, Enteric motor neurotransmission (acetylcholine, nitric oxide), Eponym, Frequency of ICC pacemaker cells (+26 more)
 
-### Community 119 - "main.js"
-Cohesion: 0.05
-Nodes (56): 11.18. Reconciliation with `src/` and DOPAMINE.md, CENTER, GpuTimer, BODY, BRAIN_SHADE, CAMERA, canvas, CLASSIC_DA (+48 more)
+### Community 119 - "OrgasmAdapter"
+Cohesion: 0.14
+Nodes (5): CommandRing, OrgasmAdapter, makeAdapter(), hudVitals(), rig()
 
 ### Community 120 - "Lumbar plexus"
 Cohesion: 0.13
 Nodes (15): Additional images, Branches, Cremaster muscle, Genitofemoral nerve, Iliohypogastric nerve, Ilioinguinal nerve, Inguinal ligament, Lateral cutaneous femoral nerve (+7 more)
 
 ### Community 121 - "Stretch Reflex"
-Cohesion: 0.09
-Nodes (22): Monosynaptic Reflex, Deep Tendon Reflexes - The Precise Neurological Exam (NYU), Patellar Reflex (Knee Jerk), Patellar reflex, Ankle Jerk Reflex, Clinical significance, Clonus, Eldred, Granit & Merton (1953) Supraspinal Control of the Muscle Spindles (+14 more)
+Cohesion: 0.06
+Nodes (33): Pyramidal Tract Lesion, A-gamma fiber, Stretch Reflex (Knee Jerk), Composition, Function, Muscle Spindle, Muscle Spindle Macrophages (MSMPs), Sensitivity modification (+25 more)
 
 ### Community 122 - "Vestibular System"
-Cohesion: 0.12
-Nodes (19): Central processing, Cerebellar VOR Adaptation, Ampullary Cupula, Vestibular Hair Cell, Rapid Head Impulse Test (Halmagyi-Curthoys Test), Labyrinth of the Inner Ear, Mechanics, Cranial Nerve Nuclei III, IV and VI (+11 more)
+Cohesion: 0.13
+Nodes (18): Central processing, Cerebellar VOR Adaptation, Ampullary Cupula, Vestibular Hair Cell, Rapid Head Impulse Test (Halmagyi-Curthoys Test), Labyrinth of the Inner Ear, Mechanics, Otoconia (+10 more)
 
-### Community 123 - "Orgasm"
-Cohesion: 0.12
-Nodes (17): Anorgasmia, Cerebral Cortex Metabolic Decrease, Ejaculation, Euphoria, Georgiadis (cited neuroimaging source), Komisaruk (cited psychogenic orgasm source), Limbic System Activity, Male-Female Orgasm Similarity (+9 more)
+### Community 123 - "Blood-brain barrier"
+Cohesion: 0.27
+Nodes (10): Brain, Arachnoid Mater, Cerebrospinal Fluid, Denticulate Ligaments, Dura Mater, Epidural Space, Lumbar Puncture, Meninges (+2 more)
 
 ### Community 124 - "Central Pattern Generators"
 Cohesion: 0.10
 Nodes (16): Central pattern generator, CPG circuits, CPG neurons, Dopamine Modulation of Pyloric Network, Gap Junctions in CPGs, Hypoglossal Nucleus (Swallowing CPG), Marder and Bucher (2001), Modulation alters CPG neurons (+8 more)
 
-### Community 125 - "Sympathetic nervous system"
-Cohesion: 0.16
-Nodes (12): General Visceral Efferent (GVE) Neurons, Celiac and Mesenteric Ganglia, Cervical Ganglia (Superior, Middle, Inferior), Chromaffin Cells of the Adrenal Medulla, Organization, Paravertebral Ganglia (Sympathetic Chain), Prevertebral Ganglia, Renal Dopamine D1 Exception (+4 more)
+### Community 125 - "Clinical significance"
+Cohesion: 0.22
+Nodes (9): Piriformis muscle, Anaesthetic, Clinical significance, Injury, Lumbar spinal stenosis, Other disease, Piriformis syndrome, Sciatica (+1 more)
 
 ### Community 126 - "hud-static.test.mjs"
 Cohesion: 0.11
 Nodes (22): A7_TITLES, all(), byId, clean(), cls(), DOC, dropByStore, drops (+14 more)
 
-### Community 127 - "renderer.js"
-Cohesion: 0.13
-Nodes (18): ATTR_TYPES, bindAttributes(), compileShader(), createContext(), createInterleavedVAO(), createProgram(), deleteVAO(), readPixelsAsync() (+10 more)
+### Community 127 - "Marr-Albus theory"
+Cohesion: 0.14
+Nodes (14): Cerebellar cortex (folia), Climbing fiber, David Marr, Cerebellar granule cell, Inferior cerebellar peduncle, Inferior olivary nucleus, James Albus, Long-term depression (+6 more)
 
-### Community 128 - "Adrenocorticotropic hormone (ACTH)"
-Cohesion: 0.09
-Nodes (25): Adrenal Gland, Diurnal cortisol cycle, Glucocorticoid hormone class, Glucocorticoid receptor (GR), Anatomy, Circadian cortisol rhythm (peak 30-45 min after waking), Mineralocorticoid and glucocorticoid receptors, Cortisol (+17 more)
+### Community 128 - "Body form: analysis of the human shape for the skin field"
+Cohesion: 0.14
+Nodes (13): 1. Data and method, 2. Targets, 3. Form, region by region (surface anatomy), 4. Defects of the current skin, 5. Modelling method, 6. Constraints and acceptance, 7. Result (as built), 8.1 Targets (+5 more)
 
 ### Community 129 - "Internal medullary lamina (Y-shaped)"
-Cohesion: 0.25
-Nodes (8): Allothalamus, Anterior nuclear group, Internal medullary lamina (Y-shaped), Intralaminar thalamic nuclei, Isothalamus, Medial dorsal nucleus, Medial nuclear group, Midline nuclear group
+Cohesion: 0.15
+Nodes (13): Arbor vitae, Deep cerebellar nuclei, Superior cerebellar peduncle, Allothalamus, Anatomy, Anterior nuclear group, Internal medullary lamina (Y-shaped), Intralaminar thalamic nuclei (+5 more)
 
-### Community 130 - "Thalamus"
-Cohesion: 0.10
-Nodes (23): Medial Geniculate Nucleus (Auditory Thalamus), Somatosensory cortex, Medial Lemniscus, Pseudounipolar Neuron, Ventral Posterolateral Nucleus (VPL), Thalamus, Dorsal Root Ganglia, Insula (+15 more)
+### Community 130 - "Orgasm"
+Cohesion: 0.11
+Nodes (20): Mesolimbic pathway, Pleasure (liking) response, Multiple Orgasms, Anorgasmia, Cerebral Cortex Metabolic Decrease, Euphoria, Georgiadis (cited neuroimaging source), Komisaruk (cited psychogenic orgasm source) (+12 more)
 
 ### Community 131 - "compilerOptions"
 Cohesion: 0.17
 Nodes (11): compilerOptions, allowJs, checkJs, lib, module, moduleResolution, noEmit, skipLibCheck (+3 more)
 
-### Community 132 - "autonomic"
-Cohesion: 0.07
-Nodes (35): 10.10. Open questions, 10.11. Sources, 10.1. Scope and architecture, 10.2. Cytokines and the peripheral innate response, 10.3. Immune → brain: two routes, two waves, 10.4. The inflammatory reflex, 10.5. Brain → immune: the two brakes, 10.6. Fever (+27 more)
+### Community 132 - "Somatic nervous system"
+Cohesion: 0.12
+Nodes (20): Aortic arch, Vagus nerve (CN X), Interneuron, Autonomic nervous system, Brachial plexus (C5–T1), Cervical spinal nerves (C1–C4), Cranial nerve ganglia, Ganglia (+12 more)
 
-### Community 133 - "immune.test.mjs"
-Cohesion: 0.11
-Nodes (19): clamp(), Immune, INTERVENTIONS, NET_BIT, PARAMS, plugin, sat(), SICKNESS_IDS (+11 more)
+### Community 133 - "Appendix B. Implementation plan and integration with the current code"
+Cohesion: 0.14
+Nodes (13): Appendix B. Implementation plan and integration with the current code, B.10. HUD dropdowns, fields and controls, B.12. Scenario player and scenario UI, B.14. Tests, B.16. Open questions, B.17. Sources, B.1. Scope and ownership, B.2. Integration principles (+5 more)
 
-### Community 134 - "Human Sexual Response Cycle"
-Cohesion: 0.17
-Nodes (15): Alternative Sexual Response Models, Edging, Ejaculation, Human Sexual Response (1966), Human Sexual Response Cycle, Masters and Johnson, Orgasm Phase, Orgasmic Platform (+7 more)
+### Community 134 - "Submucosal plexus"
+Cohesion: 0.12
+Nodes (17): Myenteric plexus, Costa 2000 - Anatomy and physiology of the enteric nervous system, Dogiel cells, Intestinal epithelial layer, External links, Gray's Anatomy (1918, 20th edition), Haubrich 1999 - Meissner of Meissner's plexus, History (+9 more)
 
-### Community 135 - "Lateral geniculate nucleus"
-Cohesion: 0.08
-Nodes (37): Auditory Cortex, Heschl's Gyrus (Transverse Temporal Gyrus), Superior Olivary Complex, Trapezoid Body, Optic Nerve, Auditory Verbal Agnosia, Lateral dorsal nucleus, Lateral geniculate nucleus (+29 more)
+### Community 135 - "Close-up clarity of the body"
+Cohesion: 0.25
+Nodes (7): 1. What was measured, 2. The user's decisions (7 November 2026), 4. The focus slab, 5. Resolution, 6. Measured in the app, 7. Tests, Close-up clarity of the body
 
-### Community 136 - "Group A nerve fiber"
-Cohesion: 0.16
-Nodes (14): A-gamma fiber, Erlanger–Gasser classification, Group A nerve fiber, Group B nerve fiber, Guyton and Hall Textbook of Medical Physiology, References, Sensory fiber type classification, Types (+6 more)
+### Community 136 - "Enteric nervous system"
+Cohesion: 0.10
+Nodes (25): ENS Autonomous Reflex Circuitry (Integrating Center), William Bayliss and Ernest Starling, Complexity, Enteric Ganglionic Diffusion Barrier (Blood-Brain-Barrier-like), Enteric Glia (Astroglia-like Support Cells), Enteric nervous system, Function, Gastrointestinal Hormones (Gastrin, Secretin) (+17 more)
 
 ### Community 137 - "Stevens's power law"
 Cohesion: 0.07
 Nodes (38): Buchsbaum and Stevens (1971) Neural Events and Psychophysical Law, Criticisms, Cross-modality matching, Ellermeier and Faulhammer (2000), Exponents reported by Stevens, Global psychophysics, L. L. Thurstone, Local psychophysics (+30 more)
 
-### Community 138 - "Dopamine system"
-Cohesion: 0.16
-Nodes (15): Left amygdala, Rostromedial tegmental nucleus, Dopaminergic pathways, Reward system, Ventral tegmental area, Ventral striatum and substantia nigra/ventral tegmental region, Ascorbic acid (vitamin C), Graham and Pfaus (2013) Ascorbic acid infusions into mPOA facilitate appetitive sexual behavior (+7 more)
+### Community 138 - "Trace amine-associated receptor 1 (TAAR1)"
+Cohesion: 0.20
+Nodes (6): Protein kinase C (PKC), Xie, Miller 2009 - TAAR1 as a Monoaminergic Modulator in Brain, Cyclic AMP (cAMP), DARPP-32, Protein kinase A (PKA), Protein phosphatase 1 (PP1)
 
 ### Community 139 - "Cochlea"
-Cohesion: 0.09
-Nodes (33): Cochlea, Outer Hair Cells (Cochlear Amplifier), Prestin, Spiral Ganglion, Tectorial Membrane, Basilar Membrane, Cochlea, Cochlear Sexual Dimorphism (+25 more)
-
-### Community 140 - "Cortisol"
 Cohesion: 0.11
-Nodes (23): L-DOPA, Adrenaline, Biological activity, Bone formation, Catecholamines, Cortisol, Cortisone (metabolite of cortisol), GABA-A receptor biphasic modulation (+15 more)
+Nodes (24): Cochlea, Basilar Membrane, Cochlea, Cochlear Sexual Dimorphism, Endolymph, Etymology, Function, Hearing (+16 more)
+
+### Community 140 - "Adrenocorticotropic hormone (ACTH)"
+Cohesion: 0.16
+Nodes (15): Adrenal Gland, Glucocorticoid hormone class, Hippocampal atrophy from prolonged glucocorticoid exposure, Corticotropin-releasing hormone (CRH), Adrenocorticotropic hormone (ACTH), Adrenal cortex, Adrenergic agonists and antagonists, Catecholamine synthesis enzymes (tyrosine hydroxylase, AADC, dopamine-β-hydroxylase, PNMT) (+7 more)
 
 ### Community 141 - "Human Body Composition"
 Cohesion: 0.09
 Nodes (20): Body electrolytes (sodium, chloride, potassium), Cells, Cells, Commensal bacteria (about 38 trillion), Composition, DNA damage and repair, Elemental composition of the human body, Endothelium (+12 more)
 
-### Community 142 - "Spinal Cord"
-Cohesion: 0.23
-Nodes (3): lookAt(), OrbitCamera, perspective()
+### Community 142 - "OrbitCamera"
+Cohesion: 0.05
+Nodes (33): clampPitch(), ARROWS, CameraControls, CLICK, CONTROL_ROLES, DIGIT_VIEWS, dragMode(), FLY_KEYS (+25 more)
 
-### Community 143 - ".settle"
-Cohesion: 0.13
-Nodes (8): 11.6. Kernel layers, striding and determinism, makeKernel(), kernel(), run(), withStress(), kernel(), stim(), stim()
+### Community 143 - "autonomic"
+Cohesion: 0.07
+Nodes (35): 10.10. Open questions, 10.11. Sources, 10.1. Scope and architecture, 10.2. Cytokines and the peripheral innate response, 10.3. Immune → brain: two routes, two waves, 10.4. The inflammatory reflex, 10.5. Brain → immune: the two brakes, 10.6. Fever (+27 more)
 
 ### Community 144 - "Phrenic Nerve and Diaphragm"
 Cohesion: 0.09
 Nodes (24): Phrenic motor column, Accessory phrenic nerve, Alexander (1940) The innervation of the biliary system, Breathing, Cervical spinal nerves C3-C5, Clinical significance, Dalman & Thompson (2015) Operative Techniques in Vascular Surgery, Dartle (diaphragmatic startle) response (+16 more)
 
 ### Community 145 - "Raphe nuclei"
+Cohesion: 0.05
+Nodes (46): Buspirone, 5-HT1 serotonin autoreceptor, Triptans, Adenosine, Raphe nuclei (pontine and dorsal raphe), Addictive Drugs (Cocaine, Amphetamine, Alcohol, Nicotine, Opiates), Dopamine Transporter, Medial Forebrain Bundle (+38 more)
+
+### Community 146 - "heart-form.js"
 Cohesion: 0.06
-Nodes (41): Buspirone, 5-HT1 serotonin autoreceptor, Triptans, Adenosine, Raphe nuclei (pontine and dorsal raphe), Medial Forebrain Bundle, Serotonin system, Nucleus Accumbens Core (+33 more)
+Nodes (56): 8.1 Close-up level of detail, add(), ANT, APEX, axialOf(), BASE, closeUpRank(), closeUpWeight() (+48 more)
 
-### Community 146 - "Dopamine transporter"
-Cohesion: 0.14
-Nodes (14): Attention deficit hyperactivity disorder, Cocaine, D4 receptor (DRD4), DRD4 VNTR polymorphism (D4.7 allele), DAT-related disorders (ADHD, bipolar, depression, eating, substance use), Dopamine transporter, Function, Norepinephrine transporter (+6 more)
+### Community 147 - "Pupillary Response"
+Cohesion: 0.11
+Nodes (18): Cephalic Phase of Digestion, Ivan Pavlov, CNS-ENS Cross Connections (Parasympathetic and Sympathetic Links), Miosis (Pupil Constriction), Accommodation Reflex, Anisocoria, Classical (Pavlovian) Conditioning of Pupillary Response, Pupil Size as Related to Interest Value of Visual Stimuli (Hess & Polt, 1960) (+10 more)
 
-### Community 147 - "Submucosal plexus"
-Cohesion: 0.14
-Nodes (14): Costa 2000 - Anatomy and physiology of the enteric nervous system, Dogiel cells, Intestinal epithelial layer, External links, Gray's Anatomy (1918, 20th edition), Haubrich 1999 - Meissner of Meissner's plexus, History, Dogiel type II intrinsic primary afferent neurons (+6 more)
+### Community 148 - "renderer.js"
+Cohesion: 0.20
+Nodes (14): 13.16. Rendering implementation and reconciliation with `src/`, 8.2. Colour temperatures and limits, blackbodyRGB(), cctDuvRGB(), cie(), desaturate(), DOPAMINE_RGB, lobe() (+6 more)
 
-### Community 148 - "Somatic nervous system"
-Cohesion: 0.14
-Nodes (17): Interneuron, Autonomic nervous system, Brachial plexus (C5–T1), Cervical spinal nerves (C1–C4), Cranial nerve ganglia, Ganglia, Lumbosacral plexus (L1–Co1), Peripheral nervous system (+9 more)
-
-### Community 149 - "Neuroimmune system"
-Cohesion: 0.10
-Nodes (21): Negative Regulation of TNF Production, Anti-Cytokine Drugs (Anti-TNF, Anti-IL-1 Antibodies), Tumor Necrosis Factor (TNF), Adenosine Triphosphate (ATP), Blood-Cerebrospinal Fluid Barrier, Cellular physiology, Chemokines, Complement System (+13 more)
+### Community 149 - "Somatosensory System"
+Cohesion: 0.13
+Nodes (15): Parietal lobe, Amygdala, Cingulate Cortex, Nociplastic Pain, Secondary Somatosensory Cortex (S2), Brodmann Area 5, Emotion communication, Overview (+7 more)
 
 ### Community 150 - "Vagotomy and Ulcers"
 Cohesion: 0.07
 Nodes (31): Antrectomy with Billroth I/II Reconstruction, Applications, Barry Marshall, Chang et al. 2001 - Duodenectomy with Highly Selective Vagotomy, Chronic duodenal ulcers, Gastric Dumping Syndrome, Gastric Outlet Obstruction, Gastroesophageal Reflux (+23 more)
 
-### Community 151 - "Superior colliculus"
-Cohesion: 0.40
-Nodes (6): Inferior Colliculus, Tectum, Frontal Eye Field (FEF), Supplementary Eye Field (SEF), Lateral Lemniscus, Superior colliculus
+### Community 151 - "8. Close-up detail (third pass)"
+Cohesion: 0.18
+Nodes (10): 8.0 Analysis and decisions, 8.2 Fine anatomy, 8.3 Depth cue and focus, 8.4 Section, 8.5 Stars style, 8.6 Hover names, 8.6a Follow-up (7 November 2026), 8.7 Budgets and measurements (+2 more)
 
-### Community 152 - "Locus coeruleus"
-Cohesion: 0.07
-Nodes (38): Basal forebrain, Clinical significance, Cortical gamma band activity (30-80 Hz), Deep brain stimulation of the nucleus basalis, Dementia (Alzheimer's and Parkinson's disease dementia), Diagonal band of Broca, Function, GABAergic basal forebrain neurons (+30 more)
+### Community 152 - "Sensory Nervous System"
+Cohesion: 0.10
+Nodes (14): Chemoreceptor, Chemoreceptors, Five Traditional Senses, Mechanoreceptors, Nociceptors, Photoreceptors, Receptors, Rod Cell (+6 more)
 
-### Community 154 - "4. Signal processing"
-Cohesion: 0.12
-Nodes (16): 4.11. Latency method and model-vs-target table, 4.12. Delayed-loop stability, 4.13. Three-fidelity formalism and node-class time constants, 4.14. Analytic arrival-time overlay, 4.15. Open questions, 4.16. Sources, 4.1. Scope and conventions, 4.2. Membrane potential, spike and single-cell models (+8 more)
+### Community 154 - "Group A nerve fiber"
+Cohesion: 0.09
+Nodes (27): A-alpha fiber, A-beta fiber, A-delta fiber, Erlanger–Gasser classification, Group A nerve fiber, Group B nerve fiber, Guyton and Hall Textbook of Medical Physiology, References (+19 more)
 
-### Community 155 - "Visual Cortex"
-Cohesion: 0.22
-Nodes (7): Eye, Neural, Optical, Retina, Structure, System overview, Visual System
+### Community 155 - "Autoreceptor"
+Cohesion: 0.13
+Nodes (15): Alpha-2 adrenergic autoreceptor, Autoreceptor, Bear, Connors, Paradiso 2006 - Neuroscience: Exploring the Brain, Beta-adrenergic autoreceptor (atypical, increases release), Clonidine, D2 dopamine autoreceptor, Feedback cell, H3 histamine autoreceptor (+7 more)
 
-### Community 156 - "Glial cells"
-Cohesion: 0.22
-Nodes (9): Bergmann glia, Gliosis, Microglia, Neuroglia (glia), Glial cells, Astrocytes, Hippocampal Neurogenesis, Oligodendrocytes (+1 more)
-
-### Community 157 - "Two-streams Hypothesis"
-Cohesion: 0.33
-Nodes (4): Ebbinghaus Illusion, Franz et al. 2005, Leslie Ungerleider, Mortimer Mishkin
+### Community 156 - "Taste"
+Cohesion: 0.13
+Nodes (15): Exteroreceptor, Olfactory Sensory Neuron, Chemesthesis, Dysgeusia, Filiform Papillae, Flavor, Gustatory Cortex, Lingual Papillae (+7 more)
 
 ### Community 158 - "Dermatomes and Referred Pain"
 Cohesion: 0.08
@@ -1007,85 +998,89 @@ Nodes (11): Antipyretics (ibuprofen, paracetamol), Associated symptoms, Differen
 Cohesion: 0.10
 Nodes (20): Diagnostics, Dietrich et al. 2012: TSH and thyrotropic agonists, Functional states of thyrotropic feedback control, Hyperthyroidism, Hypothalamic-pituitary-thyroid axis, Lechan and Fekete 2004: Feedback regulation of TRH, Peripheral deiodination, Physiology (+12 more)
 
-### Community 161 - "Postcentral Gyrus"
-Cohesion: 0.17
-Nodes (10): Additional images, Central Sulcus, External links, Medial Longitudinal Fissure, Middle Cerebral Artery, Postcentral Gyrus, Postcentral Sulcus, See also (+2 more)
+### Community 161 - "Sex Flush"
+Cohesion: 0.10
+Nodes (24): Sexual Frustration, Female Sex Flush Spread Pattern, Flushing (physiology), Male Sex Flush Spread Pattern, Sex Flush, Skin Vasocongestion, Ambient Temperature Dependence of Sex Flush, Clitoral Tumescence and Erection (+16 more)
 
 ### Community 162 - "orgasm-regression.test.mjs"
-Cohesion: 0.13
+Cohesion: 0.14
 Nodes (16): f64, frameTimes(), GOLDEN, Hasher, humanState(), MANUAL_SCRIPT, RUNS, scriptFrames() (+8 more)
 
 ### Community 163 - "Neural Adaptation"
-Cohesion: 0.09
-Nodes (22): Afterimage, Auditory, Auditory Adaptation, Calcium (Ca2+) Negative Feedback, Dark Adaptation, Fast Adaptation, Fast and slow adaptation, George M. Stratton (+14 more)
+Cohesion: 0.12
+Nodes (18): Afterimage, Auditory, Calcium (Ca2+) Negative Feedback, Dark Adaptation, Fast Adaptation, Fast and slow adaptation, George M. Stratton, Hermann Helmholtz (+10 more)
 
 ### Community 164 - "Rate Code"
-Cohesion: 0.10
-Nodes (25): Synapse, Action Potential (Spike), Adrian-Zotterman 1926 Muscle Weight Experiment, Edgar Adrian, Encoding and decoding, Graded Potential, Real-Time Hippocampal Memory Code, Hypothesized coding schemes (+17 more)
+Cohesion: 0.11
+Nodes (22): Adrian-Zotterman 1926 Muscle Weight Experiment, Edgar Adrian, Encoding and decoding, Real-Time Hippocampal Memory Code, Hypothesized coding schemes, Interspike Interval (ISI), Neural Coding, Neural Decoding (+14 more)
 
 ### Community 165 - "12. Scenarios and validation"
-Cohesion: 0.10
-Nodes (21): 12.10. Eating a meal (`meal`), 12.11. Acute stressor (`stressor`), 12.12. Infection and fever (`infection`), 12.13. Orgasm – dopamine (`orgasm`) and the regression requirement, 12.14. Switch-off outcome matrix, 12.15. Brain-only forms, 12.16. Optional scenarios, 12.17. Manual-stimulus default behaviour per sense (+13 more)
+Cohesion: 0.11
+Nodes (19): 12.10. Eating a meal (`meal`), 12.11. Acute stressor (`stressor`), 12.12. Infection and fever (`infection`), 12.13. Orgasm – dopamine (`orgasm`) and the regression requirement, 12.14. Switch-off outcome matrix, 12.15. Brain-only forms, 12.16. Optional scenarios, 12.18. Repetition and habituation (+11 more)
 
 ### Community 166 - "Nicotinic acetylcholine receptor (nAChR)"
-Cohesion: 0.11
-Nodes (19): Acetylcholine (ACh), Acetylcholine receptors, Acetylcholinesterase (AChE), Cys-loop receptor, Dystrophin, Endplate potential (EPP), Miniature endplate potential (MEPP), Motor endplate (+11 more)
+Cohesion: 0.22
+Nodes (10): Cys-loop receptor, Endplate potential (EPP), Motor endplate, Muscle contraction, Myasthenia gravis, Nicotinic acetylcholine receptor (nAChR), Postjunctional folds, Sarcolemma (+2 more)
 
 ### Community 167 - "Predictive Coding"
 Cohesion: 0.12
-Nodes (24): MEG Repetition Suppression, Active Inference, Adams et al. (2013) Motor Cortex Review, Ascending Reticular Activating System (ARAS), Attention (as Precision Weighting), Bayesian Brain Hypothesis, Bayesian Inference, Deep Belief Network (+16 more)
+Nodes (22): MEG Repetition Suppression, Active Inference, Adams et al. (2013) Motor Cortex Review, Ascending Reticular Activating System (ARAS), Attention (as Precision Weighting), Bayesian Brain Hypothesis, Bayesian Inference, Deep Belief Network (+14 more)
 
-### Community 168 - "Excitement Phase"
-Cohesion: 0.16
-Nodes (14): Heart Rate, Breathing and Blood Pressure Rise, Erotic Stimuli, Excitement Phase, Myotonia, 2006 Nipple Stimulation Arousal Survey, Lower Pelvic Muscle Contraction Cycles, Sex Flush, Vasocongestion (+6 more)
-
-### Community 169 - "Pain"
-Cohesion: 0.07
-Nodes (38): Nociceptive Autonomic Responses, Consequences, Detection of noxious stimuli, Hyperalgesia, In non-mammals, Mechanical, Neural, Nociception (+30 more)
-
-### Community 170 - "Pupillary Response"
-Cohesion: 0.11
-Nodes (18): Oculomotor nerve (CN III), Ciliary Muscle (Accommodation), Ciliary Ganglion, Clinical significance, Iris, Iris Sphincter Muscle, Miosis (Pupil Constriction), Mydriasis (Pupil Dilation) (+10 more)
-
-### Community 171 - "Clinical significance"
-Cohesion: 0.22
-Nodes (9): Piriformis muscle, Anaesthetic, Clinical significance, Injury, Lumbar spinal stenosis, Other disease, Piriformis syndrome, Sciatica (+1 more)
-
-### Community 172 - "Neuron"
-Cohesion: 0.09
-Nodes (26): Action potential, Afterhyperpolarization, Axonal initial segment, Excitable cell, Overview, Pancreatic beta cell, Process in a typical neuron, Anatomy and histology (+18 more)
-
-### Community 173 - "4. Dopamine across the sexual response cycle and orgasm"
-Cohesion: 0.22
-Nodes (9): 4.1. Evidence classes and their limits, 4.2. Anticipatory (appetitive) phase, 4.3. Consummatory phase, 4.4. Ejaculation and orgasm, 4.5. The post-orgasmic period, 4.6. Translating rat time courses to human phases, 4.7. Sex and profiles, 4.8. Schematic time course (model, default profile) (+1 more)
-
-### Community 174 - "Sympathetic trunk"
-Cohesion: 0.10
-Nodes (21): General Visceral Afferent (GVA) Fibers, Additional images, Autonomic innervation of organs table, Carotid sheath, Celiac plexus, Comparative Vertebrate Neuroanatomy (Butler and Hodos, 2005), Function, Ganglion impar (+13 more)
-
-### Community 175 - "Dopamine"
+### Community 168 - "Olfactory System"
 Cohesion: 0.12
-Nodes (16): Amphetamine, Beta-arrestin, Ca2+/calmodulin-dependent protein kinase II, cAMP independent, D1-D2 receptor heteromer, D2-like family, D2 receptor (DRD2), D2Lh postsynaptic long isoform (+8 more)
+Nodes (15): Olfactory epithelium, Accessory Olfactory System, Anosmia and Olfactory Dysfunction, Central, Chemosensory System (Smell and Taste), Clinical significance, Cribriform Plate, Olfactory Receptor (+7 more)
 
-### Community 176 - "bodySDF"
-Cohesion: 0.11
-Nodes (38): 5. Modelling method, skinGrid(), add(), bodySDF(), buildGut(), capF(), capsuleChainDist(), capsulesOf() (+30 more)
+### Community 169 - "Extended or Continuous Orgasm"
+Cohesion: 0.20
+Nodes (10): Heart Rate, Breathing and Blood Pressure Rise, Heart Rate, Blood Pressure and Respiration Changes, Clinical Definition of Orgasm, Clitoris, Extended or Continuous Orgasm, G-spot, Mah and Binik (2001), Clinical Psychology Review, Vaginal Nerve Ending Distribution (+2 more)
 
-### Community 177 - "D1-like family"
+### Community 170 - "Pupillary Light Reflex"
 Cohesion: 0.18
-Nodes (10): Adenylyl cyclase, Cyclic AMP (cAMP), Cyclin-dependent kinase 5, D1-like family, D1 receptor (DRD1), D5 receptor (DRD5), G olf protein, Gi alpha subunit (+2 more)
+Nodes (8): Clinical significance, Mydriasis (Pupil Dilation), Neural pathway anatomy, Rhazes (Abu Bakr al-Razi), Schematic, Terminology, Types of neurons, Iris Dilator Muscle
 
-### Community 178 - "Taste"
-Cohesion: 0.13
-Nodes (15): Exteroreceptor, Olfactory Sensory Neuron, Chemesthesis, Dysgeusia, Filiform Papillae, Flavor, Gustatory Cortex, Lingual Papillae (+7 more)
+### Community 171 - "Hypothalamic–pituitary–adrenal axis (HPA axis)"
+Cohesion: 0.09
+Nodes (18): Amygdala (central nucleus), Anatomy, Cytokines (IL-1, IL-6, IL-10, TNF-alpha), Function, General adaptation syndrome, Hypothalamic–pituitary–adrenal axis (HPA axis), Hypothalamic–pituitary–thyroid axis, Hypothalamic–neurohypophyseal system (+10 more)
+
+### Community 172 - "Spinothalamic Tract"
+Cohesion: 0.10
+Nodes (24): Somatosensory cortex, Medial Lemniscus, Pseudounipolar Neuron, Ventral Posterolateral Nucleus (VPL), Thalamus, Dorsal Root Ganglia, Insula, Rostral Ventromedial Medulla (+16 more)
+
+### Community 173 - "Inflammatory reflex"
+Cohesion: 0.10
+Nodes (21): Acetylcholine-Synthesizing T Cells, The shock tactics set to shake up immunology (Fox, 2017), Immunological Memory, Inflammatory Disease Models (Arthritis, Colitis, Sepsis, Hemorrhagic Shock, Heart Failure), Inflammatory reflex, Innate Immune System, Kevin J. Tracey, Insular cortex neurons encode and retrieve specific immune responses (Koren et al., 2021) (+13 more)
+
+### Community 174 - "Commonly identified networks"
+Cohesion: 0.33
+Nodes (10): Central Executive (lateral frontoparietal), Commonly identified networks, Default mode (medial frontoparietal), Fluid intelligence, Organization for Human Brain Mapping, Sensorimotor network (pericentral), Task-positive network, Uddin, Yeo and Spreng (2019) six core networks proposal (+2 more)
+
+### Community 175 - "Nigrostriatal pathway"
+Cohesion: 0.07
+Nodes (32): Telencephalon, Dopaminergic cell groups, Brandao and Coimbra (2019) Role of dopamine in conditioned and unconditioned fear, Fear modulation, Incertohypothalamic pathway, Lookingland and Moore (2005) Functional neuroanatomy of hypothalamic dopaminergic neuroendocrine systems, References, See also (+24 more)
+
+### Community 176 - "Adrenal Medulla"
+Cohesion: 0.22
+Nodes (11): Adrenal Medulla, L-DOPA, Physiological effects, Adrenaline, Catecholamines, Glucagon, Glycogen phosphorylase, Glycogenolysis (+3 more)
+
+### Community 177 - "Salience (midcingulo-insular)"
+Cohesion: 0.20
+Nodes (10): Pavlovian Conditioning, See also, Homeostatic emotions (hunger, thirst, pain, fatigue), Interoception, Attention (dorsal frontoparietal), Frontal eye fields, Intraparietal sulcus, Salience (midcingulo-insular) (+2 more)
+
+### Community 178 - "Mechanoreceptor"
+Cohesion: 0.11
+Nodes (26): A-beta Fibers, Baroreceptors, By rate of adaptation, By receptive field, By sensation, Cutaneous Mechanoreceptors, Hair Follicle Receptor, Juxtacapillary (J) Receptors (+18 more)
 
 ### Community 179 - "Hirschsprung's Disease"
 Cohesion: 0.07
 Nodes (33): Associated syndromes, Bardet-Biedl Syndrome, Biopsy Diagnosis (AChE-Positive Nerve Fibers), Bowel Obstruction, Cartilage-Hair Hypoplasia, Cause, Down Syndrome (Trisomy 21), ECE1 (Endothelin Converting Enzyme 1) (+25 more)
 
-### Community 181 - "Cardiovascular centre"
-Cohesion: 0.14
-Nodes (15): Caudal ventrolateral medulla (CVLM), Intermediolateral nucleus, Rostral ventrolateral medulla (RVLM), Bainbridge reflex (atrial reflex), Baroreceptor reflex, Cardiac plexus, Cardioaccelerator center, Cardioinhibitory center (+7 more)
+### Community 180 - "Visual Cortex"
+Cohesion: 0.12
+Nodes (14): Function, Introduction, Posterior Cerebral Artery (Calcarine Branch), Primary visual cortex (V1), Psychological model of the neural processing of visual information, Ventral-dorsal model, Visual Cortex, Eye (+6 more)
+
+### Community 181 - "Insular cortex"
+Cohesion: 0.22
+Nodes (8): Arcuate fasciculus, Audio-visual integration (sensory binding), Central sulcus of the insula, Circular sulcus of insula (sulcus of Reil), Consciousness, Insular cortex, Lateral sulcus, Operculum
 
 ### Community 182 - "Sacral plexus"
 Cohesion: 0.13
@@ -1093,75 +1088,71 @@ Nodes (15): Lumbosacral trunk, Coccygeal nerve, Gluteal muscles (gluteus maximus
 
 ### Community 183 - "Adrenaline"
 Cohesion: 0.11
-Nodes (19): Adrenaline, Anaphylaxis, Asthma, Cardiac Arrest, Croup, Epinephrine (Medication), Inotropes, Medical uses (+11 more)
+Nodes (18): Adrenaline, Anaphylaxis, Asthma, Cardiac Arrest, Croup, Epinephrine (Medication), Inotropes, Medical uses (+10 more)
 
-### Community 184 - "Central nervous system"
-Cohesion: 0.16
-Nodes (13): Primary brain vesicles (prosencephalon, mesencephalon, rhombencephalon), Central nervous system, Cranial nerves, Gray matter, Optic nerve (cranial nerve II), Overview, Reflex, Retina (+5 more)
+### Community 184 - "Postcentral Gyrus"
+Cohesion: 0.15
+Nodes (11): Somatosensory System, Additional images, Central Sulcus, External links, Medial Longitudinal Fissure, Middle Cerebral Artery, Postcentral Gyrus, Postcentral Sulcus (+3 more)
 
 ### Community 185 - "Basic Tastes"
 Cohesion: 0.22
 Nodes (12): G protein-coupled receptor, Homeostasis, Basic Tastes, Bitterness, Fat Taste (Oleogustus), Kikunae Ikeda, L-Glutamate, Saltiness (+4 more)
 
 ### Community 186 - "Receptive Field Theory"
-Cohesion: 0.13
-Nodes (16): Charles Scott Sherrington, Exteroception, Haldan K. Hartline, Horseshoe Crab Ommatidia Experiment (1956), Alonso and Chen, Auditory system, Convergence, Deep Neural Networks (Local Operations) (+8 more)
+Cohesion: 0.12
+Nodes (18): Charles Scott Sherrington, Exteroception, Haldan K. Hartline, Horseshoe Crab Ommatidia Experiment (1956), End-Stopping (Extra-Classical Receptive Field Effect), Rao and Ballard Computational Model of Vision, Alonso and Chen, Auditory system (+10 more)
 
-### Community 187 - "Advantages"
-Cohesion: 0.40
-Nodes (5): Advantages, General advantage, Inclusive fitness advantages, Social advantage, Specific advantages
+### Community 187 - "response.js"
+Cohesion: 0.22
+Nodes (8): BASE, C, CLOCK, PHASES, PROFILES, relax(), NETS, PARAMS
 
-### Community 188 - "Body form: analysis of the human shape for the skin field"
-Cohesion: 0.15
-Nodes (12): 1. Data and method, 2. Targets, 3. Form, region by region (surface anatomy), 4. Defects of the current skin, 6. Constraints and acceptance, 7. Result (as built), 8.1 Targets, 8.2 Form (+4 more)
+### Community 188 - "Cytokines"
+Cohesion: 0.16
+Nodes (13): Negative Regulation of TNF Production, Anti-Cytokine Drugs (Anti-TNF, Anti-IL-1 Antibodies), Tumor Necrosis Factor (TNF), Adenosine Triphosphate (ATP), Cellular physiology, Cytokines, Interleukin-1 Beta (IL-1 beta), Interleukin-1 Receptor (IL-1R) (+5 more)
 
 ### Community 189 - "Suprachiasmatic Nucleus"
 Cohesion: 0.11
 Nodes (16): Arginine vasopressin (AVP), Circadian clock, Circadian rhythm sleep disorders, Circadian rhythms of endothermic (warm-blooded) and ectothermic (cold-blooded) vertebrates, Dorsomedial hypothalamic nucleus and subparaventricular zone, Hamster SCN lesion and transplant experiments, Melanopsin photosensitive retinal ganglion cells, Neuroanatomy (+8 more)
 
-### Community 190 - "Startle Response"
+### Community 190 - "Sympathoadrenal system"
+Cohesion: 0.20
+Nodes (8): Adrenal hormone receptors type I and II (fat and carbohydrate storage), Chemical messengers, Exercise and Metabolism, Function, Hypertension and obesity, Hypoglycemia, Stress, Sympathoadrenal system
+
+### Community 191 - "Startle Response"
 Cohesion: 0.10
 Nodes (19): Lower Motor Neurons, Lateral Giant Neuron (Crayfish), Acoustic Startle Reflex, Amygdala, Application in occupational settings, Electromyography, Lang, Bradley & Cuthbert (1990) Emotion, Attention, and the Startle Reflex, Moro Reflex (+11 more)
 
-### Community 191 - "brainnet.js"
-Cohesion: 0.08
-Nodes (24): brainFragment(), DRIVEN, edgeTable(), LOGGED_AREAS, N, PARAMS, plugin, POOL_IDS (+16 more)
-
-### Community 192 - ".advanceTo"
-Cohesion: 0.17
-Nodes (7): now(), reader(), trace(), challenge(), hudVitals(), sample(), reader()
+### Community 192 - "Neurons"
+Cohesion: 0.15
+Nodes (13): Bergmann glia, Gliosis, Neuroglia (glia), Axon, Cells, Glial cells, Motor neurons, Neural pathways, circuits and large-scale networks (+5 more)
 
 ### Community 193 - "Auditory Cortex"
 Cohesion: 0.14
-Nodes (15): Auditory Belt (A2), Auditory Cortex, Auditory Objects, Auditory Parabelt (A3), Brodmann Areas 41 and 42, Development, Function, James Beament (+7 more)
+Nodes (16): Auditory Belt (A2), Auditory Cortex, Auditory Objects, Auditory Parabelt (A3), Brodmann Areas 41 and 42, Development, Function, James Beament (+8 more)
 
-### Community 194 - "AdaptiveQuality"
-Cohesion: 0.27
-Nodes (5): AdaptiveQuality, detectTier(), readGpuName(), tierFromGpu(), TIERS
+### Community 195 - "Spinal Cord"
+Cohesion: 0.12
+Nodes (18): Schwann cell, Nerve fascicle, Peripheral nervous system, Central Canal, Cervical Enlargement, Conus Medullaris, Dorsal Roots (Afferent), Filum Terminale (+10 more)
 
-### Community 195 - "runtime.js"
-Cohesion: 0.09
-Nodes (30): buildGraph(), dist3(), EDGE_KINDS, edgeDelay(), FIBRE_V, FIBRES, isBodyOwner(), KIND_DEFAULTS (+22 more)
-
-### Community 196 - "Sensory neuron"
-Cohesion: 0.08
-Nodes (21): Chemoreceptor, Chemoreceptors, Five Traditional Senses, Mechanoreceptors, Nociceptors, Photoreceptors, Receptors, Senses and receptors (+13 more)
+### Community 196 - "Auditory System"
+Cohesion: 0.38
+Nodes (6): Auditory System, Middle ear, Middle Ear Ossicles (Malleus, Incus, Stapes), Outer Ear, Structure, System overview
 
 ### Community 197 - "Biological Neuron Models"
-Cohesion: 0.14
-Nodes (14): Biological background, classification, and aims of neuron models, Biological neuron model, Electrical input–output membrane voltage models, Extracellular electrical stimulation, Extracellular measurement, Hodgkin–Huxley, Hodgkin–Huxley model, Lapicque (+6 more)
+Cohesion: 0.10
+Nodes (21): Hyperpolarization, Ion pump, Lipid bilayer, Membrane potential, Biological background, classification, and aims of neuron models, Biological neuron model, Electrical input–output membrane voltage models, Extracellular electrical stimulation (+13 more)
 
 ### Community 198 - "Cable Theory History"
-Cohesion: 0.15
-Nodes (13): Alan Lloyd Hodgkin, Cable theory, Davis and Lorente de No (1947), Deriving the cable equation, Electrotonic potential, Fourier heat conduction equations, Hermann, History (+5 more)
+Cohesion: 0.10
+Nodes (24): Alan Lloyd Hodgkin, Cable equation, Cable theory, Davis and Lorente de No (1947), Deriving the cable equation, Displacement current, Electrotonic potential, Fourier heat conduction equations (+16 more)
 
 ### Community 199 - "Cerebellum"
-Cohesion: 0.13
-Nodes (15): Cerebellar arteries (SCA, AICA, PICA), Cerebellar hemispheres, Cerebellar tentorium, Cerebellum, Fourth ventricle, Gross anatomy, Hindbrain (rhombencephalon), Metencephalon (+7 more)
+Cohesion: 0.12
+Nodes (16): Primary brain vesicles (prosencephalon, mesencephalon, rhombencephalon), Cerebellar arteries (SCA, AICA, PICA), Cerebellar hemispheres, Cerebellar tentorium, Cerebellum, Fourth ventricle, Gross anatomy, Hindbrain (rhombencephalon) (+8 more)
 
-### Community 200 - "Olfactory System"
-Cohesion: 0.08
-Nodes (25): Olfactory epithelium, Olfactory Tubercle, Accessory Olfactory System, Amygdala (Olfactory Processing), Anosmia and Olfactory Dysfunction, Anterior Olfactory Nucleus, Central, Chemosensory System (Smell and Taste) (+17 more)
+### Community 200 - "Human brain"
+Cohesion: 0.29
+Nodes (7): Adult brain weight and volume, Electroencephalography (EEG), Functional neuroimaging, Human brain, Neural pathways and circuits, Neurons (more than 86 billion), Neurotransmission
 
 ### Community 201 - "Brain System — dopamine during the sexual response (orgasm scenario): analysis and design rationale"
 Cohesion: 0.07
@@ -1179,113 +1170,117 @@ Nodes (17): Alan Hodgkin, Andrew Huxley, Basic components, Boltzmann Equation (S
 Cohesion: 0.29
 Nodes (7): fMRI BOLD signal, Functional connectivity, Graph theory and dynamical systems, Independent component analysis, Large-scale brain network, Network disruption in neuropsychiatric disorders (depression, Alzheimer's, autism, schizophrenia, ADHD, bipolar), Resting state network
 
-### Community 205 - "Arterial pulse wave and the vascular tree"
-Cohesion: 0.10
-Nodes (20): 10. Monitor tie-in, 11. Tests (`test/pulse.test.mjs`), 13.1 Aorta, 13.2 Named arteries added, 13.3 Organ trees, 13.4 Capillaries, 13.5 Veins added, 13.6 Display and rules (+12 more)
+### Community 205 - "Anterior insula"
+Cohesion: 0.25
+Nodes (9): Amygdala (amygdaloid complex), Anterior insula, Primary gustatory cortex, Posterior insula, Pure speech apraxia, Secondary somatosensory cortex, Speech motor control, Thalamus (ventral medial and ventral posterior lateral nuclei) (+1 more)
 
-### Community 206 - "Lateral Spinothalamic Tract"
-Cohesion: 0.16
-Nodes (14): Fine Touch (Epicritic), A-delta Fibers, C Fibers, Nucleus Proprius (Laminae 3-5), Substantia Gelatinosa of Rolando (Lamina 2), Anatomy, Anterior Spinothalamic Tract, Crude Touch and Firm Pressure (+6 more)
+### Community 206 - "Group C nerve fiber"
+Cohesion: 0.12
+Nodes (19): Function, Group C nerve fiber, Location, Non-myelinating Schwann cell, Pathway, Postganglionic autonomic fibers, Remak bundles, Structure (+11 more)
 
 ### Community 207 - "Myelin and White Matter"
-Cohesion: 0.12
-Nodes (19): White matter, Cholesterol, Composition, Demyelinating disease, Function, Galactocerebroside, History, Internodal segment (+11 more)
+Cohesion: 0.13
+Nodes (16): Cholesterol, Composition, Demyelinating disease, Function, Galactocerebroside, History, Internodal segment, Leukodystrophies (+8 more)
 
-### Community 208 - "Insular cortex"
-Cohesion: 0.22
-Nodes (8): Arcuate fasciculus, Audio-visual integration (sensory binding), Central sulcus of the insula, Circular sulcus of insula (sulcus of Reil), Consciousness, Insular cortex, Lateral sulcus, Operculum
+### Community 208 - "Node of Ranvier"
+Cohesion: 0.33
+Nodes (3): Potassium channel, Resting potential, Node of Ranvier
 
 ### Community 209 - "Retina Structure"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (23): Suprachiasmatic nucleus, APS Study on Inverted Retina Purpose, Blind Spot, Cephalopod Non-inverted Retina, Fovea Centralis, Inverted versus non-inverted retina, Muller Glia, Retinal Photoreceptors (Rods and Cones) (+15 more)
 
-### Community 210 - "Cerebral cortex"
-Cohesion: 0.10
-Nodes (16): Cerebellar granule cell, Magnetic resonance imaging of the brain, Cerebral cortex, Cortical columns and minicolumns, Folds, Golgi stain, Layers of neocortex, Neocortex (six-layered) (+8 more)
+### Community 210 - "Neurotransmitter"
+Cohesion: 0.08
+Nodes (26): Glutamate, Acetylcholine (ACh), Acetylcholine receptors, Acetylcholinesterase (AChE), Dystrophin, Glutamatergic neuromuscular junction (crayfish, fruit flies), Miniature endplate potential (MEPP), MuSK receptor tyrosine kinase (+18 more)
 
-### Community 211 - "Reinforcement learning"
-Cohesion: 0.29
-Nodes (6): Machine learning, Policy gradient method, Q-learning, Reinforcement learning, SARSA, Temporal difference learning
+### Community 211 - "Santiago Ramon y Cajal"
+Cohesion: 0.25
+Nodes (7): Folds, Golgi stain, Layers of neocortex, Nissl stain, Structure, Thickness, Santiago Ramon y Cajal
 
 ### Community 212 - "Somatosensory System"
-Cohesion: 0.18
-Nodes (10): 14.1. Citation rules, 14.2. Peer-reviewed literature, 14.3. Secondary tabulations, 14.4. Textbooks, handbooks, atlases and standards, 14.5. Sources identified by venue or without a year, 14.6. Raw captures, 14.7. Project documents and code, 14.8. Open questions (+2 more)
+Cohesion: 0.22
+Nodes (9): 14.1. Citation rules, 14.2. Peer-reviewed literature, 14.3. Secondary tabulations, 14.4. Textbooks, handbooks, atlases and standards, 14.5. Sources identified by venue or without a year, 14.6. Raw captures, 14.7. Project documents and code, 14.8. Open questions (+1 more)
 
 ### Community 213 - "Cerebral hemispheres"
-Cohesion: 0.14
-Nodes (15): Insular cortex (insular lobe), Lobes, Longitudinal fissure, Cerebral hemispheres, Frontal lobe, Occipital lobe, Parietal lobe, Temporal lobe (+7 more)
+Cohesion: 0.20
+Nodes (11): Dyslexia, Gyrus, Insular cortex (insular lobe), Lobes, Longitudinal fissure, Microgyrus, Sulcus, Cerebral hemispheres (+3 more)
 
-### Community 214 - "monitor.test.mjs"
-Cohesion: 0.16
-Nodes (9): Structure, 7. Patient monitor, arterialWave(), isAlarm(), MONITOR, monitorValues(), RespTrace, monitorText() (+1 more)
+### Community 214 - "Structure"
+Cohesion: 0.20
+Nodes (8): Structure, 7. Patient monitor, CapnoTrace, isAlarm(), MONITOR, monitorValues(), RespTrace, SpO2Meter
 
 ### Community 215 - "Dysautonomia and Sympathectomy"
 Cohesion: 0.07
 Nodes (33): Orthostatic hypotension, Alcoholism, Anxiety (Dysautonomia Mimic), Anxiety Sensitivity Index, Autoimmune Autonomic Ganglionopathy, Autonomic Function Testing (Ambulatory Blood Pressure, EKG Monitoring), Autonomic Neuropathy, Beck Anxiety Inventory (+25 more)
 
-### Community 216 - "Visual Cortex"
-Cohesion: 0.17
-Nodes (8): Rod Cell, Function, Introduction, Posterior Cerebral Artery (Calcarine Branch), Primary visual cortex (V1), Psychological model of the neural processing of visual information, Ventral-dorsal model, Visual Cortex
-
-### Community 217 - "Autonomic nervous system"
-Cohesion: 0.20
-Nodes (7): Autonomic nervous system, Intrinsic Cardiac Nervous System, Non-Noradrenergic Non-Cholinergic Transmitters, Parasympathetic division, Sexual Arousal and Orgasm (Dual Autonomic Role), Structure, Sympathetic division
-
-### Community 218 - "Marr-Albus theory"
+### Community 216 - "Cardiovascular centre"
 Cohesion: 0.22
-Nodes (9): Climbing fiber, David Marr, Inferior olivary nucleus, James Albus, Long-term depression, Motor learning, Parallel fiber, Purkinje cell (+1 more)
+Nodes (9): Hypothalamus (Autonomic Integrator), Vasomotor center, Bainbridge reflex (atrial reflex), Baroreceptor reflex, Cardiac plexus, Cardiovascular centre, Proprioreceptors, Amygdala (+1 more)
 
-### Community 219 - "Cutaneous Mechanoreceptors"
-Cohesion: 0.11
-Nodes (25): A-beta Fibers, Baroreceptors, By rate of adaptation, By receptive field, By sensation, Cutaneous Mechanoreceptors, Hair Follicle Receptor, Juxtacapillary (J) Receptors (+17 more)
+### Community 217 - "Dopamine transporter"
+Cohesion: 0.14
+Nodes (14): Attention deficit hyperactivity disorder, Cocaine, D4 receptor (DRD4), DRD4 VNTR polymorphism (D4.7 allele), DAT-related disorders (ADHD, bipolar, depression, eating, substance use), Dopamine transporter, Function, Norepinephrine transporter (+6 more)
 
-### Community 220 - "len3"
-Cohesion: 0.26
-Nodes (12): ellipsoidR2(), len3(), spline(), insideDeepVolume(), insideVoid(), structureVolume(), tubeSampler(), tubeTest() (+4 more)
+### Community 218 - "Proinflammatory cytokines (IL-1, IL-6, TNF)"
+Cohesion: 0.20
+Nodes (7): Interleukin-6 (IL-6), EP3 prostaglandin receptor, Prostaglandin E2 (PGE2), Pyrogen, Blood-borne factor X, Lipopolysaccharides, Proinflammatory cytokines (IL-1, IL-6, TNF)
+
+### Community 219 - "Hypothalamus"
+Cohesion: 0.05
+Nodes (45): Dopaminergic pathways, Hypothalamospinal tract, Incertohypothalamic pathway, Major, Minor, Pathways, Amygdala, Pituitary gland (anterior lobe) (+37 more)
+
+### Community 220 - "._resp"
+Cohesion: 0.22
+Nodes (8): 13.1 Kernel (`src/sim/autonomic.js`, `Autonomic._resp`), 13.3 Budgets, 13.4 Tests, 13.5 Open, 13. Result (as built, 6 November 2026), 1. What existed (6 November 2026), acutePH(), sao2()
 
 ### Community 221 - "Spinal Cord Injury"
 Cohesion: 0.10
 Nodes (20): Mirror Box Therapy, Paraplegia, Phantom Pain, American Spinal Injury Association (ASIA), ASIA Impairment Scale, Classification, Complete and incomplete injuries, Complete spinal cord injury (+12 more)
 
 ### Community 222 - "Corticotropin-releasing hormone"
-Cohesion: 0.07
-Nodes (32): Adrenergic Receptors (Alpha and Beta), Blood Sugar Level, Pupil Dilation Response, Sinoatrial (SA) Node, Adrenocorticotropic Hormone (Medication), Adrenocorticotropic hormone, Anterior Pituitary Gland, Beta-Endorphin (+24 more)
+Cohesion: 0.08
+Nodes (25): Blood Sugar Level, Pupil Dilation Response, Sinoatrial (SA) Node, Adrenocorticotropic Hormone (Medication), Adrenocorticotropic hormone, Anterior Pituitary Gland, Biological Stress, Corticotropin-Like Intermediate Peptide (CLIP) (+17 more)
 
-### Community 223 - "runtime.js"
-Cohesion: 0.09
-Nodes (25): B.10. HUD dropdowns, fields and controls, PATHS, approachS(), fmtNum(), formatRate(), formatTime(), group(), PARAMS (+17 more)
+### Community 223 - "Sympathetic nervous system"
+Cohesion: 0.07
+Nodes (35): Activation, Anatomy, Atrial natriuretic peptide, Baroreflex, Blood pressure, Cardiac output, Caudal ventrolateral medulla (CVLM), Reflex bradycardia (+27 more)
+
+### Community 224 - "3. Cellular physiology and kinetics"
+Cohesion: 0.25
+Nodes (8): 3.1. Firing, 3.2. Release, 3.3. Uptake and clearance, 3.4. Diffusion and volume transmission, 3.5. Receptors and autoreceptors, 3.6. Extracellular concentrations, 3.7. Parameter table, 3. Cellular physiology and kinetics
 
 ### Community 225 - "Thalamus Anatomy"
-Cohesion: 0.16
-Nodes (11): Spinal tracts (final common pathway), Diencephalon, Epithalamus (habenula), External medullary lamina, Interthalamic adhesion, Posterior cerebral artery, Prethalamus (zona incerta), Stratum zonale (thalamus) (+3 more)
+Cohesion: 0.14
+Nodes (13): Gray matter, Spinal tracts (final common pathway), Subcortical gray matter nuclei, Diencephalon, Epithalamus (habenula), External medullary lamina, Interthalamic adhesion, Posterior cerebral artery (+5 more)
 
-### Community 226 - "Glucocorticoid negative feedback loop"
+### Community 226 - "Cerebellum"
 Cohesion: 0.33
-Nodes (5): Pituitary gland (anterior lobe), Growth hormone-releasing hormone (GHRH) neurons, Growth hormone (pulsatile secretion), Periventricular nucleus, Somatostatin neurons
+Nodes (7): Vestibular nuclei, Spinocerebellar Tracts, Cerebellum, Nonconscious Proprioception, Righting Reflex, Dorsal and Ventral Spinocerebellar Tracts, Cranial Nerve Nuclei III, IV and VI
 
-### Community 227 - "Tuberoinfundibular pathway"
-Cohesion: 0.16
-Nodes (14): Prolactin, Anterior pituitary, Dopamine (hypophyseal portal secretion), Anterior pituitary lactotrophs, Antipsychotic drugs, Arcuate (infundibular) nucleus, External links, Hyperprolactinemia (+6 more)
+### Community 227 - "Oculomotor nerve (CN III)"
+Cohesion: 0.25
+Nodes (10): Reflex, Oculomotor nerve (CN III), Ciliary Muscle (Accommodation), Cranial Parasympathetic Ganglia (Ciliary, Pterygopalatine, Otic, Submandibular), Ciliary Ganglion, Iris, Iris Sphincter Muscle, Pretectal Nucleus (+2 more)
 
 ### Community 228 - "Motor Neuron Development"
 Cohesion: 0.50
 Nodes (4): Neurogenin 2 (Ngn2), OLIG2 transcription factor, Motor neuron progenitor domain (pMN), Sonic hedgehog (Shh)
 
-### Community 229 - "Cable equation"
-Cohesion: 0.27
-Nodes (11): Cable equation, Displacement current, Length constant, Longitudinal axoplasmic resistance, Membrane capacitance per unit length, Membrane resistance per unit length, Ohm's law, Steady-state exponential voltage decay (+3 more)
+### Community 229 - "len3"
+Cohesion: 0.16
+Nodes (20): ellipsoidR2(), insideCallosalWindow(), len3(), spline(), axonAllocation(), generateBrain(), insideDeepVolume(), insideVoid() (+12 more)
 
-### Community 231 - "Auditory System"
-Cohesion: 0.38
-Nodes (6): Auditory System, Middle ear, Middle Ear Ossicles (Malleus, Incus, Stapes), Outer Ear, Structure, System overview
+### Community 231 - "Health effects"
+Cohesion: 0.40
+Nodes (5): Health effects, Immune response, Metabolic response, Metabolism of glucose, Metabolism of proteins and lipids
 
-### Community 232 - "9. Implementation targets"
-Cohesion: 0.29
-Nodes (7): 9.2. Point counts, 9.4. Glow radii and colours, 9.5. HUD fields and disclosures, 9.6. Default timeline (demo cycle), 9.7. Tests, 9.9. Phase texts (user-facing, neutral, species-tagged), 9. Implementation targets
-
-### Community 233 - "Appendix B. Implementation plan and integration with the current code"
+### Community 232 - "Trace amine-associated receptor 1 (TAAR1)"
 Cohesion: 0.20
-Nodes (10): Appendix B. Implementation plan and integration with the current code, B.12. Scenario player and scenario UI, B.14. Tests, B.16. Open questions, B.17. Sources, B.1. Scope and ownership, B.2. Integration principles, B.7. GPU data layout and memory (+2 more)
+Nodes (11): Trace amine-associated receptor 1 (TAAR1), Trace amines, Xie, Westmoreland, Miller 2008 - Modulation of Monoamine Transporters via TAAR1, Amphetamine, Beta-arrestin, D1-D2 receptor heteromer, D2 receptor (DRD2), D2Lh postsynaptic long isoform (+3 more)
+
+### Community 233 - "Outer Hair Cells (Cochlear Amplifier)"
+Cohesion: 0.13
+Nodes (18): Cortical Deafness, Cochlear Nucleus, Outer Hair Cells (Cochlear Amplifier), Prestin, Spiral Ganglion, Superior Olivary Complex, Tectorial Membrane, Trapezoid Body (+10 more)
 
 ### Community 234 - "Vasopressin Hormone"
 Cohesion: 0.13
@@ -1293,155 +1288,151 @@ Nodes (14): AVP Gene (Chromosome 20p13), Desmopressin, Diuretics, Felypressin, M
 
 ### Community 235 - "3. Brain systems"
 Cohesion: 0.11
-Nodes (18): 3.10. Ascending modulatory systems, 3.11. Arousal and sleep–wake state machine, 3.13. Voluntary action and response timing, 3.14. Brain ports, 3.15. Brain-graph nodes and principal edges, 3.17. Changes to `anatomy.js` and `brain.js` geometry, 3.18. Behaviour under the switches and in brain-only mode, 3.19. Open questions (+10 more)
+Nodes (19): 3.10. Ascending modulatory systems, 3.11. Arousal and sleep–wake state machine, 3.13. Voluntary action and response timing, 3.14. Brain ports, 3.15. Brain-graph nodes and principal edges, 3.17. Changes to `anatomy.js` and `brain.js` geometry, 3.18. Behaviour under the switches and in brain-only mode, 3.19. Open questions (+11 more)
 
 ### Community 236 - "5. Sensory systems"
 Cohesion: 0.11
 Nodes (21): 1.5. Exclusions, 3.12. Salience and large-scale networks, 4.10. Psychophysical laws, 5.10. Proprioception, 5.11. Interoception, 5.12. Cross-modal processing and descending control, 5.13. Psychophysical scaling: Stevens exponents and Weber fractions, 5.14. Stimulus parameters and valid sites (+13 more)
 
-### Community 242 - "Health effects"
-Cohesion: 0.40
-Nodes (5): Health effects, Immune response, Metabolic response, Metabolism of glucose, Metabolism of proteins and lipids
+### Community 242 - "Neuroimmune system"
+Cohesion: 0.10
+Nodes (22): Adrenergic Receptors (Alpha and Beta), Microglia, Blood-brain barrier, Glial cells, Astrocytes, Blood-Cerebrospinal Fluid Barrier, Cannabinoid Receptors (CB1, CB2, GPR55), Chemokines (+14 more)
 
-### Community 243 - "Dopamine"
-Cohesion: 0.14
-Nodes (12): Catechol structure, Catecholamine, Dopamine, L-DOPA (Levodopa), Methylphenidate, Structure, Tyrosine and phenylalanine precursors, AMPT (alpha-methyl-p-tyrosine) (+4 more)
+### Community 243 - "Interoception"
+Cohesion: 0.10
+Nodes (19): 2000 and on, Cardiovascular Interoception, Early to mid-1900s, Glossopharyngeal Nerve, History and etymology, Interoception, Interoceptive Misrepresentation in Psychiatric Disorders, Mid-1900s to 2000 (+11 more)
 
 ### Community 244 - "1. Purpose, scope and conventions"
 Cohesion: 0.15
 Nodes (13): 1.10. Content rules, 1.11. Corrections to the raw captures, 1.12. Reading guide, 1.13. Open questions, 1.14. Sources, 1.1. Status, 1.3. Modelling stance, 1.4. Scope (+5 more)
 
 ### Community 245 - "2. Frames and the reference body"
-Cohesion: 0.11
-Nodes (18): 2.10. Great vessels, 2.11. Autonomic ganglia and plexuses, 2.12. Nerve routes, 2.13. Muscle centres and effector targets, 2.14. Standard path lengths, 2.15. Tolerances and consistency rules, 2.16. Open questions, 2.17. Sources (+10 more)
+Cohesion: 0.12
+Nodes (17): 2.10. Great vessels, 2.11. Autonomic ganglia and plexuses, 2.13. Muscle centres and effector targets, 2.14. Standard path lengths, 2.15. Tolerances and consistency rules, 2.16. Open questions, 2.17. Sources, 2.1. Frame, ownership and inputs (+9 more)
 
-### Community 247 - "Auditory Nerve"
+### Community 247 - "7. Display options and the photosensitivity rules"
+Cohesion: 0.25
+Nodes (8): 7.1 Airway tree and acini (fine stars, crisp up close), 7.2 Bronchovascular bundles, 7.3 Breathing motion, 7.4 Airflow wave, 7.5 Gas exchange, 7.6 Lungs view and names, 7.7 Patient monitor, 7. Display options and the photosensitivity rules
+
+### Community 248 - "9. Implementation targets"
 Cohesion: 0.29
-Nodes (7): Cortical Deafness, Cochlear Nucleus, Auditory Nerve, Cochlear Root Neurons (CRN), Facial Motor Nucleus, Nucleus of the Lateral Lemniscus (LLN), Nucleus Reticularis Pontis Caudalis (PnC)
+Nodes (7): 9.2. Point counts, 9.3. Timings and clocks, 9.4. Glow radii and colours, 9.5. HUD fields and disclosures, 9.6. Default timeline (demo cycle), 9.9. Phase texts (user-facing, neutral, species-tagged), 9. Implementation targets
 
-### Community 248 - "Cerebellar cortex (folia)"
-Cohesion: 0.18
-Nodes (10): Arbor vitae, Cerebellar cortex (folia), Deep cerebellar nuclei, Superior cerebellar peduncle, Dyslexia, Gyrus, Microgyrus, Sulcus (+2 more)
-
-### Community 250 - "Group C nerve fiber"
-Cohesion: 0.22
-Nodes (10): Function, Group C nerve fiber, Location, Non-myelinating Schwann cell, Pathway, Postganglionic autonomic fibers, Remak bundles, Structure (+2 more)
+### Community 250 - "sdCerebrum"
+Cohesion: 0.19
+Nodes (17): 13.2. Body surface, skin sampling and the clinical mannequin, 3.16. MNI coordinates of new brain structures, 2.4. MNI coordinates and extents of every structure in the model, 7.1. Frame and units, 7.2. Procedural construction (no downloaded meshes), 7.3. Recommended changes to the current geometry, 7.4. Point budget per structure, 7.5. Dopamine-system points (+9 more)
 
 ### Community 251 - "2. How stars look in space and how they are distributed"
 Cohesion: 0.40
 Nodes (5): 2.1. Carried over from Anger Galaxy (summary only), 2.2. New structures this project needs, 2.3. Corrections to reused Anger parameters, 2.4. The physical causal chain and its timescales, 2. How stars look in space and how they are distributed
 
-### Community 252 - "Reticular formation"
-Cohesion: 0.09
-Nodes (26): Central nucleus of the amygdala, Brainstem, Dorsal column-medial lemniscus pathway, Medulla oblongata, Midbrain, Midbrain nuclei, Periaqueductal gray, Pons (+18 more)
+### Community 252 - "Anterior Cingulate Cortex"
+Cohesion: 0.33
+Nodes (4): Empathy, Spindle neurons (von Economo neurons), Dorsal anterior cingulate cortex, Anterior Cingulate Cortex
 
 ### Community 253 - "9. Neuroendocrine network"
-Cohesion: 0.16
-Nodes (14): 9.10. Validation targets, 9.11. Open questions, 9.12. Sources, 9.1. Architecture of the network, 9.2. Nodes, coordinates and geometry changes, 9.3. HPA axis: stages, transport routes and feedback, 9.4. HPA kinetics, parameters and the delay loop, 9.5. Pulsatility, the circadian envelope and the awakening response (+6 more)
+Cohesion: 0.13
+Nodes (17): Camera navigation, Controls, 9.10. Validation targets, 9.11. Open questions, 9.12. Sources, 9.1. Architecture of the network, 9.2. Nodes, coordinates and geometry changes, 9.3. HPA axis: stages, transport routes and feedback (+9 more)
 
-### Community 254 - "Meninges"
-Cohesion: 0.27
-Nodes (10): Brain, Arachnoid Mater, Cerebrospinal Fluid, Denticulate Ligaments, Dura Mater, Epidural Space, Lumbar Puncture, Meninges (+2 more)
-
-### Community 256 - "Proinflammatory cytokines (IL-1, IL-6, TNF)"
-Cohesion: 0.20
-Nodes (7): Interleukin-6 (IL-6), EP3 prostaglandin receptor, Prostaglandin E2 (PGE2), Pyrogen, Blood-borne factor X, Lipopolysaccharides, Proinflammatory cytokines (IL-1, IL-6, TNF)
-
-### Community 257 - "Anatomy and physiology"
+### Community 254 - "Femoral nerve"
 Cohesion: 0.40
-Nodes (5): Anatomy and physiology, Lower motor neurons, Nerve tracts, Somatic motor neurons, Upper motor neurons
+Nodes (5): Femoral nerve, Psoas major muscle, Quadriceps femoris muscle, Saphenous nerve, Bernese periacetabular osteotomy
 
-### Community 258 - ".settle"
-Cohesion: 0.36
-Nodes (3): kernel(), kernel(), kernel()
+### Community 256 - "3. Mechanics of breathing"
+Cohesion: 0.33
+Nodes (6): 3.1 Volumes and capacities (man, 20–30 years, 1.75 m; women ≈ 20–25 % smaller), 3.2 The tidal breath, 3.3 Diaphragm, 3.4 Rib cage, 3.5 How the lung expands, 3. Mechanics of breathing
 
-### Community 259 - "DAT phosphorylation via PKA/PKC"
-Cohesion: 0.25
-Nodes (5): Protein kinase C (PKC), Xie, Miller 2009 - TAAR1 as a Monoaminergic Modulator in Brain, DARPP-32, Protein kinase A (PKA), Protein phosphatase 1 (PP1)
-
-### Community 260 - "A-delta fiber"
-Cohesion: 0.25
-Nodes (8): A-delta fiber, Rexed laminae, Withdrawal reflex, C fiber nociceptor, First pain, Second pain, Thermoreceptor, TRP Channels (TRPV1, TRPM8)
-
-### Community 261 - "Brain System — the brain, its internal systems and its networks throughout the body: analysis and design rationale"
-Cohesion: 0.22
-Nodes (9): Brain System, Controls, Features, Getting started, Network switches, Safety, Tests and type check, What you see (+1 more)
-
-### Community 262 - "Spinal nerve"
-Cohesion: 0.09
-Nodes (23): Lumbosacral plexus, Sacral Splanchnic Nerves, Pudendal plexus, Cauda Equina, Myotome, Anterior divisions, Anterior divisions, Dorsal ramus of spinal nerve (+15 more)
-
-### Community 263 - "TRPM8"
+### Community 257 - "2. Anatomy (adult, upright, neutral)"
 Cohesion: 0.29
-Nodes (8): Transient receptor potential channel family, TRPV2 vanilloid-like receptor, Capsaicin, TRP Ion Channels in Proprioception, Transient Receptor Potential (TRP) Family, TRPM8, TRPV1, Zhang 2015 - Molecular sensors and modulators of thermoreception
+Nodes (7): 2.1 Upper airway, 2.2 The airway tree, 2.3 Lobes, fissures, segments, pleura, 2.4 Respiratory muscles, 2.5 Vessels, 2.6 Nerves, 2. Anatomy (adult, upright, neutral)
 
-### Community 264 - "8. Mapping: physiology → galaxy → animation parameter"
-Cohesion: 0.22
-Nodes (9): 10. Realism rules and things to avoid, 1. Purpose and framing, 6. Neurochemistry, 8.1. Mapping table, 8.2. Why each mapping is defensible, 8.3. Variables deliberately not mapped onto the galaxy, 8.4. How it must look and feel different from Anger Galaxy, 8. Mapping: physiology → galaxy → animation parameter (+1 more)
+### Community 258 - "Mechanism and cycle"
+Cohesion: 0.33
+Nodes (6): Elimination, Mechanism and cycle, Receptor interaction, Release, Storage, Synthesis
 
-### Community 265 - "Inflammatory reflex"
-Cohesion: 0.09
-Nodes (22): Acetylcholine-Synthesizing T Cells, The shock tactics set to shake up immunology (Fox, 2017), Immunological Memory, Inflammatory Disease Models (Arthritis, Colitis, Sepsis, Hemorrhagic Shock, Heart Failure), Inflammatory reflex, Innate Immune System, Kevin J. Tracey, Insular cortex neurons encode and retrieve specific immune responses (Koren et al., 2021) (+14 more)
-
-### Community 266 - "Lateral motor column"
+### Community 259 - "Lateral motor column"
 Cohesion: 0.50
 Nodes (4): Hox transcription factors, Lateral motor column, Motor columns of the spinal cord, Brachial plexus
 
-### Community 267 - "Function"
+### Community 260 - "Superior colliculus"
+Cohesion: 0.40
+Nodes (6): Inferior Colliculus, Tectum, Frontal Eye Field (FEF), Supplementary Eye Field (SEF), Lateral Lemniscus, Superior colliculus
+
+### Community 261 - "Sensory neuron"
+Cohesion: 0.14
+Nodes (13): Auditory Cortex, Heschl's Gyrus (Transverse Temporal Gyrus), Auditory, Auditory Processing Disorder, Auditory Verbal Agnosia, External receptors, Interoreceptor, Sensory neuron (+5 more)
+
+### Community 262 - "Cervical nerves"
+Cohesion: 0.07
+Nodes (33): Lumbosacral plexus, Sacral Splanchnic Nerves, Greater auricular nerve, Greater occipital nerve, Lesser occipital nerve, Pudendal plexus, Suboccipital nerve, Cauda Equina (+25 more)
+
+### Community 263 - "Structure"
+Cohesion: 0.33
+Nodes (6): Branches, Course and relations, Nucleus, Origin, Structure, Variation
+
+### Community 264 - "8. Mapping: physiology → galaxy → animation parameter"
+Cohesion: 0.40
+Nodes (5): 8.1. Mapping table, 8.2. Why each mapping is defensible, 8.3. Variables deliberately not mapped onto the galaxy, 8.4. How it must look and feel different from Anger Galaxy, 8. Mapping: physiology → galaxy → animation parameter
+
+### Community 265 - "Visual Cortex"
+Cohesion: 0.09
+Nodes (32): Optic Nerve, Lateral dorsal nucleus, Lateral geniculate nucleus, Lateral nuclear group, Lateral posterior nucleus, Medial geniculate nucleus, Metathalamus, Neothalamus (+24 more)
+
+### Community 266 - "Reinforcement learning"
+Cohesion: 0.29
+Nodes (6): Machine learning, Policy gradient method, Q-learning, Reinforcement learning, SARSA, Temporal difference learning
+
+### Community 267 - "Two-streams Hypothesis"
+Cohesion: 0.33
+Nodes (4): Ebbinghaus Illusion, Franz et al. 2005, Leslie Ungerleider, Mortimer Mishkin
+
+### Community 268 - "Function"
 Cohesion: 0.40
 Nodes (5): Function, Interoceptive awareness, Multi-modal sensory processing, sensory binding, Speech, Taste
 
-### Community 268 - "Polymodal C fibers"
-Cohesion: 0.29
-Nodes (7): A-beta fiber, Ultrafast nociceptors, C fiber warmth receptors, C mechano- and metaboreceptors, C-tactile fibers, Histamine-selective C fibers, Polymodal C fibers
+### Community 269 - "Beta-Lipotropin"
+Cohesion: 0.50
+Nodes (4): Beta-Endorphin, Beta-Lipotropin, Gamma-Lipotropin, Mu-Opioid Receptors
 
-### Community 269 - "Structure"
+### Community 270 - "Structure"
 Cohesion: 0.50
 Nodes (4): Connections, Cytoarchitecture, Development, Structure
-
-### Community 270 - "Sensory inhibition"
-Cohesion: 0.50
-Nodes (4): Auditory inhibition, Sensory inhibition, Tactile inhibition, Visual inhibition
 
 ### Community 271 - "package.json"
 Cohesion: 0.25
 Nodes (7): description, name, private, scripts, test, typecheck, type
 
-### Community 272 - "Human brain"
-Cohesion: 0.29
-Nodes (7): Adult brain weight and volume, Electroencephalography (EEG), Functional neuroimaging, Human brain, Neural pathways and circuits, Neurons (more than 86 billion), Neurotransmission
+### Community 272 - "Dopamine"
+Cohesion: 0.12
+Nodes (13): Catechol structure, Catecholamine, DOPA decarboxylase, Dopamine, L-DOPA (Levodopa), Methylphenidate, Structure, Tyrosine and phenylalanine precursors (+5 more)
 
-### Community 273 - "Cervical nerves"
-Cohesion: 0.29
-Nodes (7): Greater auricular nerve, Greater occipital nerve, Lesser occipital nerve, Suboccipital nerve, Ansa cervicalis, Cervical nerves, Cervical plexus
-
-### Community 274 - "._emit"
-Cohesion: 0.29
-Nodes (4): heapPop(), heapPush(), pless(), rngNext()
-
-### Community 275 - "Spinothalamic Tract"
-Cohesion: 0.33
-Nodes (6): Substantia gelatinosa, Wide dynamic range neuron, Spinomesencephalic Pathway, Spinothalamic Tract, Ventral Posterolateral Nucleus (VPL) of Thalamus, Lissauer's Tract
-
-### Community 276 - "Mechanism and cycle"
-Cohesion: 0.33
-Nodes (6): Elimination, Mechanism and cycle, Receptor interaction, Release, Storage, Synthesis
-
-### Community 277 - "Glial cells"
-Cohesion: 0.18
-Nodes (11): Axon, Cells, Glial cells, Motor neurons, Neural pathways, circuits and large-scale networks, Neurons, Neurotransmitter, Sensory neurons (+3 more)
-
-### Community 278 - "Femoral nerve"
+### Community 273 - "Advantages"
 Cohesion: 0.40
-Nodes (5): Femoral nerve, Psoas major muscle, Quadriceps femoris muscle, Saphenous nerve, Bernese periacetabular osteotomy
+Nodes (5): Advantages, General advantage, Inclusive fitness advantages, Social advantage, Specific advantages
 
-### Community 279 - "Left Vagus Nerve"
-Cohesion: 0.60
-Nodes (5): Left Vagus Nerve, Recurrent Laryngeal Nerve, Right Vagus Nerve, Cardiac, Pulmonary and Esophageal Plexuses, Anterior and Posterior Vagal Trunks
+### Community 274 - "14. Second pass: the upper airway, sharpness and visible breathing (6 November 2026)"
+Cohesion: 0.29
+Nodes (6): 14.1 Upper airway (`airway-tree.js` `UPPER_AIRWAY`, `upperAirwaySegments`), 14.2 Sharpness, 14.3 Visible breathing, 14.3a Fixes after the browser check (6 November 2026), 14.4 Tests, 14. Second pass: the upper airway, sharpness and visible breathing (6 November 2026)
 
-### Community 284 - "Sympathoadrenal system"
-Cohesion: 0.20
-Nodes (8): Adrenal hormone receptors type I and II (fat and carbohydrate storage), Chemical messengers, Exercise and Metabolism, Function, Hypertension and obesity, Hypoglycemia, Stress, Sympathoadrenal system
+### Community 275 - "Sensory inhibition"
+Cohesion: 0.50
+Nodes (4): Auditory inhibition, Sensory inhibition, Tactile inhibition, Visual inhibition
+
+### Community 276 - "Auditory Adaptation"
+Cohesion: 0.50
+Nodes (4): Auditory Adaptation, Hair Cells, Mechanoelectric Transduction (MET) Channels, Tip Link Proteins
+
+### Community 277 - "4. Gas exchange"
+Cohesion: 0.50
+Nodes (4): 4.1 Values (sea level, healthy young adult), 4.2 Oxygen saturation (computable from the model), 4.3 CO₂ and the capnogram (computable from the model), 4. Gas exchange
+
+### Community 279 - "Brain System — the whole-body sexual response model: analysis and design rationale"
+Cohesion: 0.50
+Nodes (4): 10. Realism rules and things to avoid, 1. Purpose and framing, 6. Neurochemistry, Brain System — the whole-body sexual response model: analysis and design rationale
+
+### Community 284 - "Sympathectomy"
+Cohesion: 0.17
+Nodes (11): Endoscopic Thoracic Sympathectomy, Ganglionectomy, Johns Hopkins Medicine - Sympathectomy, Hyperhidrosis, Indications, Lumbar Sympathectomy, Occlusive Arterial Disease, Raynaud Syndrome (+3 more)
 
 ## Ambiguous Edges - Review These
 - `Hermann` → `Ludimar Hermann`  [AMBIGUOUS]
@@ -1452,22 +1443,22 @@ Nodes (8): Adrenal hormone receptors type I and II (fat and carbohydrate storage
   brain-system/raw/en_wikipedia_org_api_rest_v1_page_html_Hippocampus.md · relation: conceptually_related_to
 
 ## Knowledge Gaps
-- **933 isolated node(s):** `Spatial memory`, `Endorphins`, `Mah and Binik (2001), Clinical Psychology Review`, `Anorgasmia`, `Euphoria` (+928 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2546 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **21 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **933 isolated node(s):** `Spatial memory`, `Anorgasmia`, `Euphoria`, `Muscular Spasms, Body Movements and Vocalizations`, `Nocturnal Emission` (+928 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2641 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **22 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Vagus Nerve` connect `Enteric Nervous System` to `Hypothalamus`, `Cranial nerves`, `Interoception`, `Inflammatory reflex`, `Pelvic splanchnic nerves`, `Acetylcholine`, `Sympathetic trunk`, `Cardiovascular centre`, `Vagotomy and Ulcers`, `Sympathectomy`, `Enteric nervous system`, `Dermatomes and Referred Pain`?**
-  _High betweenness centrality (0.044) - this node is a cross-community bridge._
-- **Are the 28 inferred relationships involving `start()` (e.g. with `.flyTo()` and `.unproject()`) actually correct?**
-  _`start()` has 28 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `Spatial memory`, `Endorphins`, `Mah and Binik (2001), Clinical Psychology Review` to the rest of the system?**
+- **Why does `Vagus Nerve` connect `Vagus Nerve` to `Acetylcholine`, `Sympathetic nervous system`, `Somatic nervous system`, `Sympathetic trunk`, `Enteric nervous system`, `Inflammatory reflex`, `Interoception`, `Vagotomy and Ulcers`, `Hypothalamus`, `Dermatomes and Referred Pain`, `Pelvic splanchnic nerves`?**
+  _High betweenness centrality (0.038) - this node is a cross-community bridge._
+- **Are the 34 inferred relationships involving `start()` (e.g. with `.flyTo()` and `._rayDir()`) actually correct?**
+  _`start()` has 34 INFERRED edges - model-reasoned connections that need verification._
+- **What connects `Spatial memory`, `Anorgasmia`, `Euphoria` to the rest of the system?**
   _933 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `ScenarioPlayer` be split into smaller, more focused modules?**
-  _Cohesion score 0.09090909090909091 - nodes in this community are weakly interconnected._
-- **Why does `Hypothalamus` connect `Hypothalamus` to `Adrenocorticotropic hormone (ACTH)`, `Hypothalamus`, `Human brain`, `Human brain`, `Raphe nuclei`, `Ventral tegmental area`, `Sympathoadrenal system`, `Hypothalamic-pituitary-thyroid axis`, `Locus coeruleus`, `Medial preoptic nucleus (mPOA)`, `Vagus nerve`, `Olfactory System`, `Enteric Nervous System`, `Periaqueductal Gray (PAG)`, `Corticotropin-releasing hormone`, `Glucocorticoid negative feedback loop`, `Tuberoinfundibular pathway`, `Vasopressin Hormone`, `Hypothalamic–pituitary–adrenal axis (HPA axis)`, `Reticular formation`?**
+  _Cohesion score 0.0726764500349406 - nodes in this community are weakly interconnected._
+- **Why does `Hypothalamus` connect `Hypothalamus` to `Hypothalamic-pituitary-thyroid axis`, `Hippocampus`, `Reward system`, `Human brain`, `Reticular formation`, `Periaqueductal Gray (PAG)`, `Hypothalamic–pituitary–adrenal axis (HPA axis)`, `Adrenocorticotropic hormone (ACTH)`, `Vasopressin Hormone`, `Nigrostriatal pathway`, `Locus coeruleus`, `Raphe nuclei`, `Hypothalamus`, `Vagus Nerve`, `Sympathoadrenal system`, `Vagus nerve`, `Corticotropin-releasing hormone`?**
   _High betweenness centrality (0.036) - this node is a cross-community bridge._
 
 ### Low-confidence Hints

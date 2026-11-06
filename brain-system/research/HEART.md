@@ -243,6 +243,227 @@ CORT 11.3 µg/dL.
 Tests: `test/monitor.test.mjs` has 3 tests. The full suite has 567 tests: 535 pass, 4 known arm64
 golden failures, 28 todo. `tsc` is clean.
 
+## 8. Close-up detail (third pass)
+
+The user asked for the heart down to its finest anatomical elements. It had to stay crisp, clear and
+easy to read when the camera is close.
+
+### 8.0 Analysis and decisions
+
+**What was there before (6 November 2026).**
+- About 39,600 heart stars at High and 63,800 at Ultra.
+- A star's size is fixed in pixels: about 2.4 px, with a core of about 1 px.
+- The density is fixed per tier.
+
+**The problem.**
+- The Heart view sits at 300 mm, where 1 mm is about 6.4 px. There the spacing between stars on
+  screen is about 3 px.
+- At the camera's closest, 90 mm, 1 mm is about 21 px. The heart covers 11 times the screen area and
+  the spacing opens to about 10 px, so the surface breaks into sparse dots.
+- The stars add their light, so the front wall, the back wall and everything inside overlap.
+
+**The user's decisions (6 November 2026).**
+- All four groups of fine structures:
+  - the inner walls;
+  - the valve apparatus;
+  - the septum and the openings;
+  - the surface vessels and fat.
+- A depth cue, and a section that opens the heart on request.
+- Structure names on hover only.
+- Close-up stars built on demand, per tier: Low +0, Medium +60k, High +150k, Ultra +250k.
+
+### 8.1 Close-up level of detail
+
+The density law is in `HEART_LOD` and `heartDensity` in `src/body/heart-form.js`. `BODY_VS` applies
+it per star.
+
+- **The wanted density.** Each heart star computes its own scale from its view depth,
+  q = `uPxMm`·`uDist`/depth, in px/mm at the 1,080-px reference. The wanted density is
+  max(1, (q/q0)²), with q0 = 4.5 px/mm. That keeps the spacing of the stars on screen constant.
+- **The close-up stars.** `generateHeartCloseUpChunks` in `src/body/generate.js` builds them.
+  - They come from the same structures and shares as the body's heart.
+  - They are tagged LOD 4 and shuffled.
+  - They are built in ≤ 8 ms slices, the first time the camera nears the heart in Detailed. A tier
+    change discards them.
+  - Each star has a rank, taken from its seed. A star fades in once the filled share passes its
+    rank, over a window of 0.08 in rank, so stars never pop in.
+- **D_max.** It is 1 + (drawn close-up stars ÷ drawn heart stars): 3.5 at Medium, 4.8 at High, 4.9
+  at Ultra. The renderer passes it in `uPulse.w`, which was unused; 1 means no close-up stars.
+- **Energy.** Every heart star's flux is divided by the expected drawn density. That density
+  integrates the fade window exactly, `rampInt` in the shader. So the heart's light does not change
+  as stars are added.
+- **Past D_max.** The stars grow as (want/D_max)^0.25, at most ×1.5. The point spread function
+  conserves energy, so this changes no brightness.
+- **Unchanged parts.** The size law of the other body stars stays as it was.
+
+### 8.2 Fine anatomy
+
+`HEART_FORM` and `heartEntries` hold it. About a fifth of the heart's stars belong to it. The other
+parts' shares fall in proportion.
+
+**Ventricles.**
+- **Trabeculae carneae** (Ho 2009): strands on the endocardium, raised 0.6–2.2 mm into the cavity.
+  They run mostly along the axis and branch once in a third of cases.
+  - LV: 320 fine strands over the apical two thirds.
+  - RV: 200 coarse strands over the free wall.
+- **Septomarginal trabecula (moderator band)**, from the septum to the anterior papillary muscle.
+- **Three false tendons** across the LV.
+- **Papillary muscles with their heads:**
+  - LV: anterolateral (2 heads) and posteromedial (3 heads);
+  - RV: anterior, posterior and septal.
+
+**Chordae tendineae.**
+- Per head: 5 in the LV and 4 in the RV.
+- Each trunk fans into 3 branches over its last 30 %.
+- Primary chordae reach the free edge (0.15–0.35 of the ring radius). Secondary chordae reach the
+  rough zone (0.45–0.65).
+- Ten tertiary chordae run from the basal LV wall to the posterior mitral leaflet.
+
+**Leaflets.**
+- **Tricuspid:** anterior 150°, posterior 90°, septal 120° of the ring (Silver et al. 1971).
+- **Mitral:** the anterior leaflet faces the aortic valve. The coaptation line is a curve behind
+  the centre. The posterior leaflet has the clefts of the P1–P3 scallops.
+- **Semilunar valves:** three cusps each. Each cusp has a nodule of Arantius at the middle of its
+  free edge, and a lunula along both sides of the coaptation lines.
+
+**Aortic and pulmonary roots.**
+- The sinuses of Valsalva bulge ×1.3 of the ring radius above the cusps, up to the sinotubular
+  junction 18 mm above the ring.
+- The left and right coronary ostia open in their sinuses.
+- The left main runs to the LAD and LCx, and the proximal RCA runs from its ostium.
+
+**Right atrium.** See Wilcox et al. 2004 and Sweeney & Rosenquist 1979.
+- **Crista terminalis:** a C-shaped ridge from the SVC to the IVC.
+- **Pectinate muscles:** 14 ridges from the crista towards the auricle, and meridian ridges inside
+  both auricles.
+- **Fossa ovalis:** 18 × 14 mm, a thin floor recessed 1.2 mm, ringed by the limbus, which is widest
+  above.
+- **Coronary sinus ostium:** about 10 mm, with its rim and the Thebesian valve over its lower half.
+- **Eustachian valve:** along the anterior lip of the IVC.
+- **Tendon of Todaro:** from the Eustachian valve to the central fibrous body.
+- The atrial wall leaves the fossa and the ostium to their own stars.
+
+**Septum.** The membranous septum is a fibrous oval below the aortic valve.
+
+**Conduction system.**
+- **SA node:** a crescent along the sulcus terminalis.
+- **Inferior nodal extensions:** the slow pathway, towards the coronary sinus ostium.
+- **Left bundle branch:** a fan of 9 fascicles over the septal endocardium. Its flux is 1.1 × the
+  organ flux, because it is a thin sheet.
+- **Purkinje strands:** each has two twigs, so the network reads as a mesh.
+
+**Vessels.**
+- The vessels taper by 45 % from origin to end.
+- New arteries: the second obtuse marginal, the posterolateral branch, the conus branch, the SA and
+  AV nodal arteries, and four septal perforators inside the septum.
+- New veins: the small cardiac vein, the posterior vein of the LV, two anterior cardiac veins, the
+  oblique vein of the left atrium, and the coronary sinus to its ostium.
+
+**Epicardial fat** (Iacobellis et al. 2005).
+- Lobules along the atrioventricular and interventricular grooves, lying round their vessels.
+- It is thickest at the base.
+- It is pale yellow at 0.55 × the organ flux, so the vessels read through it.
+
+**Pericardium.** A faint sac 4.5 mm outside the heart.
+- Its brightness follows mix(0.12, 1, (1 − |n·v|)²), with n the normal of an envelope ellipsoid.
+- It reads as an outline and never veils the heart.
+
+**New part codes.** 16 trabecula, 17 pectinate, 18 fat, 19 pericardium, 20 atrial fibrous tissue.
+
+### 8.3 Depth cue and focus
+
+- **The depth cue.** It applies in Detailed only. Stars beyond t0 = −22 mm along the line of sight
+  from the heart's centre dim as exp(−(t − t0)/λ):
+  - λ = 30 mm for walls;
+  - λ = 70 mm for the inner parts: valves, leaflets, chordae, the conduction system and fibrous
+    tissue;
+  - a gain of 1.25 keeps the front surface as bright as before.
+- **The focus.** `uHeartK.w` is now continuous, 0–1, and eases over 0.3 s. It is 1 in the Heart
+  view. In Detailed it rises as the camera comes within about 160–240 mm of the heart and looks at
+  it.
+- **The rest of the body.** It dims with the focus, to 0.18, and to 0.4 for nerves, cord and
+  ganglia. Body stars 12–45 mm in front of the camera fade out, so close-ups are not crossed by skin
+  and ribs.
+
+### 8.4 Section
+
+- **The plane.** It is fitted through the apex, both atrioventricular valves and both atrial
+  centres, each within 9 mm of it: the four-chamber plane, `HEART_SECTION`.
+- **Opening.** The C key, or the heart button in the simple HUD corner, opens the heart. The button
+  shows only while the heart is in focus.
+  - The half towards the camera goes. The plane sweeps in from 95 mm outside over 0.6 s, so the
+    change is gradual and does not flash.
+  - In the Heart view the camera also turns to face the cut.
+  - Leaving the heart closes it.
+  - The amount is in `uHeartV.w`, which was unused.
+- **When open.**
+  - Depth is measured behind the cut face, with a steeper λ: 14 mm for walls and 32 mm for inner
+    parts. The chambers read as hollows.
+  - Wall stars within 4 mm of the face are lifted ×1.5.
+- **The cut face.** Stars spread through a volume leave a thin slice sparse, so a separate layer is
+  added. It has 30k / 60k / 100k stars (Medium, High, Ultra), within 4 mm of the plane on either
+  side, tagged LOD 5. It is drawn only while the heart is open, at 0.7 × flux.
+
+### 8.5 Stars style
+
+- The Stars style keeps its earlier look. It draws no fine anatomy (parts 16–20), no depth cue and
+  no close-up stars.
+- Its heart share is raised by the ratio of all heart stars to those of the earlier parts. It still
+  draws 2,400 heart stars at High.
+- The energy-conserving wave mean is taken over the stars each style draws: `HeartBeat.setStars`
+  keeps two samples.
+
+### 8.6 Hover names
+
+- `src/heart-ui.js` reads the heart stars of the body buffer, which carry their structure id in the
+  path-position slot.
+- Under a still mouse, about 8 times a second, it weights the stars in a 8-px cone round the cursor
+  ray as the shader draws them, with a bias to the front. The structure with the largest weight is
+  named in a small tooltip.
+- `LABEL_NAMES` holds 98 names. There are no numbers. It works with the mouse only.
+
+### 8.6a Follow-up (7 November 2026)
+
+At the user's request:
+- **The opened heart.** The conduction system dims to 0.55 × as the section opens, so the walls lead.
+  This is `PARAMS.heart.openConduction`.
+- **Touch.** On touch screens, a long press of 550 ms names the structure under the finger. The name
+  sits above the finger for 2.5 s.
+
+The same close-up idea now covers the whole body; see `research/CLOSEUP.md`.
+
+### 8.7 Budgets and measurements
+
+- **Uniforms.** `BODY_VS` stays within its 110 slots: two unused components are reused, and the
+  constants are compiled in.
+- **Generation.** In Node, the close-up and the cut face take 0.25 s at High: 150,000 + 60,000
+  stars. They are built in slices in the app.
+- **Measured in the app** (Apple M4, High, 1,024 × 768), GPU time per frame:
+
+  | View | With the close-up | Without it |
+  |---|---|---|
+  | Heart view | 2.35 ms | 1.85 ms |
+  | 90 mm | 2.32 ms | 1.47 ms |
+
+- **Photosensitivity.** Nothing new pulses:
+  - the close-up and the section are static, or ramp over 0.3–0.6 s;
+  - the wave stays energy-conserving.
+
+### 8.8 Tests
+
+`test/heart-detail.test.mjs` has 8 tests:
+- every structure has stars and a name;
+- the atrial landmarks;
+- the section plane;
+- the density law's energy conservation, by Monte Carlo over the ranks;
+- the close-up and cut-face buffers;
+- the shader hooks and the slot budget;
+- the hover pick;
+- the focus and section ramps.
+
+`test/geometry-body.test.mjs` now allows heart parts up to 20. The full suite has 606 tests: 574
+pass, 4 known arm64 golden failures, 28 todo. `tsc` is clean.
+
 ## Sources
 
 - Hall J. E., Hall M. E. (2021). *Guyton and Hall Textbook of Medical Physiology*, 14th ed.,
@@ -256,3 +477,12 @@ golden failures, 28 todo. `tsc` is clean.
   psychosocial stress (TSST). *Psychoneuroendocrinology* 29: 983–992 (heart rate +10–25 bpm).
 - Streeter D. D. et al. (1969). Fiber orientation in the canine left ventricle during diastole and
   systole. *Circulation Research* 24: 339–347.
+- Silver M. D. et al. (1971). Morphology of the human tricuspid valve. *Circulation* 43: 333–348.
+- Sweeney L. J., Rosenquist G. C. (1979). The normal anatomy of the atrial septum in the human
+  heart. *American Heart Journal* 98: 194–199.
+- Wilcox B. R., Cook A. C., Anderson R. H. (2004). *Surgical Anatomy of the Heart*, 3rd ed.
+  Cambridge University Press (papillary muscles, the triangle of Koch, the sinuses of Valsalva).
+- Ho S. Y. (2009). Anatomy and myoarchitecture of the left ventricular wall in normal and in
+  disease. *European Journal of Echocardiography* 10: iii3–iii7.
+- Iacobellis G. et al. (2005). Epicardial adipose tissue: anatomic, biomolecular and clinical
+  relationships with the heart. *Nature Clinical Practice Cardiovascular Medicine* 2: 536–543.

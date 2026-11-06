@@ -6,13 +6,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mulberry32 } from '../src/anatomy.js';
 import {
-  STANDARD_PATHS, SITES, NODE_IDS, PATHS, TISSUE, TISSUE_NAMES, BODY_BOUNDS, PELVIC_FLOOR, siteById, bodySDF, inPerineum, sdEllipsoid,
+  STANDARD_PATHS, SITES, NODE_IDS, PATHS, TISSUE, TISSUE_NAMES, BODY_BOUNDS, PELVIC_FLOOR, siteById, bodySDF, inPerineum, sdEllipsoid, LUNG_ROLE,
 } from '../src/body/geometry.js';
 import { generateBody, generateBodyChunks, FLOATS, PARAMS as GEN } from '../src/body/generate.js';
 import { pick, isPosteriorView } from '../src/body/picking.js';
 
 const TIERS = ['low', 'medium', 'high', 'ultra'];
-const B8_TOTAL = { low: 122250, medium: 238500, high: 393000, ultra: 610000 };  // B.8 `TIERS.body` (dense star model, dense heart, vascular tree)
+const B8_TOTAL = { low: 129583, medium: 253167, high: 417000, ultra: 648667 };  // B.8 `TIERS.body` (dense star model, dense heart, vascular tree)
 const A9_TOLERANCE = 0.10;                                                      // A.9, §2.15
 const SEED = 1848;
 const bodies = new Map();
@@ -87,13 +87,20 @@ test('records follow the B.7 layout', () => {
       if (r.tissue === TISSUE.skin) assert.ok(Math.abs(nl - 1) < 1e-3, 'skin normal');
       else if (r.tissue === TISSUE.organ && P[k + 5] > 0.5) {   // heart stars (HEART.md): τ, part, axial place
         assert.ok([-1, -2, -3, -4, -5].includes(P[k + 4]) || (P[k + 4] >= 0 && P[k + 4] <= 3), 'heart τ (codes −1 to −5: inert, venous, leaflet valves)');
-        assert.ok(Number.isInteger(P[k + 5]) && P[k + 5] >= 1 && P[k + 5] <= 16, 'heart part');
+        assert.ok(Number.isInteger(P[k + 5]) && P[k + 5] >= 1 && P[k + 5] <= 20, 'heart part (1–15, and 16–20 the fine anatomy of HEART.md §8)');
         assert.ok(P[k + 6] >= 0 && P[k + 6] <= 1, 'heart axial place');
       } else if (r.tissue === TISSUE.vessel && P[k + 5] > 0.5) {   // vessel stars (PULSE.md §9): delay, part, amplitude
         assert.ok(P[k + 4] === -1 || (P[k + 4] >= 0 && P[k + 4] < 0.3), 'pulse delay (s; −1 none)');
         assert.ok(Number.isInteger(P[k + 5]) && P[k + 5] >= 1 && P[k + 5] <= 9, 'vessel part');
         if (P[k + 5] === 5) assert.ok(P[k + 4] === -1 && P[k + 6] >= 0.6 && P[k + 6] <= 1, 'capillary: no pulse, oxygen saturation');
         else assert.ok(P[k + 4] === -1 ? P[k + 6] === 0 : P[k + 6] > 0 && P[k + 6] < 2, 'pulse amplitude');
+      } else if ((r.tissue === TISSUE.organ || r.tissue === TISSUE.muscle) && P[k + 5] < -1.5) {   // lung stars (LUNGS.md §7): volume coordinate, −role
+        const role = -P[k + 5];
+        assert.ok(Object.values(LUNG_ROLE).includes(role), `lung role ${role}`);
+        assert.equal(role === LUNG_ROLE.DIAPHRAGM, r.tissue === TISSUE.muscle, 'the diaphragm is muscle; the other roles are organ');
+        assert.ok(P[k + 4] >= 0 && P[k + 4] <= 0.46, 'volume coordinate (L)');
+        if (role === LUNG_ROLE.AIR) assert.ok(Number.isInteger(P[k + 6]) && P[k + 6] > 0 && P[k + 6] < 2 ** 24, 'air particle: packed branch vector');
+        else assert.equal(P[k + 6], 0);
       } else assert.equal(nl, 0, 'volume points carry no normal');
     }
   }

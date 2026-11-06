@@ -17,13 +17,17 @@
 
 import { createContext, GpuTimer } from './gl-utils.js';
 import { TIERS, detectTier, AdaptiveQuality } from './performance.js';
-import { generateBrain, generateBrainExtra, applyRelabel, areaIds } from './brain.js';
+import { generateBrain, generateBrainExtra, applyRelabel, areaIds, FLOATS as BRAIN_FLOATS } from './brain.js';
 import { BrainRenderer, PARAMS as RENDER } from './renderer.js';
 import { WAVE_SLOTS } from './shaders.js';
 import { HeartBeat, HEART } from './heart.js';
 import { PulseWave } from './pulse.js';
-import { RespTrace, monitorValues } from './monitor.js';
+import { RespTrace, CapnoTrace, SpO2Meter, monitorValues } from './monitor.js';
+import { BreathClock, BREATH } from './breath.js';
+import { lungStarIndex, pickLungPoint, lungName } from './lung-ui.js';
 import { OrbitCamera } from './camera.js';
+import { CameraControls } from './camera-controls.js';
+import { pickStars, VIEW_PICK } from './view-pick.js';
 import { PRESETS } from './clock.js';
 import { CENTER, MM, AREAS, R as ANATOMY_R } from './anatomy.js';
 import { NEURON_COOL, NEURON_WARM, DOPAMINE_RGB, blackbodyRGB } from './color.js';
@@ -35,7 +39,9 @@ import { Runtime } from './sim/runtime.js';
 import { NET_IDS } from './sim/graph.js';
 import { SCENARIOS } from './sim/scenarios.js';
 import * as stimuli from './sim/stimuli.js';
-import { generateBodyChunks } from './body/generate.js';
+import { generateBodyChunks, generateHeartCloseUpChunks, generateFocusRegionChunks } from './body/generate.js';
+import { HEART_DEPTH, HEART_LOD, HEART_SECTION, LABEL_NAMES } from './body/heart-form.js';
+import { HeartUi, HEART_PICK, heartLabelIndex, pickHeartLabel } from './heart-ui.js';
 import { pick } from './body/picking.js';
 import { SITES, BODY_BOUNDS } from './body/geometry.js';
 import { PhotoLimiter } from './safety.js';
@@ -79,6 +85,7 @@ const VIEWS = {
   headNeck: bodyView([0, 0.1, -0.4], 6.7, -0.5, 0.15),
   thorax: bodyView([-0.1, 0, -3.3], 6.7, -0.25, 0.10),
   heart: bodyView([-0.25, 0.15, -3.45], 3.0, -0.45, 0.12),   // HEART.md §5: close on the heart; the rest dims
+  lungs: bodyView([0.62, -0.1, -3.3], 6.0, -0.3, 0.08),       // LUNGS.md §7.6: both lungs and the diaphragm, right of the monitor; the rest dims
   abdomen: bodyView([0, 0.1, -5.9], 8.6, -0.25, 0.10),
   torso: bodyView([0, 0, -4.6], 14.3, -0.35, 0.10),
   spine: bodyView([0, -0.6, -4.3], 15.9, Math.PI, 0.10),
@@ -236,8 +243,27 @@ async function start() {
   const rawPackets = [], bodyPackets = [], sources = [];
   let bodyGen = null, bodyData = null, bodyTier = -1;
   const heart = new HeartBeat();   // the beat drawn on the heart stars and the HUD trace (HEART.md)
+  // Heart close-up (HEART.md §8): close-up stars built on demand for the drawn body tier, the section,
+  // and the label index of the body's heart stars.
+  let heartCloseGen = null, heartCloseTier = -1, heartSection = false, heartIdx = null, lungIdx = null;
+  const HEART_C = HEART_DEPTH.c.map((v) => v * MM);
+  const HEART_ZONE = { focusQ: [8, 12], look: [0.86, 0.96], nearSide: 0.6 };   // [model] px/mm at the heart's centre; cos of the angle off it; units
+  // Focus region (research/CLOSEUP.md §3) [model]: built when the camera is within maxDist (units) of
+  // its pivot and the pivot has held still for `stable` s; radius radiusK × the distance within
+  // `radius` (units); rebuilt when the pivot leaves `move` of the radius or the wanted radius leaves
+  // `resize` of it; k × the body's stars there, at most `cap` per tier; fades in over `fade` s. The
+  // slab's strength runs from 0 at slab[0] to 1 at slab[1] (units). Full resolution within fullRes.
+  const FOCUS = { maxDist: 6, stable: 0.25, radiusK: 0.9, radius: [0.5, 2.0], move: 0.45, resize: [0.6, 1.6], k: 6,
+    cap: { low: 0, medium: 100000, high: 200000, ultra: 300000 }, fade: 0.35, slab: [7, 3], fullRes: [6, 7.5], fullResGpuMs: 10 };
+  let regionGen = null, regionAt = null, regionWeight = 0, pivotPrev = null, pivotStill = 0, fullRes = false, fullResBlock = 0;
   const pulse = new PulseWave();   // the arterial pulse on the vessel stars and the PLETH trace (PULSE.md)
   const resp = new RespTrace();     // the patient monitor's respiration trace (monitor.js)
+  // Breathing (LUNGS.md §7, §14): one breath clock from the kernel's respiration for the lungs, the
+  // RESP and CO₂ traces and the air particles; the oximeter reads the kernel's SaO₂ after its delay.
+  // The motion is drawn × BREATH.display (user decision); reduced motion holds it and the particles.
+  const breath = new BreathClock({ seed: BODY.seed }), capno = new CapnoTrace(), spo2 = new SpO2Meter();
+  const AIR = { focusRate: 2.5 };
+  let lungFocus = 0, relaxSet = -1;
   let picking = false, limbMotion = true, lastPath = null;
   const overlayOn = {};
   // Simple HUD state: the chosen state (Calm, Stress, Dopamine), what the camera looks at, the
@@ -279,6 +305,11 @@ async function start() {
     if (!body) return;
     bodyData = body;
     renderer.replaceBody(body);
+    renderer.setHeartCloseUp(null);   // the close-up follows the new tier on demand
+    heartCloseGen = null; heartCloseTier = -1;
+    renderer.setFocusRegion(null); regionGen = null; regionAt = null;
+    heartIdx = heartLabelIndex(body.points, body.floats, body.count);
+    lungIdx = lungStarIndex(body.points, body.floats, body.count);
     heart.setStars(body.points, body.floats, body.count);
     pulse.setStars(body.points, body.floats, body.count);
     if (bodyMode === 'body') renderer.setBodyFade(1);   // fade in over t_fade (B.9, §13.15)
@@ -347,11 +378,178 @@ async function start() {
   canvas.addEventListener('pointerup', (e) => {
     const d = pressAt;
     pressAt = null;
-    if (e.button !== 0 || e.shiftKey || e.ctrlKey) return;   // right, middle and modified drags pan (camera.js)
+    if (e.button !== 0 || e.shiftKey || e.ctrlKey || e.altKey) return;   // modified clicks and drags navigate (camera-controls.js)
     if (!picking || !d || bodyMode !== 'body' || !bodyData) return;
     if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > PICK.movePx || performance.now() - d.t > PICK.holdMs) return;
     pickAt(e.clientX, e.clientY);
   });
+
+  // --- Camera navigation (camera-controls.js): the depth under a pixel is read from the stars drawn
+  // there (view-pick.js): the brain populations (minus the cutaway half) and, in body mode, the body.
+  const navSets = () => {
+    const cut = VIEWS[view].cut > -1 ? VIEWS[view].cut : -Infinity;
+    const sets = [{ data: brain.neurons, stride: BRAIN_FLOATS, count: brain.neuronCount, cutX: cut },
+      { data: brain.da, stride: BRAIN_FLOATS, count: brain.daCount, cutX: cut }];
+    if (brain.extra) sets.push({ data: brain.extra.neurons, stride: BRAIN_FLOATS, count: brain.extra.neuronCount, cutX: cut });
+    if (bodyMode === 'body' && bodyData) sets.push({ data: bodyData.points, stride: bodyData.floats, count: bodyData.count });
+    return sets;
+  };
+  const navPick = (x, y) => {
+    const pxAngle = (2 * Math.tan(camera.fovEff / 2)) / (canvas.clientHeight || 1);
+    const ray = camera._rayDir(x, y), opts = { near: camera.nearPlane, bin: camera.distance * VIEW_PICK.binFrac };
+    const sets = navSets();
+    const hit = pickStars(camera.eye, ray, sets, { ...opts, cone: VIEW_PICK.conePx * pxAngle })
+      ?? pickStars(camera.eye, ray, sets, { ...opts, cone: VIEW_PICK.conePx * VIEW_PICK.widen * pxAngle });
+    return hit ? hit.point : null;
+  };
+  const navBounds = () => {
+    if (bodyMode !== 'body' || !bodyData) return { center: TARGET, radius: LIMIT.brainRadiusMm * MM };
+    const { min, max } = BODY_BOUNDS;
+    return { center: min.map((v, i) => ((v + max[i]) / 2) * MM), radius: 0.5 * Math.max(...min.map((v, i) => max[i] - v)) * MM };
+  };
+  let storage = null;
+  try { storage = window.localStorage; } catch { storage = null; }
+  new CameraControls(canvas, camera, {
+    pickAt: navPick, frameAll: navBounds, framePreset: () => requestView(view), storage,
+    blocked: () => { const d = document.getElementById('info'); return !!d && !d.hidden; },   // the About dialog
+    simpleHud: () => document.body.classList.contains('hud-simple'),
+  });
+
+  // --- Focus region: close-up stars of every body class round the camera's pivot (CLOSEUP.md §3) ---
+  const stepFocus = (dt) => {
+    const d = camera.distance, t = camera.target, s = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
+    renderer.focusSlab = s(FOCUS.slab[0], FOCUS.slab[1], d);
+    regionWeight = Math.min(1, regionWeight + dt / FOCUS.fade);
+    renderer.focusWeight = regionWeight;
+    const moved = pivotPrev ? Math.hypot(t[0] - pivotPrev[0], t[1] - pivotPrev[1], t[2] - pivotPrev[2]) : Infinity;
+    pivotPrev = [...t];
+    pivotStill = moved < 0.02 * d ? pivotStill + dt : 0;
+    if (regionGen) {
+      const r = regionGen.it.next(), v = r.value;
+      if (r.done || (v && v.done)) {
+        const reg = v && v.region ? v.region : v;
+        renderer.setFocusRegion(reg, regionGen.n);
+        regionWeight = 0;
+        regionGen = null;
+      }
+      return;
+    }
+    if (!renderer.detailed || !bodyData || bodyGen || heartCloseGen || d > FOCUS.maxDist || pivotStill < FOCUS.stable) return;
+    const R = Math.min(FOCUS.radius[1], Math.max(FOCUS.radius[0], FOCUS.radiusK * d));
+    if (regionAt && Math.hypot(t[0] - regionAt.c[0], t[1] - regionAt.c[1], t[2] - regionAt.c[2]) < FOCUS.move * regionAt.r
+      && R / regionAt.r > FOCUS.resize[0] && R / regionAt.r < FOCUS.resize[1]) return;
+    regionAt = { c: [...t], r: R };
+    const T = TIERS[bodyTier], cap = FOCUS.cap[T?.name] ?? 0;
+    if (!cap) return;
+    // The body buffer's stars inside the sphere, per class, the heart left out.
+    const P = bodyData.points, F = bodyData.floats, base = new Array(9).fill(0), R2 = R * R;
+    for (let i = 0, o = 0; i < bodyData.count; i++, o += F) {
+      const dx = P[o] - t[0], dy = P[o + 1] - t[1], dz = P[o + 2] - t[2];
+      if (dx * dx + dy * dy + dz * dz > R2 || (P[o + 11] === 1 && P[o + 5] > 0.5)) continue;
+      base[P[o + 11]]++;
+    }
+    const n = base.reduce((a, b) => a + b, 0);
+    if (n < 50) return;
+    const k = Math.min(FOCUS.k, cap / n);
+    regionGen = { n, it: generateFocusRegionChunks({ budget: T, lod: T.bodyLod, centre: t.map((v) => v / MM), radius: R / MM, k,
+      cap: Math.ceil(n * k * 1.4) + 2000, seed: BODY.seed, sliceMs: BODY.sliceMs, baseCounts: base }) };
+  };
+
+  // --- Heart close-up: the section (button and C) and the structure name under the mouse (HEART.md §8.4, §8.6) ---
+  const toggleSection = () => {
+    if (!(heart.focus > 0.3 || heartSection)) return;
+    heartSection = !heartSection;
+    // Opened in the Heart view, the camera turns to face the cut: the four-chamber view.
+    if (heartSection && view === 'heart') {
+      const e = camera.eye, n = HEART_SECTION.n, p = HEART_SECTION.p.map((v) => v * MM);
+      const k = (e[0] - p[0]) * n[0] + (e[1] - p[1]) * n[1] + (e[2] - p[2]) * n[2] >= 0 ? 1 : -1;
+      camera.flyTo({ yaw: Math.atan2(k * n[0], k * n[1]), pitch: Math.asin(k * n[2]), distance: camera.distance, target: HEART_C });
+    }
+  };
+  const heartUi = new HeartUi(document, { onSection: toggleSection });
+  let hover = null, hoverAt = -Infinity, press = null, labelHold = -Infinity, lastZone = null;
+  const pickName = (x, y) => {
+    if (!heartIdx || !lastZone || !(lastZone.q > HEART_PICK.minQ || view === 'heart')) return 0;
+    const pxAngle = (2 * Math.tan(camera.fovEff / 2)) / (canvas.clientHeight || 1);
+    return pickHeartLabel(camera.eye, camera._rayDir(x, y), heartIdx,
+      { cone: HEART_PICK.conePx * pxAngle, near: camera.nearPlane, section: heart.section, detailed: renderer.detailed });
+  };
+  const endPress = () => { if (press) { clearTimeout(press.timer); press = null; } };
+  canvas.addEventListener('pointermove', (e) => {
+    if (e.pointerType !== 'mouse') { if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > HEART_PICK.pressMovePx) endPress(); return; }
+    if (e.buttons) { hover = null; heartUi.hideLabel(); return; }
+    hover = { x: e.clientX, y: e.clientY };
+  });
+  for (const ev of ['pointerleave', 'pointerdown', 'wheel']) canvas.addEventListener(ev, () => { hover = null; labelHold = -Infinity; heartUi.hideLabel(); }, { passive: true });
+  // On touch, a long press names the structure under the finger for a few seconds (HEART.md §8.6).
+  canvas.addEventListener('pointerdown', (e) => {
+    endPress();
+    if (e.pointerType === 'mouse' || !e.isPrimary) return;
+    const x = e.clientX, y = e.clientY;
+    press = { x, y, timer: setTimeout(() => {
+      press = null;
+      const id = pickName(x, y);
+      if (id) { heartUi.showLabel(LABEL_NAMES[id], x, y - HEART_PICK.pressLiftPx); labelHold = screenT + HEART_PICK.pressShowS; }
+    }, HEART_PICK.pressMs) };
+  });
+  for (const ev of ['pointerup', 'pointercancel']) canvas.addEventListener(ev, endPress, { passive: true });
+  window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || (e.key !== 'c' && e.key !== 'C')) return;
+    const t = /** @type {any} */ (e.target);
+    if (t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
+    toggleSection();
+  });
+  // The heart's place in view: px/mm at its centre and near side, and its focus target (the Heart
+  // view, or in Detailed the camera close to the heart and looking at it).
+  const heartZone = () => {
+    const e = camera.eye, t = camera.target, dx = HEART_C[0] - e[0], dy = HEART_C[1] - e[1], dz = HEART_C[2] - e[2];
+    const d = Math.hypot(dx, dy, dz) || 1e-6, fpx = (540 / Math.tan(camera.fovEff / 2)) * MM;
+    const fx = t[0] - e[0], fy = t[1] - e[1], fz = t[2] - e[2], fl = Math.hypot(fx, fy, fz);
+    const look = fl > 1e-9 ? (dx * fx + dy * fy + dz * fz) / (d * fl) : 0, q = fpx / d;
+    const s = (a, b, x) => { const k = Math.min(1, Math.max(0, (x - a) / (b - a))); return k * k * (3 - 2 * k); };
+    const prox = renderer.detailed ? s(HEART_ZONE.focusQ[0], HEART_ZONE.focusQ[1], q) * s(HEART_ZONE.look[0], HEART_ZONE.look[1], look) : 0;
+    return { q, near: fpx / Math.max(0.05, d - HEART_ZONE.nearSide), focus: view === 'heart' ? 1 : prox };
+  };
+  const stepHeartUi = (hz) => {
+    if (heartSection && hz.focus < 0.02 && heart.focus < 0.05) heartSection = false;   // leaving the heart closes it
+    heartUi.setAvailable(heart.focus > 0.3 && !!simple);
+    heartUi.setSection(heartSection);
+    // Close-up stars for the drawn tier, built in slices once the camera nears the heart (after the body).
+    if (renderer.detailed && bodyData && !bodyGen && !heartCloseGen && heartCloseTier !== bodyTier && (view === 'heart' || hz.near > HEART_LOD.q0 * 0.7)) {
+      const name = TIERS[bodyTier]?.name;
+      if ((HEART_LOD.stars[name] ?? 0) > 0) heartCloseGen = { it: generateHeartCloseUpChunks(name, BODY.seed, BODY.sliceMs), tier: bodyTier };
+      else heartCloseTier = bodyTier;
+    }
+    if (heartCloseGen) {
+      const r = heartCloseGen.it.next(), v = r.value;
+      if (r.done || (v && v.done)) {
+        const cu = v && v.closeUp ? v.closeUp : v;
+        heartCloseTier = heartCloseGen.tier;
+        heartCloseGen = null;
+        if (cu && cu.count + cu.sectionCount) {
+          renderer.setHeartCloseUp(cu);
+          console.info(`[brain] heart close-up: ${cu.count.toLocaleString('en-US')} points, cut face ${cu.sectionCount.toLocaleString('en-US')}`);
+        }
+      }
+    }
+    // The structure name under a still mouse, a few times a second (a touch label holds for a while).
+    lastZone = hz;
+    // In the Lungs view, the lung structure under the mouse (LUNGS.md §7.6), on the heart's tooltip.
+    if (view === 'lungs' && hover && lungIdx) {
+      if (screenT - hoverAt < HEART_PICK.everyMs / 1000) return;
+      hoverAt = screenT;
+      const pxAngle = (2 * Math.tan(camera.fovEff / 2)) / (canvas.clientHeight || 1);
+      const p = pickLungPoint(camera.eye, camera._rayDir(hover.x, hover.y), lungIdx, { cone: HEART_PICK.conePx * pxAngle, near: camera.nearPlane });
+      const name = p ? lungName(p) : null;
+      if (name) heartUi.showLabel(name, hover.x, hover.y); else heartUi.hideLabel();
+      return;
+    }
+    if (!hover || !heartIdx || !(hz.q > HEART_PICK.minQ || view === 'heart')) { if (screenT > labelHold) heartUi.hideLabel(); return; }
+    if (screenT - hoverAt < HEART_PICK.everyMs / 1000) return;
+    hoverAt = screenT;
+    const id = pickName(hover.x, hover.y);
+    if (id) heartUi.showLabel(LABEL_NAMES[id], hover.x, hover.y); else heartUi.hideLabel();
+  };
 
   // --- Overlays and Views toggles (display only, A.5, §13.10, §13.13) ---
   const setOverlay = (id, on) => {
@@ -566,7 +764,7 @@ async function start() {
       showStress(stressOverlay(level));
     }
     const q = { value: quality.locked ? String(quality.tier) : 'auto', autoLabel: quality.locked ? null : TIERS[quality.tier].label };
-    const monitor = renderer.bodyVisible && bodyData ? monitorValues(rt.vitals(), heart.bpm, pulse.ptt) : null;
+    const monitor = renderer.bodyVisible && bodyData ? monitorValues(rt.vitals(), heart.bpm, pulse.ptt, { spo2: spo2.value(kernel.t), etco2: kernel.get('etco2') }) : null;
     return { state: mode, view: viewQueued ?? view, quality: q, style, paused, story, meter, monitor };
   };
   if (!url.advanced) {
@@ -609,7 +807,13 @@ async function start() {
   // 4. Size: CSS size × DPR (capped per tier) × adaptive render scale.
   let cssW = 0, cssH = 0, dprUsed = 0;
   function resize(force = false) {
-    const dpr = Math.min(window.devicePixelRatio || 1, TIERS[quality.tier].maxDpr);
+    // Close to the body (or in the Heart view), the canvas takes the full device resolution while the
+    // GPU has room, so fine stars are not resampled (CLOSEUP.md §5).
+    const d = camera.distance, gpu = quality.lastGpuMs ?? 0;
+    const near = renderer.bodyVisible && quality.scale >= 1 && (d < FOCUS.fullRes[fullRes ? 1 : 0] || view === 'heart');
+    if (fullRes && gpu > FOCUS.fullResGpuMs) { fullRes = false; fullResBlock = screenT + 5; }   // no room: back off for 5 s
+    else fullRes = near && screenT >= fullResBlock && (fullRes || gpu < FOCUS.fullResGpuMs / 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, fullRes ? 2 : TIERS[quality.tier].maxDpr);
     const w = canvas.clientWidth, h = canvas.clientHeight;
     if (!force && w === cssW && h === cssH && dpr === dprUsed) return;
     cssW = w; cssH = h; dprUsed = dpr;
@@ -687,6 +891,9 @@ async function start() {
     // B.6 steps 2–6: clock proposal, orgasm adapter, dopamine filter (the per-tick contract), kernel
     // within the tier's budget (B.9), clock commit, BrainNet filter.
     const sdt = paused ? 0 : dt;
+    // Calm in the simple HUD is relaxed rest: slow, deep breathing (LUNGS.md §6, kernel input `relax`).
+    const relax = simple && mode === 'calm' && !player.active && !adapter.active ? 1 : 0;
+    if (relax !== relaxSet) { kernel.set('relax', relax); relaxSet = relax; }
     rt.frame(sdt, { budgetMs: TIERS[quality.tier].kernelMs });
     if (stressShown >= 0) paintStressTint(stressShown);   // simple HUD, Stress
     updateWaves(sdt);
@@ -696,15 +903,25 @@ async function start() {
     if (renderer.bodyVisible) {
       const vit = rt.vitals(), hrK = kernel.get('hr'), hrI = kernel.get('aut.hrInst');
       const contr = Math.max(kernel.get('contractility') || 1, 1 + ((vit.sbp ?? 115) - 115) / HEART.contrFromSbp);
+      const hz = heartZone();
       heart.step(dt, { hr: vit.hr, rsa: hrK > 0 && hrI > 0 ? hrI / hrK : 1, contractility: contr, kh: clock.kh,
-        paused, reducedMotion, focus: view === 'heart', sbp: vit.sbp, dbp: vit.dbp });
-      resp.step(dt, { rr: vit.rr, vt: kernel.get('vt'), kh: clock.kh, paused });
+        paused, reducedMotion, focus: hz.focus, sbp: vit.sbp, dbp: vit.dbp, section: heartSection, detailed: renderer.detailed });
+      renderer.heartNear = hz.near;
+      stepHeartUi(hz);
+      stepFocus(dt);
+      breath.step(dt, { rr: kernel.get('rr'), vt: kernel.get('vt'), sighRate: kernel.get('sighRate'), etco2: kernel.get('etco2'), kh: clock.kh, paused });
+      resp.step(dt, { rr: vit.rr, vt: kernel.get('vt'), kh: clock.kh, paused, volume: breath.volume });
+      capno.step(dt, breath.co2, { kh: clock.kh, paused });
+      spo2.push(kernel.t, kernel.get('sao2'));
+      lungFocus += ((view === 'lungs' ? 1 : 0) - lungFocus) * Math.min(1, dt * AIR.focusRate);
+      const k = reducedMotion ? 0 : BREATH.display;
+      renderer.setBreath({ excursionMm: k * breath.excursion, ribMm: k * breath.ribs, focus: lungFocus, flow: reducedMotion ? 0 : breath.drift });
       renderer.setHeart(...heart.uniforms());
       // Arterial pulse (PULSE.md §7–§8): the beat's wave through the tree; the skin blood flow sets the
       // fingertip pulse amplitude.
       pulse.step(heart, { sbf: kernel.get('sbf') });
       renderer.setPulse(pulse.uniforms());
-    }
+    } else { heartUi.setAvailable(false); heartUi.hideLabel(); }
     animT += sdt;
 
     // The body follows the first brain frame in slices (B.9).
@@ -754,7 +971,7 @@ async function start() {
     }
     if (adapter.active && model.mode === 'demo') hud.setLevel(model.level);
 
-    if (simple && renderer.bodyVisible && bodyData) simple.drawMonitor(heart, resp, pulse);
+    if (simple && renderer.bodyVisible && bodyData) simple.drawMonitor(heart, resp, pulse, capno);
     hudTimer -= dt;
     if (hudTimer <= 0 && simple) {
       hudTimer = 0.12;

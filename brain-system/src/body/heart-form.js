@@ -19,7 +19,53 @@ const add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k, a[2] + b[2] * k]
 export const PART = {
   RA: 1, LA: 2, RV: 3, LV: 4, VALVE: 5, SA: 6, ATRIAL_PATH: 7, AV: 8, HIS: 9, PURKINJE: 10, ROOT: 11,
   CORONARY_A: 12, CORONARY_V: 13, LEAFLET: 14, CHORDAE: 15,
+  // Fine anatomy (HEART.md §8): ventricular trabeculae, atrial pectinate muscles and the crista
+  // terminalis, epicardial fat, the pericardial sac, and the fibrous parts of the right atrium (fossa
+  // ovalis, the valves of the coronary sinus and the IVC, the tendon of Todaro).
+  TRABECULA: 16, PECTINATE: 17, FAT: 18, PERICARDIUM: 19, ATRIAL_FIBROUS: 20,
 };
+// Structure names for the hover label (HEART.md §8.6): every heart star carries the id of its
+// structure in the path-position slot (heart stars have no path) as id / LABEL_SCALE, so the slot
+// keeps its B.7 range 0–1 (exact in float32). 0 = none.
+const LABEL_LIST = [
+  ['lvWall', 'Left ventricle'], ['ivs', 'Interventricular septum'], ['rvWall', 'Right ventricle'],
+  ['raWall', 'Right atrium'], ['laWall', 'Left atrium'], ['raAuricle', 'Right auricle'], ['laAuricle', 'Left auricle'],
+  ['tvRing', 'Tricuspid annulus'], ['mvRing', 'Mitral annulus'], ['avRing', 'Aortic annulus'], ['pvRing', 'Pulmonary annulus'],
+  ['tvAnt', 'Tricuspid valve · anterior leaflet'], ['tvPost', 'Tricuspid valve · posterior leaflet'], ['tvSept', 'Tricuspid valve · septal leaflet'],
+  ['mvAnt', 'Mitral valve · anterior leaflet'], ['mvPost', 'Mitral valve · posterior leaflet (P1–P3)'],
+  ['avR', 'Aortic valve · right coronary cusp'], ['avL', 'Aortic valve · left coronary cusp'], ['avN', 'Aortic valve · non-coronary cusp'],
+  ['pvA', 'Pulmonary valve · anterior cusp'], ['pvL', 'Pulmonary valve · left cusp'], ['pvR', 'Pulmonary valve · right cusp'],
+  ['nodule', 'Nodule of Arantius'], ['lunula', 'Lunula of a semilunar cusp'],
+  ['chordae1', 'Chordae tendineae · primary (free edge)'], ['chordae2', 'Chordae tendineae · secondary'], ['chordae3', 'Chordae tendineae · tertiary'],
+  ['pmAL', 'Anterolateral papillary muscle'], ['pmPM', 'Posteromedial papillary muscle'],
+  ['pmRA', 'Anterior papillary muscle (RV)'], ['pmRP', 'Posterior papillary muscle (RV)'], ['pmRS', 'Septal papillary muscle (RV)'],
+  ['trabLV', 'Trabeculae carneae (LV)'], ['trabRV', 'Trabeculae carneae (RV)'], ['moderator', 'Septomarginal trabecula (moderator band)'],
+  ['falseTendon', 'False tendon (LV)'], ['crista', 'Crista terminalis'], ['pectRA', 'Pectinate muscles'], ['pectLA', 'Pectinate muscles (left auricle)'],
+  ['fossa', 'Fossa ovalis'], ['limbus', 'Limbus of the fossa ovalis'], ['csOstium', 'Coronary sinus ostium'],
+  ['thebesian', 'Thebesian valve (coronary sinus)'], ['eustachian', 'Eustachian valve (IVC)'], ['todaro', 'Tendon of Todaro'],
+  ['membranous', 'Membranous septum'],
+  ['aorta', 'Ascending aorta'], ['pulmonaryTrunk', 'Pulmonary trunk'], ['pulmonaryArteryL', 'Left pulmonary artery'],
+  ['pulmonaryArteryR', 'Right pulmonary artery'], ['svc', 'Superior vena cava'], ['ivc', 'Inferior vena cava'],
+  ['pulmonaryVeinLU', 'Left superior pulmonary vein'], ['pulmonaryVeinLL', 'Left inferior pulmonary vein'],
+  ['pulmonaryVeinRU', 'Right superior pulmonary vein'], ['pulmonaryVeinRL', 'Right inferior pulmonary vein'],
+  ['sinusR', 'Right coronary sinus (of Valsalva)'], ['sinusL', 'Left coronary sinus (of Valsalva)'], ['sinusN', 'Non-coronary sinus (of Valsalva)'],
+  ['pulmSinus', 'Pulmonary sinus'], ['lcaOstium', 'Left coronary ostium'], ['rcaOstium', 'Right coronary ostium'],
+  ['LM', 'Left main coronary artery'], ['LAD', 'Left anterior descending artery'], ['D1', 'First diagonal branch'], ['D2', 'Second diagonal branch'],
+  ['LCx', 'Left circumflex artery'], ['OM', 'Obtuse marginal branch'], ['OM2', 'Second obtuse marginal branch'], ['RCA', 'Right coronary artery'],
+  ['AM', 'Acute marginal branch'], ['PDA', 'Posterior descending artery'], ['PL', 'Posterolateral branch'], ['septal', 'Septal perforator'],
+  ['conus', 'Conus branch'], ['sanA', 'Sinoatrial nodal artery'], ['avnA', 'Atrioventricular nodal artery'],
+  ['greatCardiac', 'Great cardiac vein'], ['coronarySinus', 'Coronary sinus'], ['middleCardiac', 'Middle cardiac vein'],
+  ['smallCardiac', 'Small cardiac vein'], ['posteriorLV', 'Posterior vein of the left ventricle'], ['anteriorCardiac', 'Anterior cardiac vein'],
+  ['oblique', 'Oblique vein of the left atrium'],
+  ['sa', 'Sinoatrial node'], ['internodal', 'Internodal tract'], ['bachmann', "Bachmann's bundle"], ['av', 'Atrioventricular node'],
+  ['avExt', 'Inferior nodal extension (slow pathway)'], ['his', 'Bundle of His'], ['lbb', 'Left bundle branch'],
+  ['lpf', 'Left posterior fascicle'], ['laf', 'Left anterior fascicle'], ['lsf', 'Left septal fascicle'], ['rbb', 'Right bundle branch'],
+  ['purkinje', 'Purkinje fibres'], ['fat', 'Epicardial fat'], ['pericardium', 'Pericardium'],
+];
+export const LABEL = Object.fromEntries(LABEL_LIST.map(([k], i) => [k, i + 1]));
+export const LABEL_NAMES = ['', ...LABEL_LIST.map(([, n]) => n)];
+export const LABEL_SCALE = 128;
+export const labelOf = (u) => Math.round(u * LABEL_SCALE);
 // τ codes of stars that never depolarise: −1, and for leaflets −(2 + valve index) (valves order),
 // for roots −1 (oxygenated, red) or −2 (venous, blue).
 // Parts that conduct the impulse (drawn brighter; the wave is sharper in them).
@@ -75,22 +121,59 @@ export const HEART_FORM = {
       { id: 'RCA', r: 1.8, pts: [[0.04, 10], [0.07, 50], [0.08, 90], [0.08, 130], [0.08, 170], [0.09, 195]] },
       { id: 'AM', r: 1.2, pts: [[0.08, 95], [0.3, 100], [0.55, 104], [0.7, 106]] },
       { id: 'PDA', r: 1.4, pts: [[0.09, 190], [0.3, 188], [0.55, 185], [0.8, 182]] },
+      // Smaller branches (HEART.md §8.2): a second obtuse marginal, the posterolateral branch beyond
+      // the crux and the conus branch round the right ventricular outflow.
+      { id: 'OM2', r: 1.0, pts: [[0.08, -135], [0.3, -138], [0.52, -141], [0.68, -144]] },
+      { id: 'PL', r: 1.0, pts: [[0.09, 195], [0.25, 208], [0.42, 218], [0.55, 224]] },
+      { id: 'conus', r: 0.8, pts: [[0.03, 22], [0.025, 8], [0.035, -6], [0.06, -16]] },
     ],
     veins: [
       { id: 'greatCardiac', r: 2.2, pts: [[0.95, -16], [0.75, -40], [0.5, -42], [0.25, -42], [0.1, -50], [0.09, -90], [0.09, -130], [0.09, -170]] },
-      { id: 'coronarySinus', r: 3.5, pts: [[0.09, -170], [0.09, -200], [0.07, -230]] },
+      { id: 'coronarySinus', r: 3.5, pts: [[0.09, -170], [0.09, -200], [0.07, -230]] },   // + the ostium (generate.js)
       { id: 'middleCardiac', r: 1.8, pts: [[0.85, 176], [0.55, 178], [0.3, 180], [0.1, 182]] },
+      { id: 'smallCardiac', r: 1.2, pts: [[0.12, 72], [0.09, 100], [0.08, 125]] },
+      { id: 'posteriorLV', r: 1.4, pts: [[0.62, -150], [0.4, -156], [0.2, -162], [0.09, -168]] },
+      { id: 'anteriorCardiac', r: 0.9, pts: [[0.45, 42], [0.28, 52], [0.1, 62], [0.02, 68]] },
+      { id: 'anteriorCardiac', r: 0.8, pts: [[0.5, 78], [0.3, 84], [0.12, 90], [0.03, 94]] },
     ],
+    taper: 0.45,   // radius falls by this share along each vessel, origin to end
   },
   // Valve leaflets (cusps), closed in the ring plane; heart.js opens them with the cycle. Papillary
   // muscles as [s, θ] of their base on the wall and of their tip inside the cavity (tip radius as a
   // share of the cavity radius), with chordae to the leaflets of their valve.
   leaflets: [{ n: 3, dome: -3 }, { n: 2, dome: -3 }, { n: 3, dome: 3 }, { n: 3, dome: 3 }],   // valves order
+  // Each muscle splits into `heads` (the LV muscles commonly have 1–3; Wilcox et al. 2004); `r` its
+  // trunk radius (mm). The septal muscle of the RV rises from the septum (`septal`), `tipMm` long.
   papillary: [
-    { chamber: 'lv', base: [0.62, -70], tip: [0.34, -62], tipR: 0.45, valve: 1 },
-    { chamber: 'lv', base: [0.62, -150], tip: [0.34, -140], tipR: 0.45, valve: 1 },
-    { chamber: 'rv', base: [0.55, 60], tip: [0.32, 52], tipR: 0.5, valve: 0 },
+    { id: 'pmAL', chamber: 'lv', base: [0.62, -70], tip: [0.34, -62], tipR: 0.45, valve: 1, heads: 2, r: 6 },
+    { id: 'pmPM', chamber: 'lv', base: [0.62, -150], tip: [0.34, -140], tipR: 0.45, valve: 1, heads: 3, r: 6 },
+    { id: 'pmRA', chamber: 'rv', base: [0.55, 60], tip: [0.32, 52], tipR: 0.5, valve: 0, heads: 2, r: 5 },
+    { id: 'pmRP', chamber: 'rv', base: [0.55, 100], tip: [0.36, 95], tipR: 0.5, valve: 0, heads: 2, r: 3.5 },
+    { id: 'pmRS', septal: true, base: [0.18, 30], tipMm: 7, valve: 0, heads: 1, r: 2.2 },
   ],
+  // Chordae per head (LV, RV), fanning into `fan` branches over the last `split` of their length;
+  // primary chordae reach the free edge (r 0.15–0.35 of the ring radius), secondary ones the rough
+  // zone (0.45–0.65), tertiary ones run from the basal wall to the posterior mitral leaflet (0.85–0.95).
+  chordae: { perHead: [5, 4], fan: 3, split: 0.3, tertiary: 10, primaryShare: 0.6 },
+  // Trabeculae carneae (Ho 2009): fine apical ridges in the LV, coarse ones over the RV body; strands
+  // on the endocardium raised `h` mm into the cavity, of radius `r` mm, `share` branching once.
+  trabeculae: { lv: 320, rv: 200, length: [6, 22], lvS: [0.35, 0.96], rvS: [0.25, 0.95], lvR: [0.5, 1.0], rvR: [0.9, 1.6],
+    lvH: [0.6, 1.6], rvH: [0.8, 2.2], wander: 0.35, branch: 0.35, moderatorR: 2.2, falseTendons: 3 },
+  // Pectinate muscles: ridges from the crista terminalis across the right atrial wall towards the
+  // auricle, and ridges inside both auricles; the crista is a C-shaped ridge from the SVC to the IVC.
+  pectinate: { ra: 14, raAuricle: 8, laAuricle: 6, r: 0.9, h: 0.9, cristaR: 1.6, cristaH: 1.3 },
+  // Fossa ovalis on the septal wall of the right atrium (≈ 18 × 14 mm, Sweeney & Rosenquist 1979):
+  // a thin floor recessed `recess` mm, ringed by the limbus.
+  fossa: { dir: [-0.78, -0.55, -0.15], a: 9, b: 7, recess: 1.2, limbus: [1.5, 3] },
+  csOstium: { r: 5, rim: 1.0 },   // ≈ 10 mm across [model]; the Thebesian valve covers its lower half
+  eustachian: { width: 5, span: 100 },   // crescent along the anterior lip of the IVC, ±span°
+  // Epicardial fat (Iacobellis 2005): lobules along the atrioventricular and interventricular grooves,
+  // thickest at the base; `thick` per groove, lobule radius `r` mm × thick.
+  fat: { step: 2.5, r: [1.2, 2.4], across: [1.5, 5.5], grooves: { RCA: 1, LCx: 1, coronarySinus: 1, greatCardiac: 0.8, LAD: 0.75, PDA: 0.7, middleCardiac: 0.6, AM: 0.5 } },
+  pericardium: { gap: 4.5, flux: 0.6 },   // the parietal sac `gap` mm outside the heart, faint
+  // Aortic and pulmonary sinuses (of Valsalva): three bulges of `bulge` × the ring radius above the
+  // cusps, up to the sinotubular junction `height` mm above the ring; coronary ostia at `ostium` of it.
+  sinuses: { height: 18, bulge: 0.3, ostium: 0.55, ostiumR: 2 },
   sa: { c: [30, 0, -312], r: [4, 4, 7] },        // §2.8 saNode
   av: { c: [5, -2, -350], r: [3, 3, 5] },        // §2.8 avNode
   // Atrial conduction: internodal tracts (SA → AV) and Bachmann's bundle (SA → left atrium).
@@ -146,3 +229,92 @@ export function surfacePoint(s, thetaDeg, lift = 1.5) {
   return add(c, d, r + lift);
 }
 export { sub as hSub, dot as hDot, len as hLen, norm as hNorm, cross as hCross, add as hAdd };
+
+// --- Fine anatomy landmarks (HEART.md §8.2) ------------------------------------------------------
+// Point on the ellipsoid (centre c, radii r) along the unit direction d, `inset` mm inside it.
+export function ellPoint(c, r, d, inset = 0) {
+  const rho = 1 / Math.sqrt((d[0] / r[0]) ** 2 + (d[1] / r[1]) ** 2 + (d[2] / r[2]) ** 2);
+  return add(c, d, rho - inset);
+}
+// Unit vectors perpendicular to n; the first leans towards `up`.
+export function tangents(n, up = [0, 0, 1]) {
+  const k = dot(up, n);
+  let e1 = sub(up, [n[0] * k, n[1] * k, n[2] * k]);
+  if (len(e1) < 1e-6) e1 = cross(n, [1, 0, 0]);
+  e1 = norm(e1);
+  return [e1, cross(n, e1)];
+}
+// Normalised interpolation between unit directions (enough for arcs below 120°).
+export const dirLerp = (a, b, t) => norm([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t]);
+
+{
+  const H = HEART_FORM, RA = H.ra, raDir = (p) => norm(sub(p, RA.c));
+  const root = (id) => H.roots.find((g) => g.id === id).pts[0];
+  const site = (n, up) => { const [e1, e2] = tangents(n, up); return { c: ellPoint(RA.c, RA.r, n), n, e1, e2 }; };
+  const csEnd = surfacePoint(0.07, -230, 4);
+  const ivcN = raDir(root('ivc')), svcN = raDir(root('svc'));
+  H.landmarks = {
+    fossa: site(norm(H.fossa.dir)),
+    csOstium: site(raDir(csEnd)),
+    ivc: site(ivcN, [0, 1, 0]),   // e1 anterior: the Eustachian valve lies along the anterior lip
+    svc: site(svcN, [0, 1, 0]),
+    csEnd,
+    // Crista terminalis: from the anterolateral rim of the SVC down the lateral wall to that of the IVC.
+    crista: [norm(add(svcN, [0.35, 0.35, 0])), norm([1, 0.25, 0]), norm(add(ivcN, [0.45, 0.35, 0]))],
+  };
+}
+
+// Section (HEART.md §8.4): the four-chamber plane, fitted through the apex, both atrioventricular
+// valves and both atrial centres; the half towards the camera is taken away.
+function fitPlane(pts) {
+  const c = [0, 1, 2].map((k) => pts.reduce((a, p) => a + p[k], 0) / pts.length);
+  let best = null, bestE = Infinity;
+  const N = 6000, ga = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) {   // Fibonacci half-sphere of normals
+    const z = 1 - (i + 0.5) / N, r = Math.sqrt(1 - z * z), n = [r * Math.cos(i * ga), r * Math.sin(i * ga), z];
+    const e = pts.reduce((a, p) => a + dot(sub(p, c), n) ** 2, 0);
+    if (e < bestE) { bestE = e; best = n; }
+  }
+  return { p: c, n: dot(best, ANT) < 0 ? [-best[0], -best[1], -best[2]] : best };
+}
+const SECTION_PLANE = fitPlane([APEX, HEART_FORM.valves[0].c, HEART_FORM.valves[1].c, HEART_FORM.ra.c, HEART_FORM.la.c]);
+// open: plane offset (mm) at which the cut begins, outside the heart; rim: stars within `rim` mm of
+// the cut face are lifted × rimGain, so the walls read in section as in an anatomy atlas [model].
+export const HEART_SECTION = { ...SECTION_PLANE, open: 95, rim: 4, rimGain: 1.5, faceGain: 0.7, seconds: 0.6 };
+
+// Depth cue (HEART.md §8.3): along the line of sight from the heart's centre, stars beyond t0 dim as
+// exp(−(t − t0)/λ); the inner parts (valves, chordae, conduction system, fibrous tissue) dim less, so
+// they read through the wall. Opened, the depth is taken behind the cut face, with the steeper
+// lambdaOpen. `gain` restores the heart's front surface brightness [model, browser check].
+const HC = add(add(add(BASE, W, 42), ANT, 5), RIGHT, -2);
+export const HEART_DEPTH = { c: HC, t0: -22, lambda: [30, 70], lambdaOpen: [14, 32], gain: 1.25,
+  envelope: [68, 45, 38] };   // half-axes (mm) along w, ant, right: the pericardium's facing law
+
+// Close-up level of detail (HEART.md §8.1): the wanted star density grows as (q/q0)² with q the
+// star's own pixels per mm (1,080-px reference). Close-up stars of rank below the filled share f
+// fade in (over `fade` of rank), up to D_max; every heart star's flux is divided by the expected
+// drawn density, so the heart's light does not change as stars are added. Beyond D_max the stars
+// grow as (want/D_max)^grow, at most × sizeMax.
+export const HEART_LOD = { q0: 4.5, fade: 0.08, grow: 0.25, sizeMax: 1.5, rankMul: 31.7, rankAdd: 0.21,
+  stars: { low: 0, medium: 60000, high: 150000, ultra: 250000 }, lod: 4,
+  // The cut face (§8.4): stars within `slab` mm of the section plane on either side, drawn only while
+  // the heart is open, so the walls read as solid bands in section (LOD 5).
+  section: { low: 0, medium: 30000, high: 60000, ultra: 100000 }, sectionLod: 5, slab: 4, tries: 400 };
+const rampInt = (x) => { const d = HEART_LOD.fade; return x <= 0 ? 0 : x < d ? (x * x) / (2 * d) : x - d / 2; };
+// Wanted density, filled share f, the expected drawn density and the size factor at q px/mm when
+// the close-up stars can bring the density to dmax.
+export function heartDensity(q, dmax) {
+  const want = Math.max(1, (q / HEART_LOD.q0) ** 2), m = Math.max(1, dmax);
+  const f = m > 1 ? (Math.min(want, m) - 1) / (m - 1) : 0, F = f * (1 + HEART_LOD.fade);
+  const share = rampInt(F) - rampInt(F - 1);   // expected visible share of the close-up stars
+  return { want, f, d: 1 + (m - 1) * share, size: Math.min(HEART_LOD.sizeMax, Math.max(1, want / m) ** HEART_LOD.grow) };
+}
+// Visibility 0–1 of a close-up star of rank r (0–1) at filled share f.
+export function closeUpWeight(rank, f) {
+  return Math.min(1, Math.max(0, (f * (1 + HEART_LOD.fade) - rank) / HEART_LOD.fade));
+}
+// LOD tag added to the close-up stars of the body's focus region (research/CLOSEUP.md §3; generate.js
+// generateFocusRegionChunks); kept here, with the heart's tags, because the shader reads it too.
+export const FOCUS_LOD = 8;
+// Seed → rank of a close-up star (the shader does the same with the seed in aNrm.w).
+export const closeUpRank = (seed) => { const x = seed * HEART_LOD.rankMul + HEART_LOD.rankAdd; return x - Math.floor(x); };
