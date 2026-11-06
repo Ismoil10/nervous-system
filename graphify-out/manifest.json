@@ -1416,9 +1416,9 @@
     "semantic_hash": ""
   },
   "brain-system/research/LUNGS.md": {
-    "mtime": 1793967273.7177432,
-    "seen": 1793967284.21184,
-    "ast_hash": "1893a95782d5c5f444287f8757210aaa",
+    "mtime": 1793968700.6900883,
+    "seen": 1793969920.6010082,
+    "ast_hash": "994803005245aae0688a6b3d96a10cfa",
     "semantic_hash": ""
   },
   "brain-system/src/body/airway-tree.js": {
