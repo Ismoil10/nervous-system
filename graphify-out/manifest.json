@@ -234,27 +234,27 @@
     "semantic_hash": ""
   },
   "brain-system/src/main.js": {
-    "mtime": 1793947963.3857377,
-    "seen": 1793947970.3842292,
-    "ast_hash": "a38a7b950cef137a05e47030a8f71f24",
+    "mtime": 1793956766.8538058,
+    "seen": 1793956774.184182,
+    "ast_hash": "4d9b8d1ee670d54052de6400872546ec",
     "semantic_hash": ""
   },
   "brain-system/src/renderer.js": {
-    "mtime": 1793885505.015063,
-    "seen": 1793885512.132035,
-    "ast_hash": "6e828cb78580e020c6e7c759a6da1791",
+    "mtime": 1793956706.0228713,
+    "seen": 1793956713.934952,
+    "ast_hash": "45532277d4a7c2ac093e177f144a8c5b",
     "semantic_hash": ""
   },
   "brain-system/src/shaders.js": {
-    "mtime": 1793885505.0146112,
-    "seen": 1793885512.1320362,
-    "ast_hash": "2720cd39d529fec43d87e9409b024a14",
+    "mtime": 1793957118.8765802,
+    "seen": 1793957125.5990558,
+    "ast_hash": "bc9236608c127598e3358ab47a6b8e9c",
     "semantic_hash": ""
   },
   "brain-system/README.md": {
-    "mtime": 1793949122.1451318,
-    "seen": 1793949197.5774531,
-    "ast_hash": "7cabc171d12b7f40125fc993ebe8adf4",
+    "mtime": 1793957151.9192812,
+    "seen": 1793957191.137225,
+    "ast_hash": "534ba64408667feb493c92271f275c29",
     "semantic_hash": ""
   },
   "brain-system/index.html": {
@@ -1092,9 +1092,9 @@
     "semantic_hash": ""
   },
   "brain-system/test/shaders.test.mjs": {
-    "mtime": 1793885534.4994068,
-    "seen": 1793885541.1357381,
-    "ast_hash": "a60c566bd272c021a5c7224a4c8f7e1d",
+    "mtime": 1793957118.8801482,
+    "seen": 1793957125.5990882,
+    "ast_hash": "2d25786c2aae9c1c50caabfd2e28e853",
     "semantic_hash": ""
   },
   "brain-system/research/ANALYSIS.md": {
@@ -1104,9 +1104,9 @@
     "semantic_hash": ""
   },
   "brain-system/src/body/generate.js": {
-    "mtime": 1793885534.4991436,
-    "seen": 1793885541.1357062,
-    "ast_hash": "81ccdb82b1d2a81c40ac26ad4ec02f4f",
+    "mtime": 1793956652.0793378,
+    "seen": 1793956652.6565151,
+    "ast_hash": "efd4ca29df96a3bf30b372ad68a17701",
     "semantic_hash": ""
   },
   "brain-system/src/body/picking.js": {
@@ -1116,9 +1116,9 @@
     "semantic_hash": ""
   },
   "brain-system/test/geometry-body.test.mjs": {
-    "mtime": 1793885534.4992797,
-    "seen": 1793885541.13573,
-    "ast_hash": "834104d7847a923a616c783a6a751e68",
+    "mtime": 1793952301.101795,
+    "seen": 1793952308.181727,
+    "ast_hash": "98265f934c85da2b018f74be3e46d588",
     "semantic_hash": ""
   },
   "brain-system/src/sim/stimuli.js": {
@@ -1314,21 +1314,21 @@
     "semantic_hash": ""
   },
   "brain-system/src/body/heart-form.js": {
-    "mtime": 1793880226.3161695,
-    "seen": 1793880233.272276,
-    "ast_hash": "43daeeb032618fa6dc9b0d473398f147",
+    "mtime": 1793956644.593325,
+    "seen": 1793956652.656517,
+    "ast_hash": "b8575379c8626111788f5f5c64d230da",
     "semantic_hash": ""
   },
   "brain-system/research/HEART.md": {
-    "mtime": 1793880962.9272106,
-    "seen": 1793882527.9834921,
-    "ast_hash": "69568bb309a99a22bc30ffbcfca136a6",
+    "mtime": 1793957151.9191203,
+    "seen": 1793957191.1373062,
+    "ast_hash": "3471bb81fb0bbb1831081493d1f32db1",
     "semantic_hash": ""
   },
   "brain-system/src/heart.js": {
-    "mtime": 1793880608.8324747,
-    "seen": 1793880616.236119,
-    "ast_hash": "ba786c165a5057cf0d5eb5a94a9cfe8c",
+    "mtime": 1793951196.7412293,
+    "seen": 1793951204.1677802,
+    "ast_hash": "18848f20cd86d213de0ef2cc1e49f9b7",
     "semantic_hash": ""
   },
   "brain-system/test/heart.test.mjs": {
@@ -1389,6 +1389,30 @@
     "mtime": 1793948903.6227345,
     "seen": 1793948911.7923388,
     "ast_hash": "dd6b3a5f3ca6e7ff4d5e061b036e290f",
+    "semantic_hash": ""
+  },
+  "brain-system/src/heart-ui.js": {
+    "mtime": 1793956766.853952,
+    "seen": 1793956774.184181,
+    "ast_hash": "4f37a87d8e7ff186e43f0488d7f6d095",
+    "semantic_hash": ""
+  },
+  "brain-system/test/heart-detail.test.mjs": {
+    "mtime": 1793952273.307004,
+    "seen": 1793952281.218336,
+    "ast_hash": "4f79c594530c1783716e46756a254737",
+    "semantic_hash": ""
+  },
+  "brain-system/test/closeup.test.mjs": {
+    "mtime": 1793957024.0343695,
+    "seen": 1793957031.542078,
+    "ast_hash": "aad82cf4b3a63dea1f10a3a463302235",
+    "semantic_hash": ""
+  },
+  "brain-system/research/CLOSEUP.md": {
+    "mtime": 1793957186.648887,
+    "seen": 1793957191.137305,
+    "ast_hash": "a3c4fd94eea9e4b52b5a75a88eea189e",
     "semantic_hash": ""
   }
 }
