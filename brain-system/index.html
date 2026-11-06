@@ -544,6 +544,7 @@
                 <option value="headNeck">Head &amp; neck</option>
                 <option value="thorax">Thorax</option>
                 <option value="heart">Heart</option>
+                <option value="lungs">Lungs</option>
                 <option value="abdomen">Abdomen</option>
                 <option value="torso">Torso</option>
                 <option value="spine">Spine</option>
@@ -663,17 +664,25 @@
           <div class="mon-val"><span class="mon-label">ART</span><span class="mon-lim" aria-hidden="true">160<br>90</span>
             <span class="mon-num mon-num-bp"><span id="mon-sys">115</span>/<span id="mon-dia">75</span></span><span class="mon-unit">(<span id="mon-map">88</span>) mmHg</span></div>
         </div>
-        <div class="mon-row mon-pleth" data-key="ptt">
+        <div class="mon-row mon-pleth" data-key="spo2">
           <canvas id="mon-pleth" class="mon-wave" width="440" height="76" aria-hidden="true"></canvas>
           <span class="mon-tag" aria-hidden="true">PLETH</span>
-          <div class="mon-val" title="Fingertip pulse (plethysmograph). PTT: pulse transit time from the ECG R wave to the foot of the fingertip pulse. No SpO₂: the model does not compute it.">
-            <span class="mon-label">PTT</span><span id="mon-ptt" class="mon-num">163</span><span class="mon-unit">ms</span></div>
+          <div class="mon-val" title="Fingertip pulse (plethysmograph). SpO₂: the model's arterial oxygen saturation from its PaO₂ (Severinghaus curve), reaching the finger after the circulation delay. PTT: pulse transit time from the ECG R wave to the foot of the fingertip pulse.">
+            <span class="mon-label">SpO₂</span><span class="mon-sub" aria-label="Pulse transit time">PTT <span id="mon-ptt">163</span> ms</span>
+            <span id="mon-spo2" class="mon-num">97</span><span class="mon-unit">%</span></div>
         </div>
         <div class="mon-row mon-rr" data-key="rr">
           <canvas id="mon-resp" class="mon-wave" width="440" height="76" aria-hidden="true"></canvas>
           <span class="mon-tag" aria-hidden="true">RESP</span>
           <div class="mon-val"><span class="mon-label">RR</span><span class="mon-lim" aria-hidden="true">25<br>8</span>
             <span id="mon-rr" class="mon-num">14</span><span class="mon-unit">/min</span></div>
+        </div>
+        <div class="mon-row mon-co2" data-key="co2">
+          <canvas id="mon-capno" class="mon-wave" width="440" height="76" aria-hidden="true"></canvas>
+          <span class="mon-tag" aria-hidden="true">CO₂</span>
+          <div class="mon-val" title="Capnogram: CO₂ at the mouth through each breath. EtCO₂: end-tidal CO₂, from the model's arterial PaCO₂.">
+            <span class="mon-label">EtCO₂</span><span class="mon-lim" aria-hidden="true">50<br>30</span>
+            <span id="mon-co2" class="mon-num">37</span><span class="mon-unit">mmHg</span></div>
         </div>
         <div class="mon-tiles">
           <div class="mon-tile mon-temp" data-key="temp"><span class="mon-label">TEMP</span><span id="mon-temp" class="mon-num-s">37.0</span><span class="mon-unit">°C</span></div>

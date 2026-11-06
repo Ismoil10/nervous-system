@@ -754,6 +754,10 @@ export const DIAPHRAGM = {
   bumps: [[55, -5, -382], [-55, -5, -395], [0, 15, -392]], // §2.8 domes and central tendon
   radius: 135,                                           // [model] dome footprint radius
 };
+// Lung and breathing star roles (research/LUNGS.md §7): organ and muscle stars carry −role in their
+// normal's y (≤ −2, clear of unit normals and of the heart's positive part codes); airway and acinus
+// stars carry their volume coordinate from the mouth (L) in the normal's x for the airflow front.
+export const LUNG_ROLE = { AIRWAY: 2, ACINUS: 3, PLEURA: 4, PARENCHYMA: 5, DIAPHRAGM: 6 };
 export function diaphragmZ(x, y) {
   const D = DIAPHRAGM;
   let z = D.base;
@@ -808,14 +812,15 @@ export const ORGANS = [
   { id: 'bat', sided: true, group: 'other', type: 'e', c: [65, 5, -200], r: [25, 15, 10] },              // §2.8 supraclavicular
   { id: 'bat', sided: true, group: 'other', type: 'e', c: [32, -80, -320], r: [8, 10, 40] },             // §2.8 paravertebral
   { id: 'larynx', group: 'other', type: 'e', c: HEAD.larynx.c, r: HEAD.larynx.r },                      // §2.3
-  { id: 'airways', group: 'other', type: 'tube', pts: [[0, 20, -172, 9], [0, 5, -230, 9], [0, -10, -290, 9]] }, // §2.8 trachea
-  { id: 'airways', sided: true, group: 'other', type: 'tube', pts: [[0, -10, -290, 7], [45, -20, -300, 5]] },   // §2.8 bronchi to the hila
+  // The trachea and bronchi are the airway tree of airway-tree.js (research/LUNGS.md §2.2, §7.1).
 ];
 export const ORGAN_SHARES = {   // §13.4 organ star share (% of the organ budget)
   // The heart takes 55 % (HEART.md §6: a dense heart of fine stars, as the brain); the other organs
   // share 45 % of a budget that grew so their counts stay as before.
-  heart: 55, intestines: 10, lungs: 9, liver: 6, kidney: 4, stomach: 3.5, sense: 3.5, spleen: 2, pancreas: 1.5,
-  pelvic: 1.5, thyroid: 0.5, other: 3.5,
+  // The lungs then grew the budget by a third (LUNGS.md §7.1: the airway tree, the acini, the pleura),
+  // and every other organ keeps its count: 55 → 41.25, 9 % + the new third → 31.75, the rest × 0.75.
+  heart: 41.25, intestines: 7.5, lungs: 31.75, liver: 4.5, kidney: 3, stomach: 2.625, sense: 2.625, spleen: 1.5, pancreas: 1.125,
+  pelvic: 1.125, thyroid: 0.375, other: 2.625,
 };
 export const PELVIC_FLOOR = { id: 'pelvicFloor', c: [0, -20, -810], r: [45, 50, 8] };   // §2.8 unlabelled field (A.1)
 

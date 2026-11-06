@@ -832,13 +832,14 @@ body.hud-simple #hud { display: none; }
 .shud-monitor[hidden] { display: none; }
 .mon-row { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 104px; align-items: center; gap: 8px;
   padding: 2px 0 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); color: var(--c); }
-.mon-hr { --c: #4dff88; } .mon-art { --c: #ff5a5f; } .mon-pleth { --c: #5ad8ff; } .mon-rr { --c: #ffe066; }
+.mon-hr { --c: #4dff88; } .mon-art { --c: #ff5a5f; } .mon-pleth { --c: #5ad8ff; } .mon-rr { --c: #ffe066; } .mon-co2 { --c: #e6e6e6; }
 .mon-wave { display: block; width: 100%; height: 38px; color: var(--c); }
 .mon-tag { position: absolute; left: 1px; top: 1px; font-size: 9px; letter-spacing: 0.04em; opacity: 0.75; }
 .mon-val { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "label lim" "num num" "unit unit"; line-height: 1; }
 .mon-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; opacity: 0.85; }
 .mon-val .mon-label { grid-area: label; }
 .mon-lim { grid-area: lim; font-size: 8px; line-height: 1.05; text-align: right; opacity: 0.55; }
+.mon-sub { grid-area: lim; font-size: 8px; line-height: 1.05; text-align: right; opacity: 0.6; white-space: nowrap; }   /* PTT beside SpO₂ */
 .mon-num { grid-area: num; justify-self: end; font-size: 30px; font-weight: 600; letter-spacing: -0.02em; margin-top: 1px; }
 .mon-num-bp { font-size: 22px; }
 .mon-unit { font-size: 9px; opacity: 0.7; margin-top: 2px; }

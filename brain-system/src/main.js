@@ -22,7 +22,9 @@ import { BrainRenderer, PARAMS as RENDER } from './renderer.js';
 import { WAVE_SLOTS } from './shaders.js';
 import { HeartBeat, HEART } from './heart.js';
 import { PulseWave } from './pulse.js';
-import { RespTrace, monitorValues } from './monitor.js';
+import { RespTrace, CapnoTrace, SpO2Meter, monitorValues } from './monitor.js';
+import { BreathClock, frontMean } from './breath.js';
+import { lungStarIndex, pickLungPoint, lungName } from './lung-ui.js';
 import { OrbitCamera } from './camera.js';
 import { CameraControls } from './camera-controls.js';
 import { pickStars, VIEW_PICK } from './view-pick.js';
@@ -83,6 +85,7 @@ const VIEWS = {
   headNeck: bodyView([0, 0.1, -0.4], 6.7, -0.5, 0.15),
   thorax: bodyView([-0.1, 0, -3.3], 6.7, -0.25, 0.10),
   heart: bodyView([-0.25, 0.15, -3.45], 3.0, -0.45, 0.12),   // HEART.md §5: close on the heart; the rest dims
+  lungs: bodyView([0.62, -0.1, -3.3], 6.0, -0.3, 0.08),       // LUNGS.md §7.6: both lungs and the diaphragm, right of the monitor; the rest dims
   abdomen: bodyView([0, 0.1, -5.9], 8.6, -0.25, 0.10),
   torso: bodyView([0, 0, -4.6], 14.3, -0.35, 0.10),
   spine: bodyView([0, -0.6, -4.3], 15.9, Math.PI, 0.10),
@@ -242,7 +245,7 @@ async function start() {
   const heart = new HeartBeat();   // the beat drawn on the heart stars and the HUD trace (HEART.md)
   // Heart close-up (HEART.md §8): close-up stars built on demand for the drawn body tier, the section,
   // and the label index of the body's heart stars.
-  let heartCloseGen = null, heartCloseTier = -1, heartSection = false, heartIdx = null;
+  let heartCloseGen = null, heartCloseTier = -1, heartSection = false, heartIdx = null, lungIdx = null;
   const HEART_C = HEART_DEPTH.c.map((v) => v * MM);
   const HEART_ZONE = { focusQ: [8, 12], look: [0.86, 0.96], nearSide: 0.6 };   // [model] px/mm at the heart's centre; cos of the angle off it; units
   // Focus region (research/CLOSEUP.md §3) [model]: built when the camera is within maxDist (units) of
@@ -255,6 +258,12 @@ async function start() {
   let regionGen = null, regionAt = null, regionWeight = 0, pivotPrev = null, pivotStill = 0, fullRes = false, fullResBlock = 0;
   const pulse = new PulseWave();   // the arterial pulse on the vessel stars and the PLETH trace (PULSE.md)
   const resp = new RespTrace();     // the patient monitor's respiration trace (monitor.js)
+  // Breathing (LUNGS.md §7): one breath clock from the kernel's respiration for the lungs, the RESP and
+  // CO₂ traces and the airflow front; the oximeter reads the kernel's SaO₂ after its delay. AIR.gain is
+  // the airflow band's gain G (energy-conserving, ≤ ×1.6 on a faint star) [model].
+  const breath = new BreathClock({ seed: BODY.seed }), capno = new CapnoTrace(), spo2 = new SpO2Meter();
+  const AIR = { gain: 0.6, focusRate: 2.5 };
+  let lungFocus = 0, relaxSet = -1;
   let picking = false, limbMotion = true, lastPath = null;
   const overlayOn = {};
   // Simple HUD state: the chosen state (Calm, Stress, Dopamine), what the camera looks at, the
@@ -300,6 +309,7 @@ async function start() {
     heartCloseGen = null; heartCloseTier = -1;
     renderer.setFocusRegion(null); regionGen = null; regionAt = null;
     heartIdx = heartLabelIndex(body.points, body.floats, body.count);
+    lungIdx = lungStarIndex(body.points, body.floats, body.count);
     heart.setStars(body.points, body.floats, body.count);
     pulse.setStars(body.points, body.floats, body.count);
     if (bodyMode === 'body') renderer.setBodyFade(1);   // fade in over t_fade (B.9, §13.15)
@@ -524,6 +534,16 @@ async function start() {
     }
     // The structure name under a still mouse, a few times a second (a touch label holds for a while).
     lastZone = hz;
+    // In the Lungs view, the lung structure under the mouse (LUNGS.md §7.6), on the heart's tooltip.
+    if (view === 'lungs' && hover && lungIdx) {
+      if (screenT - hoverAt < HEART_PICK.everyMs / 1000) return;
+      hoverAt = screenT;
+      const pxAngle = (2 * Math.tan(camera.fovEff / 2)) / (canvas.clientHeight || 1);
+      const p = pickLungPoint(camera.eye, camera._rayDir(hover.x, hover.y), lungIdx, { cone: HEART_PICK.conePx * pxAngle, near: camera.nearPlane });
+      const name = p ? lungName(p) : null;
+      if (name) heartUi.showLabel(name, hover.x, hover.y); else heartUi.hideLabel();
+      return;
+    }
     if (!hover || !heartIdx || !(hz.q > HEART_PICK.minQ || view === 'heart')) { if (screenT > labelHold) heartUi.hideLabel(); return; }
     if (screenT - hoverAt < HEART_PICK.everyMs / 1000) return;
     hoverAt = screenT;
@@ -744,7 +764,7 @@ async function start() {
       showStress(stressOverlay(level));
     }
     const q = { value: quality.locked ? String(quality.tier) : 'auto', autoLabel: quality.locked ? null : TIERS[quality.tier].label };
-    const monitor = renderer.bodyVisible && bodyData ? monitorValues(rt.vitals(), heart.bpm, pulse.ptt) : null;
+    const monitor = renderer.bodyVisible && bodyData ? monitorValues(rt.vitals(), heart.bpm, pulse.ptt, { spo2: spo2.value(kernel.t), etco2: kernel.get('etco2') }) : null;
     return { state: mode, view: viewQueued ?? view, quality: q, style, paused, story, meter, monitor };
   };
   if (!url.advanced) {
@@ -871,6 +891,9 @@ async function start() {
     // B.6 steps 2–6: clock proposal, orgasm adapter, dopamine filter (the per-tick contract), kernel
     // within the tier's budget (B.9), clock commit, BrainNet filter.
     const sdt = paused ? 0 : dt;
+    // Calm in the simple HUD is relaxed rest: slow, deep breathing (LUNGS.md §6, kernel input `relax`).
+    const relax = simple && mode === 'calm' && !player.active && !adapter.active ? 1 : 0;
+    if (relax !== relaxSet) { kernel.set('relax', relax); relaxSet = relax; }
     rt.frame(sdt, { budgetMs: TIERS[quality.tier].kernelMs });
     if (stressShown >= 0) paintStressTint(stressShown);   // simple HUD, Stress
     updateWaves(sdt);
@@ -886,7 +909,14 @@ async function start() {
       renderer.heartNear = hz.near;
       stepHeartUi(hz);
       stepFocus(dt);
-      resp.step(dt, { rr: vit.rr, vt: kernel.get('vt'), kh: clock.kh, paused });
+      breath.step(dt, { rr: kernel.get('rr'), vt: kernel.get('vt'), sighRate: kernel.get('sighRate'), etco2: kernel.get('etco2'), kh: clock.kh, paused });
+      resp.step(dt, { rr: vit.rr, vt: kernel.get('vt'), kh: clock.kh, paused, volume: breath.volume });
+      capno.step(dt, breath.co2, { kh: clock.kh, paused });
+      spo2.push(kernel.t, kernel.get('sao2'));
+      lungFocus += ((view === 'lungs' ? 1 : 0) - lungFocus) * Math.min(1, dt * AIR.focusRate);
+      const hist = bodyData?.lungHist ?? null, front = breath.front, dir = breath.direction;
+      renderer.setBreath({ excursionMm: reducedMotion ? 0 : breath.excursion, ribMm: reducedMotion ? 0 : breath.ribs, focus: lungFocus,
+        front, dir, gain: hist && dir ? AIR.gain : 0, mean: hist && dir ? AIR.gain * frontMean(hist, front, dir) : 0 });
       renderer.setHeart(...heart.uniforms());
       // Arterial pulse (PULSE.md §7–§8): the beat's wave through the tree; the skin blood flow sets the
       // fingertip pulse amplitude.
@@ -942,7 +972,7 @@ async function start() {
     }
     if (adapter.active && model.mode === 'demo') hud.setLevel(model.level);
 
-    if (simple && renderer.bodyVisible && bodyData) simple.drawMonitor(heart, resp, pulse);
+    if (simple && renderer.bodyVisible && bodyData) simple.drawMonitor(heart, resp, pulse, capno);
     hudTimer -= dt;
     if (hudTimer <= 0 && simple) {
       hudTimer = 0.12;

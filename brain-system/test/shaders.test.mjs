@@ -238,7 +238,7 @@ describe('body palette (§13.5) and colour rules', () => {
     assert.deepEqual(RP.netRole, ['afferent', 'somEff', 'symp', 'para', 'afferent', 'enteric', 'endocrine', 'immune']);
     assert.deepEqual(Object.keys(S.NET_BIT), ['somAff', 'somEff', 'symp', 'para', 'visAff', 'enteric', 'endocrine', 'immune']);
     const sum = (t) => RP.classBudget[t].reduce((a, b) => a + b, 0);
-    assert.deepEqual(['low', 'medium', 'high', 'ultra'].map(sum), [122250, 238500, 393000, 610000], '§13.4 body totals (dense star model, dense heart, vascular tree)');
+    assert.deepEqual(['low', 'medium', 'high', 'ultra'].map(sum), [129583, 253167, 417000, 648667], '§13.4 body totals (dense star model, dense heart, vascular tree, lungs)');
   });
 });
 

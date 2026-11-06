@@ -21,10 +21,10 @@ const BONE = 3;        // tissue class index of the bone range (shaders.js TISSU
 export const PARAMS = {
   classRatio: [0.15, 0.38, 0.10, 0.08, 0.5, 0.30, 0.5, 0.2, 0.1],   // §13.3 flux × mean brain neuron-star flux
   classBudget: {                                                       // §13.4 points per tier
-    low: [27000, 22000, 3000, 2250, 5000, 18000, 5000, 4000, 36000],
-    medium: [48000, 44000, 6000, 4500, 10000, 36000, 10000, 8000, 72000],
-    high: [78000, 72000, 10500, 7500, 15000, 60000, 16000, 14000, 120000],
-    ultra: [120000, 116000, 15000, 10500, 22500, 90000, 24000, 20000, 192000],
+    low: [27000, 29333, 3000, 2250, 5000, 18000, 5000, 4000, 36000],
+    medium: [48000, 58667, 6000, 4500, 10000, 36000, 10000, 8000, 72000],
+    high: [78000, 96000, 10500, 7500, 15000, 60000, 16000, 14000, 120000],
+    ultra: [120000, 154667, 15000, 10500, 22500, 90000, 24000, 20000, 192000],
   },
   refTier: 'high',          // B.5: per-class gains normalised to a reference tier, as REF above (renderer L56–60)
   tierExponent: 1,          // gain = (reference count / drawn count)^exponent, as the neuron and axon gains
@@ -57,13 +57,14 @@ export const PARAMS = {
   // random `keep` share of each class at full per-star flux: the earlier budgets (before the dense
   // model) and so the earlier look. Classes in TISSUE order.
   // The heart has its own share of the organ budget (HEART.md §6): `keep[1]` is the share of the
-  // other organ stars (their earlier 17,600 of the 32,400 now at High) and `keepHeart` that of the
+  // other organ stars (their earlier 17,600 of the 56,400 now at High, the lungs' third included,
+  // LUNGS.md §7.1) and `keepHeart` that of the
   // heart (its earlier 2,400 of 39,600); in Detailed the heart's stars carry `heartGain` × the organ
   // star flux. The vascular tree (PULSE.md §9) is drawn in Detailed only (`keepTree` in Stars), and
   // there it replaces the earlier great-vessel stars; `keep[8]` is the share of the earlier vessel,
   // haze and immune stars (their earlier 5,000 of 7,500 at High).
   style: {
-    keep: [1 / 3, 17600 / 32400, 2 / 3, 2 / 3, 2 / 5, 1 / 3, 1 / 2, 1 / 2, 2 / 3],
+    keep: [1 / 3, 17600 / 56400, 2 / 3, 2 / 3, 2 / 5, 1 / 3, 1 / 2, 1 / 2, 2 / 3],
     keepHeart: 2400 / 39600,
     keepTree: 0,
     boost: [3.4, 1.6, 1.2, 1.2, 1.6, 2.0, 1.6, 1.4, 1.2],
@@ -166,6 +167,10 @@ export class BrainRenderer {
     // brightening of the tree and of the earlier great arteries; the drawn style picks its mean.
     this.pulse = new Float32Array(4);
     this.pulseIn = new Float32Array(4);
+    // Breathing (breath.js, BODY_VS uBreath/uAir, LUNGS.md §7.3–7.4): diaphragm excursion and rib-cage
+    // expansion (units), Lungs view focus; airflow front (L), gain, mean gain, on.
+    this.breath = new Float32Array(4);
+    this.air = new Float32Array(4);
     // Heart close-up (HEART.md §8.1): the extra heart stars and their VAO, drawn in Detailed while the
     // camera is near the heart; heartNear is the px/mm (1,080-px reference) at the heart's near side.
     this.heartClose = null;
@@ -305,6 +310,14 @@ export class BrainRenderer {
   // Arterial pulse from pulse.js (PulseWave.uniforms): [reduced time (s), amplitude G, mean of the
   // tree, mean of the earlier great arteries] (PULSE.md §8).
   setPulse(p) { this.pulseIn.set(p); }
+
+  // Breathing from breath.js (LUNGS.md §7.3–7.4): diaphragm excursion and rib-cage expansion (mm),
+  // the Lungs view focus 0–1, and the airflow front (L from the mouth), its direction (+1 in, −1 out),
+  // gain G and mean G·M (off when G or the direction is 0).
+  setBreath({ excursionMm = 0, ribMm = 0, focus = 0, front = 0, dir = 1, gain = 0, mean = 0 } = {}) {
+    this.breath.set([excursionMm * MM, ribMm * MM, focus, 0]);
+    this.air.set([front, gain, mean, gain > 0 ? Math.sign(dir) : 0]);
+  }
 
   // Dopamine waves (display only): origin [x, y, z] in mm and ≤ WAVE_SLOTS { radiusMm, amp, widthMm,
   // pushMm }; an empty list switches them off.
@@ -600,6 +613,8 @@ export class BrainRenderer {
     else this.focusU.set([0, 0, 0, 0, 1, 0, D ? this.focusSlab : 0, 0]);
     gl.uniform4fv(u.uFocus, this.focusU);
     gl.uniform4fv(u.uPulse, this.pulse);
+    gl.uniform4fv(u.uBreath, this.breath);
+    gl.uniform4fv(u.uAir, this.air);
     gl.uniform4fv(u.uNetGain, this.netGain);
     gl.uniform3fv(u.uNetRGB, this.netRGB);
     gl.uniform3fv(u.uStructRGB, this.structRGB);

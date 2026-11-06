@@ -374,6 +374,49 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
     light. The region size and the slab are set by `FOCUS` in `main.js` and `PARAMS.focus.front` and
     `.back`.
 
+22. **Lungs and the respiratory system** (`brain-system/research/LUNGS.md`). The user asked for an
+    analysis of the lungs and the respiratory system. Before building, they chose:
+    - the lungs only for now, to the finest detail; the other organs later, one system at a time
+      (LUNGS.md §10 proposes the order: gut, then liver, pancreas, spleen and the portal circulation,
+      then kidneys and bladder, then the endocrine glands, then the reproductive organs);
+    - all four display parts: the airway tree with the acini, the breathing motion, the airflow
+      front, and a Lungs view;
+    - SpO₂ and CO₂ (capnogram and EtCO₂) on the monitor;
+    - the kernel extension, with Calm as relaxed slow, deep breathing.
+
+    Measured before the change: `rr` stayed at 14 and `vt` at 0.5 through Stress and Pleasure, so
+    nothing drove breathing from emotion.
+
+    What was built:
+    - **The kernel** (`Autonomic._resp`):
+      - CO₂ on alveolar ventilation, in two pools;
+      - a behavioural drive from the stressor, the arousal record (read with every network on: a
+        deliberate change to the §11.14 "record ignored" rule for the respiratory layer only) and
+        the HUD's `relax` input;
+      - sighs, the acute pH, SaO₂ (Severinghaus) and EtCO₂.
+
+      Calm runs at 10.5/min × 0.62 L, Stress at 18/min with PaCO₂ 38, Pleasure at up to 26/min with
+      breath-holds. Rest is unchanged.
+    - **The airway tree** (`src/body/airway-tree.js`, built by a subagent): 27,305 branches, 5 lobes,
+      18 segments, fitted fissures, the carina at z −274.
+    - **The lung stars:** they take 31.75 % of an organ budget that grew by a third; every other
+      organ keeps its count, and the body totals are now 129,583 / 253,167 / 417,000 / 648,667.
+      Also:
+      - pulmonary arteries beside the bronchi;
+      - a diaphragm sheet;
+      - the breathing field and the airflow front in `BODY_VS` (106 of its 110 slots);
+      - the breath clock (`src/breath.js`);
+      - the Lungs view with names (`src/lung-ui.js`);
+      - SpO₂ and a CO₂ row on the monitor.
+
+    Next decision for the user:
+    - whether the airway tree reads clearly enough in the Lungs view and close up;
+    - whether the breathing depth and the airflow front suit them;
+    - which organ system comes next.
+
+    The airway's legibility is set by `PARAMS.lung.share` (generate.js) and `PARAMS.breath.roleGain`
+    (shaders.js). The front's gain is `AIR.gain` (main.js).
+
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
   noEmit. No React, no `.ts`, no build step, no typescript dependency in `package.json` (`tsc` 7.0.2 must be
@@ -432,6 +475,7 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Mac, camera navigation (decision 19; `test/camera.test.mjs`, 24 tests) | 598 | 566 | 4 (golden, platform bits) | 28 |
 | Mac, heart close-up detail (decision 20; `test/heart-detail.test.mjs`, 8 tests) | 606 | 574 | 4 (golden, platform bits) | 28 |
 | Mac, body close-up clarity (decision 21; `test/closeup.test.mjs`, 5 tests) | 611 | 579 | 4 (golden, platform bits) | 28 |
+| Mac, lungs and respiratory system (decision 22; `airway-tree` 14, `breath` 10, `lungs` 9, respiration 7, monitor 2 new tests) | 653 | 621 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was

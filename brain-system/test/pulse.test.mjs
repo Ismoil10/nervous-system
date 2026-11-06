@@ -121,7 +121,7 @@ test('budgets: the vessel group, the tree share and the body totals agree everyw
   assert.deepEqual(tiers.map((t) => GEN.budgets[t].vessel - Math.round(GEN.budgets[t].vessel * GEN.treeShare)), [2250, 4500, 7500, 12000], 'the earlier stars keep their counts');
   assert.deepEqual(tiers.map((t) => RP.classBudget[t][8]), tiers.map((t) => GEN.budgets[t].vessel));
   const sum = (t) => Object.values(GEN.budgets[t]).reduce((a, x) => a + x, 0);
-  assert.deepEqual(tiers.map(sum), [122250, 238500, 393000, 610000]);
+  assert.deepEqual(tiers.map(sum), [129583, 253167, 417000, 648667]);
   assert.deepEqual(TIERS.map((t) => t.body), tiers.map(sum));
   const b = low(), r = vesselRange(b), parts = new Map();
   for (let i = r.start; i < r.start + r.count; i++) { const p = Math.round(b.points[i * FLOATS + 5]); parts.set(p, (parts.get(p) || 0) + 1); }

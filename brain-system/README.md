@@ -78,7 +78,15 @@ coupling of arousal to peripheral vasocongestion is removed, and the vitals read
 - **Vitals and Live.** Heart rate, blood pressure, respiration, pupils, skin conductance,
   temperatures, gut motility, cortisol, adrenaline, IL-6 and sickness behaviour, with network-off
   tags and 60-s traces; an event log of arrivals and switches, newest first.
-- **Views.** Three brain views and nine body views; Skeleton off by default.
+- **Views.** Three brain views and ten body views; Skeleton off by default.
+- **Lungs and breathing** ([research/LUNGS.md](research/LUNGS.md)). The kernel's respiration answers
+  emotion: Calm breathes slowly and deeply (≈ 10.5/min × 0.62 L), Stress faster and shallower with
+  twice the sighs (≈ 18/min, PaCO₂ ≈ 38), Pleasure hyperventilates towards the climax, with
+  breath-holds. CO₂ balances on alveolar ventilation in two pools; SaO₂ comes from the Severinghaus
+  curve, EtCO₂ from PaCO₂. One breath clock, in screen time, moves the lungs, the diaphragm, the rib
+  cage, the heart and the abdominal organs, sends an airflow front through the airways, and draws
+  the RESP trace and the capnogram. The airway tree runs from the trachea to the acini, with the
+  pulmonary arteries beside the bronchi; the Lungs view dims everything else.
 
 ## Controls
 The app opens with a **simple HUD** (`src/ui-simple.js`) of four controls. The person's emotion
@@ -106,9 +114,13 @@ changes the emotion.
     Dopamine keeps its amber.
   - **Stars** is the earlier look, kept as a preset.
   - **Heart** (view button): a close camera on a beating heart with valves, fibres, coronary vessels
-    and the conduction system. In the Body and Heart views the HUD shows a patient monitor: ECG and
-    heart rate, arterial pressure, a fingertip pulse (PLETH) with the pulse transit time, respiration,
-    temperature, and the adrenaline and cortisol blood values.
+    and the conduction system. In the Body, Heart and Lungs views the HUD shows a patient monitor:
+    ECG and heart rate, arterial pressure, a fingertip pulse (PLETH) with SpO₂ and the pulse transit
+    time, respiration, the capnogram with EtCO₂, temperature, and the adrenaline and cortisol blood
+    values. SpO₂ and EtCO₂ are the model's own values (`research/LUNGS.md` §4); SpO₂ stays at
+    97–99 % in every state, as in a healthy person.
+  - **Lungs** (view button): both lungs breathing, the diaphragm, the airway tree with its airflow
+    front, and the pulmonary vessels; everything else dims (`research/LUNGS.md` §7).
   - **Heart close-up** (Detailed; `research/HEART.md` §8). The heart carries its fine anatomy:
     - trabeculae, pectinate muscles and the crista terminalis;
     - papillary muscles with their heads, and chordae that fan out;
@@ -284,7 +296,10 @@ HUD actions reach the kernel.
 | `src/camera-controls.js`, `src/view-pick.js` | Camera input (mouse, trackpad, touch, keys, fly mode, help) and the depth under the cursor |
 | `src/ui-simple.js` | Simple HUD (the default): emotion (Calm / Stress / Pleasure), view and style, quality, Pause; story and one meter |
 | `src/heart.js` | `HeartBeat`: the beat clock, conduction timing, Wiggers volumes, valves and the schematic ECG |
-| `src/monitor.js` | `MONITOR`, `RespTrace`, `isAlarm`, `monitorValues`: the patient monitor's channels, alarm limits and respiration trace |
+| `src/monitor.js` | `MONITOR`, `RespTrace`, `CapnoTrace`, `SpO2Meter`, `isAlarm`, `monitorValues`: the patient monitor's channels, alarm limits, the respiration trace, the capnogram and the oximeter reading |
+| `src/breath.js` | `BreathClock`: one breath at a time in screen time from the kernel's respiration (sighs, breath-holds); the diaphragm excursion and rib-cage laws, the airflow front and its energy-conserving mean, the capnogram |
+| `src/body/airway-tree.js` | `buildAirwayTree`, `LOBES`, `SEGMENTS`, `lobeOf`, `segmentOf`, `fissureDist`: the airway tree from the trachea to the acini (space-filling, Murray diameters), the lobes, fissures and Boyden segments |
+| `src/lung-ui.js` | Lungs view names: the airway, segment or lobe under the mouse |
 | `src/pulse.js` | `PulseWave`: the arterial pulse from the beat (arrival delays scaled by the state's wave speed, the energy-conserving mean for `BODY_VS`), the PLETH trace and the pulse transit time |
 | `src/body/vessel-tree.js` | `VESSEL_TREE`, `buildDetail`, `pulseSite`: the named arteries and veins, their branches, organ trees and capillary beds, radii (Murray), arrival delays and pulse amplitudes |
 | `src/body/heart-form.js` | `HEART_FORM`: heart geometry (ventricles, fibres, atria, valves, vessels, conduction system, fine anatomy); `LABEL_NAMES`; the close-up law (`HEART_LOD`), depth cue and four-chamber section |

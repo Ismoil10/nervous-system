@@ -114,7 +114,7 @@ export const AROUSAL_STATES = [                                                /
 export const VIEWS = {                                                         // §13.11, §13.13
   brain: [['whole', 'Whole brain'], ['cutaway', 'Cutaway'], ['dopamine', 'Dopamine system']],
   body: [['wholeBody', 'Whole body'], ['upperBody', 'Upper body'], ['headNeck', 'Head & neck'],
-    ['thorax', 'Thorax'], ['heart', 'Heart'], ['abdomen', 'Abdomen'], ['torso', 'Torso'], ['spine', 'Spine'],
+    ['thorax', 'Thorax'], ['heart', 'Heart'], ['lungs', 'Lungs'], ['abdomen', 'Abdomen'], ['torso', 'Torso'], ['spine', 'Spine'],
     ['rightArm', 'Right arm'], ['rightLeg', 'Right leg']],
 };
 const VIEW_LABEL = new Map([...VIEWS.brain, ...VIEWS.body]);

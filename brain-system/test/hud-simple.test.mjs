@@ -14,6 +14,8 @@ import { VIEWS, isBodyView } from '../src/ui-body.js';
 import { SCENARIOS as SIM_SCENARIOS } from '../src/sim/scenarios.js';
 import { PHASES } from '../src/response.js';
 import { R, AREAS } from '../src/anatomy.js';
+import { ORGAN_SHARES } from '../src/body/geometry.js';
+const HEART_SHARE = ORGAN_SHARES.heart / 100;
 import { NEURON_VS, DA_VS, BODY_VS, WAVE_SLOTS, uniformSlots } from '../src/shaders.js';
 import { TIERS } from '../src/performance.js';
 import { BrainRenderer, PARAMS as RP, PROGRAMS } from '../src/renderer.js';
@@ -31,7 +33,7 @@ test('index.html holds the simple HUD beside the full one; main.js chooses which
   assert.match(CSS, /body\.hud-simple #shud \{ display: grid; \}/);
   assert.match(CSS, /body\.hud-simple #hud \{ display: none; \}/);
   for (const id of ['shud-story', 'shud-scenario', 'shud-stage', 'shud-text', 'shud-meter', 'shud-meter-label', 'shud-meter-bar',
-    'shud-meter-low', 'shud-meter-high', 'shud-meter-value', 'shud-views', 'shud-style', 'shud-quality', 'shud-pause', 'shud-states', 'shud-monitor', 'mon-ecg', 'mon-abp', 'mon-resp', 'mon-hr', 'mon-sys', 'mon-dia', 'mon-map', 'mon-rr',
+    'shud-meter-low', 'shud-meter-high', 'shud-meter-value', 'shud-views', 'shud-style', 'shud-quality', 'shud-pause', 'shud-states', 'shud-monitor', 'mon-ecg', 'mon-abp', 'mon-resp', 'mon-capno', 'mon-hr', 'mon-sys', 'mon-dia', 'mon-map', 'mon-rr', 'mon-spo2', 'mon-co2', 'mon-ptt',
     'mon-temp', 'mon-adr', 'mon-cort']) {
     assert.match(SHUD, new RegExp(`id="${id}"`), `#${id}`);
   }
@@ -129,9 +131,9 @@ test('body star styles: Detailed draws every star, Stars the earlier share at th
   const before = { skin: 26000, organ: 20000, muscle: 7000, bone: 5000, cord: 6000, nerve: 20000, ganglion: 8000, enteric: 7000, vessel: 5000 };
   const K = RP.style;
   TISSUE_NAMES.forEach((name, c) => {
-    // The organ class splits into the heart (55 % of it) and the rest, each with its own share.
+    // The organ class splits into the heart (ORGAN_SHARES.heart %) and the rest, each with its own share.
     // The vessel class splits into the vascular tree (PULSE.md §9) and the earlier stars.
-    const drawn = name === 'organ' ? GEN.budgets.high.organ * (0.45 * K.keep[c] + 0.55 * K.keepHeart)
+    const drawn = name === 'organ' ? GEN.budgets.high.organ * ((1 - HEART_SHARE) * K.keep[c] + HEART_SHARE * K.keepHeart)
       : name === 'vessel' ? GEN.budgets.high.vessel * ((1 - GEN.treeShare) * K.keep[c] + GEN.treeShare * K.keepTree)
       : GEN.budgets.high[name] * K.keep[c];
     assert.ok(Math.abs(drawn - before[name]) < 1, `${name}: high-tier budget × keep = the earlier budget`);

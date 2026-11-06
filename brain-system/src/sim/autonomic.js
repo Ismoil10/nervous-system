@@ -139,7 +139,26 @@ export const PARAMS = {
     // τ = ch.vagCard.on 0.5 s), applied analytically to the sinusoid (gain 1/√(1 + (ωτ)²), phase lag
     // atan ωτ) so it holds in coarse CV mode (§11.6). Gives ≈ 10.5 bpm at 14 breaths/min (§7.8 model
     // check: 9.4) [model].
-    rsa: 0.25 },
+    rsa: 0.25,
+    // LUNGS.md §8 [model]. CO₂ balances on alveolar ventilation V̇A = (VT − VD)·f, so rapid shallow
+    // breathing ventilates less; rest is unchanged (4.9 L/min ↔ PaCO₂ 40). Below eupnoeic PaCO₂ the
+    // awake CO₂ response is flat (the "dog-leg", LUNGS.md §5.2): hcvrLow.
+    vd: 0.15, hcvrLow: 0.5,
+    // Two-pool CO₂ (LUNGS.md §4.3): a fast lung-and-blood pool (share `fast`, τ tauFast at resting
+    // V̇A) and the tissue pool (τ tauCo2); both relax to 40·V̇A₀/V̇A, so rest is unchanged.
+    fast: 0.6, tauFast: 60,
+    // Behavioural drive (LUNGS.md §5.3, §6): the rate rises with the stressor input u and the arousal
+    // drive h (14 + 13·h, the RESPONSE.md §7.4 law), falls with relaxation c (Calm, slow and deep);
+    // stress and arousal add alveolar ventilation beyond the metabolic need (hypocapnia, opposed by
+    // the chemoreflex). Arousal's extra V̇A grows as h⁴, so the plateau stays near resting depth and the
+    // climax is fast and deep ("hyperventilation begins late", RESPONSE.md §4.1). No metabolic term:
+    // exertion's V̇CO₂ is not modelled. Measured: PaCO₂ ≈ 38 in a full stressor (LUNGS.md §13).
+    beh: { tau: 5, stressRate: 0.30, stressVA: 0.20, calmRate: 0.25, arousalRate: 13, arousalVA: 3.0, arousalExp: 4 },
+    // Sighs (LUNGS.md §5.1): ≈ 12 per hour at rest (Li et al. 2016), doubling in a full stressor.
+    sigh: { rate: 12, stress: 1 },
+    // PaCO₂ − EtCO₂ (2–5 mmHg in health); HCO₃⁻ and its acute buffering (+1 per 10 mmHg rise,
+    // −2 per 10 mmHg fall) for the acute pH (LUNGS.md §4.2).
+    etGrad: 3, hco3: 24, hco3Up: 0.1, hco3Down: 0.2 },
   // Thermoregulation (§7.10)
   thermo: { tSet: 37.0, tauT: 2700, warm: [0.08, 0.42, 0.50], cool: [0.25, 0.75], tSkin: 33.0,
     sweatOn: 0.1, vcOn: 0.1,                         // onsets tSet + 0.1 / − 0.1 °C [model]
@@ -179,6 +198,20 @@ const E_REST = lumDrive(PARAMS.pupil.background);
 const E_1000 = lumDrive(PARAMS.pupil.lum1000);
 const alphaFn = (t, tp) => (t <= 0 ? 0 : (t / tp) * Math.exp(1 - t / tp));   // unit-peak alpha function (§7.8)
 export const ihr = (age) => PARAMS.ihr.a - PARAMS.ihr.b * age;
+// Resting alveolar ventilation (LUNGS.md §3.1): (0.5 − 0.15) × 14 = 4.9 L/min.
+const VA0 = (PARAMS.resp.vt0 - PARAMS.resp.vd) * PARAMS.resp.rr0;
+// Arterial O₂ saturation, % (Severinghaus 1979, LUNGS.md §4.2): the curve S = 1/(23,400/(P³ + 150P) + 1)
+// at the "virtual" PO₂ corrected for temperature, pH and PaCO₂ (the Bohr shift).
+export function sao2(po2, ph, pco2, temp = 37) {
+  const pv = Math.max(0, po2) * Math.pow(10, 0.024 * (37 - temp) + 0.40 * (ph - 7.40) + 0.06 * Math.log10(40 / Math.max(1, pco2)));
+  return pv > 0 ? 100 / (23400 / (pv * pv * pv + 150 * pv) + 1) : 0;
+}
+// Acute arterial pH from PaCO₂ (Henderson–Hasselbalch, LUNGS.md §4.2): HCO₃⁻ buffered acutely.
+export function acutePH(pco2) {
+  const R = PARAMS.resp, d = pco2 - R.paco2;
+  const hco3 = R.hco3 + (d > 0 ? R.hco3Up : R.hco3Down) * d;
+  return 6.1 + Math.log10(Math.max(1, hco3) / (0.03 * Math.max(1, pco2)));
+}
 
 // --- Fragment (§7.2, §11.3; positions §2 body frame, mm) ---
 const mir = (p) => [-p[0], p[1], p[2]];
@@ -285,6 +318,13 @@ class Autonomic {
       co: D('co', P.co0, 'L/min'), sv: D('sv', sv0, 'mL'), tpr: D('tpr', P.tpr0, 'mmHg·min/L'), contractility: D('contractility', 1),
       rr: D('rr', P.resp.rr0, '1/min'), vt: D('vt', P.resp.vt0, 'L'), ve: D('ve', P.resp.ve0, 'L/min'), respPhase: D('respPhase', 0),
       paco2: D('paco2', P.resp.paco2, 'mmHg'), pao2: D('pao2', P.resp.pao2, 'mmHg'),
+      // LUNGS.md §8: alveolar ventilation, the behavioural rate and extra V̇A, the two CO₂ pools, the
+      // derived gases (acute pH, SaO₂ by Severinghaus 1979, EtCO₂), the sigh rate, and the HUD's
+      // relaxation input (Calm: 1; written by the app, 0 in every scenario).
+      va: D('va', VA0, 'L/min'), rrB: D('resp.rrB', P.resp.rr0, '1/min'), dVA: D('resp.dVA', 0, 'L/min'),
+      co2F: D('resp.co2Fast', P.resp.paco2, 'mmHg'), co2S: D('resp.co2Slow', P.resp.paco2, 'mmHg'),
+      ph: D('phA', 7.4), sao2: D('sao2', sao2(P.resp.pao2, 7.4, P.resp.paco2, 37), '%'), etco2: D('etco2', P.resp.paco2 - P.resp.etGrad, 'mmHg'),
+      sighRate: D('sighRate', P.resp.sigh.rate, '1/h'), relax: D('relax', 0),
       pupilL: D('pupilD.L', 0, 'mm'), pupilR: D('pupilD.R', 0, 'mm'),
       scl: D('scl', P.scr.sclBase, 'µS'), scr: D('scr', 0, 'µS'),
       tCore: D('tCore', P.thermo.tSet, '°C'), tSkin: D('tSkin', P.thermo.tSkin, '°C'),
@@ -651,27 +691,60 @@ class Autonomic {
   }
 
   _resp(t, h) {
-    const k = this.k, vars = k.vars, R = PARAMS.resp;
+    const k = this.k, vars = k.vars, R = PARAMS.resp, B = R.beh, v = this.v;
     const gA = k.g('autonomic', t), gS = k.g('somatic', t);
-    const p = vars[this.v.paco2];
-    let apnoea = false;
-    if (this._switched()) { const rec = k.command(t); apnoea = !!rec?.apnoea; }
-    // Chemoreflex: central share always (RTN is CNS), peripheral share through the carotid body (§7.9).
-    const S = R.hcvr * (R.central + (1 - R.central) * gA);
-    const veT = apnoea ? 0 : Math.max(0.5, R.ve0 + S * (p - R.paco2));
-    const ve = veT + (vars[this.v.ve] - veT) * Math.exp(-h / R.tauVe);
-    vars[this.v.ve] = ve;
-    // CO₂ balance: τ dP/dt = (VCO₂ term − ve · P)/ve0, so P = 40 at ve 7; somatic off clamps the gases (A.5).
-    let pn;
-    if (ve > 1e-9) { const pss = R.paco2 * R.ve0 / ve; pn = pss + (p - pss) * Math.exp(-h * ve / (R.ve0 * R.tauCo2)); }
-    else pn = p + h * R.paco2 / R.tauCo2;
-    pn = R.paco2 + (pn - R.paco2) * (gS + (1 - gS) * Math.exp(-h / R.tauClamp));
-    vars[this.v.paco2] = pn;
-    vars[this.v.pao2] = R.pao2 - R.pao2Slope * (pn - R.paco2);
-    const vt = R.vt0 * Math.pow(Math.max(0, ve) / R.ve0, R.vtExp);
-    vars[this.v.vt] = vt; vars[this.v.rr] = vt > 1e-9 ? ve / vt : 0;
-    const ph = vars[this.v.respPhase] + h * vars[this.v.rr] / 60;
-    vars[this.v.respPhase] = ph - Math.floor(ph);
+    const p = vars[v.paco2], inp = k.input(t);
+    // Behavioural drive (LUNGS.md §5.3, §6, §8): the stressor input u; the arousal drive h and the
+    // breath-hold of the orgasm adapter's record, read with every network on (the respiratory layer
+    // follows the drive while the HUD keeps the legacy vitals, §11.14); the HUD's relaxation c (Calm),
+    // which yields to stress and arousal.
+    const rec = k.command(t);
+    const apnoea = !!rec?.apnoea;
+    const u = typeof inp.stress === 'number' ? clamp(inp.stress, 0, 1) : 0;
+    const hA = rec && Number.isFinite(rec.cmdSym) ? clamp(rec.cmdSym, 0, 1) : 0;
+    const c = clamp(vars[v.relax], 0, 1) * (1 - u) * (1 - hA);
+    const eB = Math.exp(-h / B.tau);
+    const rrBT = R.rr0 * (1 + B.stressRate * u) * (1 - B.calmRate * c) + B.arousalRate * hA;
+    const dVAT = VA0 * (B.stressVA * u + B.arousalVA * Math.pow(hA, B.arousalExp));
+    const rrB = rrBT + (vars[v.rrB] - rrBT) * eB, dVA = dVAT + (vars[v.dVA] - dVAT) * eB;
+    vars[v.rrB] = rrB; vars[v.dVA] = dVA;
+    // Chemoreflex: central share always (RTN is CNS), peripheral share through the carotid body (§7.9);
+    // flat below eupnoea while awake. It sets ventilation in V̇E units (HCVR), scaled to V̇A at the
+    // resting dead-space fraction.
+    const share = R.central + (1 - R.central) * gA;
+    const veC = Math.max(0.5, R.ve0 + (p >= R.paco2 ? R.hcvr : R.hcvrLow) * share * (p - R.paco2));
+    // `va` holds the ventilatory drive in V̇A units through a breath-hold, so breathing resumes at its
+    // depth; the effective ventilation is 0 while the breath is held.
+    const vaT = veC * VA0 / R.ve0 + dVA;
+    const vaD = vaT + (vars[v.va] - vaT) * Math.exp(-h / R.tauVe);
+    const va = apnoea ? 0 : vaD;
+    // Pattern: the behavioural rate, raised by hypercapnia as before (VT first: rate ∝ (V̇E/V̇E₀)^0.4);
+    // the depth follows from the alveolar ventilation, VT = V̇A/f + VD.
+    const rr = apnoea ? 0 : rrB * Math.pow(Math.max(1, veC / R.ve0), 1 - R.vtExp);
+    const vt = rr > 1e-9 ? va / rr + R.vd : 0;
+    vars[v.va] = vaD; vars[v.rr] = rr; vars[v.vt] = vt; vars[v.ve] = rr * vt;
+    // Two-pool CO₂ balance (LUNGS.md §4.3): each pool relaxes to 40·V̇A₀/V̇A with τ ∝ V̇A₀/V̇A; in apnoea
+    // both rise at 40/τ_tissue per s. Somatic off clamps the gases (A.5).
+    const cl = gS + (1 - gS) * Math.exp(-h / R.tauClamp);
+    const pool = (x, tau) => {
+      let y;
+      if (va > 1e-9) { const pss = R.paco2 * VA0 / va; y = pss + (x - pss) * Math.exp(-h * va / (VA0 * tau)); }
+      else y = x + h * R.paco2 / R.tauCo2;
+      return R.paco2 + (y - R.paco2) * cl;
+    };
+    const pf = pool(vars[v.co2F], R.tauFast), ps = pool(vars[v.co2S], R.tauCo2);
+    vars[v.co2F] = pf; vars[v.co2S] = ps;
+    const pn = R.fast * pf + (1 - R.fast) * ps;
+    vars[v.paco2] = pn;
+    vars[v.pao2] = R.pao2 - R.pao2Slope * (pn - R.paco2);
+    // Derived gases (LUNGS.md §4.2–4.3) and the sigh rate (§5.1).
+    const ph = acutePH(pn);
+    vars[v.ph] = ph;
+    vars[v.sao2] = sao2(vars[v.pao2], ph, pn, vars[v.tCore]);
+    vars[v.etco2] = pn - R.etGrad;
+    vars[v.sighRate] = R.sigh.rate * (1 + R.sigh.stress * u);
+    const phase = vars[v.respPhase] + h * rr / 60;
+    vars[v.respPhase] = phase - Math.floor(phase);
   }
 
   // CV quiescence of the deterministic core on 1-s boundaries (§11.6; overlays excluded).

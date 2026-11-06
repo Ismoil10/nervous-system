@@ -20,18 +20,21 @@
 
 import { MM, mulberry32 } from '../anatomy.js';
 import {
-  PARAMS as GEO, NET, TISSUE, TISSUE_NAMES, BODY_BOUNDS, HEAD, ORGANS, ORGAN_SHARES, PELVIC_FLOOR, GUT, GANGLIA, MUSCLES,
+  PARAMS as GEO, NET, TISSUE, TISSUE_NAMES, BODY_BOUNDS, HEAD, ORGANS, ORGAN_SHARES, PELVIC_FLOOR, GUT, GANGLIA, MUSCLES, LUNG_ROLE, DIAPHRAGM,
   VESSELS, PATHS, SITES, SKIN_REGIONS, bodySDF, bodyNormal, skinRegion, diaphragmZ, sdEllipsoid, gutAt, drawToS, sToDraw,
   gutRegionAt, rigidAt, pathById, pathSamples, nodeIndex, eyeFissure,
 } from './geometry.js';
 import { HEART_FORM, HEART_LOD, HEART_SECTION, FOCUS_LOD, PART, LABEL, LABEL_SCALE, axialOf, lvInside, rvInside, surfacePoint, ellPoint, tangents, dirLerp, hAdd } from './heart-form.js';
 import { TREE, VPART, VESSEL_TREE, arteryAt, buildDetail, vesselPoint } from './vessel-tree.js';
+import { buildAirwayTree, lungRegion, fissureDist } from './airway-tree.js';
+import { BREATH } from '../breath.js';
 import { SEGMENTS, CORD_SEGMENTS, CORD_ARC_CONUS, VERTEBRAE, PARAMS as FRAME, canalAt, canalAtArc, cordRadiiAtArc, drg, sided } from './frame.js';
 
 export const FLOATS = 16;   // B.7
 
 export const PARAMS = {
-  // §13.4 point budgets per tier and budget group (= B.8 `TIERS.body` totals 122,250 / 238,500 / 393,000 / 610,000).
+  // §13.4 point budgets per tier and budget group (= B.8 `TIERS.body` totals 129,583 / 253,167 / 417,000 / 648,667).
+  // The organ budget grew by a third for the lungs (LUNGS.md §7.1; geometry.js ORGAN_SHARES), the other organs keeping their counts.
   // The dense star model (user decision, 6 November 2026) raised the earlier budgets per group by
   // skin ×3, organ ×2, muscle ×1.5, bone ×1.5, cord ×2.5, nerve ×3, ganglion ×2, enteric ×2,
   // vessel ×1.5; the Stars style draws the earlier share (renderer PARAMS.style.keep). The organ
@@ -40,10 +43,10 @@ export const PARAMS = {
   // is the tree, and the earlier vessel, haze and immune stars keep their counts (the same 0.3 / 0.6 /
   // 1 / 1.6 tier ratio as before).
   budgets: {
-    low:    { skin: 27000,  organ: 22000, muscle: 3000,  bone: 2250,  cord: 5000,  nerve: 18000, ganglion: 5000,  enteric: 4000,  vessel: 36000 },
-    medium: { skin: 48000,  organ: 44000, muscle: 6000,  bone: 4500,  cord: 10000, nerve: 36000, ganglion: 10000, enteric: 8000,  vessel: 72000 },
-    high:   { skin: 78000,  organ: 72000, muscle: 10500, bone: 7500,  cord: 15000, nerve: 60000, ganglion: 16000, enteric: 14000, vessel: 120000 },
-    ultra:  { skin: 120000, organ: 116000, muscle: 15000, bone: 10500, cord: 22500, nerve: 90000, ganglion: 24000, enteric: 20000, vessel: 192000 },
+    low:    { skin: 27000,  organ: 29333, muscle: 3000,  bone: 2250,  cord: 5000,  nerve: 18000, ganglion: 5000,  enteric: 4000,  vessel: 36000 },
+    medium: { skin: 48000,  organ: 58667, muscle: 6000,  bone: 4500,  cord: 10000, nerve: 36000, ganglion: 10000, enteric: 8000,  vessel: 72000 },
+    high:   { skin: 78000,  organ: 96000, muscle: 10500, bone: 7500,  cord: 15000, nerve: 60000, ganglion: 16000, enteric: 14000, vessel: 120000 },
+    ultra:  { skin: 120000, organ: 154667, muscle: 15000, bone: 10500, cord: 22500, nerve: 90000, ganglion: 24000, enteric: 20000, vessel: 192000 },
   },
   // §13.2 Lund–Browder skin shares (% BSA); the perineal 1 % is folded into the smooth pelvic shell.
   skinShares: { head: 7, neck: 2, trunkAnt: 13, trunkPost: 13, buttocks: 5, perineum: 1, upperArm: 8, forearm: 6, hand: 5, thigh: 19, leg: 14, foot: 7 },
@@ -78,6 +81,14 @@ export const PARAMS = {
   boneSplit: { vertebrae: 0.5, pelvis: 0.2, ribs: 0.3 },
   senseShares: { iris: 30, eye: 20, retina: 15, cochlea: 7, vestLabyrinth: 8, olfEpith: 6, tongue: 8, tonguePatch: 6 }, // % of the §13.4 sense-organ share
   ribOffset: 8,                                       // [model] rib hint above the intercostal nerve (costal groove), mm
+  diaphragmSheet: { a: 140, b: 105, cy: -10, thick: 4, weightK: 4 },   // [model] the dome sheet inside the rib cage (LUNGS.md §2.4), mm; × weight so the breathing muscle reads
+  // Lungs (research/LUNGS.md §7.1) [model]: shares of the lungs' organ stars; the airway generations
+  // drawn in the whole-body build (the close-up region draws every generation); wall scatter (× the
+  // lumen radius); the parenchyma's clearance from the fissures (mm); the acinus stars on the sacs'
+  // shell; the visceral pleura's thickness (mm); the tracheal and main-bronchus ring hints (spacing mm,
+  // jitter, density contrast ≤ 30 % Michelson, irregular: §13.15 periodic-structure rule).
+  lung: { share: { airway: 0.55, acini: 0.25, parenchyma: 0.08, pleura: 0.12 }, baseGen: { low: 9, medium: 10, high: 11, ultra: 11 },
+    wall: 0.12, fissureGap: 1.2, acinusShell: 0.6, pleura: 1.0, rings: { spacing: 6, jitter: 0.35, low: 0.77 } },
   // [model] extent of each rib hint as a fraction u of its intercostal route: T1–T7 reach the sternum,
   // T8–T10 end at the costal margin, T11 is a floating rib (the nerves continue into the abdominal wall).
   ribExtent: [1, 1, 1, 1, 1, 1, 1, 0.75, 0.75, 0.75, 0.55],
@@ -166,6 +177,7 @@ export function hashPoints(f32) {
 const SENSE_NODES = ['iris', 'eye', 'retina', 'cochlea', 'vestLabyrinth', 'olfEpith', 'tongue', 'tongueAnt', 'tonguePost'];
 const ORGAN_NODE = (o) => o.id;
 for (const o of ORGANS) nodeIndex(ORGAN_NODE(o));
+nodeIndex('airways');   // the trachea and main bronchi (LUNGS.md §7.1), where ORGANS' last entries once registered it
 for (const [id] of GUT.regions) nodeIndex(id);
 for (const id of SENSE_NODES) nodeIndex(id);
 for (const m of MUSCLES) nodeIndex(m.id);
@@ -175,6 +187,7 @@ for (let i = 1; i <= 11; i++) nodeIndex(`rib.T${i}`);
 for (const g of GANGLIA) nodeIndex(g.id);
 for (const p of PATHS) nodeIndex(p.nerve);
 nodeIndex('blood');
+nodeIndex('diaphragm');   // after every earlier node, so their indices stay as they were (LUNGS.md §7.3)
 
 // ---------------------------------------------------------------------------------------------
 // Point writer
@@ -1102,7 +1115,153 @@ function heartEntries() {
   heartCache = entries;
   return entries;
 }
-function organEntries() {
+// ---------------------------------------------------------------------------------------------
+// Lungs (research/LUNGS.md §7.1): the airway tree's walls (airway-tree.js), the acini at its tips,
+// the parenchyma haze with its fissure gaps, and the visceral pleura. Every star carries its
+// breathing role (geometry.js LUNG_ROLE) in n.y; airway and acinus stars carry their volume
+// coordinate from the mouth (L, scaled so the conducting airways hold the dead space BREATH.vd) in n.x
+// for the airflow front. The whole-body build draws the airways to PARAMS.lung.baseGen[tier]; the
+// close-up region draws every generation near the pivot.
+// ---------------------------------------------------------------------------------------------
+let lungCache = null;
+function lungTree() {
+  if (lungCache) return lungCache;
+  const T = buildAirwayTree(), L = PARAMS.lung;
+  let volMax = 0;
+  for (const b of T.branches) volMax = Math.max(volMax, b.vol1);
+  const sOf = (mL) => (mL / volMax) * BREATH.vd;
+  const lungs = [1, -1].map((sd) => ORGANS.find((o) => o.id === 'lungs' && o.side === sd));
+  const node = nodeIndex('lungs'), airNode = nodeIndex('airways'), bits = ORGAN_BITS.lungs || 0;
+  // Stars per branch: ∝ length × r^1.3 in the whole-body build, so the trachea, bronchi and segmental
+  // airways read as tubes (generations 0–3 ≈ 13 %, 4–7 ≈ 34 %, 8–11 ≈ 53 % of the airway stars at
+  // High); ∝ length × (0.5 + r) in a close-up, so the small airways there read as lines.
+  const weight = (b) => b.len * Math.pow(b.r, 1.3), weightClose = (b) => b.len * (0.5 + b.r);
+  // Ring hints on the trachea and the main bronchi: irregular spacing, anterior C only (LUNGS.md §2.2).
+  const rngR = new Rng(0x7a11), R = L.rings, rings = new Map();
+  for (const b of T.branches) {
+    if (b.gen > 1) continue;
+    const at = [];
+    for (let x = rngR.range(0, R.spacing); x < b.len; x += R.spacing * (1 + R.jitter * (2 * rngR.u() - 1))) at.push(x);
+    rings.set(b.id, at);
+  }
+  lungCache = { T, sOf, volMax, lungs, node, airNode, bits, weight, weightClose, rings, L };
+  return lungCache;
+}
+const lungTier = (ctx) => (ctx && ctx.tier) || 'high';
+function lungEntries(tier = 'high') {
+  const C = lungTree(), { T, sOf, lungs, node, airNode, bits, weight, weightClose, rings, L } = C, S = L.share;
+  const nAir = [0, -LUNG_ROLE.AIRWAY, 0];
+  // Airway walls. `set` is the drawn branch set: the base generations, or every branch near the region.
+  const wallPoint = (rnd, b) => {
+    const t = rnd.u(), d = norm(sub(b.b, b.a)), n1 = norm(cross(d, Math.abs(d[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])), n2 = cross(d, n1);
+    const phi = 2 * Math.PI * rnd.u(), rho = b.r * (1 + L.wall * (rnd.u() - 0.5));
+    const c = lerp3(b.a, b.b, t);
+    const p = [0, 1, 2].map((k) => c[k] + (n1[k] * Math.cos(phi) + n2[k] * Math.sin(phi)) * rho);
+    return { p, t, phi, n1, n2 };
+  };
+  const ringOk = (rnd, b, w) => {
+    const at = rings.get(b.id);
+    if (!at) return true;
+    const x = w.t * b.len;
+    let near = 0;
+    for (const r0 of at) near = Math.max(near, Math.exp(-(((x - r0) / 1.2) ** 2)));
+    const ant = w.p[1] - lerp3(b.a, b.b, w.t)[1] > -0.35 * b.r;   // the posterior membranous wall carries no ring
+    return rnd.u() < L.rings.low + (1 - L.rings.low) * (ant ? near : 0);
+  };
+  const airSample = (rnd, set) => {
+    for (let k = 0; k < 4; k++) {
+      const b = set.list[rnd.pick(set.cdf)], w = wallPoint(rnd, b);
+      if (k < 3 && !ringOk(rnd, b, w)) continue;
+      return { p: w.p, o: { node: b.gen <= 1 ? airNode : node, bits, side: b.side || (w.p[0] >= 0 ? 1 : -1), n: [sOf(b.vol0 + (b.vol1 - b.vol0) * w.t), nAir[1], 0] } };
+    }
+    return null;
+  };
+  const baseSets = new Map();
+  const baseSet = (tier) => {
+    if (!baseSets.has(tier)) {
+      const list = T.branches.filter((b) => b.gen <= L.baseGen[tier]);
+      baseSets.set(tier, { list, cdf: cumulative(list.map(weight)), close: list.reduce((a, b) => a + weightClose(b), 0) });
+    }
+    return baseSets.get(tier);
+  };
+  let regSet = null;
+  const regionSet = () => {
+    if (regSet && regSet.id === REGION.id) return regSet;
+    const c = REGION.c, r = REGION.r, list = [];
+    for (const b of T.branches) {   // branches whose segment passes within the region
+      const d = sub(b.b, b.a), l2 = Math.max(1e-9, d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+      const t = clamp(((c[0] - b.a[0]) * d[0] + (c[1] - b.a[1]) * d[1] + (c[2] - b.a[2]) * d[2]) / l2, 0, 1);
+      const q = lerp3(b.a, b.b, t);
+      if (len3(q[0] - c[0], q[1] - c[1], q[2] - c[2]) <= r + b.r + 2) list.push(b);
+    }
+    regSet = { id: REGION.id, list, cdf: list.length ? cumulative(list.map(weightClose)) : null, share: 0 };
+    if (list.length) {   // the region's wall stars per unit weight equal the base build's
+      const pr = new Rng(0xa1e + REGION.id), N = 256;
+      let hit = 0;
+      for (let i = 0; i < N; i++) { const w = wallPoint(pr, list[pr.pick(regSet.cdf)]); if (regionHas(w.p)) hit++; }
+      const base = baseSet(tier);
+      regSet.share = (regSet.cdf[regSet.cdf.length - 1] / base.close) * (hit / N);
+    }
+    return regSet;
+  };
+  const airway = {
+    weight: S.airway,
+    sample(rnd) { return /** @type {any} */ (airSample(rnd, baseSet(tier))); },
+    regionShare() { return regionSet().share; },
+    regionSample(rnd) { const rs = regionSet(); return /** @type {any} */ (rs.cdf ? airSample(rnd, rs) : airSample(rnd, baseSet(tier))); },
+  };
+  // Acini: alveolar sacs round each terminal bronchiole's tip; the volume coordinate runs on from the
+  // dead space over the acinar diffusion depth (BREATH.front.acinar), centre to rim.
+  const acini = {
+    weight: S.acini,
+    sample(rnd) {
+      const a = T.acini[rnd.int(T.acini.length)], u = rnd.unitSphere();
+      const f = rnd.u() < L.acinusShell ? 0.75 + 0.25 * rnd.u() : Math.cbrt(rnd.u()) * 0.75;
+      const p = [a.c[0] + u[0] * a.r * f, a.c[1] + u[1] * a.r * f, a.c[2] + u[2] * a.r * f];
+      return { p, o: { node, bits, side: p[0] >= 0 ? 1 : -1, n: [BREATH.vd + BREATH.front.acinar * f, -LUNG_ROLE.ACINUS, 0] } };
+    },
+  };
+  // Parenchyma haze: the lung region, clear of the fissures (2-mm dark gaps, LUNGS.md §7.1).
+  const vol = lungs.map((o) => ellVol(o.r));
+  const pick = (rnd) => lungs[rnd.u() * (vol[0] + vol[1]) < vol[0] ? 0 : 1];
+  const parenchyma = {
+    weight: S.parenchyma,
+    sample(rnd) {
+      const o = pick(rnd), p = tryPoint(rnd, () => inEll(rnd, o.c, o.r), (q) => lungRegion(q) !== 0 && fissureDist(q) > L.fissureGap);
+      return { p, o: { node, bits, side: o.side, n: [0, -LUNG_ROLE.PARENCHYMA, 0] } };
+    },
+  };
+  // Visceral pleura: a faint shell on the lung surface (the ellipsoid where it bounds the lung).
+  const pleura = {
+    weight: S.pleura,
+    sample(rnd) {
+      const o = pick(rnd);
+      const p = tryPoint(rnd, () => onEllShell(rnd, o.c, o.r, L.pleura), (q) => lungRegion(q) !== 0);
+      return { p, o: { node, bits, side: o.side, n: [0, -LUNG_ROLE.PLEURA, 0] } };
+    },
+  };
+  return [airway, acini, parenchyma, pleura];
+}
+// The airflow band's histogram (breath.js frontMean): expected star counts over the volume coordinate
+// of the airway and acinus stars drawn in the whole-body build of a tier.
+export function lungFrontHist(tier = 'high', bins = 96) {
+  const { T, sOf, weight, L } = lungTree(), top = BREATH.vd + BREATH.front.acinar;
+  const s = new Float32Array(bins), w = new Float32Array(bins);
+  for (let i = 0; i < bins; i++) s[i] = ((i + 0.5) / bins) * top;
+  const put = (x, m) => { w[clamp(Math.floor((x / top) * bins), 0, bins - 1)] += m; };
+  const list = T.branches.filter((b) => b.gen <= L.baseGen[tier]), W = list.reduce((a, b) => a + weight(b), 0);
+  const share = L.share.airway / (L.share.airway + L.share.acini);
+  for (const b of list) { const m = (share * weight(b)) / W, s0 = sOf(b.vol0), s1 = sOf(b.vol1); for (let k = 0; k < 4; k++) put(s0 + ((k + 0.5) / 4) * (s1 - s0), m / 4); }
+  // Acini: f on the shell (0.75–1) or inside (∛u · 0.75).
+  const mA = 1 - share;
+  for (let k = 0; k < 32; k++) {
+    const f1 = 0.75 + 0.25 * (k + 0.5) / 32, f2 = Math.cbrt((k + 0.5) / 32) * 0.75;
+    put(BREATH.vd + BREATH.front.acinar * f1, (mA * L.acinusShell) / 32);
+    put(BREATH.vd + BREATH.front.acinar * f2, (mA * (1 - L.acinusShell)) / 32);
+  }
+  return { s, w };
+}
+function organEntries(ctx = null) {
   const byId = new Map();
   for (const o of ORGANS) { if (!byId.has(o.id)) byId.set(o.id, []); byId.get(o.id).push(o); }
   const carveHit = (p, ids) => ids.some((id) => (byId.get(id) || []).some((o) => {
@@ -1115,6 +1274,7 @@ function organEntries() {
   for (const o of ORGANS) {
     const node = nodeIndex(ORGAN_NODE(o)), bits = ORGAN_BITS[o.id] || 0, mult = o.sided ? 2 : 1;
     if (o.group === 'heart') continue;   // the heart's stars come from heartEntries (HEART.md); ORGANS keeps its volume for carving
+    if (o.id === 'lungs') continue;      // the lungs' stars come from lungEntries (LUNGS.md §7.1); ORGANS keeps their volume
     if (o.type === 'e') {
       const r = enlarge(o.r);
       const ok = (p) => insideSkin(p) && (o.clipBelow === undefined || p[2] >= o.clipBelow)
@@ -1140,6 +1300,7 @@ function organEntries() {
     }
   }
   for (const e of heartEntries()) add('heart', e);
+  for (const e of lungEntries(lungTier(ctx))) add('lungs', e);
   for (const g of ['intestines', 'stomach', 'pelvic', 'other']) add(g, gutWallEntry(g));
   {   // gastric fundus dome (§2.9) as a wall shell
     const F = GUT.fundus, node = nodeIndex('gut.fundus'), path = pathById('gut');
@@ -1167,7 +1328,7 @@ function organEntries() {
   return groups;
 }
 function* genOrgans(w, count, rnd, ctx) {
-  const groups = organEntries();
+  const groups = organEntries(ctx);
   const names = Object.keys(ORGAN_SHARES).filter((g) => groups.has(g) || g === 'intestines' || g === 'stomach');
   const shares = names.map((g) => (groups.has(g) ? ORGAN_SHARES[g] : 0));
   const counts = apportion(count, shares);
@@ -1200,6 +1361,21 @@ function* genMuscles(w, count, rnd, ctx) {
       },
     };
   });
+  // The diaphragm (research/LUNGS.md §2.4, §7.3): a thin dome sheet on the geometry.js height field
+  // inside the rib cage, its stars marked for the breathing motion (domes descend, costal rim fixed).
+  {
+    const node = nodeIndex('diaphragm'), D = PARAMS.diaphragmSheet, n = [0, -LUNG_ROLE.DIAPHRAGM, 0];
+    entries.push({
+      weight: D.weightK * (Math.PI * D.a * D.b * D.thick) ** (2 / 3),
+      sample(r) {
+        const p = tryPoint(r, () => {
+          const [u, v] = r.disk(), x = D.a * u, y = D.cy + D.b * v;
+          return [x, y, diaphragmZ(x, y) + D.thick * (r.u() - 0.5)];
+        }, (q) => insideSkin(q) && q[2] > DIAPHRAGM.base + 2);
+        return { p, o: { node, side: p[0] >= 0 ? 1 : -1, n } };
+      },
+    });
+  }
   yield* fill(w, rnd, ctx, 'muscle', count, entries, { flux: PARAMS.flux.muscle, tissue: TISSUE.muscle, bits: 0, lod: 0 });
 }
 
@@ -1559,7 +1735,7 @@ function* build({ budget = 'high', lod = 2 } = {}, seed = 1848, sliceMs = Infini
   const isoTier = tier || (groups.skin >= PARAMS.budgets.high.skin ? 'high' : 'low');
   let t0 = now(), phase = '';
   const ctx = {
-    maxLod: lod, isoGrid: PARAMS.isoGrid[isoTier],
+    tier: isoTier, maxLod: lod, isoGrid: PARAMS.isoGrid[isoTier],
     icc: tier ? tier === 'high' || tier === 'ultra' : groups.enteric >= PARAMS.budgets.high.enteric,   // §13.3 ICC on high and ultra only
     skipIntercostal: PARAMS.lowTierSkipIntercostals && (tier ? tier === 'low' : groups.nerve <= PARAMS.budgets.low.nerve),
     due: () => sliceMs !== Infinity && now() - t0 >= PARAMS.sliceHeadroom * sliceMs,
@@ -1584,7 +1760,7 @@ function* build({ budget = 'high', lod = 2 } = {}, seed = 1848, sliceMs = Infini
     normal: s.kind === 'skin' ? bodyNormal(s.pos[0], s.pos[1], s.pos[2]) : null,
     node: s.kind === 'skin' ? nodeIndex(`skin.${skinRegion(s.pos[0], s.pos[1], s.pos[2])}`) : -1,
   }));
-  return { points, count: w.n, floats: FLOATS, ranges, sites, hash: hashPoints(points), tier, seed, lod, budget: groups };
+  return { points, count: w.n, floats: FLOATS, ranges, sites, hash: hashPoints(points), tier, seed, lod, budget: groups, lungHist: lungFrontHist(isoTier) };
 }
 
 // One-shot generation: { points (Float32Array, FLOATS per point), count, ranges, sites, hash, … }.
@@ -1659,7 +1835,7 @@ export function* generateFocusRegionChunks({ budget = 'high', lod = 2, centre, r
   let t0 = now();
   const w = new Writer(Math.max(0, Math.round(cap)));
   const ctx = {
-    maxLod: lod, isoGrid: PARAMS.isoGrid[isoTier],
+    tier: isoTier, maxLod: lod, isoGrid: PARAMS.isoGrid[isoTier],
     icc: tier ? tier === 'high' || tier === 'ultra' : groups.enteric >= PARAMS.budgets.high.enteric,
     skipIntercostal: PARAMS.lowTierSkipIntercostals && (tier ? tier === 'low' : groups.nerve <= PARAMS.budgets.low.nerve),
     due: () => sliceMs !== Infinity && now() - t0 >= PARAMS.sliceHeadroom * sliceMs,
