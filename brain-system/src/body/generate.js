@@ -26,7 +26,7 @@ import {
 } from './geometry.js';
 import { HEART_FORM, HEART_LOD, HEART_SECTION, FOCUS_LOD, PART, LABEL, LABEL_SCALE, axialOf, lvInside, rvInside, surfacePoint, ellPoint, tangents, dirLerp, hAdd } from './heart-form.js';
 import { TREE, VPART, VESSEL_TREE, arteryAt, buildDetail, vesselPoint } from './vessel-tree.js';
-import { buildAirwayTree, lungRegion, fissureDist } from './airway-tree.js';
+import { buildAirwayTree, lungRegion, lobeOf, upperAirwaySegments, fissureSurfacePoint } from './airway-tree.js';
 import { BREATH } from '../breath.js';
 import { SEGMENTS, CORD_SEGMENTS, CORD_ARC_CONUS, VERTEBRAE, PARAMS as FRAME, canalAt, canalAtArc, cordRadiiAtArc, drg, sided } from './frame.js';
 
@@ -82,13 +82,17 @@ export const PARAMS = {
   senseShares: { iris: 30, eye: 20, retina: 15, cochlea: 7, vestLabyrinth: 8, olfEpith: 6, tongue: 8, tonguePatch: 6 }, // % of the §13.4 sense-organ share
   ribOffset: 8,                                       // [model] rib hint above the intercostal nerve (costal groove), mm
   diaphragmSheet: { a: 140, b: 105, cy: -10, thick: 4, weightK: 4 },   // [model] the dome sheet inside the rib cage (LUNGS.md §2.4), mm; × weight so the breathing muscle reads
-  // Lungs (research/LUNGS.md §7.1) [model]: shares of the lungs' organ stars; the airway generations
-  // drawn in the whole-body build (the close-up region draws every generation); wall scatter (× the
-  // lumen radius); the parenchyma's clearance from the fissures (mm); the acinus stars on the sacs'
-  // shell; the visceral pleura's thickness (mm); the tracheal and main-bronchus ring hints (spacing mm,
-  // jitter, density contrast ≤ 30 % Michelson, irregular: §13.15 periodic-structure rule).
-  lung: { share: { airway: 0.55, acini: 0.25, parenchyma: 0.08, pleura: 0.12 }, baseGen: { low: 9, medium: 10, high: 11, ultra: 11 },
-    wall: 0.12, fissureGap: 1.2, acinusShell: 0.6, pleura: 1.0, rings: { spacing: 6, jitter: 0.35, low: 0.77 } },
+  // Lungs (research/LUNGS.md §7.1, §14) [model]: shares of the lungs' organ stars; the airway
+  // generations drawn in the whole-body build (the close-up region draws every generation); wall
+  // scatter (× the lumen radius); the acinus stars on the sacs' shell, the acinar depth of the volume
+  // coordinate (L) and the close-up region's acini (× their body share); the visceral pleura's
+  // thickness (mm); the fissures' cumulative pick (right oblique, left oblique, horizontal); the
+  // tracheal and main-bronchus ring hints (spacing mm, jitter, density contrast ≤ 30 % Michelson,
+  // irregular: §13.15 periodic-structure rule); the air particles' branches (length ≥ minLen mm,
+  // generation ≤ maxGen) and their spread across the lumen (× radius).
+  lung: { share: { airway: 0.47, upper: 0.10, air: 0.10, acini: 0.08, pleura: 0.15, fissure: 0.10 }, baseGen: { low: 6, medium: 7, high: 7, ultra: 8 },
+    wall: 0.06, acinusShell: 0.6, acinar: 0.3, aciniRegion: 5, pleura: 1.0, fissureKinds: [0.4, 0.75, 1], rings: { spacing: 6, jitter: 0.35, low: 0.77 },
+    air: { minLen: 4, maxGen: 7, lumen: 0.6 } },
   // [model] extent of each rib hint as a fraction u of its intercostal route: T1–T7 reach the sternum,
   // T8–T10 end at the costal margin, T11 is a floating rib (the nerves continue into the abdominal wall).
   ribExtent: [1, 1, 1, 1, 1, 1, 1, 0.75, 0.75, 0.75, 0.55],
@@ -1116,25 +1120,25 @@ function heartEntries() {
   return entries;
 }
 // ---------------------------------------------------------------------------------------------
-// Lungs (research/LUNGS.md §7.1): the airway tree's walls (airway-tree.js), the acini at its tips,
-// the parenchyma haze with its fissure gaps, and the visceral pleura. Every star carries its
-// breathing role (geometry.js LUNG_ROLE) in n.y; airway and acinus stars carry their volume
-// coordinate from the mouth (L, scaled so the conducting airways hold the dead space BREATH.vd) in n.x
-// for the airflow front. The whole-body build draws the airways to PARAMS.lung.baseGen[tier]; the
-// close-up region draws every generation near the pivot.
+// Lungs (research/LUNGS.md §7.1, §14): the airway tree's walls (airway-tree.js) from the nostrils to
+// the bronchi, air particles inside the larger airways, the visceral pleura over the lungs and along
+// the fissures, and the acini. Every star carries its role (geometry.js LUNG_ROLE) in n.y and its
+// volume coordinate from the nostrils (L, scaled so the conducting airways hold the dead space
+// BREATH.vd) in n.x. The whole-body build draws only the larger airways (PARAMS.lung.baseGen[tier])
+// and surfaces, so the lungs read as a crisp tree inside a clear outline; the close-up region adds
+// every airway generation and the acini near the pivot (§14.2).
 // ---------------------------------------------------------------------------------------------
 let lungCache = null;
 function lungTree() {
   if (lungCache) return lungCache;
-  const T = buildAirwayTree(), L = PARAMS.lung;
+  const T = buildAirwayTree(), L = PARAMS.lung, U = upperAirwaySegments();
   let volMax = 0;
   for (const b of T.branches) volMax = Math.max(volMax, b.vol1);
   const sOf = (mL) => (mL / volMax) * BREATH.vd;
   const lungs = [1, -1].map((sd) => ORGANS.find((o) => o.id === 'lungs' && o.side === sd));
   const node = nodeIndex('lungs'), airNode = nodeIndex('airways'), bits = ORGAN_BITS.lungs || 0;
   // Stars per branch: ∝ length × r^1.3 in the whole-body build, so the trachea, bronchi and segmental
-  // airways read as tubes (generations 0–3 ≈ 13 %, 4–7 ≈ 34 %, 8–11 ≈ 53 % of the airway stars at
-  // High); ∝ length × (0.5 + r) in a close-up, so the small airways there read as lines.
+  // airways read as tubes; ∝ length × (0.5 + r) in a close-up, so the small airways there read as lines.
   const weight = (b) => b.len * Math.pow(b.r, 1.3), weightClose = (b) => b.len * (0.5 + b.r);
   // Ring hints on the trachea and the main bronchi: irregular spacing, anterior C only (LUNGS.md §2.2).
   const rngR = new Rng(0x7a11), R = L.rings, rings = new Map();
@@ -1144,20 +1148,24 @@ function lungTree() {
     for (let x = rngR.range(0, R.spacing); x < b.len; x += R.spacing * (1 + R.jitter * (2 * rngR.u() - 1))) at.push(x);
     rings.set(b.id, at);
   }
-  lungCache = { T, sOf, volMax, lungs, node, airNode, bits, weight, weightClose, rings, L };
+  lungCache = { T, U, sOf, volMax, lungs, node, airNode, bits, weight, weightClose, rings, L };
   return lungCache;
 }
 const lungTier = (ctx) => (ctx && ctx.tier) || 'high';
+// A branch vector (mm, each component within ±120) packed exactly into one float32 (24 bits) for the
+// air particles; BODY_VS unpacks it (LUNGS.md §14.3). The ±120 limit keeps the unpacking's divisions
+// clear of their rounding edges.
+export const packVector = (d) => d.reduce((a, c, k) => a + (clamp(Math.round(c), -120, 120) + 128) * 256 ** k, 0);
 function lungEntries(tier = 'high') {
-  const C = lungTree(), { T, sOf, lungs, node, airNode, bits, weight, weightClose, rings, L } = C, S = L.share;
-  const nAir = [0, -LUNG_ROLE.AIRWAY, 0];
+  const C = lungTree(), { T, U, sOf, lungs, node, airNode, bits, weight, weightClose, rings, L } = C, S = L.share;
+  const frame = (a, b) => { const d = norm(sub(b, a)), n1 = norm(cross(d, Math.abs(d[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])); return [d, n1, cross(d, n1)]; };
   // Airway walls. `set` is the drawn branch set: the base generations, or every branch near the region.
   const wallPoint = (rnd, b) => {
-    const t = rnd.u(), d = norm(sub(b.b, b.a)), n1 = norm(cross(d, Math.abs(d[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0])), n2 = cross(d, n1);
+    const t = rnd.u(), [, n1, n2] = frame(b.a, b.b);
     const phi = 2 * Math.PI * rnd.u(), rho = b.r * (1 + L.wall * (rnd.u() - 0.5));
     const c = lerp3(b.a, b.b, t);
     const p = [0, 1, 2].map((k) => c[k] + (n1[k] * Math.cos(phi) + n2[k] * Math.sin(phi)) * rho);
-    return { p, t, phi, n1, n2 };
+    return { p, t };
   };
   const ringOk = (rnd, b, w) => {
     const at = rings.get(b.id);
@@ -1169,69 +1177,94 @@ function lungEntries(tier = 'high') {
     return rnd.u() < L.rings.low + (1 - L.rings.low) * (ant ? near : 0);
   };
   const airSample = (rnd, set) => {
-    for (let k = 0; k < 4; k++) {
-      const b = set.list[rnd.pick(set.cdf)], w = wallPoint(rnd, b);
-      if (k < 3 && !ringOk(rnd, b, w)) continue;
-      return { p: w.p, o: { node: b.gen <= 1 ? airNode : node, bits, side: b.side || (w.p[0] >= 0 ? 1 : -1), n: [sOf(b.vol0 + (b.vol1 - b.vol0) * w.t), nAir[1], 0] } };
-    }
-    return null;
+    let b = set.list[rnd.pick(set.cdf)], w = wallPoint(rnd, b);
+    for (let k = 0; k < 3 && !ringOk(rnd, b, w); k++) { b = set.list[rnd.pick(set.cdf)]; w = wallPoint(rnd, b); }
+    return { p: w.p, o: { node: b.gen <= 1 ? airNode : node, bits, side: b.side || (w.p[0] >= 0 ? 1 : -1), n: [sOf(b.vol0 + (b.vol1 - b.vol0) * w.t), -LUNG_ROLE.AIRWAY, 0] } };
   };
   const baseSets = new Map();
-  const baseSet = (tier) => {
-    if (!baseSets.has(tier)) {
-      const list = T.branches.filter((b) => b.gen <= L.baseGen[tier]);
-      baseSets.set(tier, { list, cdf: cumulative(list.map(weight)), close: list.reduce((a, b) => a + weightClose(b), 0) });
+  const baseSet = (tr) => {
+    if (!baseSets.has(tr)) {
+      const list = T.branches.filter((b) => b.gen <= L.baseGen[tr]);
+      baseSets.set(tr, { list, cdf: cumulative(list.map(weight)), close: list.reduce((a, b) => a + weightClose(b), 0) });
     }
-    return baseSets.get(tier);
+    return baseSets.get(tr);
   };
   let regSet = null;
+  const near = (a, b, m) => {   // the segment a–b passes within the region (+ m mm)
+    const c = REGION.c, d = sub(b, a), l2 = Math.max(1e-9, d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+    const t = clamp(((c[0] - a[0]) * d[0] + (c[1] - a[1]) * d[1] + (c[2] - a[2]) * d[2]) / l2, 0, 1), q = lerp3(a, b, t);
+    return len3(q[0] - c[0], q[1] - c[1], q[2] - c[2]) <= REGION.r + m;
+  };
   const regionSet = () => {
     if (regSet && regSet.id === REGION.id) return regSet;
-    const c = REGION.c, r = REGION.r, list = [];
-    for (const b of T.branches) {   // branches whose segment passes within the region
-      const d = sub(b.b, b.a), l2 = Math.max(1e-9, d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-      const t = clamp(((c[0] - b.a[0]) * d[0] + (c[1] - b.a[1]) * d[1] + (c[2] - b.a[2]) * d[2]) / l2, 0, 1);
-      const q = lerp3(b.a, b.b, t);
-      if (len3(q[0] - c[0], q[1] - c[1], q[2] - c[2]) <= r + b.r + 2) list.push(b);
-    }
+    const list = T.branches.filter((b) => near(b.a, b.b, b.r + 2));
     regSet = { id: REGION.id, list, cdf: list.length ? cumulative(list.map(weightClose)) : null, share: 0 };
     if (list.length) {   // the region's wall stars per unit weight equal the base build's
       const pr = new Rng(0xa1e + REGION.id), N = 256;
       let hit = 0;
       for (let i = 0; i < N; i++) { const w = wallPoint(pr, list[pr.pick(regSet.cdf)]); if (regionHas(w.p)) hit++; }
-      const base = baseSet(tier);
-      regSet.share = (regSet.cdf[regSet.cdf.length - 1] / base.close) * (hit / N);
+      regSet.share = (regSet.cdf[regSet.cdf.length - 1] / baseSet(tier).close) * (hit / N);
     }
     return regSet;
   };
   const airway = {
     weight: S.airway,
-    sample(rnd) { return /** @type {any} */ (airSample(rnd, baseSet(tier))); },
+    sample(rnd) { return airSample(rnd, baseSet(tier)); },
     regionShare() { return regionSet().share; },
-    regionSample(rnd) { const rs = regionSet(); return /** @type {any} */ (rs.cdf ? airSample(rnd, rs) : airSample(rnd, baseSet(tier))); },
+    regionSample(rnd) { const rs = regionSet(); return rs.cdf ? airSample(rnd, rs) : airSample(rnd, baseSet(tier)); },
   };
-  // Acini: alveolar sacs round each terminal bronchiole's tip; the volume coordinate runs on from the
-  // dead space over the acinar diffusion depth (BREATH.front.acinar), centre to rim.
+  // Upper airway (LUNGS.md §14.1): nostrils, nasal cavities, pharynx and larynx, elliptic in section.
+  const uCdf = cumulative(U.map((g) => len3(...sub(g.b, g.a)) * (1 + (g.wa + g.ha + g.wb + g.hb) / 4)));
+  const upperPoint = (rnd, g, inside = 1) => {
+    const t = rnd.u(), [, n1, n2] = frame(g.a, g.b), c = lerp3(g.a, g.b, t), phi = 2 * Math.PI * rnd.u();
+    const w = (g.wa + (g.wb - g.wa) * t) * inside, h = (g.ha + (g.hb - g.ha) * t) * inside;
+    // n1 lies in the horizontal plane for these near-sagittal passages: the half-width is lateral.
+    return { p: [0, 1, 2].map((k) => c[k] + n1[k] * w * Math.cos(phi) + n2[k] * h * Math.sin(phi)), t };
+  };
+  const upper = {
+    weight: S.upper,
+    sample(rnd) {
+      const g = U[rnd.pick(uCdf)], q = upperPoint(rnd, g, 1 + L.wall * (rnd.u() - 0.5));
+      return { p: q.p, o: { node: airNode, bits, side: g.side || (q.p[0] >= 0 ? 1 : -1), n: [sOf(g.vol0 + (g.vol1 - g.vol0) * q.t), -LUNG_ROLE.AIRWAY, 0] } };
+    },
+  };
+  // Air particles (LUNGS.md §14.3): inside the upper airway and the base airways long enough to carry
+  // them, each with its branch vector; BODY_VS moves it along that vector with the breath.
+  const pipes = [...U.map((g) => ({ a: g.a, b: g.b, r: Math.min(g.wb, g.hb), vol0: g.vol0, vol1: g.vol1, side: g.side, upper: true })),
+    ...baseSet(tier).list.filter((b) => b.len >= L.air.minLen && b.gen <= L.air.maxGen)];
+  const pCdf = cumulative(pipes.map((b) => len3(...sub(b.b, b.a)) * Math.sqrt(b.r)));
+  const air = {
+    weight: S.air,
+    sample(rnd) {
+      const b = pipes[rnd.pick(pCdf)], [, n1, n2] = frame(b.a, b.b), u = rnd.u(), [dx, dy] = rnd.disk(), k = L.air.lumen * b.r;
+      const p = [0, 1, 2].map((m) => b.a[m] + (n1[m] * dx + n2[m] * dy) * k);
+      return { p, o: { node: b.upper ? airNode : node, bits, side: b.side || (p[0] >= 0 ? 1 : -1), u, n: [sOf(b.vol0 + (b.vol1 - b.vol0) * u), -LUNG_ROLE.AIR, packVector(sub(b.b, b.a))] } };
+    },
+    regionShare() { return 0; },
+  };
+  // Acini: alveolar sacs round each terminal bronchiole's tip. Few in the whole-body build (a fine
+  // speckle); the close-up region holds L.aciniRegion × as many near the pivot.
+  let aReg = null;
+  const regionAcini = () => {
+    if (aReg && aReg.id === REGION.id) return aReg;
+    const list = T.acini.filter((a) => regionHas(a.c, a.r));
+    aReg = { id: REGION.id, list, share: (list.length / T.acini.length) * L.aciniRegion };
+    return aReg;
+  };
+  const acinusStar = (rnd, a) => {
+    const u = rnd.unitSphere(), f = rnd.u() < L.acinusShell ? 0.75 + 0.25 * rnd.u() : Math.cbrt(rnd.u()) * 0.75;
+    const p = [a.c[0] + u[0] * a.r * f, a.c[1] + u[1] * a.r * f, a.c[2] + u[2] * a.r * f];
+    return { p, o: { node, bits, side: p[0] >= 0 ? 1 : -1, n: [BREATH.vd + L.acinar * f, -LUNG_ROLE.ACINUS, 0] } };
+  };
   const acini = {
     weight: S.acini,
-    sample(rnd) {
-      const a = T.acini[rnd.int(T.acini.length)], u = rnd.unitSphere();
-      const f = rnd.u() < L.acinusShell ? 0.75 + 0.25 * rnd.u() : Math.cbrt(rnd.u()) * 0.75;
-      const p = [a.c[0] + u[0] * a.r * f, a.c[1] + u[1] * a.r * f, a.c[2] + u[2] * a.r * f];
-      return { p, o: { node, bits, side: p[0] >= 0 ? 1 : -1, n: [BREATH.vd + BREATH.front.acinar * f, -LUNG_ROLE.ACINUS, 0] } };
-    },
+    sample(rnd) { return acinusStar(rnd, T.acini[rnd.int(T.acini.length)]); },
+    regionShare() { return regionAcini().share; },
+    regionSample(rnd) { const A = regionAcini().list; return acinusStar(rnd, A.length ? A[rnd.int(A.length)] : T.acini[rnd.int(T.acini.length)]); },
   };
-  // Parenchyma haze: the lung region, clear of the fissures (2-mm dark gaps, LUNGS.md §7.1).
+  // Visceral pleura: the lung surface (the ellipsoid where it bounds the lung) …
   const vol = lungs.map((o) => ellVol(o.r));
   const pick = (rnd) => lungs[rnd.u() * (vol[0] + vol[1]) < vol[0] ? 0 : 1];
-  const parenchyma = {
-    weight: S.parenchyma,
-    sample(rnd) {
-      const o = pick(rnd), p = tryPoint(rnd, () => inEll(rnd, o.c, o.r), (q) => lungRegion(q) !== 0 && fissureDist(q) > L.fissureGap);
-      return { p, o: { node, bits, side: o.side, n: [0, -LUNG_ROLE.PARENCHYMA, 0] } };
-    },
-  };
-  // Visceral pleura: a faint shell on the lung surface (the ellipsoid where it bounds the lung).
   const pleura = {
     weight: S.pleura,
     sample(rnd) {
@@ -1240,26 +1273,17 @@ function lungEntries(tier = 'high') {
       return { p, o: { node, bits, side: o.side, n: [0, -LUNG_ROLE.PLEURA, 0] } };
     },
   };
-  return [airway, acini, parenchyma, pleura];
-}
-// The airflow band's histogram (breath.js frontMean): expected star counts over the volume coordinate
-// of the airway and acinus stars drawn in the whole-body build of a tier.
-export function lungFrontHist(tier = 'high', bins = 96) {
-  const { T, sOf, weight, L } = lungTree(), top = BREATH.vd + BREATH.front.acinar;
-  const s = new Float32Array(bins), w = new Float32Array(bins);
-  for (let i = 0; i < bins; i++) s[i] = ((i + 0.5) / bins) * top;
-  const put = (x, m) => { w[clamp(Math.floor((x / top) * bins), 0, bins - 1)] += m; };
-  const list = T.branches.filter((b) => b.gen <= L.baseGen[tier]), W = list.reduce((a, b) => a + weight(b), 0);
-  const share = L.share.airway / (L.share.airway + L.share.acini);
-  for (const b of list) { const m = (share * weight(b)) / W, s0 = sOf(b.vol0), s1 = sOf(b.vol1); for (let k = 0; k < 4; k++) put(s0 + ((k + 0.5) / 4) * (s1 - s0), m / 4); }
-  // Acini: f on the shell (0.75–1) or inside (∛u · 0.75).
-  const mA = 1 - share;
-  for (let k = 0; k < 32; k++) {
-    const f1 = 0.75 + 0.25 * (k + 0.5) / 32, f2 = Math.cbrt((k + 0.5) / 32) * 0.75;
-    put(BREATH.vd + BREATH.front.acinar * f1, (mA * L.acinusShell) / 32);
-    put(BREATH.vd + BREATH.front.acinar * f2, (mA * (1 - L.acinusShell)) / 32);
-  }
-  return { s, w };
+  // … and the pleura that lines the fissures, where the lobes above and below differ (§14.2).
+  const between = (q) => { const up = lobeOf([q[0], q[1], q[2] + 1.5]), dn = lobeOf([q[0], q[1], q[2] - 1.5]); return up >= 0 && dn >= 0 && up !== dn; };
+  const fissure = {
+    weight: S.fissure,
+    sample(rnd) {
+      const kind = rnd.pick(L.fissureKinds);
+      const p = tryPoint(rnd, () => { const q = fissureSurfacePoint(rnd.u(), rnd.u(), kind); q[2] += L.pleura * (rnd.u() - 0.5); return q; }, between);
+      return { p, o: { node, bits, side: kind === 1 ? -1 : 1, n: [0, -LUNG_ROLE.PLEURA, 0] } };
+    },
+  };
+  return [airway, upper, air, acini, pleura, fissure];
 }
 function organEntries(ctx = null) {
   const byId = new Map();
@@ -1760,7 +1784,7 @@ function* build({ budget = 'high', lod = 2 } = {}, seed = 1848, sliceMs = Infini
     normal: s.kind === 'skin' ? bodyNormal(s.pos[0], s.pos[1], s.pos[2]) : null,
     node: s.kind === 'skin' ? nodeIndex(`skin.${skinRegion(s.pos[0], s.pos[1], s.pos[2])}`) : -1,
   }));
-  return { points, count: w.n, floats: FLOATS, ranges, sites, hash: hashPoints(points), tier, seed, lod, budget: groups, lungHist: lungFrontHist(isoTier) };
+  return { points, count: w.n, floats: FLOATS, ranges, sites, hash: hashPoints(points), tier, seed, lod, budget: groups };
 }
 
 // One-shot generation: { points (Float32Array, FLOATS per point), count, ranges, sites, hash, … }.

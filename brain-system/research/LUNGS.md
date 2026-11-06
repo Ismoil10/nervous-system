@@ -630,6 +630,118 @@ run, not 25–30), because the climax is short and the fast pool needs about a m
 - **Not built:** a metabolic V̇CO₂ for exertion; a fall of PaO₂ during long breath-holds; names for
   the pulmonary vessels.
 
+## 14. Second pass: the upper airway, sharpness and visible breathing (6 November 2026)
+
+The user reported three things: the airway should reach the nose; the lungs read as a diffuse pink
+haze; the breathing and the airflow cannot be seen. They chose to draw the motion × 3 and to show
+the airflow with particles.
+
+### 14.1 Upper airway (`airway-tree.js` `UPPER_AIRWAY`, `upperAirwaySegments`)
+
+- **Path:** each nostril, the nasal vestibule and the nasal cavity to the choana; then the
+  nasopharynx, oropharynx and laryngopharynx; then the larynx (vestibule, a 2.5-mm glottic slit,
+  subglottis) to the top of the trachea.
+- **Section:** elliptic, lateral half-width × sagittal half-height; the nasal cavity is a tall
+  slit (3 × 16 mm).
+- **Placement:** every wall point lies inside the skin. The vestibule runs within 1 mm of the
+  nasal skin, as it does in life. All points are ≥ 2 mm from the eyes and below z −48 (under the
+  cribriform plate).
+- **Volume coordinate:** it runs from 0 at the nostril to the upper dead space (50 mL) at the
+  trachea. Each nasal passage counts half, since it carries half the flow.
+- **Names:** "Nasal cavity · right", "Oropharynx", "Larynx · glottis" and so on.
+- **Stars:** 6 % of the lungs' stars. Breathing does not move them: they lie above the thoracic
+  inlet, or on the head's rigid segment.
+
+### 14.2 Sharpness
+
+Measured first: inside the lungs the High build drew 55,131 stars.
+
+| Stars inside the lungs (High) | Count | Kind |
+|---|---|---|
+| Airway walls | 15,236 | 4,613 branches to generation 11 |
+| Acini | 7,436 | fill the volume |
+| Parenchyma | 2,438 | fills the volume |
+| Pleura | 3,658 | surface |
+| Pulmonary arteries | 7,756 | lines |
+| Pulmonary veins | 4,486 | random fractal, 7 generations |
+| Capillary beds | 4,899 | haze |
+| Nerves passing | 2,882 | |
+| Other organs | 3,427 | |
+
+- **Coverage:** in the Lungs view (≈ 90,000 px²) these ≈ 2.4-px stars cover each pixel about 3
+  times, so they merge into a sheet.
+- **The tree itself:** a space-filling tree drawn to generation 11 projects as an even texture,
+  not as a tree.
+- **Ruled out:** the `uKeep` cull (Detailed draws every star), the LOD (body LOD 2 draws every
+  base star) and the alpha.
+
+**Changes:**
+- **The whole-body build draws only structure:**
+  - airways to generation 7 (6 / 7 / 7 / 8 by tier; walls scatter 0.06 × r);
+  - the upper airway;
+  - air particles;
+  - the visceral pleura on the lung surface and **along the fissures**, a sheet wherever the lobes
+    above and below differ;
+  - a light speckle of acini;
+  - no parenchyma haze.
+- **Shares of the lungs' stars:** airways 47 %, upper airway 6 %, air 10 %, acini 8 %, pleura 17 %,
+  fissure pleura 12 %. Role gains are airway 1.6, acinus 0.7, pleura 0.8, air 1.4.
+- **The close-up region near the pivot** (CLOSEUP.md) adds every airway generation and the acini
+  at 5 × their body share. The lobes, fissures, hilum and finer bronchi sharpen as the camera nears.
+- **Pulmonary vessels:**
+  - arteries beside the airways to generation 7;
+  - veins 5 generations (was 7);
+  - lung capillary strands 2–3 per bed (was 6–8);
+  - in the Lungs view the beds dim to 0.45.
+
+High now: airway walls 16,154 (with the upper airway), pleura 8,840, air 3,048, acini 2,438.
+The budgets are unchanged.
+
+### 14.3 Visible breathing
+
+- **The values were right but small.** The reported `uBreath.x` 0.0774 is 7.7 mm: 1 unit is
+  100 mm. That is the true excursion at VT 0.45 L, and the rib-cage motion is under 1 mm at rest.
+- **× 3:** the motion is now drawn × 3 (`BREATH.display`), and the rib term is gated to zero above
+  the thoracic inlet (z −195). The model, the traces and the monitor keep true values. Calm now
+  shows ≈ 54 mm of diaphragm excursion and Pleasure ≈ 23 mm.
+- **Light under the larger motion:** each star still keeps its light through its stretch
+  (energy-conserving).
+- **Air particles** (role 7, pale cyan, 10 % of the lungs' stars):
+  - they sit in the upper airway and in the base airways ≥ 4 mm long, at generation ≤ 7;
+  - each carries its branch vector, packed exactly in one float (components ±120 mm);
+  - `BODY_VS` moves it along that vector by the breath's displacement V/VT (`BreathClock.drift`):
+    inwards from the nostrils as the lungs fill, outwards as they empty; a sigh carries them 2.5
+    runs;
+  - each fades in and out over its run (mean gain 1), so the light is conserved;
+  - they pass any point at most a few times a breath, ≤ 2 Hz.
+- **The luminance band is removed.** The 8 % rule kept it too thin to see.
+- **Reduced motion:** the geometry and the particles hold.
+
+### 14.3a Fixes after the browser check (6 November 2026)
+
+- **No star moved.** `BODY_VS` gated the breathing on `seg < 0`, but `rigidAt` gives the trunk 0
+  (the head 1, the limbs 2–13), never −1, so `breathField` never ran. The gate is now `seg == 0`.
+  The trunk's joint transform is the identity, so it composes with the breathing.
+  - Measured on 8770, Lungs view, Calm: the lungs' light centroid moves 20.5 px of 768 between
+    end-expiration and end-inspiration; it moved 0.6 px before.
+  - Total light changes by 6 %.
+- **The upper airway was dark.** Organ stars above z −145 take the head fade (0.35 ×
+  smoothstep(5, 8, camera distance)), which is 0 at close range. The airways and the air particles
+  are now exempt.
+  - Measured in a side view: the upper airway's walls are 2–6 × as bright as the tissue 12 mm
+    beside them, from the nasal vestibule to the subglottis.
+  - The upper airway's share rose from 6 % to 10 % of the lungs' stars; the pleura went 17 → 15 %
+    and the fissures 12 → 10 %.
+
+### 14.4 Tests
+
+- `test/lungs.test.mjs`, rewritten: the role shares and no haze; the upper airway inside the head;
+  the walls; the fissure pleura; the particle packing; the region's finer airways and acini; the
+  names from the nose to the acini; the breathing gate against the stars as `put()` packs them;
+  the airways' exemption from the head fade.
+- `test/breath.test.mjs`: the particle displacement and the × 3 display.
+- `test/geometry-body.test.mjs`: the air particles' packed vectors.
+
 ## Sources
 
 - Weibel E. R. (1963). *Morphometry of the Human Lung.* Springer.

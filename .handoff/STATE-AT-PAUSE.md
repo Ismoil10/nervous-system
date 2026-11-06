@@ -415,7 +415,37 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
     - which organ system comes next.
 
     The airway's legibility is set by `PARAMS.lung.share` (generate.js) and `PARAMS.breath.roleGain`
-    (shaders.js). The front's gain is `AIR.gain` (main.js).
+    (shaders.js).
+
+23. **Lungs, second pass** (`brain-system/research/LUNGS.md` §14). The user reported three things:
+    the airway should reach the nose, the lungs were a blurry pink haze, and the breathing and
+    airflow could not be seen. They chose to draw the motion × 3 and to show the airflow with
+    particles.
+
+    Measured cause of the blur: 55k stars inside the lungs covered each pixel about 3 times in the
+    Lungs view. The airways drawn to generation 11 also project as an even texture, and the acini,
+    parenchyma and capillary beds fill the volume.
+
+    What changed:
+    - **Upper airway:** nostrils, nasal cavities, pharynx and larynx to the trachea, inside the head
+      SDF (`UPPER_AIRWAY` in `airway-tree.js`).
+    - **The body build draws structure only:** airways to generation 7, the pleura on the lungs and
+      along the fissures, a light speckle of acini, no parenchyma.
+    - **The close-up region** adds every airway generation and the acini.
+    - **Pulmonary vessels:** veins 5 generations, fewer lung capillary strands, arteries to
+      generation 7.
+    - **Motion:** drawn × 3 (`BREATH.display`), with the rib term gated above the thoracic inlet.
+    - **Air particles** (role 7) run along their branches with the breath. They replace the
+      luminance band. `uAir` now carries their displacement; budgets are unchanged and `BODY_VS`
+      still uses 106 slots.
+
+    Fixed after the parent's browser check:
+    - the breathing gate was `seg < 0`, but the trunk is segment 0, so it never ran; it is now
+      `seg == 0`;
+    - the upper airway fell under the head fade; airways and air particles are now exempt.
+
+    Next decision for the user: whether the lungs now read crisply on 8768, and whether × 3 and the
+    particles suit them.
 
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
@@ -476,6 +506,8 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Mac, heart close-up detail (decision 20; `test/heart-detail.test.mjs`, 8 tests) | 606 | 574 | 4 (golden, platform bits) | 28 |
 | Mac, body close-up clarity (decision 21; `test/closeup.test.mjs`, 5 tests) | 611 | 579 | 4 (golden, platform bits) | 28 |
 | Mac, lungs and respiratory system (decision 22; `airway-tree` 14, `breath` 10, `lungs` 9, respiration 7, monitor 2 new tests) | 653 | 621 | 4 (golden, platform bits) | 28 |
+| Mac, lungs second pass: upper airway, sharpness, visible breathing (decision 23; `lungs` 10, `breath` 9) | 654 | 622 | 4 (golden, platform bits) | 28 |
+| Mac, lungs: breathing gate (seg == 0) and the airway head fade fixed (decision 23; `lungs` 12) | 656 | 624 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was

@@ -84,9 +84,11 @@ coupling of arousal to peripheral vasocongestion is removed, and the vitals read
   twice the sighs (≈ 18/min, PaCO₂ ≈ 38), Pleasure hyperventilates towards the climax, with
   breath-holds. CO₂ balances on alveolar ventilation in two pools; SaO₂ comes from the Severinghaus
   curve, EtCO₂ from PaCO₂. One breath clock, in screen time, moves the lungs, the diaphragm, the rib
-  cage, the heart and the abdominal organs, sends an airflow front through the airways, and draws
-  the RESP trace and the capnogram. The airway tree runs from the trachea to the acini, with the
-  pulmonary arteries beside the bronchi; the Lungs view dims everything else.
+  cage, the heart and the abdominal organs (drawn × 3 so it reads), sends air particles in from
+  the nostrils and back out, and draws the RESP trace and the capnogram. The airways run from the
+  nostrils through the nose, pharynx and larynx to the bronchi; the whole-body view draws the larger
+  airways, the pleura and the fissures, and a close-up adds the finer airways and the acini. The
+  pulmonary arteries run beside the bronchi; the Lungs view dims everything else.
 
 ## Controls
 The app opens with a **simple HUD** (`src/ui-simple.js`) of four controls. The person's emotion
@@ -119,8 +121,9 @@ changes the emotion.
     time, respiration, the capnogram with EtCO₂, temperature, and the adrenaline and cortisol blood
     values. SpO₂ and EtCO₂ are the model's own values (`research/LUNGS.md` §4); SpO₂ stays at
     97–99 % in every state, as in a healthy person.
-  - **Lungs** (view button): both lungs breathing, the diaphragm, the airway tree with its airflow
-    front, and the pulmonary vessels; everything else dims (`research/LUNGS.md` §7).
+  - **Lungs** (view button): both lungs breathing, the diaphragm, the airways from the nose with
+    their air particles, the pleura and fissures, and the pulmonary vessels; everything else dims
+    (`research/LUNGS.md` §7, §14).
   - **Heart close-up** (Detailed; `research/HEART.md` §8). The heart carries its fine anatomy:
     - trabeculae, pectinate muscles and the crista terminalis;
     - papillary muscles with their heads, and chordae that fan out;

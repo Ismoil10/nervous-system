@@ -1,8 +1,8 @@
 // @ts-check
-// Breath clock (research/LUNGS.md §3, §7): one breath at a time, in screen time, from the kernel's
-// respiration (rr, vt, the sigh rate, EtCO₂). It gives the lung volume above FRC, the diaphragm
-// excursion and the rib-cage expansion for the breathing motion, the airflow front for the airway
-// stars and the capnogram for the monitor, so the lungs, the RESP and CO₂ traces share one signal.
+// Breath clock (research/LUNGS.md §3, §7, §14): one breath at a time, in screen time, from the
+// kernel's respiration (rr, vt, the sigh rate, EtCO₂). It gives the lung volume above FRC, the
+// diaphragm excursion and the rib-cage expansion for the breathing motion, the air particles'
+// displacement and the capnogram, so the lungs, the RESP and CO₂ traces share one signal.
 // Like the heartbeat (HEART.md §5) the breath runs at the model rate in screen seconds: time
 // compression (kh > 1) never speeds it up, slow motion (kh < 1) slows it. DOM-free (Node tests).
 
@@ -21,12 +21,9 @@ export const BREATH = {
   // Capnogram (LUNGS.md §4.3): phase II spread ± 0.04 L about the dead space (Taylor dispersion),
   // phase III rising 2 mmHg to EtCO₂, the inspiratory downstroke over the first 5 % of inspiration.
   capno: { spread: 0.04, slope: 2, down: 0.05 },
-  // Airflow front (LUNGS.md §7.4): a band of relative width 0.03 in the volume coordinate (≈ 1.2 mL,
-  // a ring ≈ 5 mm deep in the trachea), followed by a dim trail `trail` σ behind it (towards where the
-  // gas came from), so any stretch of airway longer than the band keeps its light (local energy
-  // conservation; the trachea swings ≤ 8 %); the acini take the diffusion front over the 0.3 L beyond
-  // the dead space.
-  front: { sigmaRel: 0.03, sigmaMin: 0.001, trail: 1.5, acinar: 0.3 },
+  // Display (user decision, 6 November 2026; LUNGS.md §14.3): the breathing motion is drawn × 3 so it
+  // reads at body scale; the model, the traces and the monitor keep the true values.
+  display: 3,
   minRate: 0.5,         // below this rate (1/min) the breath holds (apnoea, breath-hold)
 };
 
@@ -45,23 +42,6 @@ export function ribExpansion(dv) {
   if (!(dv > 0)) return 0;
   const share = R.share0 + (R.share1 - R.share0) * clamp((dv - BREATH.excursion.v) / (R.v1 - BREATH.excursion.v), 0, 1);
   return (share * dv * 1e6) / R.areaMm2;
-}
-
-// Gain of the airflow band at volume coordinate s (L from the mouth) for a front at sf (L) moving in
-// direction dir (+1 inspiration, −1 expiration): the bright band minus its trail; dir 0, the band alone.
-export function frontBand(s, sf, dir = 0) {
-  const F = BREATH.front, sg = Math.max(F.sigmaMin, F.sigmaRel * Math.max(s, sf));
-  const g = (x) => { const d = (s - x) / sg; return Math.exp(-d * d); };
-  return dir ? g(sf) - g(sf - dir * F.trail * sg) : g(sf);
-}
-
-// Flux-weighted mean of the band over the airway and acinus stars, for the energy-conserving gain
-// 1 + G·b − G·M (as the pulse, PULSE.md §8). `hist` is { s: Float32Array (bin centres, L), w: weights }.
-export function frontMean(hist, sf, dir = 0) {
-  if (!hist || !hist.s.length) return 0;
-  let a = 0, b = 0;
-  for (let i = 0; i < hist.s.length; i++) { a += hist.w[i] * frontBand(hist.s[i], sf, dir); b += hist.w[i]; }
-  return b > 0 ? a / b : 0;
 }
 
 // Seeded generator (mulberry32) for the sighs: deterministic per seed.
@@ -173,7 +153,10 @@ export class BreathClock {
     return v;
   }
 
-  // Display quantities for the shader (LUNGS.md §3.3–3.5): excursion and rib expansion, mm.
+  // Display quantities for the shader (LUNGS.md §3.3–3.5): excursion and rib expansion, mm (true
+  // scale; main.js applies BREATH.display), and the air particles' displacement along each branch:
+  // the inspired volume over the tidal volume (a sigh carries them 2.5 runs).
   get excursion() { return excursion(this.volume); }
   get ribs() { return ribExpansion(this.volume); }
+  get drift() { return this.volume / Math.max(0.05, this.vt); }
 }

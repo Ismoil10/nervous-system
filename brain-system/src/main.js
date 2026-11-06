@@ -23,7 +23,7 @@ import { WAVE_SLOTS } from './shaders.js';
 import { HeartBeat, HEART } from './heart.js';
 import { PulseWave } from './pulse.js';
 import { RespTrace, CapnoTrace, SpO2Meter, monitorValues } from './monitor.js';
-import { BreathClock, frontMean } from './breath.js';
+import { BreathClock, BREATH } from './breath.js';
 import { lungStarIndex, pickLungPoint, lungName } from './lung-ui.js';
 import { OrbitCamera } from './camera.js';
 import { CameraControls } from './camera-controls.js';
@@ -258,11 +258,11 @@ async function start() {
   let regionGen = null, regionAt = null, regionWeight = 0, pivotPrev = null, pivotStill = 0, fullRes = false, fullResBlock = 0;
   const pulse = new PulseWave();   // the arterial pulse on the vessel stars and the PLETH trace (PULSE.md)
   const resp = new RespTrace();     // the patient monitor's respiration trace (monitor.js)
-  // Breathing (LUNGS.md §7): one breath clock from the kernel's respiration for the lungs, the RESP and
-  // CO₂ traces and the airflow front; the oximeter reads the kernel's SaO₂ after its delay. AIR.gain is
-  // the airflow band's gain G (energy-conserving, ≤ ×1.6 on a faint star) [model].
+  // Breathing (LUNGS.md §7, §14): one breath clock from the kernel's respiration for the lungs, the
+  // RESP and CO₂ traces and the air particles; the oximeter reads the kernel's SaO₂ after its delay.
+  // The motion is drawn × BREATH.display (user decision); reduced motion holds it and the particles.
   const breath = new BreathClock({ seed: BODY.seed }), capno = new CapnoTrace(), spo2 = new SpO2Meter();
-  const AIR = { gain: 0.6, focusRate: 2.5 };
+  const AIR = { focusRate: 2.5 };
   let lungFocus = 0, relaxSet = -1;
   let picking = false, limbMotion = true, lastPath = null;
   const overlayOn = {};
@@ -914,9 +914,8 @@ async function start() {
       capno.step(dt, breath.co2, { kh: clock.kh, paused });
       spo2.push(kernel.t, kernel.get('sao2'));
       lungFocus += ((view === 'lungs' ? 1 : 0) - lungFocus) * Math.min(1, dt * AIR.focusRate);
-      const hist = bodyData?.lungHist ?? null, front = breath.front, dir = breath.direction;
-      renderer.setBreath({ excursionMm: reducedMotion ? 0 : breath.excursion, ribMm: reducedMotion ? 0 : breath.ribs, focus: lungFocus,
-        front, dir, gain: hist && dir ? AIR.gain : 0, mean: hist && dir ? AIR.gain * frontMean(hist, front, dir) : 0 });
+      const k = reducedMotion ? 0 : BREATH.display;
+      renderer.setBreath({ excursionMm: k * breath.excursion, ribMm: k * breath.ribs, focus: lungFocus, flow: reducedMotion ? 0 : breath.drift });
       renderer.setHeart(...heart.uniforms());
       // Arterial pulse (PULSE.md §7–§8): the beat's wave through the tree; the skin blood flow sets the
       // fingertip pulse amplitude.

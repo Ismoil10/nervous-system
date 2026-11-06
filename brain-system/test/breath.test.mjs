@@ -2,7 +2,7 @@
 // breath-holds, the airflow front and the capnogram.
 import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { BREATH, BreathClock, excursion, ribExpansion, frontBand, frontMean } from '../src/breath.js';
+import { BREATH, BreathClock, excursion, ribExpansion } from '../src/breath.js';
 
 const run = (c, seconds, o, dt = 1 / 60) => { const out = []; for (let t = 0; t < seconds; t += dt) { c.step(dt, o); out.push({ t, v: c.volume, co2: c.co2, front: c.front, insp: c.inspiring }); } return out; };
 
@@ -69,25 +69,18 @@ describe('BreathClock', () => {
     assert.ok(Math.min(...tr.map((x) => x.front)) < 0, 'the interface leaves the mouth in expiration');
     assert.ok(Math.max(...tr.map((x) => x.front)) > BREATH.vd, 'it passes the dead space into the acini');
   });
-  test('energy-conserving band: the flux-weighted mean M makes Σ w (b − M) vanish', () => {
-    const s = new Float32Array(64), w = new Float32Array(64);
-    for (let i = 0; i < 64; i++) { s[i] = 0.02 + i * 0.006; w[i] = 1 + (i % 5); }
-    for (const sf of [0.05, 0.12, 0.2, 0.3]) for (const dir of [1, -1]) {
-      const M = frontMean({ s, w }, sf, dir);
-      let acc = 0, tot = 0;
-      for (let i = 0; i < 64; i++) { acc += w[i] * (frontBand(s[i], sf, dir) - M); tot += w[i]; }
-      assert.ok(Math.abs(acc / tot) < 1e-6 && Math.abs(M) < 0.2, `sf ${sf} dir ${dir}: M ${M}`);
-    }
+  test('air particles: the displacement runs 0 → 1 → 0 each breath, 2.5 for a sigh (LUNGS.md §14.3)', () => {
+    const c = new BreathClock({ seed: 2 });
+    run(c, 20, { rr: 14, vt: 0.5, sighRate: 0 });
+    const tr = []; for (let t = 0; t < 60 / 14; t += 0.01) { c.step(0.01, { rr: 14, vt: 0.5, sighRate: 0 }); tr.push(c.drift); }
+    assert.ok(Math.max(...tr) > 0.99 && Math.max(...tr) < 1.01 && Math.min(...tr) < 0.02, `flow ${Math.min(...tr)}–${Math.max(...tr)}`);
+    const s2 = new BreathClock({ seed: 7 });
+    let peak = 0;
+    for (let t = 0; t < 3600; t += 0.05) { s2.step(0.05, { rr: 14, vt: 0.5, sighRate: 12 }); if (s2.sigh) peak = Math.max(peak, s2.drift); }
+    assert.ok(Math.abs(peak - BREATH.sigh.vt) < 0.05, `sigh flow ${peak}`);
   });
-  test('the trailing band keeps a stretch of airway within the 8 % swing (LUNGS.md §7.4)', () => {
-    // The trachea's stars, uniform over its volume coordinate (50–80 mL of 240 mL, × VD 0.15 L), at
-    // the main.js gain 0.6, as the front sweeps in and out.
-    const n = 400, s = Array.from({ length: n }, (_, i) => (0.15 * (50 + (30 * (i + 0.5)) / n)) / 240);
-    let worst = 0;
-    for (let sf = -0.02; sf <= 0.1; sf += 0.0005) for (const dir of [1, -1]) {
-      const light = s.reduce((a, x) => a + Math.max(0, 1 + 0.6 * frontBand(x, sf, dir)), 0) / n;
-      worst = Math.max(worst, Math.abs(light - 1));
-    }
-    assert.ok(worst <= 0.08, `trachea swing ${(100 * worst).toFixed(1)} %`);
+  test('the motion is drawn × 3 (user decision); the model keeps true scale', () => {
+    assert.equal(BREATH.display, 3);
+    assert.equal(excursion(0.5), 15);
   });
 });

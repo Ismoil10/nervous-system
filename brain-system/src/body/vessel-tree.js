@@ -39,7 +39,7 @@ export const TREE = {
     // Pulmonary arteries in the bronchovascular bundles (research/LUNGS.md §2.5, §7.2) [model]: one
     // beside each airway branch from the lobar bronchi to generation `pulmGen`, `pulmCal` × the airway's
     // lumen radius, `pulmGap` mm clear of its wall.
-    pulmGen: 8, pulmCal: 0.9, pulmGap: 1 },
+    pulmGen: 7, pulmCal: 0.9, pulmGap: 1, pulmVeinGen: 5 },   // generation 7 matches the whole-body airways (LUNGS.md §14.2)
   // Capillary beds (§13.4) [model]: strands (random walks of `steps` × `step` mm, turning by up to
   // `spread`) from each terminal arterial tip, `n` per bed, drawn `width` mm wide; saturation `from`
   // at the arteriole to `to` at the venule (the organ's venous saturation; the lungs run the other way).
@@ -51,7 +51,7 @@ export const TREE = {
     liver: { n: [5, 7], steps: 3, step: 1.6, spread: 1.2, from: 0.9, to: 0.7, width: 0.35 },
     spleen: { n: [5, 6], steps: 3, step: 1.4, spread: 1.2, from: 0.98, to: 0.75, width: 0.3 },
     gut: { n: [4, 5], steps: 3, step: 1.2, spread: 0.9, from: 0.98, to: 0.7, width: 0.3 },
-    lung: { n: [6, 8], steps: 3, step: 2.0, spread: 1.3, from: 0.75, to: 0.98, width: 0.4 },
+    lung: { n: [2, 3], steps: 3, step: 2.0, spread: 1.3, from: 0.75, to: 0.98, width: 0.4 },   // fewer strands: the lung's bed is haze at body scale (LUNGS.md §14.2)
   },
   brain: { c: [0, -15, 12], r: [62, 82, 60] },   // [model] the brain's envelope for the bed type
   vasa: { minR: 6, every: 30, steps: 6, step: 4, r: 0.35, amp: 0.3 },   // vasa vasorum on the aorta and the venae cavae
@@ -549,7 +549,7 @@ export function buildDetail(ctx, seed = 1848) {
     const inside = lung(lungE);
     for (const pv of pvs) {
       const q = rootEnd(pv), aim = [lungE.c[0], lungE.c[1], lungE.c[2] + (pv.endsWith('U') ? 50 : -50)];
-      fractal(q, sub(aim, q), 4.5, 30, 7, inside, { part: VPART.PULM_VEIN, vein: true, name: 'pulmonaryV', side, bedKind: 'lung', centre: lungE.c, pwv: 1, a0: 0, ampTip: 1, d0: -1 });
+      fractal(q, sub(aim, q), 4.5, 30, O.pulmVeinGen, inside, { part: VPART.PULM_VEIN, vein: true, name: 'pulmonaryV', side, bedKind: 'lung', centre: lungE.c, pwv: 1, a0: 0, ampTip: 1, d0: -1 });
     }
   }
   const liver = organ([E.liver, E.liverL]), hep = named('hepatic'), por = named('portal');

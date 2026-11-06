@@ -757,7 +757,9 @@ export const DIAPHRAGM = {
 // Lung and breathing star roles (research/LUNGS.md §7): organ and muscle stars carry −role in their
 // normal's y (≤ −2, clear of unit normals and of the heart's positive part codes); airway and acinus
 // stars carry their volume coordinate from the mouth (L) in the normal's x for the airflow front.
-export const LUNG_ROLE = { AIRWAY: 2, ACINUS: 3, PLEURA: 4, PARENCHYMA: 5, DIAPHRAGM: 6 };
+// AIR (7): air particles in the airways, with their branch vector packed in the normal's z
+// (generate.js packVector; LUNGS.md §14.3). PARENCHYMA (5) is no longer drawn.
+export const LUNG_ROLE = { AIRWAY: 2, ACINUS: 3, PLEURA: 4, PARENCHYMA: 5, DIAPHRAGM: 6, AIR: 7 };
 export function diaphragmZ(x, y) {
   const D = DIAPHRAGM;
   let z = D.base;

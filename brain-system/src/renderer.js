@@ -311,12 +311,11 @@ export class BrainRenderer {
   // tree, mean of the earlier great arteries] (PULSE.md §8).
   setPulse(p) { this.pulseIn.set(p); }
 
-  // Breathing from breath.js (LUNGS.md §7.3–7.4): diaphragm excursion and rib-cage expansion (mm),
-  // the Lungs view focus 0–1, and the airflow front (L from the mouth), its direction (+1 in, −1 out),
-  // gain G and mean G·M (off when G or the direction is 0).
-  setBreath({ excursionMm = 0, ribMm = 0, focus = 0, front = 0, dir = 1, gain = 0, mean = 0 } = {}) {
+  // Breathing from breath.js (LUNGS.md §7.3, §14.3): diaphragm excursion and rib-cage expansion as
+  // drawn (mm), the Lungs view focus 0–1, and the air particles' displacement along their branches.
+  setBreath({ excursionMm = 0, ribMm = 0, focus = 0, flow = 0 } = {}) {
     this.breath.set([excursionMm * MM, ribMm * MM, focus, 0]);
-    this.air.set([front, gain, mean, gain > 0 ? Math.sign(dir) : 0]);
+    this.air.set([flow, 1, 0, 0]);
   }
 
   // Dopamine waves (display only): origin [x, y, z] in mm and ≤ WAVE_SLOTS { radiusMm, amp, widthMm,

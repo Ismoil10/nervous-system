@@ -654,3 +654,81 @@ export function buildAirwayTree(opts = {}) {
   cache.set(key, tree);
   return tree;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Upper airway (research/LUNGS.md §2.1, §14.1): from each nostril through the nasal vestibule and
+// the nasal cavity to the choanae, then the nasopharynx, oropharynx, laryngopharynx and larynx (the
+// glottis a narrow slit) to the top of the trachea. Rows are [x, y, z, half-width (lateral), half-
+// height (in the sagittal plane)], mm. Kept inside the head and neck (bodySDF ≤ −1 mm), medial to
+// the eyes (|x| ≤ 14), below the cribriform plate and olfactory epithelium (z ≤ −50) and in front
+// of the cervical vertebrae [model; positions fitted to geometry.js HEAD landmarks: subnasale
+// (0, 96, −94), tongue, hyoid (0, 25, −145), larynx (0, 30, −158.5)].
+// ---------------------------------------------------------------------------------------------
+export const UPPER_AIRWAY = {
+  nose: [   // right nostril to the right choana; the left is its mirror (x → −x)
+    { name: 'Nostril (naris)', p: [6, 91, -91, 1.8, 1.8] },
+    { name: 'Nasal vestibule', p: [6, 86, -90, 2, 2] },
+    { name: 'Nasal vestibule', p: [6, 80, -87.5, 2.2, 2.8] },
+    { name: 'Nasal cavity', p: [6.5, 70, -77, 2.8, 10] },
+    { name: 'Nasal cavity', p: [7, 60, -70, 3, 15] },
+    { name: 'Nasal cavity', p: [7, 46, -69, 3, 16] },
+    { name: 'Choana', p: [6, 34, -71, 4, 12] },
+  ],
+  pharynx: [   // the two nasal cavities meet in the nasopharynx
+    { name: 'Nasopharynx', p: [0, 22, -74, 13, 10] },
+    { name: 'Nasopharynx', p: [0, 12, -88, 14, 11] },
+    { name: 'Oropharynx', p: [0, 9, -104, 14, 9] },
+    { name: 'Oropharynx', p: [0, 11, -122, 13, 8] },
+    { name: 'Laryngopharynx', p: [0, 16, -137, 12, 7] },
+    { name: 'Larynx · vestibule', p: [0, 25, -149, 8, 6] },
+    { name: 'Larynx · glottis', p: [0, 28, -158, 7, 2.5] },
+    { name: 'Larynx · subglottis', p: [0, 25, -165, 8, 8] },
+  ],
+};
+
+/** @typedef {{ a: V3, b: V3, wa: number, ha: number, wb: number, hb: number, vol0: number, vol1: number, name: string, side: number }} UpperSegment */
+/** @type {UpperSegment[] | null} */
+let upperCache = null;
+/**
+ * Straight segments of the upper airway, nostrils to the trachea, with the cumulative lumen volume
+ * (mL) from the mouth of the nose: each nasal passage carries half the flow, so its volume counts
+ * half; the whole is scaled to AIRWAY.upperDeadSpace at the top of the trachea.
+ * @returns {UpperSegment[]}
+ */
+export function upperAirwaySegments() {
+  if (upperCache) return upperCache;
+  const T = buildAirwayTree().branches[0], top = /** @type {number[]} */ ([...T.a, T.r, T.r]);
+  const rows = (list) => list.map((q) => q.p);
+  const segVol = (A, B) => Math.PI * len(sub(B, A)) * (A[3] * A[4] + B[3] * B[4]) / 2 / 1000;   // mL
+  const out = [];
+  const mk = (A, B, name, side, v0, k) => { const v = k * segVol(A, B); out.push({ a: [A[0], A[1], A[2]], b: [B[0], B[1], B[2]], wa: A[3], ha: A[4], wb: B[3], hb: B[4], vol0: v0, vol1: v0 + v, name, side }); return v0 + v; };
+  const nose = rows(UPPER_AIRWAY.nose), ph = [...rows(UPPER_AIRWAY.pharynx), top];
+  let vNose = 0;
+  for (const side of [1, -1]) {
+    let v = 0;
+    const N = nose.map((r) => [side * r[0], r[1], r[2], r[3], r[4]]);
+    for (let i = 0; i < N.length - 1; i++) v = mk(N[i], N[i + 1], UPPER_AIRWAY.nose[i + 1].name, side, v, 0.5);
+    v = mk(N[N.length - 1], ph[0], UPPER_AIRWAY.pharynx[0].name, side, v, 0.5);
+    vNose = v;
+  }
+  let v = vNose;
+  for (let i = 0; i < ph.length - 1; i++) v = mk(ph[i], ph[i + 1], (UPPER_AIRWAY.pharynx[i + 1] ?? UPPER_AIRWAY.pharynx[i]).name, 0, v, 1);
+  const k = AIRWAY.upperDeadSpace / v;
+  for (const s of out) { s.vol0 *= k; s.vol1 *= k; }
+  upperCache = out;
+  return out;
+}
+
+/**
+ * A candidate point on a fissure surface (LUNGS.md §14.2), for the visceral pleura that lines it:
+ * kind 0 the right oblique, 1 the left oblique, 2 the right horizontal fissure; u, v ∈ [0, 1).
+ * The caller keeps it only where the lobes on either side differ (lobeOf above and below).
+ * @param {number} u @param {number} v @param {number} kind @returns {V3}
+ */
+export function fissureSurfacePoint(u, v, kind) {
+  const L = kind === 1 ? LUNG_L : LUNG_R;
+  const x = L.c[0] + (2 * u - 1) * L.r[0];
+  if (kind === 2) return [x, L.c[1] + (2 * v - 1) * L.r[1], FISSURES.horizontal.zH];
+  const F = kind === 0 ? FISSURES.obliqueR : FISSURES.obliqueL, y = F.yBack - 8 + v * (F.yFront - F.yBack + 16);
+  return [x, y, F.zBack + F.slope * (y - F.yBack) + F.curve * (y - F.yBack) * (y - F.yFront) + F.kx * (Math.abs(x) - F.x0)];
+}

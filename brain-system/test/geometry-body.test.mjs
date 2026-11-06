@@ -98,7 +98,9 @@ test('records follow the B.7 layout', () => {
         const role = -P[k + 5];
         assert.ok(Object.values(LUNG_ROLE).includes(role), `lung role ${role}`);
         assert.equal(role === LUNG_ROLE.DIAPHRAGM, r.tissue === TISSUE.muscle, 'the diaphragm is muscle; the other roles are organ');
-        assert.ok(P[k + 4] >= 0 && P[k + 4] <= 0.46 && P[k + 6] === 0, 'volume coordinate (L)');
+        assert.ok(P[k + 4] >= 0 && P[k + 4] <= 0.46, 'volume coordinate (L)');
+        if (role === LUNG_ROLE.AIR) assert.ok(Number.isInteger(P[k + 6]) && P[k + 6] > 0 && P[k + 6] < 2 ** 24, 'air particle: packed branch vector');
+        else assert.equal(P[k + 6], 0);
       } else assert.equal(nl, 0, 'volume points carry no normal');
     }
   }

@@ -1,12 +1,12 @@
 // @ts-check
-// Lungs view names (research/LUNGS.md §7.6): the structure under the mouse. The lung stars of the
-// body buffer inside a narrow cone round the cursor ray are weighted by flux and by how near the
-// front they lie; the front-most cluster's point is named by the airway tree (airway-tree.js): a named
-// airway (trachea to segmental bronchi), a smaller bronchus or bronchiole with its segment and
-// generation, or the lobe and segment of the lung tissue there. Rest positions: breathing moves the
+// Lungs view names (research/LUNGS.md §7.6, §14.1): the structure under the mouse, nose to acini.
+// The lung stars of the body buffer inside a narrow cone round the cursor ray are weighted by flux
+// and by how near the front they lie; the front-most cluster's point is named by the airways
+// (airway-tree.js): a passage of the upper airway, a named airway (trachea to segmental bronchi), a
+// smaller bronchus or bronchiole with its segment and generation, or the lobe and segment there. Rest positions: breathing moves the
 // bases by 1–2 cm at most, so the name is that of the structure at rest. Display only.
 
-import { LOBES, SEGMENTS, buildAirwayTree, lobeOf, segmentOf } from './body/airway-tree.js';
+import { LOBES, SEGMENTS, buildAirwayTree, lobeOf, segmentOf, upperAirwaySegments } from './body/airway-tree.js';
 import { LUNG_ROLE } from './body/geometry.js';
 
 export const LUNG_PICK = { front: 25, minWeight: 0.1, airwayMm: 2.0, maxGen: 11, cartilageMm: 1.0 };
@@ -57,6 +57,16 @@ export function pickLungPoint(origin, dir, index, { cone = 0.006, near = 0.01 } 
 
 // The name of the lung structure at p (mm), or null outside the lungs and airways.
 export function lungName(p) {
+  // The upper airway first (LUNGS.md §14.1): the passage whose elliptic wall lies nearest.
+  let up = null, upD = Infinity;
+  for (const g of upperAirwaySegments()) {
+    const d = [g.b[0] - g.a[0], g.b[1] - g.a[1], g.b[2] - g.a[2]], l2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2] || 1;
+    const t = Math.max(0, Math.min(1, ((p[0] - g.a[0]) * d[0] + (p[1] - g.a[1]) * d[1] + (p[2] - g.a[2]) * d[2]) / l2));
+    const q = Math.hypot(g.a[0] + t * d[0] - p[0], g.a[1] + t * d[1] - p[1], g.a[2] + t * d[2] - p[2]);
+    const r = Math.max(g.wa + t * (g.wb - g.wa), g.ha + t * (g.hb - g.ha));
+    if (q < r + LUNG_PICK.airwayMm && q < upD) { upD = q; up = g; }
+  }
+  if (up) return up.side ? `${up.name} · ${up.side > 0 ? 'right' : 'left'}` : up.name;
   const T = buildAirwayTree();
   let best = null, bestD = Infinity;
   for (const b of T.branches) {

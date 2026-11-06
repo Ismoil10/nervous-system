@@ -8,7 +8,6 @@ import { BODY_TEX_W, EDGE_TEX_W } from './statetex.js';
 import { HEART_FORM, HEART_SECTION as HSEC, HEART_DEPTH as HD, HEART_LOD as HL, PART as HP, FOCUS_LOD } from './body/heart-form.js';
 import { VPART as VP } from './body/vessel-tree.js';
 import { DIAPHRAGM, ORGANS, LUNG_ROLE } from './body/geometry.js';
-import { BREATH } from './breath.js';
 
 export const PATH_HIST = 16;   // samples of firing-rate history per pathway (axon impulse packets)
 export const PATH_COUNT = PATHWAYS.length;
@@ -45,7 +44,10 @@ export const PARAMS = {
     // ≈ 78 % of the lungs' light, the total ≈ 1.13 × the stars' own); and the Detailed colours: bronchi
     // greyish ivory (cartilage), the pleura silvery, acini and parenchyma the organ pink. In the Lungs
     // view the capillary beds stay at capillaryFocus: they are haze, not structure.
-    roleGain: [1.6, 0.6, 0.6, 0.4], airwayRGB: [0.95, 0.93, 0.88], capillaryFocus: 0.45 },
+    // Roles 2–7 (airway, acinus, pleura, parenchyma (no longer drawn), diaphragm (muscle, 1), air
+    // particles). Air particles are pale cyan; ribs and chest wall move only below the thoracic inlet.
+    roleGain: [1.6, 0.7, 0.8, 0.4, 1.0, 1.4], airwayRGB: [0.95, 0.93, 0.88], airRGB: [0.78, 0.92, 1.0], capillaryFocus: 0.45,
+    inletZ: -195, inletSpan: 20 },
   shimmer: 0.6,                        // §13.8 stream flux × (1 + 0.6·ā)
   twinkleHz: [0.2, 2.0],               // §13.8 per-star twinkle ±10 % at 0.2–2 Hz, desynchronised
   packetCut: 3,                        // [model] Gaussian packet profile truncated at ±3σ
@@ -328,7 +330,7 @@ uniform vec4 uHeartK;      // beat mode (1) or steady glow (0), steady gain, mot
 uniform vec4 uHeartV;      // atrioventricular valves open 0–1, semilunar valves open 0–1, diastole (coronary flow) 0–1, section 0 (closed) – 1 (open)
 uniform vec4 uFocus[2];     // focus region (CLOSEUP.md §3): [0] centre (units), radius; [1] D_max (1 = none), weight 0–1, slab 0–1, unused
 uniform vec4 uBreath;      // breathing (breath.js, LUNGS.md §7.3): diaphragm excursion, rib-cage expansion (units), Lungs view focus 0–1, unused
-uniform vec4 uAir;         // airflow front (LUNGS.md §7.4): front (L from the mouth), gain G, energy-conserving mean G·M, direction (+1 in, −1 out, 0 off)
+uniform vec4 uAir;         // air particles (LUNGS.md §14.3): x the breath's displacement along each branch (inspired volume ÷ VT), y on (1); z, w unused
 uniform vec4 uPulse;       // arterial pulse (pulse.js): reduced time since the aortic valve opened (s), amplitude G, energy-conserving mean G·M; w: the heart's close-up density cap D_max (1 = none, HEART.md §8.1)
 uniform vec4 uClassGain[3];   // per tissue class: flux ratio × tier compensation (§13.3, B.8)
 uniform vec4 uClassNorm[3];   // per tissue class: 1 / mean flux of the class
@@ -360,7 +362,8 @@ const float TREE_GAIN[7] = float[7](${PARAMS.pulse.partGain.map(f).join(', ')});
 const vec3 HEART_MUSCLE = vec3(1.0, 0.46, 0.5), HEART_ART = vec3(1.0, 0.22, 0.2), HEART_VEIN = vec3(0.38, 0.55, 1.0), HEART_FIBROUS = vec3(1.0, 0.95, 0.85);
 const vec3 HEART_FAT = vec3(1.0, 0.86, 0.52), HEART_SEROUS = vec3(0.82, 0.9, 1.0);   // epicardial fat pale yellow; the pericardium silvery
 const vec3 AIRWAY_RGB = vec3(${PARAMS.breath.airwayRGB.map(f).join(', ')});   // bronchial cartilage, greyish ivory (LUNGS.md §7.1)
-const float LUNG_GAIN[4] = float[4](${PARAMS.breath.roleGain.map(f).join(', ')});
+const float LUNG_GAIN[6] = float[6](${PARAMS.breath.roleGain.map(f).join(', ')});
+const vec3 AIR_RGB = vec3(${PARAMS.breath.airRGB.map(f).join(', ')});   // air particles (LUNGS.md §14.3)
 // Heart close-up, depth cue and section (HEART.md §8; heart-form.js HEART_LOD, HEART_DEPTH, HEART_SECTION).
 const vec3 HEART_C = ${vec3mm(HD.c)}, SEC_N = ${vec3u(HSEC.n)}, SEC_P = ${vec3mm(HSEC.p)};
 const vec3 HF_W = ${vec3u(HF.w)}, HF_ANT = ${vec3u(HF.ant)}, HF_RIGHT = ${vec3u(HF.right)};
@@ -403,7 +406,8 @@ vec3 breathField(vec3 p, int kind, float e, float rb, out float strain) {
   float zd = diaphragmZ(p.xy);
   float low = clamp((${f(PARAMS.breath.ribZ[0] * MM)} - p.z) / ${f(PARAMS.breath.ribZ[1] * MM)}, 0.0, 1.0);
   float wb = 0.3 + 0.7 * low, wp = 1.0 - 0.5 * low;   // bucket handle low, pump handle high (§3.4)
-  vec3 rib = vec3(rb * wb * p.x / ${f(T.a * MM)}, rb * wp * clamp((p.y - ${f((T.cy - T.b) * MM)}) / ${f(2 * T.b * MM)}, 0.0, 1.0), 0.0);
+  float inlet = clamp((${f(PARAMS.breath.inletZ * MM)} - p.z) / ${f(PARAMS.breath.inletSpan * MM)}, 0.0, 1.0);   // nothing moves out above the thoracic inlet
+  vec3 rib = inlet * vec3(rb * wb * p.x / ${f(T.a * MM)}, rb * wp * clamp((p.y - ${f((T.cy - T.b) * MM)}) / ${f(2 * T.b * MM)}, 0.0, 1.0), 0.0);
   if (kind == 2) return vec3(0.0, 0.0, -e * clamp((zd - DIA_BASE) / (DIA_TOP - DIA_BASE), 0.0, 1.0));
   if (p.z > zd) {
     if (kind == 3) return rib;
@@ -468,6 +472,16 @@ void main() {
   int path = int(floor(aNode.y + 0.5));
   vec3 p = aPos.xyz;
   vec3 n = aNrm.xyz;
+  // Air particles (LUNGS.md §14.3): each runs along its branch vector (generate.js packVector, each
+  // component within ±120 mm, so the exact unpacking keeps clear of the rounding edges) by the breath's
+  // displacement, wrapping round, inwards as the lungs fill and outwards as they empty.
+  float airT = -1.0;
+  if (cls == ${TISSUE.ORGAN} && aNrm.y < -6.5 && aNrm.y > -7.5) {
+    float v = aNrm.z, zq = floor(v / 65536.0), r = v - zq * 65536.0, yq = floor(r / 256.0), xq = r - yq * 256.0;
+    airT = fract(aNode.z + uAir.x);
+    p += (vec3(xq, yq, zq) - 128.0) * ${f(MM)} * airT;
+  }
+  vec3 restP = p;
 
   // Organ geometry (§13.7): 1 uniform scale about a centre (lungs, bladder), 2 shift along z
   // (diaphragm), 3 iris ring remap in the x–z plane (inner radius = pupil diameter / 2).
@@ -612,34 +626,29 @@ void main() {
     } else if (regionStar) { ${CULL} }
   }
 
-  // Breathing (research/LUNGS.md §3.5, §7.3): trunk stars (no rigid segment) move with the diaphragm
-  // and the rib cage; each star's flux follows its craniocaudal stretch, so a region's light stays
-  // constant as its stars spread and gather. Reduced motion holds the mean (§13.15).
+  // Breathing (research/LUNGS.md §3.5, §7.3): trunk stars (rigid segment 0, geometry.js rigidAt; the
+  // head is 1 and the limbs 2–13) move with the diaphragm and the rib cage; each star's flux follows
+  // its craniocaudal stretch, so a region's light stays constant as its stars spread and gather. The
+  // trunk's own joint transform below is the identity, so the two compose. Reduced motion holds the
+  // mean (§13.15).
   int seg = int(floor(aNet.w + 0.5));
   int lungRole = (cls == ${TISSUE.ORGAN} || cls == ${TISSUE.MUSCLE}) && aNrm.y < -1.5 ? int(-aNrm.y + 0.5) : 0;
-  bool lungStar = lungRole >= ${LUNG_ROLE.AIRWAY} && lungRole <= ${LUNG_ROLE.PARENCHYMA};
-  bool pulmTree = tree && inLung(aPos.xyz);
+  bool lungStar = (lungRole >= ${LUNG_ROLE.AIRWAY} && lungRole <= ${LUNG_ROLE.PARENCHYMA}) || lungRole == ${LUNG_ROLE.AIR};
+  bool pulmTree = tree && inLung(restP);
   bool pulmBed = pulmTree && vPart > ${f(VP.CAPILLARY - 0.5)} && vPart < ${f(VP.CAPILLARY + 0.5)};
   float breathGlow = lungStar ? LUNG_GAIN[lungRole - ${LUNG_ROLE.AIRWAY}] : 1.0;
-  if (seg < 0 && (uBreath.x > 0.0 || uBreath.y > 0.0)) {
+  // A particle fades in and out over its run (mean 1, so the airways' light is constant; it passes
+  // at most a few times a breath, ≤ 2 Hz per point).
+  if (airT >= 0.0) breathGlow *= 1.5708 * sin(3.14159 * airT);
+  if (seg == 0 && (uBreath.x > 0.0 || uBreath.y > 0.0)) {
     int kind = lungStar || pulmTree ? 1 : lungRole == ${LUNG_ROLE.DIAPHRAGM} ? 2
       : (cls == ${TISSUE.SKIN} || cls == ${TISSUE.MUSCLE} || cls == ${TISSUE.BONE}) ? 3
       : (cls == ${TISSUE.ORGAN} || cls == ${TISSUE.VESSEL} || cls == ${TISSUE.ENTERIC}) ? 4 : 0;
     if (kind > 0) {
       float strain;
-      p += breathField(aPos.xyz, kind, uBreath.x, uBreath.y, strain);
+      p += breathField(restP, kind, uBreath.x, uBreath.y, strain);
       breathGlow /= max(0.5, 1.0 + strain);
     }
-  }
-  // Airflow front (LUNGS.md §7.4): airway and acinus stars brighten as the interface between inspired
-  // and alveolar gas passes their volume coordinate; every one gives back the mean, so the airways'
-  // light is constant through the breath.
-  // The bright band runs with a dim trail 1.5 σ behind it, so any stretch of airway longer than the
-  // band keeps its light (local energy conservation; breath.js frontBand).
-  if (abs(uAir.w) > 0.5 && (lungRole == ${LUNG_ROLE.AIRWAY} || lungRole == ${LUNG_ROLE.ACINUS})) {
-    float sg = max(${f(BREATH.front.sigmaMin)}, ${f(BREATH.front.sigmaRel)} * max(aNrm.x, uAir.x));
-    float d = (aNrm.x - uAir.x) / sg, dt = (aNrm.x - uAir.x + uAir.w * ${f(BREATH.front.trail)} * sg) / sg;
-    breathGlow *= max(0.0, 1.0 + uAir.y * (exp(-d * d) - exp(-dt * dt)) - uAir.z);
   }
   // Lungs view: the lungs, their vessels and the diaphragm lifted, everything else dimmed (as the
   // Heart view, HEART.md §5).
@@ -688,6 +697,7 @@ void main() {
     // Arteries and pulmonary veins oxygenated red, veins and pulmonary arteries blue, capillaries from
     // blue to red by their oxygen saturation, 60–98 % (PULSE.md §13.6).
     if (lungRole == ${LUNG_ROLE.AIRWAY}) a = AIRWAY_RGB;
+    else if (lungRole == ${LUNG_ROLE.AIR}) a = AIR_RGB;
     else if (lungRole == ${LUNG_ROLE.PLEURA}) a = HEART_SEROUS;
     if (tree) a = vPart < 2.5 || vPart > ${f(VP.PULM_VEIN - 0.5)} ? HEART_ART
       : vPart > ${f(VP.CAPILLARY - 0.5)} && vPart < ${f(VP.CAPILLARY + 0.5)} ? mix(HEART_VEIN, HEART_ART, clamp((aNrm.z - 0.6) / 0.38, 0.0, 1.0)) : HEART_VEIN;
@@ -702,7 +712,9 @@ void main() {
   float head = smoothstep(${f(PARAMS.headZ[0] * MM)}, ${f(PARAMS.headZ[1] * MM)}, p.z);
   float headF = ${f(HS.gain)} * smoothstep(${f(HS.d0)}, ${f(HS.d1)}, uDist);
   if (cls == ${TISSUE.SKIN}) flux *= mix(1.0, headF, head);
-  else if (cls == ${TISSUE.ORGAN}) flux *= mix(1.0, mix(headF, 1.0, uSenseFull), head);
+  // The airways and their air particles keep their light in the head (LUNGS.md §14.1): they run from
+  // the nostrils through the pharynx and larynx, below the brain.
+  else if (cls == ${TISSUE.ORGAN} && lungRole != ${LUNG_ROLE.AIRWAY} && lungRole != ${LUNG_ROLE.AIR}) flux *= mix(1.0, mix(headF, 1.0, uSenseFull), head);
   else if (tree) flux *= mix(1.0, mix(smoothstep(${f(HS.d0)}, ${f(HS.d1)}, uDist), 1.0, uSenseFull), head);   // head vessels leave the brain view clear
 
   vec3 v = normalize(uEye - p);
