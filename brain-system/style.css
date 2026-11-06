@@ -1091,3 +1091,26 @@ body.hud-simple #hud { display: none; }
   .nav-help { top: auto; bottom: max(16px, env(safe-area-inset-bottom)); right: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .nav-pivot { transition: none; } }
+
+/* Heart close-up (research/HEART.md §8): the structure name under the mouse, and the section button. */
+.heart-label {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 7;
+  max-width: min(360px, calc(100vw - 16px));
+  padding: 5px 10px;
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--text);
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.heart-label[hidden] { display: none; }
+.shud .heart-section-btn[hidden] { display: none; }
+.shud .heart-section-btn[aria-pressed="true"] { color: var(--accent-hi); border-color: var(--accent-line); background: var(--accent-tint); }

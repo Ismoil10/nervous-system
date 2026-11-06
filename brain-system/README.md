@@ -109,6 +109,31 @@ changes the emotion.
     and the conduction system. In the Body and Heart views the HUD shows a patient monitor: ECG and
     heart rate, arterial pressure, a fingertip pulse (PLETH) with the pulse transit time, respiration,
     temperature, and the adrenaline and cortisol blood values.
+  - **Heart close-up** (Detailed; `research/HEART.md` §8). The heart carries its fine anatomy:
+    - trabeculae, pectinate muscles and the crista terminalis;
+    - papillary muscles with their heads, and chordae that fan out;
+    - leaflets with their scallops, nodules and lunulae;
+    - the sinuses of Valsalva with the coronary ostia;
+    - the fossa ovalis, the coronary sinus ostium and the Eustachian and Thebesian valves;
+    - the smaller coronary branches and veins, the epicardial fat and the pericardium.
+
+    As the camera nears the heart:
+    - more stars fade in, built in the background on first approach (Medium +60k, High +150k,
+      Ultra +250k), so the surface stays fine and continuous;
+    - the heart's light does not change;
+    - its back dims, so the front reads first;
+    - the rest of the body steps back.
+
+    **C**, or the heart button in the top corner, opens the heart along the four-chamber plane, and
+    the camera turns to face the cut. Hovering with the mouse, or a long press on touch, names the
+    structure under the cursor.
+  - **Body close-up** (Detailed; `research/CLOSEUP.md`). Close to the body, every system round the
+    point in view gains close-up stars, built in the background: Medium +100k, High +200k,
+    Ultra +300k. Nerve fibres, vessels, ganglia, organs, muscle, bone and skin stay crisp instead of
+    breaking into a dim scatter.
+    - The body in front of that point thins out and the far side dims, so the structures there read
+      on their own.
+    - On high-resolution screens the canvas renders at full resolution while the GPU has room.
   - **Pulse and vessels** (Detailed): a branching tree of arteries (red) and veins (blue) in fine stars,
     from the aorta (with its root sinuses) to the cerebral, digital and pedal arteries, with the
     vessels of the lungs, liver, kidneys, spleen and gut, and capillary beds coloured from red to blue
@@ -262,7 +287,8 @@ HUD actions reach the kernel.
 | `src/monitor.js` | `MONITOR`, `RespTrace`, `isAlarm`, `monitorValues`: the patient monitor's channels, alarm limits and respiration trace |
 | `src/pulse.js` | `PulseWave`: the arterial pulse from the beat (arrival delays scaled by the state's wave speed, the energy-conserving mean for `BODY_VS`), the PLETH trace and the pulse transit time |
 | `src/body/vessel-tree.js` | `VESSEL_TREE`, `buildDetail`, `pulseSite`: the named arteries and veins, their branches, organ trees and capillary beds, radii (Murray), arrival delays and pulse amplitudes |
-| `src/body/heart-form.js` | `HEART_FORM`: heart geometry (ventricles, fibres, atria, valves, vessels, conduction system) |
+| `src/body/heart-form.js` | `HEART_FORM`: heart geometry (ventricles, fibres, atria, valves, vessels, conduction system, fine anatomy); `LABEL_NAMES`; the close-up law (`HEART_LOD`), depth cue and four-chamber section |
+| `src/heart-ui.js` | Heart close-up interface: the structure name under the mouse (`pickHeartLabel`) and the section button |
 
 Rendering assets (HDR pipeline, bloom, star point-spread function, adaptive quality, HUD style)
 come from the Orgasm Galaxy project (removed on 2026-11-02; its response-model analysis lives on as

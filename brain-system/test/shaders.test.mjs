@@ -106,7 +106,7 @@ describe('shader sources', () => {
     const s = strip(S.BODY_VS);
     for (const l of [0, 1, 2, 3]) assert.ok(new RegExp(`layout\\(location = ${l}\\) in vec4 a\\w+;`).test(s), `location ${l}`);
     assert.equal(S.BODY_FLOATS, 16);
-    assert.ok(s.includes(`uniform vec4 uOrgan[16];`) && s.includes(`uniform vec4 uJoint[40];`), 'B.7 uOrgan[16], uJoint[40]');
+    assert.ok(s.includes(`uniform vec4 uOrgan[16];`) && s.includes(`uniform vec4 uJoint[32];`), 'B.7 uOrgan[16]; uJoint[32]: 16 rigid segments, rigidAt uses 0–13 (four spare segments pay for uFocus, CLOSEUP.md §3)');
     assert.equal(S.PARAMS.ghost, 0.08);
     assert.equal(S.PARAMS.lambdaBody, 150);
     assert.deepEqual(S.PARAMS.torso, { cy: -15, a: 160, b: 120, z0: -835, z1: -185 });

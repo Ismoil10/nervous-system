@@ -5,7 +5,7 @@
 
 import { MM, PATHWAYS } from './anatomy.js';
 import { BODY_TEX_W, EDGE_TEX_W } from './statetex.js';
-import { HEART_FORM, PART as HP } from './body/heart-form.js';
+import { HEART_FORM, HEART_SECTION as HSEC, HEART_DEPTH as HD, HEART_LOD as HL, PART as HP, FOCUS_LOD } from './body/heart-form.js';
 import { VPART as VP } from './body/vessel-tree.js';
 
 export const PATH_HIST = 16;   // samples of firing-rate history per pathway (axon impulse packets)
@@ -17,7 +17,7 @@ export const TISSUE_NAMES = ['skin', 'organ', 'muscle', 'bone', 'cord', 'nerve',
 export const NET_BIT = { somAff: 0, somEff: 1, symp: 2, para: 3, visAff: 4, enteric: 5, endocrine: 6, immune: 7 };
 export const BODY_FLOATS = 16;   // a0 pos.xyz (units), flux · a1 normal.xyz, seed · a2 node, path, u, class · a3 nets, LOD, side, segment
 export const ORGAN_SLOTS = 8;    // uOrgan[16]: 8 × (node, centre) + (mode, p1, p2, p3)
-export const JOINT_SLOTS = 20;   // uJoint[40]: 20 rigid segments × (quaternion, translation), B.7
+export const JOINT_SLOTS = 16;   // uJoint[32]: rigid segments × (quaternion, translation), B.7; geometry.js rigidAt uses 0–13 (was 20: four spare segments, 8 slots, pay for uFocus; CLOSEUP.md §3)
 
 // Visual constants of the body pass. Lengths in mm unless stated; the shader works in units (MM).
 export const PARAMS = {
@@ -41,7 +41,15 @@ export const PARAMS = {
   // motion at rest end-systole, atrial squeeze, the activation wave's gain and width in the
   // conduction system and in the walls, and the Heart view's dimming of everything else.
   heart: { descentMm: 12, wallIn: 0.12, atrialIn: 0.10, glow: [1.6, 0.5], sigma: [0.012, 0.02], focusDim: [0.18, 0.4], focusGain: 2.2,
-    leafletOpen: 1.3, coronaryFlow: 0.3 },
+    leafletOpen: 1.3, coronaryFlow: 0.3, near: [12, 45], openConduction: 0.55 },   // openConduction: the conduction system's flux in the opened heart (HEART.md §8.4)
+  // Focus region and focus slab (research/CLOSEUP.md §3–§4) [model]: the wanted density of the body
+  // stars grows as (q/q0)² (q px/mm, 1,080-px reference) and the region's close-up stars fill it up to
+  // D_max; past D_max the stars grow as (want/D_max)^grow, at most × sizeMax; the region's edge
+  // softens over its outer 30 %. The slab, in units of the camera's distance to the pivot d: stars
+  // nearer than front[0]–front[1]·d fade out, those beyond back·d dim with the length lambda·d.
+  // conserve: the region's stars give back the drawn density to this power: 1 keeps the total light (the
+  // heart's law), 0 keeps each star's own light, so the body's surface brightness holds as it nears.
+  focus: { q0: 2.0, grow: 0.25, sizeMax: 1.5, edge: 0.7, front: [0.35, 0.75], back: 1.25, lambda: 0.8, conserve: 0.25 },   // near: with the heart in focus, body stars fade in over 12–45 mm from the camera (HEART.md §8.3)
   // Arterial pulse display (research/PULSE.md §8) [model]: each artery star brightens as the wave
   // front passes, a Gaussian in reduced time (s ÷ the delay scale k) of width `sigma` centred `x0`
   // after the foot, cut at ±`cut` σ, of peak gain `gain` × the star's amplitude A × the beat amplitude
@@ -300,8 +308,9 @@ uniform vec4 uKeep[3];     // per tissue class: share of the stars drawn (Stars 
 uniform vec4 uHeartT;      // heart (heart.js): time since the SA firing (s), PR, QRS, P duration
 uniform vec4 uHeartM;      // atrial squeeze 0–1, ventricular contraction (1 = rest end-systole), root pulse, mean wave gain
 uniform vec4 uHeartK;      // beat mode (1) or steady glow (0), steady gain, motion amplitude, Heart view focus
-uniform vec4 uHeartV;      // atrioventricular valves open 0–1, semilunar valves open 0–1, diastole (coronary flow) 0–1
-uniform vec4 uPulse;       // arterial pulse (pulse.js): reduced time since the aortic valve opened (s), amplitude G, energy-conserving mean G·M, unused
+uniform vec4 uHeartV;      // atrioventricular valves open 0–1, semilunar valves open 0–1, diastole (coronary flow) 0–1, section 0 (closed) – 1 (open)
+uniform vec4 uFocus[2];     // focus region (CLOSEUP.md §3): [0] centre (units), radius; [1] D_max (1 = none), weight 0–1, slab 0–1, unused
+uniform vec4 uPulse;       // arterial pulse (pulse.js): reduced time since the aortic valve opened (s), amplitude G, energy-conserving mean G·M; w: the heart's close-up density cap D_max (1 = none, HEART.md §8.1)
 uniform vec4 uClassGain[3];   // per tissue class: flux ratio × tier compensation (§13.3, B.8)
 uniform vec4 uClassNorm[3];   // per tissue class: 1 / mean flux of the class
 uniform vec4 uNetGain[2];     // display gain per network bit, ghost 0.08 … 1 (carries the cross-fades)
@@ -330,6 +339,12 @@ vec3 qrot(vec4 q, vec3 v) { return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w 
 // valves, leaflets and chordae ivory (the fibrous tissue).
 const float TREE_GAIN[7] = float[7](${PARAMS.pulse.partGain.map(f).join(', ')});   // vascular tree flux per part (PULSE.md §13.6)
 const vec3 HEART_MUSCLE = vec3(1.0, 0.46, 0.5), HEART_ART = vec3(1.0, 0.22, 0.2), HEART_VEIN = vec3(0.38, 0.55, 1.0), HEART_FIBROUS = vec3(1.0, 0.95, 0.85);
+const vec3 HEART_FAT = vec3(1.0, 0.86, 0.52), HEART_SEROUS = vec3(0.82, 0.9, 1.0);   // epicardial fat pale yellow; the pericardium silvery
+// Heart close-up, depth cue and section (HEART.md §8; heart-form.js HEART_LOD, HEART_DEPTH, HEART_SECTION).
+const vec3 HEART_C = ${vec3mm(HD.c)}, SEC_N = ${vec3u(HSEC.n)}, SEC_P = ${vec3mm(HSEC.p)};
+const vec3 HF_W = ${vec3u(HF.w)}, HF_ANT = ${vec3u(HF.ant)}, HF_RIGHT = ${vec3u(HF.right)};
+const vec3 HEART_ENV = vec3(${HD.envelope.map((r) => f(r * MM)).join(', ')});
+float rampInt(float x) { return x <= 0.0 ? 0.0 : x < ${f(HL.fade)} ? x * x / ${f(2 * HL.fade)} : x - ${f(HL.fade / 2)}; }
 const vec3 VALVE_C[4] = vec3[4](${HF.valves.map((v) => vec3mm(v.c)).join(', ')});
 const vec3 VALVE_AX[4] = vec3[4](${HF.valveAxis.map(vec3u).join(', ')});
 const float VALVE_R[4] = float[4](${HF.valves.map((v) => f(v.r * MM)).join(', ')});
@@ -365,7 +380,11 @@ float torsoPath(vec3 p) {
 
 void main() {
   float lod = aNet.y;
+  bool regionStar = lod > ${f(FOCUS_LOD - 0.5)};   // close-up stars of the focus region (CLOSEUP.md §3)
+  if (regionStar) { lod -= ${f(FOCUS_LOD)}; if (uFocus[1].x < 1.001 || uFocus[1].y <= 0.0) { ${CULL} } }
   if ((lod > 1.5 && uPxMm < ${f(PARAMS.lodPxMm[0])}) || (lod > 2.5 && uPxMm < ${f(PARAMS.lodPxMm[1])})) { ${CULL} }
+  if (lod > ${f(HL.lod - 0.5)} && lod < ${f(HL.lod + 0.5)} && uPulse.w < 1.001) { ${CULL} }   // heart close-up stars (HEART.md §8.1)
+  if (lod > ${f(HL.sectionLod - 0.5)} && uHeartV.w <= 0.0) { ${CULL} }   // the cut face: only while the heart is open (§8.4)
   int cls = clamp(int(aNode.w + 0.5), 0, 8);
   float heartPart = cls == ${TISSUE.ORGAN} ? aNrm.y : 0.0;
   float vPart = cls == ${TISSUE.VESSEL} ? aNrm.y : 0.0;   // vessel part code (vessel-tree.js VPART)
@@ -375,6 +394,7 @@ void main() {
   float keep = heartPart > 0.5 ? uKeep[2].y : uKeep[cls / 4][cls % 4];
   if (tree) keep = uKeep[2].w; else if (vPart > 0.5) keep *= 1.0 - uKeep[2].w;
   if (fract(aNrm.w * 113.7 + 0.37) >= keep) { ${CULL} }
+  if (heartPart > ${f(HP.TRABECULA - 0.5)} && uStyle.x < 0.5) { ${CULL} }   // Stars keeps the earlier heart (HEART.md §8.5)
   int node = int(floor(aNode.x + 0.5));
   int path = int(floor(aNode.y + 0.5));
   vec3 p = aPos.xyz;
@@ -398,7 +418,7 @@ void main() {
   }
   // Heart (HEART.md §5): the beat moves the chambers (atria, then the ventricles with the base
   // descending towards the apex) and runs the activation wave through each star at its time τ.
-  float heartGlow = 1.0;
+  float heartGlow = 1.0, heartSize = 1.0;
   if (heartPart > 0.5) {
     int hp = int(heartPart + 0.5);
     if (uHeartK.x > 0.5) {
@@ -417,10 +437,12 @@ void main() {
         float L = max(0.0, R - rl);
         p = vc + rd * (R - L * cos(th)) + ax * (L * sin(th) + h * cos(th));
       }
-      if (hp == ${HP.RA} || hp == ${HP.LA} || hp == ${HP.SA} || hp == ${HP.ATRIAL_PATH}) {
+      bool atrialFine = hp == ${HP.PECTINATE} || hp == ${HP.ATRIAL_FIBROUS};
+      if (hp == ${HP.RA} || hp == ${HP.LA} || hp == ${HP.SA} || hp == ${HP.ATRIAL_PATH} || atrialFine) {
         vec3 c = hp == ${HP.LA} ? ${vec3mm(HF.la.c)} : ${vec3mm(HF.ra.c)};
+        if (atrialFine && distance(p, ${vec3mm(HF.la.c)}) < distance(p, ${vec3mm(HF.ra.c)})) c = ${vec3mm(HF.la.c)};
         p = c + (p - c) * (1.0 - ${f(PARAMS.heart.atrialIn)} * uHeartM.x * m);
-      } else if (hp != ${HP.AV}) {
+      } else if (hp != ${HP.AV} && hp != ${HP.PERICARDIUM}) {
         vec3 q = p - ${vec3mm(HF.base)};
         float s = dot(q, ${`vec3(${f(HF.w[0])}, ${f(HF.w[1])}, ${f(HF.w[2])})`});
         vec3 rr = q - s * ${`vec3(${f(HF.w[0])}, ${f(HF.w[1])}, ${f(HF.w[2])})`};
@@ -441,10 +463,52 @@ void main() {
       if (hp == ${HP.ROOT}) heartGlow *= 1.0 + 0.12 * uHeartM.z;
       if (hp == ${HP.CORONARY_A}) heartGlow *= 1.0 + ${f(PARAMS.heart.coronaryFlow)} * uHeartV.z;   // coronary flow is diastolic
     } else heartGlow = uHeartK.y;
-    if (uHeartK.w > 0.5) heartGlow *= ${f(PARAMS.heart.focusGain)};   // the Heart view lifts the heart
+    heartGlow *= mix(1.0, ${f(PARAMS.heart.focusGain)}, uHeartK.w);   // the heart's focus (Heart view, or close to it) lifts the heart
     heartGlow *= uKeep[2].z;
-  } else if (uHeartK.w > 0.5) {
-    heartGlow = (cls == ${TISSUE.NERVE} || cls == ${TISSUE.GANGLION} || cls == ${TISSUE.CORD}) ? ${f(PARAMS.heart.focusDim[1])} : ${f(PARAMS.heart.focusDim[0])};
+    // Section (HEART.md §8.4): the half towards the camera goes, the plane sweeping in from outside
+    // the heart to the four-chamber plane; the cut face is lifted, so the walls read in section.
+    float sec = uHeartV.w;
+    float sd = (dot(uEye - SEC_P, SEC_N) >= 0.0 ? 1.0 : -1.0) * dot(p - SEC_P, SEC_N);   // mm-units towards the camera's side of the plane
+    if (sec > 0.0) {
+      float open = ${f(HSEC.open * MM)} * (1.0 - smoothstep(0.0, 1.0, sec));
+      if (sd > open) { ${CULL} }
+      bool wall = hp == ${HP.RA} || hp == ${HP.LA} || hp == ${HP.RV} || hp == ${HP.LV} || hp == ${HP.TRABECULA} || hp == ${HP.PECTINATE} || hp == ${HP.ROOT};
+      if (wall && sd > open - ${f(HSEC.rim * MM)}) heartGlow *= mix(1.0, ${f(HSEC.rimGain)}, sec);
+      if (hp >= ${HP.SA} && hp <= ${HP.PURKINJE}) heartGlow *= mix(1.0, ${f(PARAMS.heart.openConduction)}, sec);   // the walls lead in section
+      if (lod > ${f(HL.sectionLod - 0.5)}) heartGlow *= ${f(HSEC.faceGain)} * smoothstep(0.0, 1.0, sec);   // the cut face fades in as the plane arrives
+    }
+    // Depth cue (Detailed, §8.3): beyond t0 along the line of sight from the heart's centre the stars
+    // dim; the inner parts (valves, leaflets, chordae, conduction system, fibrous tissue) dim less.
+    // Opened, the depth is taken behind the cut face, and the cue is steeper, so the chambers read
+    // as hollows bounded by their walls in section.
+    bool inner = hp == ${HP.VALVE} || (hp >= ${HP.SA} && hp <= ${HP.PURKINJE}) || hp == ${HP.LEAFLET} || hp == ${HP.CHORDAE} || hp == ${HP.ATRIAL_FIBROUS};
+    float tH = mix(dot(p - HEART_C, normalize(HEART_C - uEye)) - ${f(HD.t0 * MM)}, -sd, sec);
+    float lamH = inner ? mix(${f(HD.lambda[1] * MM)}, ${f(HD.lambdaOpen[1] * MM)}, sec) : mix(${f(HD.lambda[0] * MM)}, ${f(HD.lambdaOpen[0] * MM)}, sec);
+    heartGlow *= mix(1.0, ${f(HD.gain)} * exp(-max(0.0, tH) / lamH), uStyle.x);
+    if (hp == ${HP.PERICARDIUM}) {   // a faint sac, brightest edge-on, so it outlines the heart and never veils it
+      vec3 q = p - HEART_C, e = HEART_ENV * HEART_ENV;
+      vec3 nE = normalize(HF_W * (dot(q, HF_W) / e.x) + HF_ANT * (dot(q, HF_ANT) / e.y) + HF_RIGHT * (dot(q, HF_RIGHT) / e.z));
+      float nv = 1.0 - abs(dot(nE, normalize(uEye - p)));
+      heartGlow *= mix(0.12, 1.0, nv * nv);
+    }
+    // Close-up density (§8.1): the wanted density grows as (q/q0)² with q this star's own px/mm;
+    // close-up stars of rank below the filled share fade in, every heart star gives back the drawn
+    // density, and past D_max the stars grow a little so the surface stays continuous.
+    float dmax = max(1.0, uPulse.w);
+    if (dmax > 1.0001) {
+      float q = uPxMm * uDist / max(1e-4, -(uView * vec4(p, 1.0)).z);
+      float want = max(1.0, (q / ${f(HL.q0)}) * (q / ${f(HL.q0)}));
+      float F = (min(want, dmax) - 1.0) / (dmax - 1.0) * ${f(1 + HL.fade)};
+      if (lod < ${f(HL.sectionLod - 0.5)}) heartGlow /= 1.0 + (dmax - 1.0) * (rampInt(F) - rampInt(F - 1.0));
+      if (lod > ${f(HL.lod - 0.5)} && lod < ${f(HL.lod + 0.5)}) {
+        float wc = clamp((F - fract(aNrm.w * ${f(HL.rankMul)} + ${f(HL.rankAdd)})) / ${f(HL.fade)}, 0.0, 1.0);
+        if (wc <= 0.0) { ${CULL} }
+        heartGlow *= wc;
+      }
+      heartSize = min(${f(HL.sizeMax)}, pow(max(1.0, want / dmax), ${f(HL.grow)}));
+    }
+  } else if (uHeartK.w > 0.0) {
+    heartGlow = mix(1.0, (cls == ${TISSUE.NERVE} || cls == ${TISSUE.GANGLION} || cls == ${TISSUE.CORD}) ? ${f(PARAMS.heart.focusDim[1])} : ${f(PARAMS.heart.focusDim[0])}, uHeartK.w);
   }
   // Arterial pulse (PULSE.md §8): each artery star brightens as the wave front passes, at its delay
   // from the aortic valve opening; every pulsing star gives back the mean, so the vessels' light is
@@ -457,6 +521,26 @@ void main() {
       pulseGlow = max(0.0, pulseGlow - uPulse.z);
     }
     if (tree) pulseGlow *= TREE_GAIN[int(vPart + 0.5) - 1];
+  }
+
+  // Focus region (CLOSEUP.md §3): round the camera's pivot every body class but the heart has
+  // close-up stars; as for the heart (HEART.md §8.1) they fade in by rank as the wanted density
+  // (q/q0)² rises, every star there gives back the expected drawn density, and the region's edge is soft.
+  float focusGlow = 1.0, focusSize = 1.0;
+  if (uFocus[1].x > 1.001 && heartPart < 0.5) {
+    float wr = (1.0 - smoothstep(${f(PARAMS.focus.edge)} * uFocus[0].w, uFocus[0].w, distance(p, uFocus[0].xyz))) * uFocus[1].y;
+    if (wr > 0.0) {
+      float dm = uFocus[1].x, q = uPxMm * uDist / max(1e-4, -(uView * vec4(p, 1.0)).z);
+      float want = max(1.0, (q / ${f(PARAMS.focus.q0)}) * (q / ${f(PARAMS.focus.q0)})), dEff = 1.0 + (dm - 1.0) * wr;
+      float F = (min(want, dEff) - 1.0) / (dm - 1.0) * ${f(1 + HL.fade)};
+      focusGlow = pow(1.0 + (dm - 1.0) * (rampInt(F) - rampInt(F - 1.0)), ${f(-PARAMS.focus.conserve)});
+      if (regionStar) {
+        float wc = clamp((F - fract(aNrm.w * ${f(HL.rankMul)} + ${f(HL.rankAdd)})) / ${f(HL.fade)}, 0.0, 1.0);
+        if (wc <= 0.0) { ${CULL} }
+        focusGlow *= wc;
+      }
+      focusSize = mix(1.0, min(${f(PARAMS.focus.sizeMax)}, pow(max(1.0, want / dEff), ${f(PARAMS.focus.grow)})), wr);
+    } else if (regionStar) { ${CULL} }
   }
 
   // Rigid limb segments (§13.9): quaternion and translation; trunk and pelvis never move.
@@ -493,7 +577,8 @@ void main() {
       a = (hc >= ${HP.SA} && hc <= ${HP.PURKINJE}) ? ANAT[${TISSUE.NERVE}]
         : (hc == ${HP.CORONARY_A} || (hc == ${HP.ROOT} && aNrm.x > -1.5)) ? HEART_ART
         : (hc == ${HP.CORONARY_V} || hc == ${HP.ROOT}) ? HEART_VEIN
-        : (hc == ${HP.VALVE} || hc == ${HP.LEAFLET} || hc == ${HP.CHORDAE}) ? HEART_FIBROUS : HEART_MUSCLE;
+        : (hc == ${HP.VALVE} || hc == ${HP.LEAFLET} || hc == ${HP.CHORDAE} || hc == ${HP.ATRIAL_FIBROUS}) ? HEART_FIBROUS
+        : hc == ${HP.FAT} ? HEART_FAT : hc == ${HP.PERICARDIUM} ? HEART_SEROUS : HEART_MUSCLE;
     }
     // Arteries and pulmonary veins oxygenated red, veins and pulmonary arteries blue, capillaries from
     // blue to red by their oxygen saturation, 60–98 % (PULSE.md §13.6).
@@ -503,8 +588,8 @@ void main() {
   }
 
   float flux = aPos.w * uClassNorm[cls / 4][cls % 4];
-  float size = clamp(uPx * uStyle.y * (${f(PARAMS.size[0])} + ${f(PARAMS.size[1])} * log2(1.0 + flux)), ${f(PARAMS.size[2])} * uStyle.y, uMaxPt);
-  flux *= uClassGain[cls / 4][cls % 4] * g * N.x * (1.0 + N.z) * uFade * heartGlow * pulseGlow;
+  float size = clamp(uPx * uStyle.y * heartSize * focusSize * (${f(PARAMS.size[0])} + ${f(PARAMS.size[1])} * log2(1.0 + flux)), ${f(PARAMS.size[2])} * uStyle.y, uMaxPt);
+  flux *= uClassGain[cls / 4][cls % 4] * g * N.x * (1.0 + N.z) * uFade * heartGlow * pulseGlow * focusGlow;
 
   // Head skin and sense organs fade out at brain-view distances (§13.2).
   float head = smoothstep(${f(PARAMS.headZ[0] * MM)}, ${f(PARAMS.headZ[1] * MM)}, p.z);
@@ -550,6 +635,16 @@ void main() {
   vec3 col = flux * (mix(vec3(dot(base, LUMA)), base, sat) * shim + pk * sat);
 
   vec4 vp = uView * vec4(p, 1.0);
+  // With the heart in focus, body stars just in front of the camera thin out (HEART.md §8.3).
+  if (heartPart < 0.5 && uHeartK.w > 0.0) col *= mix(1.0, smoothstep(${f(PARAMS.heart.near[0] * MM)}, ${f(PARAMS.heart.near[1] * MM)}, -vp.z), uHeartK.w);
+  // Focus slab (Detailed, CLOSEUP.md §4): close to the pivot, the body in front of it thins out and
+  // what lies behind it dims, so the structures at the pivot read on their own.
+  float slab = uFocus[1].z * uStyle.x;
+  if (slab > 0.0 && heartPart < 0.5) {
+    float dz = -vp.z;
+    float keepF = smoothstep(${f(PARAMS.focus.front[0])} * uDist, ${f(PARAMS.focus.front[1])} * uDist, dz) * exp(-max(0.0, dz - ${f(PARAMS.focus.back)} * uDist) / (${f(PARAMS.focus.lambda)} * uDist));
+    col *= mix(1.0, keepF, slab);
+  }
   if (vp.z > -0.01 || dot(col, col) < 1e-12) { ${CULL} }
   gl_Position = uProj * vp;
   gl_PointSize = size;

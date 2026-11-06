@@ -302,6 +302,78 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
       - whether a double-click on the chest should prefer the nearest structure. Today it can pass
         a sparse front layer for the bright cord behind it.
 
+20. **The heart in close-up detail** (`brain-system/research/HEART.md` §8). The user asked for the
+    finest anatomical elements, crisp when the camera is close. They chose:
+    - all four groups of structures;
+    - a depth cue and a section opened on request;
+    - names on hover only;
+    - close-up stars built on demand: Low +0, Medium +60k, High +150k, Ultra +250k.
+
+    What was built:
+    - **Fine anatomy** in `HEART_FORM` and `heartEntries`, as parts 16–20, with 98 structure names
+      in `LABEL_NAMES`. Each star stores its structure id / 128 in the path-position slot.
+    - **Close-up stars** (LOD 4), built in slices by `generateHeartCloseUpChunks`.
+      - The density law is (q/q0)² per star, with q0 = 4.5 px/mm.
+      - Every heart star's flux is divided by the expected drawn density, so the heart's light is
+        conserved.
+      - D_max is in `uPulse.w`.
+    - **The depth cue** (Detailed). The heart's focus `uHeartK.w` is continuous: it covers the Heart
+      view and the camera close to the heart.
+    - **The four-chamber section**: the C key or the corner button. The amount is in `uHeartV.w`.
+      - The camera turns to face the cut in the Heart view.
+      - A cut-face layer (LOD 5) of 30k / 60k / 100k stars is drawn while the heart is open.
+    - **Hover names** in `src/heart-ui.js`.
+    - **Stars** draws no fine anatomy, and its heart share keeps the earlier 2,400 stars.
+    - `BODY_VS` stays at its 110-slot limit.
+    - The close-up costs 0.5–0.9 ms of GPU time on an M4 at High.
+
+    Next decision for the user:
+    - whether the close-up density and the depth cue read well on their screen;
+    - whether the conduction system (gold) should be quieter in the section view;
+    - whether hover names are wanted on touch, for example on a long press.
+
+21. **Body close-up clarity** (`brain-system/research/CLOSEUP.md`). The user reported that the
+    systems, fibres and organs went blurry when zoomed in.
+
+    Measured causes:
+    - a fixed star count per structure: about 330 stars in a 30-mm sphere of the abdomen;
+    - Gaussian-cloud geometry;
+    - overlapping layers;
+    - rendering at 75 % of a Retina screen's pixels at High.
+
+    Bloom was ruled out. The brain stays crisp and is unchanged.
+
+    The user chose the full focus region, full resolution when close, a quieter conduction system in
+    the opened heart, and names on touch.
+
+    What was built:
+    - **The focus region.** `generateFocusRegionChunks` runs the body generators in a region mode:
+      - curves sample only near the sphere;
+      - other entries are probed and rejected outside it;
+      - skin, cord, gut rows and haze have custom samplers.
+
+      It holds k × the body's stars in the sphere round the pivot, with a per-class flux correction.
+      The stars are tagged LOD + 8. A region takes 45–110 ms and is sliced.
+    - **The shader.** It applies the heart's density law with q0 = 2 px/mm. The region's stars give
+      back the density only to the power 0.25 (`PARAMS.focus.conserve`). With full conservation the
+      close-up was a dim fog.
+    - **The focus slab** (Detailed): the body in front of the pivot thins out and the far side dims.
+    - **`uFocus[2]`** reuses 8 slots freed by `JOINT_SLOTS` 20 → 16 (`rigidAt` uses 0–13). `BODY_VS`
+      now uses 104 of its 110 slots.
+    - **Full resolution** up to dpr 2 within 600 mm while the GPU has room.
+    - **The heart:**
+      - the conduction system dims to 0.55 × in the opened heart;
+      - a long press on touch names a structure.
+    - Nerve streamlines now come from a seeded stream per path.
+
+    Next decision for the user:
+    - whether the brightness of the close-up suits them;
+    - whether the region size and the slab feel natural when they zoom and pan.
+
+    `PARAMS.focus.conserve` sets the close-up brightness: 0 keeps each star's light, 1 keeps the total
+    light. The region size and the slab are set by `FOCUS` in `main.js` and `PARAMS.focus.front` and
+    `.back`.
+
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
   noEmit. No React, no `.ts`, no build step, no typescript dependency in `package.json` (`tsc` 7.0.2 must be
@@ -358,6 +430,8 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Mac, arterial pulse and vascular tree (decision 18) | 573 | 541 | 4 (golden, platform bits) | 28 |
 | Mac, vascular tree to the capillaries (decision 18, second pass) | 574 | 542 | 4 (golden, platform bits) | 28 |
 | Mac, camera navigation (decision 19; `test/camera.test.mjs`, 24 tests) | 598 | 566 | 4 (golden, platform bits) | 28 |
+| Mac, heart close-up detail (decision 20; `test/heart-detail.test.mjs`, 8 tests) | 606 | 574 | 4 (golden, platform bits) | 28 |
+| Mac, body close-up clarity (decision 21; `test/closeup.test.mjs`, 5 tests) | 611 | 579 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was

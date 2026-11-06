@@ -87,7 +87,7 @@ test('records follow the B.7 layout', () => {
       if (r.tissue === TISSUE.skin) assert.ok(Math.abs(nl - 1) < 1e-3, 'skin normal');
       else if (r.tissue === TISSUE.organ && P[k + 5] > 0.5) {   // heart stars (HEART.md): τ, part, axial place
         assert.ok([-1, -2, -3, -4, -5].includes(P[k + 4]) || (P[k + 4] >= 0 && P[k + 4] <= 3), 'heart τ (codes −1 to −5: inert, venous, leaflet valves)');
-        assert.ok(Number.isInteger(P[k + 5]) && P[k + 5] >= 1 && P[k + 5] <= 16, 'heart part');
+        assert.ok(Number.isInteger(P[k + 5]) && P[k + 5] >= 1 && P[k + 5] <= 20, 'heart part (1–15, and 16–20 the fine anatomy of HEART.md §8)');
         assert.ok(P[k + 6] >= 0 && P[k + 6] <= 1, 'heart axial place');
       } else if (r.tissue === TISSUE.vessel && P[k + 5] > 0.5) {   // vessel stars (PULSE.md §9): delay, part, amplitude
         assert.ok(P[k + 4] === -1 || (P[k + 4] >= 0 && P[k + 4] < 0.3), 'pulse delay (s; −1 none)');

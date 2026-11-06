@@ -8,6 +8,7 @@ import * as S from './shaders.js';
 import { StateTextures } from './statetex.js';
 import { cctDuvRGB } from './color.js';
 import { MM } from './anatomy.js';
+import { HEART_LOD, PART as HPART } from './body/heart-form.js';
 
 const LAYOUT = [{ loc: 0, size: 4 }, { loc: 1, size: 4 }, { loc: 2, size: 4 }];
 const BODY_LAYOUT = [{ loc: 0, size: 4 }, { loc: 1, size: 4 }, { loc: 2, size: 4 }, { loc: 3, size: 4 }];
@@ -165,6 +166,17 @@ export class BrainRenderer {
     // brightening of the tree and of the earlier great arteries; the drawn style picks its mean.
     this.pulse = new Float32Array(4);
     this.pulseIn = new Float32Array(4);
+    // Heart close-up (HEART.md §8.1): the extra heart stars and their VAO, drawn in Detailed while the
+    // camera is near the heart; heartNear is the px/mm (1,080-px reference) at the heart's near side.
+    this.heartClose = null;
+    this.heartNear = 0;
+    // Focus region (research/CLOSEUP.md §3): the close-up stars round the camera's pivot and their VAO,
+    // with the body buffer's stars inside the sphere (the heart left out); main.js sets the fade-in
+    // weight and the focus slab's strength.
+    this.region = null;
+    this.focusWeight = 0;
+    this.focusSlab = 0;
+    this.focusU = new Float32Array(8);
     this.waveO = new Float32Array(4);                  // dopamine wave origin; w = 1 while a wave runs
     this.waves = new Float32Array(4 * S.WAVE_SLOTS);   // radius, amplitude, width, push per slot
     this.joints = new Float32Array(4 * 2 * S.JOINT_SLOTS);
@@ -235,14 +247,39 @@ export class BrainRenderer {
     const ranges = bodyRanges(body.ranges, pts, count);
     // Mean flux per class, so the class ratios hold whatever flux scale the generator used.
     const sum = new Float64Array(9), num = new Float64Array(9);
+    let heart = 0, heartEarlier = 0;   // heart stars, and those of the parts the Stars style draws (no fine anatomy)
     for (let i = 0; i < count; i++) {
       const c = clamp(Math.round(pts[i * 16 + 11]), 0, 8);
       sum[c] += pts[i * 16 + 3];
       num[c]++;
+      const part = c === 1 ? Math.round(pts[i * 16 + 5]) : 0;
+      if (part > 0) { heart++; if (part < HPART.TRABECULA) heartEarlier++; }
     }
     for (let c = 0; c < 9; c++) this.classNorm[c] = num[c] && sum[c] > 0 ? num[c] / sum[c] : 1;
-    this.body = { count, ranges, classCount: Array.from(num) };
+    this.body = { count, ranges, classCount: Array.from(num), heart, heartEarlier };
     this._updateCounts();
+  }
+
+  // Close-up heart stars (generate.js generateHeartCloseUp: 16 floats per point), or null.
+  setHeartCloseUp(closeUp) {
+    const gl = this.gl;
+    if (this.heartClose) deleteVAO(gl, this.heartClose.vao);
+    this.heartClose = null;
+    const count = closeUp ? Math.floor(closeUp.count ?? closeUp.points.length / 16) : 0;
+    if (!closeUp || !(count + (closeUp.sectionCount ?? 0)) || !this.progs.body) return;
+    const section = Math.max(0, Math.floor(closeUp.sectionCount ?? 0)), total = count + section;
+    this.heartClose = { count, section, vao: createInterleavedVAO(gl, closeUp.points.subarray(0, total * 16), BODY_LAYOUT) };
+  }
+
+  // Focus region stars (generate.js generateFocusRegionChunks) and the body buffer's star count in
+  // the same sphere, or null.
+  setFocusRegion(region, baseCount = 0) {
+    const gl = this.gl;
+    if (this.region) deleteVAO(gl, this.region.vao);
+    this.region = null;
+    if (!region || !region.count || !(baseCount > 0) || !this.progs.body) return;
+    this.region = { count: region.count, base: baseCount, c: region.centre.map((v) => v * MM), r: region.radius * MM,
+      vao: createInterleavedVAO(gl, region.points.subarray(0, region.count * 16), BODY_LAYOUT) };
   }
 
   // Fade the body in or out (screen time; 0.8 s by default, B.9). Draw calls stop at 0.
@@ -532,7 +569,10 @@ export class BrainRenderer {
     gl.uniform1f(u.uTwinkle, PARAMS.twinkle * (this.reducedMotion ? PARAMS.reducedTwinkle : 1));
     const D = this.detailed, K = PARAMS.style;
     for (let k = 0; k < 9; k++) this.keep[k] = D ? 1 : K.keep[k];
-    this.keep[9] = D ? 1 : K.keepHeart;          // uKeep[2].y: heart stars
+    if (!this.skeleton) this.keep[BONE] = 0;   // the base bone range is skipped then; this hides the region's bone stars
+    // uKeep[2].y: heart stars. Stars draws no fine anatomy (HEART.md §8.5), so its share of the rest
+    // keeps the earlier count.
+    this.keep[9] = D ? 1 : Math.min(1, K.keepHeart * (b.heart > 0 && b.heartEarlier > 0 ? b.heart / b.heartEarlier : 1));
     this.keep[10] = D ? K.heartGain : 1;         // uKeep[2].z: heart star flux relative to the organ class
     this.keep[11] = D ? 1 : K.keepTree;          // uKeep[2].w: vascular tree stars
     for (let k = 0; k < 12; k++) this.drawGain[k] = this.classGain[k] * (D ? this.styleGain[k] : 1);
@@ -545,7 +585,20 @@ export class BrainRenderer {
     gl.uniform4fv(u.uHeartK, this.heartK);
     gl.uniform4fv(u.uHeartV, this.heartV);
     const P = this.pulseIn;
-    this.pulse[0] = P[0]; this.pulse[1] = P[1]; this.pulse[2] = P[1] * (D ? P[2] : P[3]); this.pulse[3] = 0;
+    this.pulse[0] = P[0]; this.pulse[1] = P[1]; this.pulse[2] = P[1] * (D ? P[2] : P[3]);
+    // uPulse.w: the heart's close-up density cap D_max = 1 + drawn close-up / drawn heart stars (§8.1).
+    const hc = this.heartClose, organShare = Math.min(1, b.classCount[1] > 0 ? c.bodyClass[1] / b.classCount[1] : 1);
+    const nClose = D && hc && b.heart > 0 && this.heartNear > HEART_LOD.q0 * 0.9 ? Math.round(hc.count * organShare) : 0;
+    this.pulse[3] = nClose > 0 ? 1 + nClose / Math.max(1, b.heart * organShare) : 1;
+    // uFocus (CLOSEUP.md §3): the region's centre and radius, D_max = 1 + drawn region / drawn body
+    // stars in it, the fade-in weight and the slab's strength.
+    let have = 0, drawn = 0;
+    for (let k = 0; k < 9; k++) { have += b.classCount[k]; drawn += c.bodyClass[k]; }
+    const rg = this.region, share = have > 0 ? Math.min(1, drawn / have) : 1;
+    const nRegion = D && rg && this.focusWeight > 0 ? Math.round(rg.count * share) : 0;
+    if (nRegion > 0) this.focusU.set([rg.c[0], rg.c[1], rg.c[2], rg.r, 1 + nRegion / Math.max(1, rg.base * share), this.focusWeight, D ? this.focusSlab : 0, 0]);
+    else this.focusU.set([0, 0, 0, 0, 1, 0, D ? this.focusSlab : 0, 0]);
+    gl.uniform4fv(u.uFocus, this.focusU);
     gl.uniform4fv(u.uPulse, this.pulse);
     gl.uniform4fv(u.uNetGain, this.netGain);
     gl.uniform3fv(u.uNetRGB, this.netRGB);
@@ -554,10 +607,19 @@ export class BrainRenderer {
     gl.uniform4fv(u.uOrgan, this.organs);
     gl.uniform4fv(u.uJoint, this.joints);
     gl.bindVertexArray(this.bodyVAO.vao);
-    if (!b.ranges) { gl.drawArrays(gl.POINTS, 0, b.count); return; }
-    for (let k = 0; k < 9; k++) {
-      if (k === BONE && !this.skeleton) continue;
-      if (b.ranges[k] && c.bodyClass[k] > 0) gl.drawArrays(gl.POINTS, b.ranges[k][0], c.bodyClass[k]);
+    if (!b.ranges) gl.drawArrays(gl.POINTS, 0, b.count);
+    else {
+      for (let k = 0; k < 9; k++) {
+        if (k === BONE && !this.skeleton) continue;
+        if (b.ranges[k] && c.bodyClass[k] > 0) gl.drawArrays(gl.POINTS, b.ranges[k][0], c.bodyClass[k]);
+      }
+    }
+    if (nClose > 0) { gl.bindVertexArray(hc.vao.vao); gl.drawArrays(gl.POINTS, 0, nClose); }
+    if (nRegion > 0) { gl.bindVertexArray(rg.vao.vao); gl.drawArrays(gl.POINTS, 0, nRegion); }
+    // The cut face (HEART.md §8.4) while the heart is open.
+    if (D && hc && hc.section > 0 && this.heartV[3] > 0) {
+      gl.bindVertexArray(hc.vao.vao);
+      gl.drawArrays(gl.POINTS, hc.count, Math.round(hc.section * organShare));
     }
   }
 
