@@ -280,6 +280,27 @@ is the implementation plan. The orgasm scenario's internals are in `brain-system
       Vessel budget 36k / 72k / 120k / 192k; body totals 122,250 / 238,500 / 393,000 / 610,000.
     - Next decision for the user: whether the denser vessels and their brightness suit them, and
       whether the larger Ultra budget (610,000 stars) runs smoothly on their other computer.
+19. **Camera navigation as in Blender, Maya / 3ds Max and Unreal.** The user found the orbit camera
+    awkward, and the model turned against the hand. Details are in `brain-system/README.md`
+    ("Camera navigation").
+    - `src/camera.js` keeps only the maths:
+      - orbit, look and pan; zoom about a point (`zoomAbout`), with a dolly on through the near limit;
+      - eased wheel zoom, focus, pivot, framing, the axis views and fly mode;
+      - the pitch stops at π/2 − 0.002;
+      - the drag direction follows the "grab" convention (`dragAngles`): the surface under the
+        cursor follows it. Before, both axes were reversed.
+    - `src/camera-controls.js` handles the input:
+      - mouse, trackpad (wheel kind from `wheelDeltaY`, Safari gesture events) and touch;
+      - capture-phase keys that leave the HUD keys alone;
+      - the `?` panel, the first-visit hint (three shows) and the pivot ring.
+    - `src/view-pick.js` reads the depth under the cursor from the stars: the first layer that
+      reaches 35 % of the densest layer along the ray.
+    - The near limit (0.9) and the brightness law are unchanged. Release inertia comes from the last
+      80 ms of the drag and is capped at 0.05 rad per frame.
+    - Next decision for the user:
+      - whether the grab direction and the speeds feel right on their mouse and trackpad;
+      - whether a double-click on the chest should prefer the nearest structure. Today it can pass
+        a sparse front layer for the bright cord behind it.
 
 **Carried over from the Mac session (still binding):**
 - **Types:** JSDoc only, through `// @ts-check` per file, `src/sim/contracts.d.ts` and `tsc -p .` with
@@ -336,6 +357,7 @@ the code of `2d6e9aa` plus the stage-6 ANALYSIS.md edits:
 | Mac, patient monitor (decision 17) | 567 | 535 | 4 (golden, platform bits) | 28 |
 | Mac, arterial pulse and vascular tree (decision 18) | 573 | 541 | 4 (golden, platform bits) | 28 |
 | Mac, vascular tree to the capillaries (decision 18, second pass) | 574 | 542 | 4 (golden, platform bits) | 28 |
+| Mac, camera navigation (decision 19; `test/camera.test.mjs`, 24 tests) | 598 | 566 | 4 (golden, platform bits) | 28 |
 
 The last row was checked on the Mac on 5 November, after the merge, with graphify 0.9.95. On that run,
 `npm run typecheck` exited 0 and the graph gate tests passed 103 of 103. The rebuilt `graph.json` was

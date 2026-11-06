@@ -691,6 +691,9 @@
         <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>
         <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"/></svg>
       </button>
+      <button type="button" id="nav-help-btn" class="shud-icon" aria-expanded="false" aria-controls="nav-help" aria-label="Camera controls" title="Camera controls (?)">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4M12 16.6v.2"/></svg>
+      </button>
     </div>
 
     <div class="shud-bottom">
@@ -800,6 +803,35 @@
   </div>
 
   <div id="fatal" class="fatal" hidden></div>
+
+  <!-- Camera navigation (camera-controls.js): the pivot ring at the screen centre, a short hint (also
+       the fly-mode badge) and the controls panel (? key or the ? button). -->
+  <div id="nav-pivot" class="nav-pivot" aria-hidden="true"></div>
+  <p id="nav-hint" class="nav-hint" role="status" hidden></p>
+  <section id="nav-help" class="nav-help" role="dialog" aria-modal="false" aria-labelledby="nav-help-title" hidden>
+    <div class="nav-help-head">
+      <h2 id="nav-help-title">Camera controls</h2>
+      <button type="button" class="nav-help-close" data-nav="help" aria-label="Close camera controls">&times;</button>
+    </div>
+    <dl class="nav-help-list">
+      <dt>Turn</dt><dd>Left- or middle-drag &middot; one finger</dd>
+      <dt>Move</dt><dd>Right-drag, Shift + drag &middot; two-finger scroll &middot; two fingers</dd>
+      <dt>Zoom</dt><dd>Wheel, towards the cursor &middot; pinch &middot; Ctrl + middle-drag</dd>
+      <dt>Focus</dt><dd>Double-click or double-tap a part</dd>
+      <dt>Pivot</dt><dd>Alt + click or middle-click: turn round that point</dd>
+      <dt>Views</dt><dd>Numpad 1, 3, 7: front, side, top (Ctrl: the other side) &middot; or Alt + 1, 3, 7</dd>
+      <dt>Steps</dt><dd>Arrows or numpad 4, 6, 8, 2 &middot; Shift + arrows move &middot; + and &minus; zoom</dd>
+      <dt>Frame</dt><dd>Home: everything &middot; F or .: the focused part</dd>
+      <dt>Fly</dt><dd>Shift + F, then W A S D, Q and E down and up, Shift faster, Esc to leave</dd>
+    </dl>
+    <div class="nav-help-actions" role="group" aria-label="Camera">
+      <button type="button" data-nav="view:front">Front</button>
+      <button type="button" data-nav="view:right">Side</button>
+      <button type="button" data-nav="view:top">Top</button>
+      <button type="button" data-nav="frame:all">Frame all</button>
+      <button type="button" data-nav="fly:toggle">Fly</button>
+    </div>
+  </section>
 
   <script type="module" src="src/main.js"></script>
 </body>

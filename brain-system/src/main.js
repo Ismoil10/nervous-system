@@ -17,13 +17,15 @@
 
 import { createContext, GpuTimer } from './gl-utils.js';
 import { TIERS, detectTier, AdaptiveQuality } from './performance.js';
-import { generateBrain, generateBrainExtra, applyRelabel, areaIds } from './brain.js';
+import { generateBrain, generateBrainExtra, applyRelabel, areaIds, FLOATS as BRAIN_FLOATS } from './brain.js';
 import { BrainRenderer, PARAMS as RENDER } from './renderer.js';
 import { WAVE_SLOTS } from './shaders.js';
 import { HeartBeat, HEART } from './heart.js';
 import { PulseWave } from './pulse.js';
 import { RespTrace, monitorValues } from './monitor.js';
 import { OrbitCamera } from './camera.js';
+import { CameraControls } from './camera-controls.js';
+import { pickStars, VIEW_PICK } from './view-pick.js';
 import { PRESETS } from './clock.js';
 import { CENTER, MM, AREAS, R as ANATOMY_R } from './anatomy.js';
 import { NEURON_COOL, NEURON_WARM, DOPAMINE_RGB, blackbodyRGB } from './color.js';
@@ -347,10 +349,41 @@ async function start() {
   canvas.addEventListener('pointerup', (e) => {
     const d = pressAt;
     pressAt = null;
-    if (e.button !== 0 || e.shiftKey || e.ctrlKey) return;   // right, middle and modified drags pan (camera.js)
+    if (e.button !== 0 || e.shiftKey || e.ctrlKey || e.altKey) return;   // modified clicks and drags navigate (camera-controls.js)
     if (!picking || !d || bodyMode !== 'body' || !bodyData) return;
     if (Math.hypot(e.clientX - d.x, e.clientY - d.y) > PICK.movePx || performance.now() - d.t > PICK.holdMs) return;
     pickAt(e.clientX, e.clientY);
+  });
+
+  // --- Camera navigation (camera-controls.js): the depth under a pixel is read from the stars drawn
+  // there (view-pick.js): the brain populations (minus the cutaway half) and, in body mode, the body.
+  const navSets = () => {
+    const cut = VIEWS[view].cut > -1 ? VIEWS[view].cut : -Infinity;
+    const sets = [{ data: brain.neurons, stride: BRAIN_FLOATS, count: brain.neuronCount, cutX: cut },
+      { data: brain.da, stride: BRAIN_FLOATS, count: brain.daCount, cutX: cut }];
+    if (brain.extra) sets.push({ data: brain.extra.neurons, stride: BRAIN_FLOATS, count: brain.extra.neuronCount, cutX: cut });
+    if (bodyMode === 'body' && bodyData) sets.push({ data: bodyData.points, stride: bodyData.floats, count: bodyData.count });
+    return sets;
+  };
+  const navPick = (x, y) => {
+    const pxAngle = (2 * Math.tan(camera.fovEff / 2)) / (canvas.clientHeight || 1);
+    const ray = camera._rayDir(x, y), opts = { near: camera.nearPlane, bin: camera.distance * VIEW_PICK.binFrac };
+    const sets = navSets();
+    const hit = pickStars(camera.eye, ray, sets, { ...opts, cone: VIEW_PICK.conePx * pxAngle })
+      ?? pickStars(camera.eye, ray, sets, { ...opts, cone: VIEW_PICK.conePx * VIEW_PICK.widen * pxAngle });
+    return hit ? hit.point : null;
+  };
+  const navBounds = () => {
+    if (bodyMode !== 'body' || !bodyData) return { center: TARGET, radius: LIMIT.brainRadiusMm * MM };
+    const { min, max } = BODY_BOUNDS;
+    return { center: min.map((v, i) => ((v + max[i]) / 2) * MM), radius: 0.5 * Math.max(...min.map((v, i) => max[i] - v)) * MM };
+  };
+  let storage = null;
+  try { storage = window.localStorage; } catch { storage = null; }
+  new CameraControls(canvas, camera, {
+    pickAt: navPick, frameAll: navBounds, framePreset: () => requestView(view), storage,
+    blocked: () => { const d = document.getElementById('info'); return !!d && !d.hidden; },   // the About dialog
+    simpleHud: () => document.body.classList.contains('hud-simple'),
   });
 
   // --- Overlays and Views toggles (display only, A.5, §13.10, §13.13) ---

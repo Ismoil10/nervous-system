@@ -36,9 +36,10 @@ test('index.html holds the simple HUD beside the full one; main.js chooses which
     assert.match(SHUD, new RegExp(`id="${id}"`), `#${id}`);
   }
   const buttons = SHUD.match(/<button\b[^>]*>/g) ?? [];
-  assert.equal(buttons.length, 1, 'Pause in the markup; the views and the three states are built by ui-simple.js');
+  assert.equal(buttons.length, 2, 'Pause and camera controls in the markup; the views and the three states are built by ui-simple.js');
   for (const b of buttons) assert.match(b, /type="button"/, `${b} has type="button"`);
   assert.match(SHUD, /id="shud-pause"[^>]*aria-label="Pause"/);
+  assert.match(SHUD, /id="nav-help-btn"[^>]*aria-controls="nav-help"[^>]*aria-label="Camera controls"/);
   assert.match(SHUD, /id="shud-meter"[^>]*role="meter"/);
   assert.match(SHUD, /id="shud-story"[^>]*aria-live="polite"/);
   assert.equal((SHUD.match(/<select/g) ?? []).length, 1, 'one form field: Quality');

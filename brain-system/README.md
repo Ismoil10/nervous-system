@@ -122,6 +122,42 @@ changes the emotion.
   hardware, then lowers the render scale or the tier when frames are slow, and raises them again
   when there is headroom. Low, Medium, High and Ultra fix the tier. Auto names the tier it is using.
 - **Pause** (top right, or `P`). Keys `1`, `2` and `3` choose Calm, Stress and Pleasure.
+- **Camera controls** (`?` button top right, or the `?` key): the navigation below, with buttons
+  for the front, side and top views, frame all and fly.
+
+### Camera navigation
+The camera follows the conventions of Blender, Maya / 3ds Max and Unreal Engine (`src/camera.js`,
+`src/camera-controls.js`). A drag turns the model *with* the hand, as in those tools: the surface
+under the cursor follows it.
+
+| | Mouse | Trackpad | Touch |
+|---|---|---|---|
+| Turn (orbit) | left or middle drag | click and drag | one finger |
+| Move (pan) | right drag, Shift + drag, Shift + middle drag | two-finger scroll | two fingers |
+| Zoom | wheel, towards the point under the cursor; Ctrl + middle drag; Alt + right drag | pinch | pinch |
+| Focus on a part | double-click | double-click | double tap |
+| Turn round a point | Alt + click or middle click | Alt + click | — |
+
+- **Focus** flies the clicked part to the centre and closer; it becomes the pivot. The depth is
+  read from the stars drawn under the cursor, so a click on the heart through the chest finds the
+  heart (`src/view-pick.js`). **Turn round a point** keeps the eye where it is and makes the clicked
+  point the pivot.
+- The wheel zooms towards what is under the cursor; at the closest distance it keeps moving the
+  camera forward, so the camera can pass into the body.
+- Keys: numpad `1` `3` `7` — front, side (right), top; with Ctrl, the other side; `Alt` + `1` `3`
+  `7` on keyboards without a numpad · numpad `9` — the opposite side · arrows or numpad `4` `6` `8`
+  `2` — turn in 15° steps · Shift + arrows — move · `+` `−` — zoom · `Home` — frame everything ·
+  `F` or `.` (numpad `.`) — frame the part last focused (the full HUD keeps `F` for full screen:
+  use `.`) · `?` — the controls.
+- **Fly mode** (`Shift` + `F`, or Fly in the controls): `W` `A` `S` `D` move, `Q` `E` down and up,
+  Shift faster, drag to look round (mouse right turns right), the wheel moves forward and back,
+  `Esc` leaves. A view button or a framing key also ends it.
+- The pitch stops just short of straight up or down, so the view never flips; the distance is held
+  between the closest and the farthest view (0.9 and 45 units). Release a drag while moving and the
+  turn coasts briefly. Under reduced motion, framing and views cut instead of flying.
+- Clicking the scene returns the keyboard to it. The camera keys never take the HUD keys (`P`, `1`
+  to `3`, Space, `V`, `H`, `I`), nothing is taken while a field has focus, and the arrows stay with
+  sliders and lists.
 
 Top left, a short story says what is happening in plain words. Below it, one meter with its
 percentage rises from rest: stress hormones or dopamine. It is the only number on screen. After an
@@ -133,9 +169,7 @@ dopamine and modulator readouts, performance, and the orgasm scenario's settings
 is in the **full HUD**: open the page with `?advanced=1`. The rest of this section describes the
 full HUD.
 
-- Left drag — rotate; right or middle drag, Shift/Ctrl + drag, or a two-finger drag — pan; wheel or
-  pinch — zoom towards the point under the cursor; double click — fly halfway in towards that point.
-  With **Pick on body** armed, a click selects a site.
+- Camera: as in **Camera navigation** above. With **Pick on body** armed, a click selects a site.
 - `B` — brain only or whole body · `L` — lock the clock · `[` `]` — clock one decade slower or faster
 - `Enter` — apply the stimulus (focus in Stimulus) · `Esc` — cancel picking, close a dropdown or dialog
 - `P` — pause · `V` — next view · `H` — hide the HUD · `F` — fullscreen · `I` — About
@@ -222,6 +256,7 @@ HUD actions reach the kernel.
 | `src/safety.js` | Photosensitivity limiter and display-rate rules |
 | `src/color.js` | Planck and CIE colours (neurons 7,000–9,500 K, body ≥ 5,500 K, dopamine 2,300 K) |
 | `src/performance.js`, `src/camera.js`, `src/ui.js`, `src/ui-body.js` | Quality tiers and adaptive quality, camera, full HUD (`?advanced=1`) |
+| `src/camera-controls.js`, `src/view-pick.js` | Camera input (mouse, trackpad, touch, keys, fly mode, help) and the depth under the cursor |
 | `src/ui-simple.js` | Simple HUD (the default): emotion (Calm / Stress / Pleasure), view and style, quality, Pause; story and one meter |
 | `src/heart.js` | `HeartBeat`: the beat clock, conduction timing, Wiggers volumes, valves and the schematic ECG |
 | `src/monitor.js` | `MONITOR`, `RespTrace`, `isAlarm`, `monitorValues`: the patient monitor's channels, alarm limits and respiration trace |
